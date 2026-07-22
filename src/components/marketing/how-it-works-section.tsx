@@ -1,98 +1,89 @@
-import { FileText, Settings, Users, PhoneCall, ArrowRight } from "lucide-react";
+import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 const steps = [
   {
     number: "01",
     title: "Оберіть сценарій",
-    description:
-      "Готовий шаблон для запису, нагадування, замовлення або заявки.",
-    icon: FileText,
+    description: "Готовий шаблон для запису, нагадування, замовлення або заявки.",
   },
   {
     number: "02",
     title: "Налаштуйте агента",
-    description:
-      "Виберіть голос, додайте фрази і правила розмови для агента.",
-    icon: Settings,
+    description: "Виберіть голос, додайте фрази і правила розмови для агента.",
   },
   {
     number: "03",
     title: "Додайте контакти",
-    description:
-      "Завантажте номери через CSV, Google Sheets або підключену CRM.",
-    icon: Users,
+    description: "Завантажте номери через CSV, Google Sheets або підключену CRM.",
   },
   {
     number: "04",
     title: "Перевірте дзвінок",
-    description:
-      "Перевірте сценарій на собі, і тільки потім запускайте дзвінки клієнтам.",
-    icon: PhoneCall,
+    description: "Перевірте сценарій на собі, і тільки потім запускайте дзвінки клієнтам.",
   },
 ];
 
 export function HowItWorksSection() {
   return (
     <section id="how-it-works" className="py-20">
-      <div className="mx-auto max-w-5xl px-4">
+      <div className="mx-auto max-w-7xl px-4">
         {/* Heading */}
-        <div className="mb-16">
-          <h2 className="mb-4 text-4xl leading-tight tracking-tight md:text-5xl">
-            <span className="font-light">До першого тестового дзвінка –</span>{" "}
-            <span className="font-semibold">4 кроки</span>
+        <div className="mb-16 max-w-2xl text-center lg:text-left">
+          <h2 className="font-display mb-4 text-4xl font-bold tracking-tight md:text-5xl">
+            До першого тестового дзвінка – <span className="text-primary">4 кроки</span>
           </h2>
-          <p className="mt-6 max-w-lg text-lg leading-tight tracking-wide text-text-primary">
-            Оберіть сценарій, налаштуйте голос, додайте контакти і перевірте
-            дзвінок на собі перед запуском.
+          <p className="text-text-secondary mx-auto max-w-lg text-lg lg:mx-0">
+            Оберіть сценарій, налаштуйте голос, додайте контакти і перевірте дзвінок на собі перед
+            запуском.
           </p>
         </div>
 
-        {/* Steps grid */}
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-4 lg:gap-6">
-          {steps.map((step, index) => {
-            const Icon = step.icon;
-            return (
-              <div key={step.number} className="flex items-start gap-3">
-                {/* Step card with watermark */}
-                <div className="w-full">
-                  {/* Title above card */}
-                  <p className="mb-1 text-lg font-semibold leading-tight tracking-wide text-black">
-                    {step.title}
-                  </p>
+        {/* Steps grid — horizontal on desktop, vertical stack on mobile with zigzag */}
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4 lg:gap-5">
+          {steps.map((step, index) => (
+            <div
+              key={step.number}
+              className={cn("flex flex-col", index % 2 !== 0 && "ml-8 md:ml-0")}
+            >
+              {/* Title above card */}
+              <p className="font-heading text-text-primary mb-8 text-lg font-semibold">
+                {step.title}
+              </p>
 
-                  {/* Card container */}
-                  <div className="relative h-32 max-w-64 overflow-hidden rounded-2xl border border-border bg-card-glass backdrop-blur-sm">
-                    {/* Step number watermark */}
-                    <span
-                      className="pointer-events-none absolute -top-2 left-0 select-none text-8xl font-semibold uppercase leading-tight tracking-wider text-primary/[0.17]"
-                      aria-hidden="true"
-                    >
-                      {step.number}
-                    </span>
+              {/* Card container */}
+              <div
+                className={cn(
+                  "relative flex h-36 flex-col",
+                  "rounded-card border-border bg-card-glass backdrop-blur-card border"
+                )}
+              >
+                {/* Step number watermark */}
+                <span
+                  className="text-primary/15 pointer-events-none absolute -top-10 left-2 text-8xl font-bold select-none"
+                  aria-hidden="true"
+                >
+                  {step.number}
+                </span>
 
-                    {/* Description text */}
-                    <p className="relative z-10 px-4 pt-5 text-lg font-normal leading-snug tracking-wide text-black">
-                      {step.description}
-                    </p>
+                {/* Description text */}
+                <p className="text-text-primary relative z-10 flex-1 px-4 pt-6 text-base font-normal">
+                  {step.description}
+                </p>
 
-                    {/* Decorative icon bottom-right */}
-                    <Icon
-                      className="absolute bottom-3 right-3 size-5 text-border"
-                      aria-hidden="true"
-                    />
-                  </div>
-                </div>
-
-                {/* Arrow between cards (hidden on last card and on mobile) */}
-                {index < steps.length - 1 && (
-                  <ArrowRight
-                    className="mt-10 hidden size-4 shrink-0 text-text-secondary/60 lg:block"
+                {/* Arrow at bottom-right */}
+                <div className="flex justify-end px-4 pb-3">
+                  <Image
+                    src="/image/how-arrow.svg"
+                    alt=""
+                    width={28}
+                    height={12}
                     aria-hidden="true"
                   />
-                )}
+                </div>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       </div>
     </section>

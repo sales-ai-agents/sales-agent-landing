@@ -15,8 +15,9 @@ const AccordionItem = React.forwardRef<
 ));
 AccordionItem.displayName = "AccordionItem";
 
-interface AccordionTriggerProps
-  extends React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger> {
+interface AccordionTriggerProps extends React.ComponentPropsWithoutRef<
+  typeof AccordionPrimitive.Trigger
+> {
   hideIcon?: boolean;
 }
 
@@ -34,9 +35,7 @@ const AccordionTrigger = React.forwardRef<
       {...props}
     >
       {children}
-      {!hideIcon && (
-        <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
-      )}
+      {!hideIcon && <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />}
     </AccordionPrimitive.Trigger>
   </AccordionPrimitive.Header>
 ));

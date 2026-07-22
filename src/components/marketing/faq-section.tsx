@@ -25,7 +25,7 @@ const faqs = [
   {
     question: "Що буде, якщо клієнт не відповів?",
     answer:
-      "Агент фіксує статус \"Не відповів\". Далі можна запланувати повторний дзвінок або передати контакт менеджеру для ручної обробки.",
+      'Агент фіксує статус "Не відповів". Далі можна запланувати повторний дзвінок або передати контакт менеджеру для ручної обробки.',
   },
   {
     question: "Можна спочатку протестувати без дзвінків клієнтам?",
@@ -47,9 +47,9 @@ const faqs = [
 export function FaqSection() {
   return (
     <section id="faq" className="py-20">
-      <div className="mx-auto max-w-5xl px-4">
-        <h2 className="mb-12 text-4xl font-semibold leading-snug tracking-wide md:text-5xl">
-          Часті питання
+      <div className="mx-auto max-w-7xl px-4">
+        <h2 className="font-display mb-12 text-4xl font-bold md:text-5xl">
+          Часті <span className="text-primary">питання</span>
         </h2>
 
         <Accordion type="single" collapsible className="w-full">
@@ -57,13 +57,13 @@ export function FaqSection() {
             <AccordionItem
               key={index}
               value={`item-${index}`}
-              className="border-b border-border py-0"
+              className="border-border border-b py-0"
             >
               <AccordionTrigger
                 hideIcon
                 className="py-5 text-left no-underline hover:no-underline [&[data-state=open]>.faq-icon]:rotate-45"
               >
-                <span className="text-2xl font-medium uppercase leading-snug tracking-tight text-black md:pr-8 md:text-3xl">
+                <span className="text-2xl font-medium tracking-tight text-black uppercase md:pr-8 md:text-3xl">
                   {faq.question}
                 </span>
                 <Plus
@@ -72,7 +72,7 @@ export function FaqSection() {
                   aria-hidden="true"
                 />
               </AccordionTrigger>
-              <AccordionContent className="pb-6 text-lg font-normal leading-snug tracking-wide text-black">
+              <AccordionContent className="pb-6 text-lg font-normal text-black">
                 {faq.answer}
               </AccordionContent>
             </AccordionItem>

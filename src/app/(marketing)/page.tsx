@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { HeroSection } from "@/components/marketing/hero-section";
-import { DemoCallSection } from "@/components/marketing/demo-call-section";
 import { ScenariosSection } from "@/components/marketing/scenarios-section";
 import { IndustriesSection } from "@/components/marketing/industries-section";
 import { HowItWorksSection } from "@/components/marketing/how-it-works-section";
@@ -38,7 +37,6 @@ export default function MarketingPage() {
   return (
     <>
       <HeroSection />
-      <DemoCallSection />
       <AudioDemoSection />
       <ScenariosSection />
       <IndustriesSection />
@@ -60,8 +58,7 @@ export default function MarketingPage() {
             "@context": "https://schema.org",
             "@type": "SoftwareApplication",
             name: "VoiceAgent",
-            description:
-              "ШІ-агент, який автоматизує рутинні дзвінки клієнтам для малого бізнесу.",
+            description: "ШІ-агент, який автоматизує рутинні дзвінки клієнтам для малого бізнесу.",
             applicationCategory: "BusinessApplication",
             operatingSystem: "Web",
             offers: {

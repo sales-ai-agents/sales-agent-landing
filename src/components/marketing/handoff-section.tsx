@@ -1,4 +1,5 @@
-import { Check, Headphones, User, ArrowDown } from "lucide-react";
+import Image from "next/image";
+import { ArrowDown } from "lucide-react";
 
 const checklist = [
   "Розпізнає нестандартні запити",
@@ -9,38 +10,40 @@ const checklist = [
 export function HandoffSection() {
   return (
     <section className="py-20">
-      <div className="mx-auto max-w-5xl px-4">
+      <div className="mx-auto max-w-7xl px-4">
         {/* Eyebrow label */}
-        <p className="mb-4 text-lg font-light uppercase leading-snug tracking-wide text-text-primary">
+        <p className="text-text-secondary mb-4 text-center text-base font-light uppercase lg:text-left">
           Передача людині
         </p>
 
         {/* Heading */}
-        <h2 className="mb-6 max-w-3xl text-4xl leading-tight tracking-tight text-text-primary md:text-5xl">
-          <span className="font-light">Складні питання </span>
-          <span className="font-semibold">переходять до менеджера</span>
+        <h2 className="font-display mb-6 text-center text-4xl font-bold md:text-5xl lg:text-left">
+          Складні питання <span className="text-primary">переходять до менеджера</span>
         </h2>
 
         {/* Two-column layout */}
         <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-2">
           {/* Left column: subtitle + checklist */}
-          <div>
+          <div className="text-center lg:text-left">
             {/* Subtitle */}
-            <p className="mb-10 max-w-3xl text-lg leading-snug tracking-wide text-text-primary">
+            <p className="text-text-primary mb-10 text-lg">
               Якщо клієнт просить людину або питання виходить за сценарій, агент не імпровізує. Він
               передає дзвінок менеджеру разом із контекстом розмови.
             </p>
 
-            {/* Checklist with filled blue circular markers */}
-            <ul className="space-y-5">
+            {/* Checklist */}
+            <ul className="inline-flex flex-col space-y-5 text-left">
               {checklist.map((item) => (
                 <li key={item} className="flex items-center gap-4">
-                  <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary">
-                    <Check className="size-4 text-white" strokeWidth={3} />
-                  </div>
-                  <span className="text-lg tracking-wide text-text-primary">
-                    {item}
-                  </span>
+                  <Image
+                    src="/image/builder-checklist.svg"
+                    alt=""
+                    width={28}
+                    height={28}
+                    className="shrink-0"
+                    aria-hidden="true"
+                  />
+                  <span className="text-text-primary text-lg">{item}</span>
                 </li>
               ))}
             </ul>
@@ -49,37 +52,54 @@ export function HandoffSection() {
           {/* Right column: message cards with connector */}
           <div className="flex flex-col items-center lg:items-end">
             {/* AI Agent message card */}
-            <div className="flex w-full max-w-sm items-center gap-4 rounded-2xl border border-border bg-card-glass px-5 py-6 backdrop-blur-sm">
-              <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                <Headphones className="size-6 text-primary" aria-hidden="true" />
-              </div>
-              <div>
-                <p className="mb-1 text-lg font-semibold leading-snug tracking-wide text-text-primary">
-                  ШI-агент
-                </p>
-                <p className="text-lg font-normal leading-snug tracking-wide text-text-primary">
-                  &quot;Це питання краще вирішить менеджер. Зараз зʼєднаю вас.&quot;
-                </p>
+            <div className="rounded-card border-border bg-card-glass backdrop-blur-card relative w-full max-w-sm overflow-hidden border">
+              <div className="rounded-card border-border/20 pointer-events-none absolute inset-0 border-4 blur-sm" />
+              <div className="relative flex items-center gap-4 px-5 py-5">
+                <div className="bg-primary/10 flex size-12 shrink-0 items-center justify-center rounded-full">
+                  <Image
+                    src="/image/handoff-headphone.svg"
+                    alt=""
+                    width={24}
+                    height={24}
+                    aria-hidden="true"
+                  />
+                </div>
+                <div>
+                  <p className="text-text-primary mb-1 text-lg font-semibold">ШI-агент</p>
+                  <p className="text-text-primary text-base">
+                    &ldquo;Це питання краще вирішить менеджер. Зараз зʼєднаю вас.&rdquo;
+                  </p>
+                </div>
               </div>
             </div>
 
-            {/* Connector arrow between cards */}
-            <div className="flex h-12 items-center justify-center" aria-hidden="true">
-              <ArrowDown className="size-8 text-text-secondary/60" strokeWidth={1.5} />
+            {/* Connector arrow — centered between cards */}
+            <div
+              className="flex w-full max-w-sm items-center justify-center py-3"
+              aria-hidden="true"
+            >
+              <ArrowDown className="text-text-secondary/60 size-6" strokeWidth={1.5} />
             </div>
 
             {/* Manager message card */}
-            <div className="flex w-full max-w-sm items-center gap-4 rounded-2xl border border-border bg-card-glass px-5 py-6 backdrop-blur-sm">
-              <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-muted">
-                <User className="size-6 text-text-secondary" aria-hidden="true" />
-              </div>
-              <div>
-                <p className="mb-1 text-lg font-semibold leading-snug tracking-wide text-text-primary">
-                  Менеджер
-                </p>
-                <p className="text-lg font-normal leading-snug tracking-wide text-text-primary">
-                  Отримує дзвінок, підсумок і причину передачі.
-                </p>
+            <div className="rounded-card border-border bg-card-glass backdrop-blur-card relative w-full max-w-sm overflow-hidden border">
+              <div className="rounded-card border-border/20 pointer-events-none absolute inset-0 border-4 blur-sm" />
+              <div className="relative flex items-center gap-4 px-5 py-5">
+                <div className="bg-primary/10 flex size-12 shrink-0 items-center justify-center rounded-full">
+                  <Image
+                    src="/image/handoff-union.svg"
+                    alt=""
+                    width={24}
+                    height={24}
+                    aria-hidden="true"
+                  />
+                </div>
+                <div>
+                  <p className="text-text-primary mb-1 text-lg font-semibold">Менеджер</p>
+                  <p className="text-text-primary text-base">
+                    Отримує дзвінок, підсумок і причину передачі.
+                  </p>
+                </div>
               </div>
             </div>
           </div>

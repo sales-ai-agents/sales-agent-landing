@@ -28,27 +28,24 @@ export function Footer() {
   return (
     <footer>
       {/* Wordmark section */}
-      <div className="bg-footer-dark pt-8">
+      <div className="bg-primary pt-8">
         {/* Large wordmark text */}
-        <div className="mx-auto max-w-5xl px-4">
-          <p className="overflow-hidden text-center text-8xl font-medium uppercase leading-none tracking-wide text-white/70 md:text-9xl">
+        <div className="mx-auto max-w-7xl px-4">
+          <p className="overflow-hidden text-center text-8xl font-medium text-white/70 uppercase md:text-9xl">
             NAME
           </p>
         </div>
       </div>
 
-      {/* Dark footer content section */}
-      <div className="bg-footer-dark px-4 pb-10 pt-16">
-        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-[340px_1fr]">
+      {/* Blue footer content section */}
+      <div className="bg-primary px-4 pt-16 pb-10">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-[340px_1fr]">
           {/* Company info column */}
           <div className="flex flex-col gap-4">
-            <Link
-              href="/"
-              className="text-base font-semibold leading-snug tracking-wide text-white"
-            >
+            <Link href="/" className="text-base font-semibold text-white">
               Logo
             </Link>
-            <p className="max-w-xs text-base font-normal leading-snug tracking-wide text-white text-justify">
+            <p className="max-w-xs text-justify text-base font-normal text-white">
               AI-агент для рутинних дзвінків: підтверджує записи, нагадує клієнтам, фіксує результат
               і передає дані в CRM або менеджеру.
             </p>
@@ -58,15 +55,13 @@ export function Footer() {
           <nav aria-label="Навігація по сайту" className="grid grid-cols-2 gap-8 sm:grid-cols-4">
             {Object.entries(footerLinks).map(([category, links]) => (
               <div key={category}>
-                <h3 className="mb-4 text-base font-normal uppercase leading-snug tracking-wide text-white">
-                  {category}
-                </h3>
+                <h3 className="mb-4 text-base font-normal text-white uppercase">{category}</h3>
                 <ul className="flex flex-col gap-2">
                   {links.map((link) => (
                     <li key={link.href}>
                       <Link
                         href={link.href}
-                        className="text-base font-normal leading-10 tracking-wide text-white transition-colors hover:text-white/80"
+                        className="text-base font-normal text-white transition-colors hover:text-white/80"
                       >
                         {link.label}
                       </Link>
@@ -79,8 +74,8 @@ export function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="mx-auto mt-12 max-w-5xl">
-          <p className="text-base font-normal leading-snug tracking-wide text-white">
+        <div className="mx-auto mt-12 max-w-7xl">
+          <p className="text-base font-normal text-white">
             © {new Date().getFullYear()} Назва . Всі права захищені.
           </p>
         </div>

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Play, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -46,7 +47,7 @@ const mockLogs = [
     customer: "Андрій В.",
     time: "10:45",
     status: "Нова заявка",
-    statusVariant: "default" as BadgeVariant,
+    statusVariant: "success" as BadgeVariant,
     summary: "Хоче запис на ТО в суботу",
     duration: "2:55",
     crm: "Оновлено",
@@ -55,98 +56,110 @@ const mockLogs = [
 
 export function CallLogsSection() {
   return (
-    <section className="py-20">
-      <div className="mx-auto max-w-5xl px-4">
+    <section className="relative py-20">
+      {/* Decorative background circle */}
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+        <Image
+          src="/image/builder-circle.jpg"
+          alt=""
+          width={400}
+          height={400}
+          className="absolute top-1/4 right-0 size-72 rounded-full opacity-40 blur-xl"
+        />
+      </div>
+
+      <div className="relative mx-auto max-w-7xl px-4">
         {/* Section header */}
         <div className="mb-10 text-center">
-          <h2 className="mb-4 text-4xl leading-tight md:text-5xl">
-            <span className="font-semibold">Повний контроль</span>{" "}
-            <span className="font-light">після кожного дзвінка</span>
+          <h2 className="font-display mb-4 text-4xl font-bold md:text-5xl">
+            <span className="text-primary">Повний контроль</span> після кожного дзвінка
           </h2>
-          <p className="mx-auto max-w-md text-lg leading-snug tracking-wide">
-            Бачите статус дзвінка, короткий підсумок розмови, запис і результат
-            синхронізації з CRM.
+          <p className="text-text-secondary mx-auto max-w-md text-lg">
+            Бачите статус дзвінка, короткий підсумок розмови, запис і результат синхронізації з CRM.
           </p>
         </div>
 
         {/* Table card */}
-        <div className="w-full overflow-hidden rounded-2xl border border-border bg-white shadow-card">
-            {/* Title row */}
-            <div className="border-b border-border px-6 py-6 md:px-14">
-              <h3 className="text-lg font-semibold tracking-wide">
-                Журнал дзвінків · Сьогодні
-              </h3>
-            </div>
+        <div className="rounded-card border-border-table w-full overflow-x-auto border-2 bg-white">
+          <table className="w-full min-w-full">
+            {/* Title */}
+            <caption className="border-border-table text-text-primary border-b px-6 py-5 text-left text-lg font-semibold">
+              Журнал дзвінків · Сьогодні
+            </caption>
 
             {/* Column headers */}
-            <div className="hidden grid-cols-12 items-center border-b border-border px-6 py-3 md:grid md:px-14">
-              <div className="col-span-2 text-lg font-normal tracking-wide">
-                Клієнт
-              </div>
-              <div className="col-span-2 text-lg font-normal tracking-wide">
-                Статус
-              </div>
-              <div className="col-span-4 text-lg font-normal tracking-wide">
-                Підсумок дзвінка
-              </div>
-              <div className="col-span-2 text-lg font-normal tracking-wide">
-                Аудіо
-              </div>
-              <div className="col-span-2 text-lg font-normal tracking-wide">
-                CRM
-              </div>
-            </div>
+            <thead>
+              <tr className="border-border-table border-b">
+                <th className="text-text-primary w-2/12 px-6 py-3 text-left text-base font-normal">
+                  Клієнт
+                </th>
+                <th className="text-text-primary w-2/12 px-4 py-3 text-left text-base font-normal">
+                  Статус
+                </th>
+                <th className="text-text-primary w-4/12 px-4 py-3 text-left text-base font-normal">
+                  Підсумок дзвінка
+                </th>
+                <th className="text-text-primary w-2/12 px-4 py-3 text-left text-base font-normal">
+                  Аудіо
+                </th>
+                <th className="text-text-primary w-2/12 px-4 py-3 text-left text-base font-normal">
+                  CRM
+                </th>
+              </tr>
+            </thead>
 
             {/* Data rows */}
-            {mockLogs.map((log, index) => (
-              <div
-                key={log.id}
-                className={cn(
-                  "flex flex-col gap-2 px-6 py-3 md:grid md:grid-cols-12 md:items-center md:px-14",
-                  index < mockLogs.length - 1 && "border-b border-border"
-                )}
-              >
-                {/* Client name + time */}
-                <div className="col-span-2 text-lg tracking-wide">
-                  <span className="font-normal">{log.customer} </span>
-                  <span className="font-light">{log.time}</span>
-                </div>
+            <tbody>
+              {mockLogs.map((log, index) => (
+                <tr
+                  key={log.id}
+                  className={cn(index < mockLogs.length - 1 && "border-border-table border-b")}
+                >
+                  {/* Client */}
+                  <td className="text-text-primary px-6 py-4 text-base">
+                    <span className="font-normal">{log.customer}</span>{" "}
+                    <span className="text-text-secondary font-light">{log.time}</span>
+                  </td>
 
-                {/* Status badge */}
-                <div className="col-span-2">
-                  <span
-                    className={cn(
-                      "inline-flex items-center rounded-full px-3 py-1 text-base font-normal tracking-wide",
-                      badgeStyles[log.statusVariant]
-                    )}
-                  >
-                    {log.status}
-                  </span>
-                </div>
+                  {/* Status badge */}
+                  <td className="px-4 py-4">
+                    <span
+                      className={cn(
+                        "inline-flex items-center rounded-full px-3 py-1 text-sm font-medium",
+                        badgeStyles[log.statusVariant]
+                      )}
+                    >
+                      {log.status}
+                    </span>
+                  </td>
 
-                {/* Call summary */}
-                <div className="col-span-4 text-base font-normal tracking-wide">
-                  {log.summary}
-                </div>
+                  {/* Summary */}
+                  <td className="text-text-primary px-4 py-4 text-base font-normal">
+                    {log.summary}
+                  </td>
 
-                {/* Audio */}
-                <div className="col-span-2 flex items-center gap-2">
-                  <Play className="size-3 text-text-secondary" aria-hidden="true" />
-                  <span className="text-base font-normal tracking-wide">
-                    {log.duration}
-                  </span>
-                </div>
+                  {/* Audio */}
+                  <td className="px-4 py-4">
+                    <div className="flex items-center gap-2">
+                      <Play className="text-text-secondary size-3.5" aria-hidden="true" />
+                      <span className="text-text-primary text-base font-normal">
+                        {log.duration}
+                      </span>
+                    </div>
+                  </td>
 
-                {/* CRM */}
-                <div className="col-span-2 flex items-center gap-2">
-                  <RefreshCw className="size-3 text-text-secondary" aria-hidden="true" />
-                  <span className="text-base font-normal tracking-wide">
-                    {log.crm}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+                  {/* CRM */}
+                  <td className="px-4 py-4">
+                    <div className="flex items-center gap-2">
+                      <RefreshCw className="text-text-secondary size-3.5" aria-hidden="true" />
+                      <span className="text-text-primary text-base font-normal">{log.crm}</span>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
   );

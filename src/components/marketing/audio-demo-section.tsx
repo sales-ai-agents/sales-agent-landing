@@ -1,60 +1,64 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { Howl } from "howler";
 import { Square } from "lucide-react";
 import {
   Carousel,
+  type CarouselApi,
   CarouselContent,
   CarouselItem,
-  type CarouselApi,
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
 
 interface DemoCard {
   id: string;
-  label: string;
+  category: string;
   description: string;
   scenario: string;
   result: string;
+  resultBold: string;
   src: string;
 }
 
 const demos: DemoCard[] = [
   {
-    id: "dental",
-    label: "Стоматологія",
-    description: "Підтвердження запису на завтра",
+    id: "logistics",
+    category: "Логістика",
+    description: "Уточнення заявки на перевезення",
     scenario:
-      "Агент нагадує пацієнту про час візиту і фіксує відповідь: підтвердив, просить перенести або не відповів",
-    result: "Результат: запис підтверджено",
+      "Агент дзвонить клієнту, уточнює маршрут, тип вантажу, дату відправки та передає заявку менеджеру",
+    result: "Результат:",
+    resultBold: "заявку уточнено",
     src: "/audio/audio.ogg",
   },
   {
-    id: "salon",
-    label: "Салон краси",
-    description: "Нагадування та перенесення запису",
-    scenario:
-      "Агент нагадує клієнту про запис. Якщо час не підходить, фіксує запит на перенесення для менеджера.",
-    result: "Результат: змінити час",
+    id: "service",
+    category: "Сервісна компанія",
+    description: "Запис на виїзд спеціаліста",
+    scenario: "Агент уточнює проблему, адресу, зручний час візиту та створює заявку для майстра",
+    result: "Результат:",
+    resultBold: "візит заплановано",
     src: "/audio/audio.ogg",
   },
   {
-    id: "auto",
-    label: "Автосервіс",
-    description: "Повідомлення про готовність авто",
-    scenario:
-      "Агент повідомляє клієнту, що авто готове до видачі, та підтверджує зручний час для забору.",
-    result: "Результат: час підтверджено",
+    id: "delivery",
+    category: "Служба доставки",
+    description: "Підтвердження доставки",
+    scenario: "Агент підтверджує адресу, зручний час отримання та фіксує статус для оператора",
+    result: "Результат:",
+    resultBold: "доставку підтверджено",
     src: "/audio/audio.ogg",
   },
   {
-    id: "store",
-    label: "Інтернет-магазин",
-    description: "Уточнення деталей замовлення",
+    id: "warehouse",
+    category: "Склад / B2B-постачання",
+    description: "Уточнення замовлення",
     scenario:
-      "Агент уточнює адресу доставки, спосіб оплати та підтверджує склад замовлення з клієнтом.",
-    result: "Результат: замовлення підтверджено",
+      "Агент перевіряє позиції в замовленні, кількість, дату відвантаження та передає зміни в кабінет",
+    result: "Результат:",
+    resultBold: "замовлення оновлено",
     src: "/audio/audio.ogg",
   },
 ];
@@ -68,7 +72,7 @@ export function AudioDemoSection() {
   useEffect(() => {
     demos.forEach((demo) => {
       if (!howlsRef.current[demo.id]) {
-        const howl = new Howl({
+        howlsRef.current[demo.id] = new Howl({
           src: [demo.src],
           html5: true,
           preload: true,
@@ -76,7 +80,6 @@ export function AudioDemoSection() {
             setPlaying((curr) => (curr === demo.id ? null : curr));
           },
         });
-        howlsRef.current[demo.id] = howl;
       }
     });
 
@@ -122,29 +125,29 @@ export function AudioDemoSection() {
     [playing]
   );
 
-  function handleSlideClick(index: number): void {
+  const handleSlideClick = (index: number) => {
     if (!api) return;
     api.scrollTo(index);
-  }
+  };
 
-  const centerIndices = [selectedSnap, (selectedSnap + 1) % demos.length];
+  //const centerIndices = [selectedSnap, (selectedSnap + 1) % demos.length];
+  const centerIndices = [selectedSnap];
 
   return (
-    <section id="audio-demo" className="overflow-hidden py-20">
+    <section id="audio-demo" className="px-13 py-20">
       {/* Heading */}
-      <div className="mx-auto max-w-5xl px-4">
-        <h2 className="mx-auto mb-5 max-w-2xl text-center text-4xl leading-tight text-text-primary md:text-5xl">
-          <span className="font-light">Не презентація.</span>
-          <br />
-          <span className="font-medium">Реальний тестовий дзвінок</span>{" "}
-          <span className="font-light">агента</span>
-        </h2>
+      <h2 className="font-display mx-auto mb-5 max-w-3xl text-center text-4xl md:text-5xl">
+        <span className="text-text-primary">Не презентація.</span>{" "}
+        <span className="text-primary">Реальний</span>{" "}
+        <span className="text-text-primary">тестовий</span>{" "}
+        <span className="text-primary">дзвінок</span>{" "}
+        <span className="text-text-primary">агента</span>
+      </h2>
 
-        <p className="mx-auto mb-16 max-w-lg text-center text-lg font-normal tracking-wide text-text-secondary">
-          Послухайте, як агент підтверджує запис, ставить уточнюючі питання і
-          фіксує результат дзвінка в кабінеті.
-        </p>
-      </div>
+      <p className="text-text-secondary mx-auto mb-16 max-w-xl text-center text-lg font-normal">
+        Послухайте, як агент підтверджує запис, ставить уточнюючі питання і фіксує результат дзвінка
+        в кабінеті.
+      </p>
 
       {/* Carousel */}
       <Carousel
@@ -153,27 +156,24 @@ export function AudioDemoSection() {
           align: "center",
           loop: true,
           startIndex: 1,
-          containScroll: false,
+          containScroll: "keepSnaps",
         }}
-        className="mx-auto w-full max-w-7xl overflow-hidden"
         aria-label="Демо дзвінки агента"
       >
-        <CarouselContent className="-ml-6">
+        <CarouselContent>
           {demos.map((demo, index) => {
             const isCenter = centerIndices.includes(index);
 
             return (
               <CarouselItem
                 key={demo.id}
-                className="basis-4/5 pl-6 sm:basis-5/12 md:basis-1/3 lg:basis-1/4"
+                className="pl-4 sm:basis-1/2 lg:basis-1/3"
                 onClick={() => handleSlideClick(index)}
               >
                 <div
                   className={cn(
                     "h-full transition-all duration-500 ease-out",
-                    isCenter
-                      ? "scale-100 opacity-100"
-                      : "scale-90 cursor-pointer opacity-40 blur-px"
+                    isCenter ? "scale-100 opacity-100" : "scale-85 cursor-pointer opacity-70"
                   )}
                 >
                   <DemoPlayerCard
@@ -201,19 +201,17 @@ interface DemoPlayerCardProps {
 
 function DemoPlayerCard({ demo, isPlaying, onTogglePlay }: DemoPlayerCardProps) {
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-border bg-card-glass px-8 py-7 backdrop-blur-sm">
-      {/* Blue pill label */}
-      <div className="mb-5 inline-flex h-9 w-fit items-center justify-center rounded-full bg-primary px-7 text-lg font-semibold text-white">
-        {demo.label}
+    <div className="rounded-card border-border bg-card-glass backdrop-blur-card flex h-full flex-col border px-7 py-7">
+      {/* Blue pill category badge */}
+      <div className="rounded-badge bg-primary mb-6 inline-flex h-9 w-fit items-center justify-center px-7 text-base font-semibold text-white">
+        {demo.category}
       </div>
 
       {/* Description */}
-      <p className="mb-5 text-center text-base font-light tracking-wide text-text-primary">
-        {demo.description}
-      </p>
+      <p className="text-text-primary mb-8 text-base font-medium">{demo.description}</p>
 
       {/* Player row */}
-      <div className="mb-5 flex items-center gap-4">
+      <div className="mb-10 flex items-center gap-5">
         <button
           type="button"
           onClick={(e) => {
@@ -221,112 +219,48 @@ function DemoPlayerCard({ demo, isPlaying, onTogglePlay }: DemoPlayerCardProps) 
             onTogglePlay();
           }}
           className="flex size-10 shrink-0 cursor-pointer items-center justify-center"
-          aria-label={isPlaying ? `Стоп ${demo.label}` : `Грати ${demo.label}`}
+          aria-label={isPlaying ? `Стоп ${demo.category}` : `Грати ${demo.category}`}
         >
           {isPlaying ? (
-            <div className="flex size-10 items-center justify-center rounded-full bg-primary">
+            <div className="bg-primary flex size-10 items-center justify-center rounded-full">
               <Square className="size-3.5 fill-white text-white" />
             </div>
           ) : (
-            <PlayIcon />
+            <Image src="/image/audio-play.svg" alt="" width={39} height={39} aria-hidden="true" />
           )}
         </button>
-        <WaveformSvg />
+        <Image
+          src="/image/audio-wave.svg"
+          alt=""
+          width={200}
+          height={36}
+          className="flex-1"
+          aria-hidden="true"
+        />
       </div>
 
       {/* Scenario white card */}
-      <div className="mb-4 rounded-xl bg-white px-5 py-4">
+      <div className="rounded-inner-card mb-4 bg-white px-5 py-4">
         <div className="flex items-start gap-3">
-          <CheckedIcon className="mt-0.5 shrink-0" />
-          <p className="text-base font-light tracking-wide text-text-primary">
-            {demo.scenario}
-          </p>
+          <Image
+            src="/image/audio-tick.svg"
+            alt=""
+            width={24}
+            height={24}
+            className="mt-0.5 shrink-0"
+            aria-hidden="true"
+          />
+          <p className="text-text-primary text-base font-light">{demo.scenario}</p>
         </div>
       </div>
 
       {/* Result row */}
-      <div className="mt-auto flex items-center gap-3 rounded-xl bg-white px-5 py-3">
-        <div className="size-2.5 shrink-0 rounded-full bg-primary" />
-        <p className="text-base font-light tracking-wide text-text-primary">
-          {demo.result}
+      <div className="rounded-inner-card mt-auto flex items-center gap-3 bg-white px-5 py-3">
+        <div className="bg-primary size-2.5 shrink-0 rounded-full" />
+        <p className="text-text-primary text-base font-light">
+          {demo.result} <span className="font-medium">{demo.resultBold}</span>
         </p>
       </div>
     </div>
-  );
-}
-
-/* ─── Icons ─── */
-
-function PlayIcon() {
-  return (
-    <svg
-      width="39"
-      height="39"
-      viewBox="0 0 39 39"
-      fill="none"
-      aria-hidden="true"
-    >
-      <circle cx="19.5" cy="19.5" r="19.5" className="fill-primary" />
-      <polygon points="16,11 16,28 29,19.5" fill="white" />
-    </svg>
-  );
-}
-
-function WaveformSvg() {
-  return (
-    <svg
-      className="h-9 flex-1"
-      viewBox="0 0 200 36"
-      fill="none"
-      preserveAspectRatio="none"
-      aria-hidden="true"
-    >
-      {Array.from({ length: 40 }).map((_, i) => {
-        const heights = [8, 14, 20, 28, 16, 24, 12, 30, 18, 10, 22, 26, 14, 32, 20, 8, 24, 16, 28, 12, 18, 30, 10, 22, 26, 14, 20, 32, 8, 16, 24, 28, 12, 18, 22, 30, 14, 10, 26, 20];
-        const h = heights[i % heights.length];
-        const y = (36 - h) / 2;
-        return (
-          <rect
-            key={i}
-            x={i * 5}
-            y={y}
-            width="2.5"
-            height={h}
-            rx="1.25"
-            className="fill-primary/60"
-          />
-        );
-      })}
-    </svg>
-  );
-}
-
-function CheckedIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      aria-hidden="true"
-    >
-      <rect
-        x="1"
-        y="1"
-        width="22"
-        height="22"
-        rx="5"
-        className="stroke-primary"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M7 12l3.5 3.5L17 9"
-        className="stroke-primary"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }

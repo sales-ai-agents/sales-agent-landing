@@ -13,39 +13,33 @@ export function CalculatorSection() {
 
   return (
     <section id="pricing" className="py-20">
-      <div className="mx-auto max-w-5xl px-4">
+      <div className="mx-auto max-w-7xl px-4">
         {/* Eyebrow */}
-        <p className="mb-4 text-center text-lg font-light uppercase tracking-wide text-black/60">
+        <p className="text-text-secondary mb-4 text-center text-sm font-light uppercase">
           Порахуємо разом
         </p>
 
         {/* Heading */}
-        <h2 className="mx-auto mb-6 max-w-2xl text-center text-4xl leading-tight tracking-tight md:text-5xl">
-          <span className="font-light">Скільки</span>{" "}
-          <span className="font-medium">часу забирають</span>{" "}
-          <span className="font-light">рутинні дзвінки</span>
+        <h2 className="font-display mx-auto mb-6 max-w-2xl text-center text-4xl tracking-tight md:text-5xl">
+          Скільки <span className="text-primary">часу забирають</span> рутинні{" "}
+          <span className="text-primary">дзвінки</span>
         </h2>
 
         {/* Subtitle */}
-        <p className="mx-auto mb-12 max-w-lg text-center text-lg leading-snug tracking-wide text-black">
-          Вкажіть кількість дзвінків, середню тривалість і вартість години
-          адміністратора.{" "}
-          <span className="font-medium">Калькулятор покаже</span>, скільки часу
-          йде на повторювані розмови.
+        <p className="text-text-secondary mx-auto mb-12 max-w-lg text-center text-lg">
+          Вкажіть кількість дзвінків, середню тривалість і вартість години адміністратора.{" "}
+          <span className="font-medium">Калькулятор покаже</span>, скільки часу йде на повторювані
+          розмови.
         </p>
 
         {/* Calculator Card */}
-        <div className="mx-auto w-full max-w-4xl overflow-hidden rounded-2xl border border-border bg-card-glass backdrop-blur-sm">
-          <div className="px-6 pb-7 pt-16 md:px-14">
+        <div className="rounded-card border-border bg-card-glass backdrop-blur-card mx-auto w-full max-w-4xl overflow-hidden border">
+          <div className="px-6 pt-16 pb-7 md:px-14">
             {/* Slider: Calls per day */}
             <div className="mb-16">
               <div className="mb-4 flex items-center justify-between">
-                <label className="text-lg tracking-wide text-black">
-                  Дзвінків на день
-                </label>
-                <span className="text-lg tracking-wide text-black">
-                  {callsPerDay}
-                </span>
+                <label className="text-text-primary text-lg">Дзвінків на день</label>
+                <span className="text-text-primary text-lg">{callsPerDay}</span>
               </div>
               <Slider
                 value={callsPerDay}
@@ -59,12 +53,8 @@ export function CalculatorSection() {
             {/* Slider: Avg call duration */}
             <div className="mb-16">
               <div className="mb-4 flex items-center justify-between">
-                <label className="text-lg tracking-wide text-black">
-                  Середня тривалість дзвінка, хв
-                </label>
-                <span className="text-lg tracking-wide text-black">
-                  {avgDuration}
-                </span>
+                <label className="text-text-primary text-lg">Середня тривалість дзвінка, хв</label>
+                <span className="text-text-primary text-lg">{avgDuration}</span>
               </div>
               <Slider
                 value={avgDuration}
@@ -78,12 +68,8 @@ export function CalculatorSection() {
             {/* Slider: Hourly rate */}
             <div className="mb-7">
               <div className="mb-4 flex items-center justify-between">
-                <label className="text-lg tracking-wide text-black">
-                  Вартість години менеджера, ₴
-                </label>
-                <span className="text-lg tracking-wide text-black">
-                  {hourlyRate}
-                </span>
+                <label className="text-text-primary text-lg">Вартість години менеджера, ₴</label>
+                <span className="text-text-primary text-lg">{hourlyRate}</span>
               </div>
               <Slider
                 value={hourlyRate}
@@ -96,24 +82,16 @@ export function CalculatorSection() {
 
             {/* Result Card */}
             <div
-              className="mx-auto w-full max-w-3xl rounded-xl bg-primary px-6 py-8 text-center"
+              className="rounded-inner-card bg-primary mx-auto w-full max-w-3xl px-6 py-8 text-center"
               role="region"
               aria-live="polite"
               aria-atomic="true"
               aria-label="Результати калькулятора"
             >
-              <p className="text-3xl font-semibold leading-snug tracking-wide text-white">
-                {hoursPerDay}
-              </p>
-              <p className="mt-2 text-base leading-snug tracking-wide text-white/80">
-                год/день йде на рутинні дзвінки
-              </p>
-              <p className="mt-4 text-3xl font-semibold leading-snug tracking-wide text-white">
-                ≈ {costPerDay} ₴/день
-              </p>
-              <p className="mt-2 text-base leading-snug tracking-wide text-white/80">
-                орієнтовна вартість цього часу
-              </p>
+              <p className="text-3xl font-semibold text-white">{hoursPerDay}</p>
+              <p className="mt-2 text-base text-white/80">год/день йде на рутинні дзвінки</p>
+              <p className="mt-4 text-3xl font-semibold text-white">≈ {costPerDay} ₴/день</p>
+              <p className="mt-2 text-base text-white/80">орієнтовна вартість цього часу</p>
             </div>
           </div>
         </div>

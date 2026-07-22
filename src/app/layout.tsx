@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
+import localFont from "next/font/local";
 import { Providers } from "@/components/providers";
 import "./globals.css";
 
@@ -18,6 +19,13 @@ const inter = Inter({
   subsets: ["latin", "cyrillic"],
 });
 
+const actayWideBold = localFont({
+  src: "../fonts/ActayWide-Bold.woff2",
+  variable: "--font-display",
+  weight: "700",
+  fallback: ["Inter", "sans-serif"],
+});
+
 export const metadata: Metadata = {
   title: {
     default: "VoiceAgent — AI Phone Call Automation",
@@ -32,8 +40,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${inter.variable}`}>
-      <body className="flex min-h-screen flex-col antialiased" suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${actayWideBold.variable}`}
+    >
+      <body suppressHydrationWarning>
         <Providers>{children}</Providers>
       </body>
     </html>
