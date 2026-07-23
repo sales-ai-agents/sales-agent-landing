@@ -71,8 +71,8 @@ export function CallLogsSection() {
       <div className="relative mx-auto max-w-7xl px-4">
         {/* Section header */}
         <div className="mb-10 text-center">
-          <h2 className="font-display mb-4 text-4xl font-bold md:text-5xl">
-            <span className="text-primary">Повний контроль</span> після кожного дзвінка
+          <h2 className="font-display mx-auto mb-4 max-w-2xl text-4xl font-bold md:text-5xl">
+            <span className="text-primary">Повний контроль</span> <br /> після кожного дзвінка
           </h2>
           <p className="text-text-secondary mx-auto max-w-md text-lg">
             Бачите статус дзвінка, короткий підсумок розмови, запис і результат синхронізації з CRM.

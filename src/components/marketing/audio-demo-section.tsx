@@ -70,19 +70,6 @@ export function AudioDemoSection() {
   const howlsRef = useRef<Record<string, Howl>>({});
 
   useEffect(() => {
-    demos.forEach((demo) => {
-      if (!howlsRef.current[demo.id]) {
-        howlsRef.current[demo.id] = new Howl({
-          src: [demo.src],
-          html5: true,
-          preload: true,
-          onend: () => {
-            setPlaying((curr) => (curr === demo.id ? null : curr));
-          },
-        });
-      }
-    });
-
     const howls = howlsRef.current;
     return () => {
       Object.values(howls).forEach((howl) => howl.unload());
@@ -109,6 +96,18 @@ export function AudioDemoSection() {
     (id: string) => {
       if (playing && playing !== id) {
         howlsRef.current[playing]?.stop();
+      }
+
+      if (!howlsRef.current[id]) {
+        const demo = demos.find((d) => d.id === id);
+        if (!demo) return;
+        howlsRef.current[id] = new Howl({
+          src: [demo.src],
+          html5: true,
+          onend: () => {
+            setPlaying((curr) => (curr === id ? null : curr));
+          },
+        });
       }
 
       const howl = howlsRef.current[id];
@@ -234,7 +233,7 @@ function DemoPlayerCard({ demo, isPlaying, onTogglePlay }: DemoPlayerCardProps) 
           alt=""
           width={200}
           height={36}
-          className="flex-1"
+          className="size-16 flex-1"
           aria-hidden="true"
         />
       </div>
@@ -247,7 +246,7 @@ function DemoPlayerCard({ demo, isPlaying, onTogglePlay }: DemoPlayerCardProps) 
             alt=""
             width={24}
             height={24}
-            className="mt-0.5 shrink-0"
+            className="mt-0.5 size-6 shrink-0"
             aria-hidden="true"
           />
           <p className="text-text-primary text-base font-light">{demo.scenario}</p>

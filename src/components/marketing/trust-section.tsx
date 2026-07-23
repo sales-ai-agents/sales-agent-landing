@@ -47,7 +47,7 @@ export function TrustSection() {
         <div className="relative mt-12">
           {/* Horizontal line through center of icons — desktop only, spans from first to last icon center */}
           <div
-            className="bg-border absolute top-7 right-7 left-7 hidden h-px lg:block"
+            className="bg-border absolute top-7 right-[20%] left-7 hidden h-px lg:block"
             aria-hidden="true"
           />
 
@@ -56,14 +56,7 @@ export function TrustSection() {
               <div key={item.title} className="flex flex-col items-start">
                 {/* Icon container — solid blue circle with white icon */}
                 <div className="bg-primary relative z-10 mb-6 flex size-14 items-center justify-center rounded-full">
-                  <Image
-                    src={item.icon}
-                    alt=""
-                    width={24}
-                    height={24}
-                    className="brightness-0 invert"
-                    aria-hidden="true"
-                  />
+                  <Image src={item.icon} alt="" width={24} height={24} aria-hidden="true" />
                 </div>
 
                 {/* Title */}

@@ -19,3 +19,12 @@ export const DynamicCalculatorSection = dynamic(
     })),
   { ssr: false }
 );
+
+// BuilderSection — uses livekit-client which reads browser APIs at module init
+export const DynamicBuilderSection = dynamic(
+  () =>
+    import("@/components/marketing/builder-section").then((m) => ({
+      default: m.BuilderSection,
+    })),
+  { ssr: false }
+);

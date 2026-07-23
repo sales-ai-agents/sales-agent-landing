@@ -3,7 +3,6 @@ import { HeroSection } from "@/components/marketing/hero-section";
 import { ScenariosSection } from "@/components/marketing/scenarios-section";
 import { IndustriesSection } from "@/components/marketing/industries-section";
 import { HowItWorksSection } from "@/components/marketing/how-it-works-section";
-import { BuilderSection } from "@/components/marketing/builder-section";
 import { CallLogsSection } from "@/components/marketing/call-logs-section";
 import { HandoffSection } from "@/components/marketing/handoff-section";
 import { IntegrationsSection } from "@/components/marketing/integrations-section";
@@ -13,6 +12,7 @@ import { FinalCtaSection } from "@/components/marketing/final-cta-section";
 import {
   DynamicAudioDemoSection as AudioDemoSection,
   DynamicCalculatorSection as CalculatorSection,
+  DynamicBuilderSection as BuilderSection,
 } from "@/components/marketing/dynamic-sections";
 
 export const metadata: Metadata = {

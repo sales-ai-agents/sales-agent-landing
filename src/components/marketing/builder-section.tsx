@@ -2,22 +2,39 @@
 
 import { useState } from "react";
 import Image from "next/image";
+
+import { useWebAgent } from "@/hooks/use-web-agent";
+import { LiveCallPanel } from "@/components/marketing/live-call-panel";
 import { cn } from "@/lib/utils";
 
-const voiceOptions = ["Жіночий", "Чоловічий"] as const;
+const VOICE_OPTIONS = ["Жіночий", "Чоловічий"] as const;
+type VoiceOption = (typeof VOICE_OPTIONS)[number];
+
+const SCENARIO_OPTIONS = [
+  "Агент уточнить маршрут, тип вантажу, дату, контактну особу та передасть заявку менеджеру",
+  "Агент підтвердить адресу, час отримання, контактний номер і зафіксує результат дзвінка",
+  "Агент нагадає про запис, запитає підтвердження та передасть відповідь менеджеру",
+] as const;
+
+const VOICE_API_MAP: Record<VoiceOption, string> = {
+  Жіночий: "жіночий",
+  Чоловічий: "чоловічий",
+} as const;
 
 export function BuilderSection() {
   const [name, setName] = useState("Марія");
-  const [voice, setVoice] = useState<string>("Жіночий");
-  const [scenario, setScenario] = useState(
-    "Агент уточнить маршрут, тип вантажу, дату, контактну особу та передасть заявку менеджеру"
-  );
+  const [voice, setVoice] = useState<VoiceOption>("Жіночий");
+  const [scenario, setScenario] = useState<string>(SCENARIO_OPTIONS[0]);
 
-  const scenarioOptions = [
-    "Агент уточнить маршрут, тип вантажу, дату, контактну особу та передасть заявку менеджеру",
-    "Агент підтвердить адресу, час отримання, контактний номер і зафіксує результат дзвінка",
-    "Агент нагадає про запис, запитає підтвердження та передасть відповідь менеджеру",
-  ];
+  const { startAgent, isLoading, isSuccess, session, errorMessage, reset } = useWebAgent();
+
+  function handleStart(): void {
+    startAgent({
+      instruction: scenario,
+      voice: VOICE_API_MAP[voice],
+      agent_name: name,
+    });
+  }
 
   return (
     <section className="relative py-20">
@@ -30,13 +47,13 @@ export function BuilderSection() {
           height={600}
           className="absolute top-1/2 left-0 h-auto w-full -translate-y-1/2 opacity-60"
         />
-        <Image
-          src="/image/builder-circle.jpg"
-          alt=""
-          width={400}
-          height={400}
-          className="absolute -top-20 -right-50 size-96 rounded-full opacity-40 blur-sm"
-        />
+        {/*<Image*/}
+        {/*  src="/image/builder-circle.jpg"*/}
+        {/*  alt=""*/}
+        {/*  width={400}*/}
+        {/*  height={400}*/}
+        {/*  className="absolute -top-20 -right-50 size-96 rounded-full opacity-40 blur-sm"*/}
+        {/*/>*/}
       </div>
 
       <div className="relative mx-auto max-w-7xl px-4">
@@ -109,7 +126,10 @@ export function BuilderSection() {
                   id="agent-name"
                   type="text"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    reset();
+                  }}
                   className="rounded-input border-border text-text-primary focus:ring-primary flex h-10 w-full border bg-white px-4 text-base focus:ring-2 focus:outline-none"
                 />
               </div>
@@ -118,11 +138,14 @@ export function BuilderSection() {
               <div className="mb-6">
                 <p className="text-text-primary mb-2 text-sm">Голос</p>
                 <div className="flex gap-3">
-                  {voiceOptions.map((option) => (
+                  {VOICE_OPTIONS.map((option) => (
                     <button
                       key={option}
                       type="button"
-                      onClick={() => setVoice(option)}
+                      onClick={() => {
+                        setVoice(option);
+                        reset();
+                      }}
                       className={cn(
                         "rounded-input border-border relative flex h-10 items-center justify-center border px-8 text-base transition-all",
                         voice === option
@@ -144,10 +167,13 @@ export function BuilderSection() {
                 <select
                   id="agent-scenario"
                   value={scenario}
-                  onChange={(e) => setScenario(e.target.value)}
+                  onChange={(e) => {
+                    setScenario(e.target.value);
+                    reset();
+                  }}
                   className="rounded-input border-border text-text-primary focus:ring-primary flex h-auto w-full appearance-none border bg-white px-4 py-3 text-base focus:ring-2 focus:outline-none"
                 >
-                  {scenarioOptions.map((option) => (
+                  {SCENARIO_OPTIONS.map((option) => (
                     <option key={option} value={option}>
                       {option}
                     </option>
@@ -159,13 +185,34 @@ export function BuilderSection() {
                 </p>
               </div>
 
-              {/* Test Call Button */}
-              <button
-                type="button"
-                className="rounded-badge bg-primary hover:bg-primary-hover flex h-12 w-full items-center justify-center text-base font-medium text-white transition-colors"
-              >
-                Перевірити дзвінок
-              </button>
+              {/* Live call panel — replaces form controls once session is active */}
+              {isSuccess && session ? (
+                <LiveCallPanel session={session} agentName={name} />
+              ) : (
+                <>
+                  {/* Error message */}
+                  {errorMessage && (
+                    <p role="alert" className="mb-4 text-center text-sm text-red-600">
+                      {errorMessage}
+                    </p>
+                  )}
+
+                  {/* Test Call Button */}
+                  <button
+                    type="button"
+                    onClick={handleStart}
+                    disabled={isLoading}
+                    className={cn(
+                      "rounded-badge flex h-12 w-full items-center justify-center text-base font-medium text-white transition-colors",
+                      isLoading
+                        ? "bg-primary/70 cursor-not-allowed"
+                        : "bg-primary hover:bg-primary-hover cursor-pointer"
+                    )}
+                  >
+                    {isLoading ? "Запускаємо…" : "Перевірити дзвінок"}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

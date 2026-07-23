@@ -17,7 +17,7 @@ export function HandoffSection() {
         </p>
 
         {/* Heading */}
-        <h2 className="font-display mb-6 text-center text-4xl font-bold md:text-5xl lg:text-left">
+        <h2 className="font-display mb-6 max-w-3xl text-center text-4xl font-bold md:text-5xl lg:text-left">
           Складні питання <span className="text-primary">переходять до менеджера</span>
         </h2>
 
@@ -61,6 +61,7 @@ export function HandoffSection() {
                     alt=""
                     width={24}
                     height={24}
+                    className="size-6"
                     aria-hidden="true"
                   />
                 </div>
@@ -91,6 +92,7 @@ export function HandoffSection() {
                     alt=""
                     width={24}
                     height={24}
+                    className="size-6"
                     aria-hidden="true"
                   />
                 </div>

@@ -45,7 +45,7 @@ export function IntegrationsSection() {
       <div className="mx-auto max-w-7xl px-4">
         {/* Heading */}
         <div className="mb-12 text-center">
-          <h2 className="font-display text-4xl tracking-tight md:text-5xl">
+          <h2 className="font-display mx-auto max-w-2xl text-4xl tracking-tight md:text-5xl">
             Працює з <span className="text-primary">вашими</span> звичними{" "}
             <span className="text-primary">інструментами</span>
           </h2>
@@ -60,7 +60,7 @@ export function IntegrationsSection() {
           {integrations.map((integration) => (
             <div
               key={integration.title}
-              className="rounded-card border-border w-full border bg-white p-5"
+              className="rounded-card border-border bg-card-glass w-full border p-5"
             >
               {/* Star icon */}
               <div className="mb-3">
