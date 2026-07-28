@@ -98,6 +98,7 @@ export interface TrustItem {
 export interface FaqEntry {
   readonly question: string;
   readonly answer: string | React.ReactNode;
+  readonly textAnswer?: string;
 }
 
 // Footer

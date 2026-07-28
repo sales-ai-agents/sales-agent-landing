@@ -19,8 +19,7 @@ const demos: readonly DemoCard[] = [
     id: "delivery",
     category: "Служба доставки",
     description: "Підтвердження доставки",
-    scenario:
-      "Агент підтверджує адресу, зручний час отримання та фіксує статус для оператора",
+    scenario: "Агент підтверджує адресу, зручний час отримання та фіксує статус для оператора",
     result: "Результат:",
     resultBold: "доставку підтверджено",
     src: "/audio/audio.ogg",
@@ -49,8 +48,7 @@ const demos: readonly DemoCard[] = [
     id: "service",
     category: "Сервісна компанія",
     description: "Запис на виїзд спеціаліста",
-    scenario:
-      "Агент уточнює проблему, адресу, зручний час візиту та створює заявку для майстра",
+    scenario: "Агент уточнює проблему, адресу, зручний час візиту та створює заявку для майстра",
     result: "Результат:",
     resultBold: "візит заплановано",
     src: "/audio/audio.ogg",
@@ -59,6 +57,7 @@ const demos: readonly DemoCard[] = [
 
 export function AudioDemoSection() {
   const [playing, setPlaying] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [api, setApi] = useState<CarouselApi>();
   const [selectedSnap, setSelectedSnap] = useState(1);
   const howlRef = useRef<Howl | null>(null);
@@ -88,6 +87,8 @@ export function AudioDemoSection() {
 
   const togglePlay = useCallback(
     (id: string) => {
+      setError(null);
+
       if (playing === id) {
         howlRef.current?.stop();
         howlRef.current?.unload();
@@ -116,6 +117,18 @@ export function AudioDemoSection() {
             setPlaying(null);
           }
         },
+        onloaderror: () => {
+          setError(id);
+          howlRef.current = null;
+          playingIdRef.current = null;
+          setPlaying(null);
+        },
+        onplayerror: () => {
+          setError(id);
+          howlRef.current = null;
+          playingIdRef.current = null;
+          setPlaying(null);
+        },
       });
 
       howlRef.current = howl;
@@ -135,57 +148,48 @@ export function AudioDemoSection() {
   const scrollNext = () => api?.scrollNext();
 
   return (
-    <section id="audio-demo" className="relative px-4 py-20 md:px-8">
-      {/* Background waveform decorations */}
-      <div className="pointer-events-none absolute top-1/8 left-0 hidden -translate-y-1/8 opacity-50 lg:block">
-        <Image
-          src="/image/audio-demo-waveform.jpg"
-          alt=""
-          width={400}
-          height={200}
-          aria-hidden="true"
-        />
+    <section id="audio-demo" className="relative overflow-hidden px-4 py-20 md:px-8">
+      <div
+        className="pointer-events-none absolute top-1/8 left-0 hidden -translate-y-1/8 opacity-50 lg:block"
+        aria-hidden="true"
+      >
+        <Image src="/image/audio-demo-waveform.jpg" alt="" width={400} height={200} />
       </div>
-      <div className="pointer-events-none absolute top-1/8 right-0 hidden -translate-y-1/8 opacity-50 lg:block">
-        <Image
-          src="/image/audio-demo-waveform.jpg"
-          alt=""
-          width={400}
-          height={200}
-          aria-hidden="true"
-        />
+      <div
+        className="pointer-events-none absolute top-1/8 right-0 hidden -translate-y-1/8 opacity-50 lg:block"
+        aria-hidden="true"
+      >
+        <Image src="/image/audio-demo-waveform.jpg" alt="" width={400} height={200} />
       </div>
 
-      {/* Heading */}
       <h2 className="font-display mx-auto mb-5 max-w-4xl text-center text-3xl sm:text-4xl md:text-5xl">
-        <span className="text-black">Не презентація. </span>
-        <span className="text-primary">Реальний</span> <span className="text-black">тестовий </span>
-        <span className="text-primary">дзвінок</span> <span className="text-black">агента</span>
+        <span className="text-foreground">Не презентація. </span>
+        <span className="text-primary">Реальний</span>{" "}
+        <span className="text-foreground">тестовий </span>
+        <span className="text-primary">дзвінок</span>{" "}
+        <span className="text-foreground">агента</span>
       </h2>
 
-      <p className="mx-auto mb-16 max-w-lg text-center text-base font-normal text-neutral-600 md:text-lg">
+      <p className="text-muted-foreground mx-auto mb-16 max-w-lg text-center text-base font-normal md:text-lg">
         Послухайте, як агент підтверджує запис, ставить уточнюючі питання і фіксує результат дзвінка
         в кабінеті.
       </p>
 
-      {/* Carousel with arrows */}
       <div className="relative mx-auto max-w-6xl">
-        {/* Left arrow */}
         <button
           onClick={scrollPrev}
           aria-label="Попередній слайд"
-          className="absolute top-1/2 -left-12 z-10 hidden -translate-y-1/2 items-center justify-center md:flex"
+          className="focus-visible:ring-primary absolute top-1/2 -left-12 z-10 hidden size-11 -translate-y-1/2 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none md:flex"
         >
-          <ChevronLeft className="size-8 text-gray-400" />
+          <ChevronLeft className="size-8 text-gray-400" aria-hidden="true" />
         </button>
 
-        {/* Right arrow */}
         <button
           onClick={scrollNext}
           aria-label="Наступний слайд"
-          className="absolute top-1/2 -right-12 z-10 hidden -translate-y-1/2 items-center justify-center md:flex"
+          className="focus-visible:ring-primary absolute top-1/2 -right-12 z-10 hidden size-11 -translate-y-1/2 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none md:flex"
         >
-          <ChevronRight className="size-8 text-gray-400" />
+          <ChevronRight className="size-8 text-gray-400" aria-hidden="true" />
         </button>
 
         <Carousel
@@ -196,7 +200,7 @@ export function AudioDemoSection() {
             startIndex: 1,
             containScroll: "keepSnaps",
           }}
-          aria-label="Демо дзвінки агента"
+          aria-label="Демо дзвінки"
         >
           <CarouselContent>
             {demos.map((demo, index) => {
@@ -218,13 +222,14 @@ export function AudioDemoSection() {
                     className={cn(
                       "h-full rounded-2xl transition-all duration-500 ease-out",
                       isCenter
-                        ? "scale-100 opacity-100 shadow-md shadow-primary/30"
-                        : "scale-90 cursor-pointer opacity-60"
+                        ? "shadow-primary/30 scale-100 opacity-100 shadow-md"
+                        : "scale-90 cursor-pointer opacity-50"
                     )}
                   >
                     <DemoPlayerCard
                       demo={demo}
                       isPlaying={playing === demo.id}
+                      hasError={error === demo.id}
                       onTogglePlay={() => togglePlay(demo.id)}
                     />
                   </div>
@@ -234,61 +239,61 @@ export function AudioDemoSection() {
           </CarouselContent>
         </Carousel>
 
-        {/* Mobile arrows */}
         <div className="mt-4 flex items-center justify-between px-2 md:hidden">
-          <button onClick={scrollPrev} aria-label="Попередній слайд">
-            <ChevronLeft className="size-6 text-gray-400" />
+          <button
+            onClick={scrollPrev}
+            aria-label="Попередній слайд"
+            className="focus-visible:ring-primary flex size-11 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+          >
+            <ChevronLeft className="size-6 text-gray-400" aria-hidden="true" />
           </button>
-          <button onClick={scrollNext} aria-label="Наступний слайд">
-            <ChevronRight className="size-6 text-gray-400" />
+          <button
+            onClick={scrollNext}
+            aria-label="Наступний слайд"
+            className="focus-visible:ring-primary flex size-11 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+          >
+            <ChevronRight className="size-6 text-gray-400" aria-hidden="true" />
           </button>
         </div>
       </div>
 
-      {/* Pagination dots */}
       <div className="mt-8 flex items-center justify-center gap-4">
         {demos.map((demo, index) => (
           <button
             key={demo.id}
             onClick={() => handleSlideClick(index)}
             aria-label={`Слайд ${index + 1}`}
-            className={cn(
-              "size-3 rounded-full transition-colors",
-              selectedSnap === index ? "bg-primary" : "bg-gray-300"
-            )}
-          />
+            className="focus-visible:ring-primary flex size-11 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none md:size-auto"
+          >
+            <span
+              className={cn(
+                "block size-3 rounded-full transition-colors",
+                selectedSnap === index ? "bg-primary" : "bg-gray-300"
+              )}
+            />
+          </button>
         ))}
       </div>
     </section>
   );
 }
 
-/* ─── Demo Player Card ─── */
-
 interface DemoPlayerCardProps {
   demo: DemoCard;
   isPlaying: boolean;
+  hasError: boolean;
   onTogglePlay: () => void;
 }
 
-function DemoPlayerCard({
-  demo,
-  isPlaying,
-  onTogglePlay,
-}: DemoPlayerCardProps) {
+function DemoPlayerCard({ demo, isPlaying, hasError, onTogglePlay }: DemoPlayerCardProps) {
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-border bg-card-glass p-6 backdrop-blur-sm">
-      {/* Blue pill category badge */}
-      <div className="mb-4 inline-flex h-9 w-3xs items-center justify-center rounded-full bg-primary px-7 text-base font-semibold text-white">
+    <div className="border-border bg-card-glass flex h-full flex-col rounded-2xl border p-6 backdrop-blur-lg">
+      <div className="bg-primary text-primary-foreground mb-4 inline-flex h-9 w-fit items-center justify-center rounded-full px-7 text-base font-semibold">
         {demo.category}
       </div>
 
-      {/* Description */}
-      <p className="mb-6 text-sm font-medium text-black md:text-base">
-        {demo.description}
-      </p>
+      <p className="text-foreground mb-6 text-sm font-medium md:text-base">{demo.description}</p>
 
-      {/* Player row */}
       <div className="mb-6 flex items-center gap-4">
         <Button
           variant="ghost"
@@ -297,26 +302,19 @@ function DemoPlayerCard({
             e.stopPropagation();
             onTogglePlay();
           }}
-          aria-label={
-            isPlaying ? `Стоп ${demo.category}` : `Грати ${demo.category}`
-          }
-          className="shrink-0"
+          aria-label={isPlaying ? `Зупинити ${demo.category}` : `Грати ${demo.category}`}
+          className="size-11 shrink-0"
+          disabled={hasError}
         >
           {isPlaying ? (
-            <div className="flex size-9 items-center justify-center rounded-full bg-primary">
+            <div className="bg-primary flex size-9 items-center justify-center rounded-full">
               <Square
-                className="size-3.5 fill-white text-white"
+                className="fill-primary-foreground text-primary-foreground size-3.5"
                 aria-hidden="true"
               />
             </div>
           ) : (
-            <Image
-              src="/image/audio-play.svg"
-              alt=""
-              width={42}
-              height={42}
-              aria-hidden="true"
-            />
+            <Image src="/image/audio-play.svg" alt="" width={42} height={42} aria-hidden="true" />
           )}
         </Button>
         <Image
@@ -329,7 +327,12 @@ function DemoPlayerCard({
         />
       </div>
 
-      {/* Scenario white card */}
+      {hasError && (
+        <p className="mb-4 text-sm text-red-500" role="alert">
+          Помилка завантаження аудіо
+        </p>
+      )}
+
       <div className="mb-4 rounded-2xl bg-white px-4 py-4">
         <div className="flex items-start gap-3">
           <Image
@@ -340,18 +343,14 @@ function DemoPlayerCard({
             className="mt-0.5 size-5 shrink-0 md:size-6"
             aria-hidden="true"
           />
-          <p className="text-sm font-light text-black md:text-base">
-            {demo.scenario}
-          </p>
+          <p className="text-foreground text-sm font-light md:text-base">{demo.scenario}</p>
         </div>
       </div>
 
-      {/* Result row */}
       <div className="mt-auto flex items-center gap-3 rounded-2xl bg-white px-4 py-3">
-        <div className="size-2.5 shrink-0 rounded-full bg-primary" />
-        <p className="text-sm font-light text-black md:text-base">
-          {demo.result}{" "}
-          <span className="font-medium">{demo.resultBold}</span>
+        <div className="bg-primary size-2.5 shrink-0 rounded-full" aria-hidden="true" />
+        <p className="text-foreground text-sm font-light md:text-base">
+          {demo.result} <span className="font-medium">{demo.resultBold}</span>
         </p>
       </div>
     </div>

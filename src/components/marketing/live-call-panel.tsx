@@ -27,7 +27,6 @@ export function LiveCallPanel({ session, agentName }: LiveCallPanelProps) {
 
   return (
     <div className="flex flex-col items-center gap-4 py-4">
-      {/* Status indicator */}
       <div className="flex items-center gap-3">
         <div
           className={cn(
@@ -39,26 +38,21 @@ export function LiveCallPanel({ session, agentName }: LiveCallPanelProps) {
           )}
           aria-hidden="true"
         />
-        <p className="text-lg font-medium text-gray-900">
-          {STATUS_LABELS[status] ?? "Невідомо"}
-        </p>
+        <p className="text-foreground text-lg font-medium">{STATUS_LABELS[status] ?? "Невідомо"}</p>
       </div>
 
-      {/* Agent name */}
-      <p className="text-base text-gray-600">
+      <p className="text-muted-foreground text-base">
         {status === "connected" && `Розмовляєте з ${agentName}`}
         {status === "connecting" && "Очікуйте підключення..."}
         {status === "disconnected" && "Дякуємо за тестування!"}
       </p>
 
-      {/* Error */}
       {errorMessage && (
         <p role="alert" className="text-center text-sm text-red-600">
           {errorMessage}
         </p>
       )}
 
-      {/* Disconnect button */}
       {(status === "connected" || status === "connecting") && (
         <button
           type="button"

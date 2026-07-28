@@ -53,7 +53,6 @@ export default function MarketingPage() {
       <FaqSection />
       <FinalCtaSection />
 
-      {/* JSON-LD Structured Data */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -70,13 +69,13 @@ export default function MarketingPage() {
               priceCurrency: "UAH",
               description: "Безкоштовний тест з 50 дзвінків",
             },
-          }),
+          }).replace(/</g, "\\u003c"),
         }}
       />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(buildFaqPageSchema(faqs)),
+          __html: JSON.stringify(buildFaqPageSchema(faqs)).replace(/</g, "\\u003c"),
         }}
       />
     </>

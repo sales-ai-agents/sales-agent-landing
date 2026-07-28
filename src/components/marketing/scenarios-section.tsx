@@ -72,57 +72,52 @@ export function ScenariosSection() {
   return (
     <section id="features" className="bg-slate-50 px-6 py-20 md:px-10">
       <div className="mx-auto max-w-7xl">
-        {/* Heading */}
-        <h2 className="font-display mb-6 max-w-2xl text-center text-3xl sm:text-4xl md:text-left md:text-5xl">
+        <h2 className="mb-4 text-3xl font-bold sm:text-4xl md:text-5xl">
           <span className="text-primary">Дзвінки,</span>{" "}
-          <span className="text-black">які агент може забрати одразу</span>
+          <span className="text-foreground">які агент може забрати одразу</span>
         </h2>
 
-        {/* Subtitle */}
-        <p className="mx-auto mb-12 max-w-md text-center text-base text-black md:mx-0 md:max-w-lg md:text-left md:text-lg">
+        <p className="text-foreground mb-12 max-w-lg text-base tracking-wide md:text-lg">
           Не треба писати сценарій з нуля. Виберіть тип дзвінка, адаптуйте кілька фраз під бізнес і
           запускайте тест.
         </p>
 
-        {/* Grid: 3 columns on lg, 2 on md, 1 on mobile */}
         <div className="mb-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {scenarios.map((scenario) => (
-            <ScenarioCard key={scenario.title} scenario={scenario} />
+          {scenarios.map((scenario, index) => (
+            <ScenarioCard key={scenario.title} scenario={scenario} alignRight={index % 2 !== 0} />
           ))}
         </div>
 
-        {/* CTA Buttons */}
-        <div className="flex flex-col items-end gap-4 sm:flex-row sm:justify-center md:justify-end">
-          <div>
-            {/* Bottom helper text */}
-            <p className="mx-auto mb-4 max-w-sm text-center text-base text-neutral-600 md:mx-0 md:text-left">
-              Почніть з готового сценарію, фрази можна{" "}
-              <span className="font-medium">змінити під ваш бізнес.</span>
-            </p>
+        <div className="flex flex-col items-center gap-6">
+          <p className="text-muted-foreground max-w-sm text-center text-base">
+            Почніть з готового сценарію, фрази можна{" "}
+            <span className="font-medium">змінити під ваш бізнес.</span>
+          </p>
 
+          <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:justify-end">
             <Button
               asChild
               size="lg"
-              className="bg-primary hover:bg-primary/90 h-12 rounded-full px-6 text-base text-white"
+              className="bg-primary hover:bg-primary/90 font-body h-12 w-full rounded-3xl px-8 text-lg font-normal text-white sm:w-auto"
             >
               <Link href="/sign-up">
                 Вибрати сценарій і запустити тест
                 <ArrowUpRight className="ml-2 size-4" aria-hidden="true" />
               </Link>
             </Button>
-          </div>
 
-          <Button
-            asChild
-            variant="ghost"
-            size="lg"
-            className="hidden h-12 rounded-full border border-black bg-transparent px-6 text-base text-black hover:bg-black/5 sm:inline-flex"
-          >
-            <Link href="/sign-up">
-              Створити власний сценарій
-              <ArrowUpRight className="ml-2 size-4" aria-hidden="true" />
-            </Link>
-          </Button>
+            <Button
+              asChild
+              variant="ghost"
+              size="lg"
+              className="border-foreground text-foreground hover:bg-foreground/5 font-body h-12 w-full rounded-3xl border bg-transparent px-8 text-lg font-normal sm:w-auto"
+            >
+              <Link href="/sign-up">
+                Створити власний сценарій
+                <ArrowUpRight className="ml-2 size-4" aria-hidden="true" />
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
     </section>
@@ -131,30 +126,29 @@ export function ScenariosSection() {
 
 interface ScenarioCardProps {
   readonly scenario: Scenario;
+  readonly alignRight?: boolean;
 }
 
-function ScenarioCard({ scenario }: ScenarioCardProps) {
+function ScenarioCard({ scenario, alignRight }: ScenarioCardProps) {
   const Icon = scenario.icon;
 
   return (
-    <div className="relative pt-4 pl-4">
-      {/* Decorative blue circle with icon */}
+    <div className={`relative pt-4 sm:pl-4 ${alignRight ? "pr-4 sm:pr-0" : "pl-4"}`}>
       <div
-        className="absolute z-50 left-0 top-0 flex size-12 items-center justify-center rounded-full bg-primary shadow-lg shadow-primary/40 md:size-14"
+        className={`bg-primary shadow-primary/30 absolute top-0 z-10 flex size-14 items-center justify-center rounded-full shadow-lg sm:left-0 ${alignRight ? "right-0 sm:right-auto" : "left-0"}`}
         aria-hidden="true"
       >
-        {Icon && <Icon className="size-5 text-white md:size-6" />}
+        {Icon && <Icon className="size-6 text-white" />}
       </div>
 
-      {/* Card body */}
-      <div className="relative rounded-2xl border border-border bg-card-glass pl-15 pr-8 py-5 backdrop-blur-sm">
-        <h3 className="mb-3 text-base font-medium text-black">
-          {scenario.title}
-        </h3>
+      <div
+        className={`border-border bg-card-glass rounded-2xl border py-5 backdrop-blur-sm sm:pr-6 sm:pl-14 ${alignRight ? "pr-14 pl-6 sm:pr-6 sm:pl-14" : "pr-6 pl-14"}`}
+      >
+        <h3 className="text-foreground mb-3 text-xl font-medium">{scenario.title}</h3>
 
         <div className="space-y-1">
           {scenario.details.map((detail: ScenarioDetail) => (
-            <p key={detail.label} className="text-sm text-black">
+            <p key={detail.label} className="text-foreground text-sm">
               <span className="font-medium">{detail.label}</span>{" "}
               <span className="font-light">{detail.value}</span>
             </p>

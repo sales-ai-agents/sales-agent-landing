@@ -28,14 +28,13 @@ export default function DemoCallCard() {
   const displayValue = digits.length > 0 ? formatUaPhoneDigits(digits) : "";
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-white/40 to-gray-200/40 p-8 backdrop-blur-xl">
-      {/* Header: Icon + Title */}
+    <div className="border-border bg-card-glass relative overflow-hidden rounded-2xl border p-8 backdrop-blur-lg">
       <div className="mb-2 flex items-center gap-5">
         <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-white shadow-sm">
           <Phone className="text-primary size-6" aria-hidden="true" />
         </div>
         <div className="flex flex-col gap-2">
-          <p className="max-w-xs text-lg leading-snug font-medium text-black">
+          <p className="text-foreground max-w-xs text-lg leading-snug font-medium">
             Протестуйте ШI-агента в реальному часі
           </p>
           <p className="text-lg font-light text-neutral-600">
@@ -79,14 +78,13 @@ function DemoCallForm({
 }: DemoCallFormProps): React.JSX.Element {
   return (
     <>
-      {/* Phone input with +380 prefix */}
       <div
         className={cn(
-          "mx-auto mb-4 flex h-12 w-full max-w-xs items-center rounded-2xl border border-gray-300 px-4",
+          "border-input-border mx-auto mb-4 flex h-12 w-full max-w-xs items-center rounded-2xl border px-4",
           errorMessage && "border-red-500"
         )}
       >
-        <span className="shrink-0 text-lg font-light text-black">+380&nbsp;</span>
+        <span className="text-foreground shrink-0 text-lg font-light">+380&nbsp;</span>
         <Input
           type="tel"
           inputMode="numeric"
@@ -97,11 +95,10 @@ function DemoCallForm({
           aria-invalid={errorMessage ? true : undefined}
           aria-describedby={errorMessage ? "demo-call-error" : undefined}
           disabled={isLoading}
-          className="h-full border-0 bg-transparent px-0 text-lg font-light text-black shadow-none placeholder:text-black/40 focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="text-foreground placeholder:text-foreground/40 h-full border-0 bg-transparent px-0 text-lg font-light shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
         />
       </div>
 
-      {/* Inline error */}
       {errorMessage && (
         <p
           id="demo-call-error"
@@ -112,25 +109,22 @@ function DemoCallForm({
         </p>
       )}
 
-      {/* CTA button */}
       <Button
         type="button"
         onClick={onSubmit}
         disabled={!isComplete || isLoading}
         aria-label="Запустити тестовий дзвінок"
-        className="bg-primary hover:bg-primary/90 disabled:bg-primary/70 mx-auto flex h-12 w-full max-w-xs items-center justify-center gap-2 rounded-full text-lg font-normal text-white shadow-md disabled:opacity-100"
+        className="bg-primary hover:bg-primary/90 mx-auto flex h-12 w-full max-w-xs items-center justify-center gap-2 rounded-full text-lg font-normal text-white shadow-md disabled:opacity-50"
       >
         {isLoading ? "Надсилаємо…" : "Запустити тестовий дзвінок"}
       </Button>
 
-      {/* Social proof */}
       <p className="mx-auto mt-5 max-w-sm text-center text-base text-neutral-500">
         Вже протестували <span className="font-semibold text-neutral-600">200+ компаній</span>
       </p>
 
-      {/* Disclaimer */}
-      <p className="mx-auto mt-3 flex items-center max-w-xs gap-2 text-base font-light text-neutral-600">
-        <Lock className="text-primary mt-0.5 size-5 shrink-0 " aria-hidden="true" />
+      <p className="mx-auto mt-3 flex max-w-xs items-center gap-2 text-base font-light text-neutral-600">
+        <Lock className="text-primary mt-0.5 size-5 shrink-0" aria-hidden="true" />
         <span>
           <span className="text-primary font-semibold">Безпечно:</span> один тестовий дзвінок. Без
           спаму та передачі бази
@@ -143,7 +137,7 @@ function DemoCallForm({
 function DemoCallSuccess({ digits }: { digits: string }): React.JSX.Element {
   return (
     <div className="flex max-w-sm flex-col items-center gap-3 py-4 text-center">
-      <p className="text-lg font-medium text-black">Дзвінок на шляху!</p>
+      <p className="text-foreground text-lg font-medium">Дзвінок на шляху!</p>
       <p className="text-base font-light text-neutral-600">
         Очікуйте дзвінок на номер +380&nbsp;{formatUaPhoneDigits(digits)} протягом 20 секунд.
       </p>

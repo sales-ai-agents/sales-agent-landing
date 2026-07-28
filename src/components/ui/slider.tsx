@@ -10,6 +10,11 @@ interface SliderProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 
 
 const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
   ({ className, value, onValueChange, min = 0, max = 100, ...props }, ref) => {
+    const numMin = Number(min);
+    const numMax = Number(max);
+    const numValue = Number(value ?? numMin);
+    const percentage = ((numValue - numMin) / (numMax - numMin)) * 100;
+
     return (
       <input
         type="range"
@@ -19,9 +24,12 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
         value={value}
         onChange={(e) => onValueChange?.(Number(e.target.value))}
         className={cn(
-          "h-1.5 w-full cursor-pointer rounded-full bg-gray-300 accent-primary",
+          "accent-primary h-1.5 w-full cursor-pointer appearance-none rounded-full",
           className
         )}
+        style={{
+          background: `linear-gradient(to right, var(--color-primary) ${percentage}%, var(--color-slider-track) ${percentage}%)`,
+        }}
         {...props}
       />
     );

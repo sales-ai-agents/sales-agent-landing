@@ -47,10 +47,13 @@ export const faqs: readonly FaqEntry[] = [
     question: "Скільки це коштує?",
     answer: (
       <>
-        Ви сплачуєте лише за використані хвилини розмови. Усі сценарії, інтеграції з CRM та тестовий баланс вже включені в тарифи.{" "}
-        <span className="text-primary">Тут будуть правки, коли будуть тарифи</span>
+        Ви сплачуєте лише за використані хвилини розмови. Усі сценарії, інтеграції з CRM та тестовий
+        баланс вже включені в тарифи.{" "}
+        <span className="text-primary font-semibold">Тут будуть правки, коли будуть тарифи</span>
       </>
     ),
+    textAnswer:
+      "Ви сплачуєте лише за використані хвилини розмови. Усі сценарії, інтеграції з CRM та тестовий баланс вже включені в тарифи.",
   },
 ] as const;
 
@@ -58,38 +61,32 @@ export function FaqSection() {
   return (
     <section id="faq" className="py-20">
       <div className="mx-auto max-w-7xl px-4">
-        <h2 className="mb-12 font-[family-name:var(--font-display)] text-3xl sm:text-4xl md:text-5xl">
-          <span className="text-black">Часті </span>
+        <h2 className="font-display mb-12 text-3xl tracking-tight sm:text-4xl md:text-5xl">
+          <span className="text-foreground">Часті </span>
           <span className="text-primary">питання</span>
         </h2>
 
         <Accordion type="single" collapsible className="w-full">
-          {faqs.map((faq, index) => {
-            return (
-              <AccordionItem
-                key={index}
-                value={`item-${index}`}
-                className="group border-b border-black py-0"
+          {faqs.map((faq, index) => (
+            <AccordionItem
+              key={index}
+              value={`item-${index}`}
+              className="border-foreground border-b py-0"
+            >
+              <AccordionTrigger
+                hideIcon
+                className="min-h-11 py-5 text-left no-underline hover:no-underline"
               >
-                <AccordionTrigger
-                  hideIcon
-                  className="py-5 text-left no-underline hover:no-underline"
-                >
-                  <span className="text-xl font-medium tracking-tight text-black uppercase md:pr-8 md:text-3xl">
-                    {faq.question}
-                  </span>
-                  <X
-                    className="size-5 shrink-0"
-                    strokeWidth={1.5}
-                    aria-hidden="true"
-                  />
-                </AccordionTrigger>
-                <AccordionContent className="pb-6 text-base text-black md:text-lg">
-                  {faq.answer}
-                </AccordionContent>
-              </AccordionItem>
-            );
-          })}
+                <span className="text-foreground text-xl font-medium tracking-tight uppercase md:pr-8 md:text-3xl">
+                  {faq.question}
+                </span>
+                <X className="size-5 shrink-0 md:size-7" strokeWidth={1.5} aria-hidden="true" />
+              </AccordionTrigger>
+              <AccordionContent className="text-foreground pb-6 text-base md:text-lg">
+                {faq.answer}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
         </Accordion>
       </div>
     </section>

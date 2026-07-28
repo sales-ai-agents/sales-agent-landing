@@ -4,36 +4,29 @@ import Image from "next/image";
 
 export function Footer() {
   return (
-    <footer className="relative overflow-hidden bg-primary">
-      {/* Large watermark text */}
-      <div className="pointer-events-none select-none">
-        <p
-          className="text-center text-8xl font-medium tracking-widest text-white/20 uppercase md:text-9xl lg:text-[12rem]"
-          aria-hidden="true"
-        >
-          CALLS4U.AI
-        </p>
+    <footer className="bg-primary relative overflow-hidden">
+      <div className="pointer-events-none overflow-hidden select-none" aria-hidden="true">
+        <div className="relative">
+          <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white to-transparent" />
+          <p className="font-display text-center text-6xl font-medium tracking-widest text-white/20 uppercase sm:text-8xl md:text-9xl lg:text-9xl">
+            CALLS4U.AI
+          </p>
+        </div>
       </div>
 
-      {/* Main content */}
-      <div className="mx-auto max-w-7xl px-6 pb-10 pt-8">
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
-          {/* Company description */}
+      <div className="mx-auto max-w-7xl px-6 pt-8 pb-10">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
           <div className="flex flex-col gap-4">
             <Link href="/" className="text-base font-semibold text-white">
               Logo
             </Link>
             <p className="max-w-xs text-base text-white">
-              AI-агент для рутинних дзвінків: підтверджує записи та передає
-              в CRM або менеджеру.
+              AI-агент для рутинних дзвінків: підтверджує записи та передає в CRM або менеджеру.
             </p>
           </div>
 
-          {/* Navigation */}
           <nav aria-label="Навігація по сайту">
-            <h3 className="mb-4 text-base font-normal uppercase text-white">
-              Навігація
-            </h3>
+            <h3 className="mb-4 text-xl font-normal text-white uppercase">Навігація</h3>
             <ul className="flex flex-col gap-3">
               <li>
                 <a
@@ -62,11 +55,8 @@ export function Footer() {
             </ul>
           </nav>
 
-          {/* Contacts */}
           <div>
-            <h3 className="mb-4 text-base font-normal uppercase text-white">
-              Контакти
-            </h3>
+            <h3 className="mb-4 text-xl font-normal text-white uppercase">Контакти</h3>
             <ul className="flex flex-col gap-3">
               <li>
                 <a
@@ -88,14 +78,13 @@ export function Footer() {
               </li>
             </ul>
 
-            {/* Social icons */}
             <div className="mt-6 flex items-center gap-4">
               <a
                 href="https://instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
-                className="flex size-8 items-center justify-center rounded-full text-white transition-colors hover:text-white/80"
+                className="flex size-11 items-center justify-center rounded-full text-white transition-opacity hover:opacity-80"
               >
                 <Image
                   src="/image/hero-inst.svg"
@@ -110,21 +99,14 @@ export function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Telegram"
-                className="flex size-8 items-center justify-center rounded-full text-white transition-colors hover:text-white/80"
+                className="flex size-11 items-center justify-center rounded-full text-white transition-opacity hover:opacity-80"
               >
-                <Image
-                  src="/image/hero-tg.svg"
-                  alt=""
-                  width={24}
-                  height={24}
-                  aria-hidden="true"
-                />
+                <Image src="/image/hero-tg.svg" alt="" width={24} height={24} aria-hidden="true" />
               </a>
             </div>
           </div>
         </div>
 
-        {/* Copyright */}
         <p className="mt-10 text-base text-white">
           © 2026{" "}
           <Link href="/" className="underline">

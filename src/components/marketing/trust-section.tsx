@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Lock, Globe, Shield } from "lucide-react";
+import { Lock, Shield, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { TrustItem } from "@/types";
 
@@ -7,8 +7,7 @@ const trustItems: readonly TrustItem[] = [
   {
     icon: "/image/trust-lock.svg",
     title: "Записи у вашому кабінеті",
-    description:
-      "Кожна розмова зберігається разом зі статусом, підсумком і записом дзвінка.",
+    description: "Кожна розмова зберігається разом зі статусом, підсумком і записом дзвінка.",
   },
   {
     icon: "/image/trust-pause.svg",
@@ -30,54 +29,47 @@ const trustItems: readonly TrustItem[] = [
   },
 ] as const;
 
+const complianceIndicators = [
+  { icon: Lock, label: "GDPR Compliant" },
+  { icon: Shield, label: "End-to-End Шифрування" },
+  { icon: Globe, label: "Сервери зберігання в ЄС" },
+] as const;
+
 export function TrustSection() {
   return (
     <section className="py-20">
       <div className="mx-auto max-w-7xl px-6">
-        {/* Heading */}
         <div className="mb-4 text-center">
           <h2 className="font-display text-3xl sm:text-4xl md:text-5xl">
-            <span className="text-black">Безпека і </span>
+            <span className="text-foreground">Безпека і </span>
             <span className="text-primary">контроль</span>
           </h2>
         </div>
 
-        {/* Subtitle */}
-        <p className="mx-auto mb-14 max-w-lg text-center text-base text-black md:text-lg">
-          Дані клієнтів залишаються у вашому кабінеті. Ви керуєте записами,
-          доступами і запуском дзвінків.
+        <p className="text-foreground mx-auto mb-14 max-w-lg text-center text-base md:text-lg">
+          Дані клієнтів залишаються у вашому кабінеті. Ви керуєте записами, доступами і запуском
+          дзвінків.
         </p>
 
-        {/* Trust items — 4 columns on lg with connecting line */}
         <div className="relative">
-          {/* Decorative horizontal connecting line — desktop only */}
-          <div
-            className="absolute inset-x-8 top-7 hidden h-px bg-gray-300 lg:block"
-            aria-hidden="true"
-          />
-
-          {/* Desktop: 4 columns */}
           <div className="hidden lg:grid lg:grid-cols-4 lg:gap-8">
-            {trustItems.map((item) => (
-              <div key={item.title} className="flex flex-col items-start">
-                <div className="relative z-10 mb-6 flex size-14 items-center justify-center rounded-full bg-primary">
-                  <Image
-                    src={item.icon}
-                    alt=""
-                    width={28}
-                    height={28}
+            {trustItems.map((item, index) => (
+              <div key={item.title} className="relative flex flex-col items-start">
+                {index < trustItems.length - 1 && (
+                  <div
+                    className="absolute top-8 right-0 left-16 h-px bg-gray-300"
                     aria-hidden="true"
                   />
+                )}
+                <div className="bg-primary relative z-10 mb-6 flex size-16 items-center justify-center rounded-full">
+                  <Image src={item.icon} alt="" width={32} height={32} aria-hidden="true" />
                 </div>
-                <h3 className="mb-2 text-lg font-semibold text-black">
-                  {item.title}
-                </h3>
-                <p className="text-base text-black">{item.description}</p>
+                <h3 className="text-foreground mb-2 text-xl font-semibold">{item.title}</h3>
+                <p className="text-foreground text-base">{item.description}</p>
               </div>
             ))}
           </div>
 
-          {/* Mobile: zigzag layout */}
           <div className="flex flex-col gap-10 lg:hidden">
             {trustItems.map((item, index) => (
               <div
@@ -87,55 +79,35 @@ export function TrustSection() {
                   index % 2 === 0 ? "items-start" : "items-end text-right"
                 )}
               >
-                <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-primary">
-                  <Image
-                    src={item.icon}
-                    alt=""
-                    width={28}
-                    height={28}
-                    aria-hidden="true"
-                  />
+                <div className="bg-primary mb-4 flex size-14 items-center justify-center rounded-full">
+                  <Image src={item.icon} alt="" width={28} height={28} aria-hidden="true" />
                 </div>
-                <h3 className="mb-2 text-lg font-semibold text-black">
-                  {item.title}
-                </h3>
-                <p className="max-w-xs text-base text-black">
-                  {item.description}
-                </p>
+                <h3 className="text-foreground mb-2 text-xl font-semibold">{item.title}</h3>
+                <p className="text-foreground max-w-xs text-base">{item.description}</p>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Compliance bar — desktop */}
-        <div className="mt-16 hidden flex-wrap items-center justify-between gap-6 border-t border-gray-200 pt-8 lg:flex">
-          <div className="flex items-center gap-3">
-            <Lock className="size-5 text-primary" aria-hidden="true" />
-            <span className="text-base font-medium text-black">GDPR Compliant</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Shield className="size-5 text-primary" aria-hidden="true" />
-            <span className="text-base font-medium text-black">End-to-End Шифрування</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Globe className="size-5 text-primary" aria-hidden="true" />
-            <span className="text-base font-medium text-black">Сервери зберігання в ЄС</span>
-          </div>
+        <div className="mt-16 hidden items-center justify-between pt-8 lg:flex">
+          {complianceIndicators.map(({ icon: Icon, label }) => (
+            <div key={label} className="flex items-center gap-3">
+              <Icon className="text-primary size-5" aria-hidden="true" />
+              <span className="text-foreground text-base font-medium">{label}</span>
+            </div>
+          ))}
         </div>
 
-        {/* Compliance bar — mobile horizontal scroll */}
-        <div className="mt-12 flex gap-6 overflow-x-auto pt-6 lg:hidden" style={{ scrollbarWidth: "none" }}>
-          <div className="flex shrink-0 items-center gap-2">
-            <Lock className="size-4 text-primary" aria-hidden="true" />
-            <span className="whitespace-nowrap text-sm font-medium text-black">GDPR Compliant</span>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <Shield className="size-4 text-primary" aria-hidden="true" />
-            <span className="whitespace-nowrap text-sm font-medium text-black">End-to-End Шифрування</span>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <Globe className="size-4 text-primary" aria-hidden="true" />
-            <span className="whitespace-nowrap text-sm font-medium text-black">Сервери зберігання в ЄС</span>
+        <div className="mt-12 overflow-x-auto pt-6 lg:hidden">
+          <div className="flex w-max gap-6">
+            {complianceIndicators.map(({ icon: Icon, label }) => (
+              <div key={label} className="flex shrink-0 items-center gap-2">
+                <Icon className="text-primary size-4" aria-hidden="true" />
+                <span className="text-foreground text-sm font-medium whitespace-nowrap">
+                  {label}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
