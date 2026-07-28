@@ -1,10 +1,20 @@
-import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import {
+  ArrowUpRight,
+  ClipboardCheck,
+  Bell,
+  ShoppingCart,
+  Trophy,
+  PhoneCall,
+  Settings,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import type { Scenario, ScenarioDetail } from "@/types";
 
 const scenarios = [
   {
     title: "Підтвердження запису",
+    icon: ClipboardCheck,
     details: [
       { label: "Для кого:", value: "салони, клініки, СТО" },
       { label: "Питає:", value: "чи клієнт прийде у вибраний час" },
@@ -13,6 +23,7 @@ const scenarios = [
   },
   {
     title: "Нагадування про візит",
+    icon: Bell,
     details: [
       { label: "Для кого:", value: "послуги за записом" },
       { label: "Робить:", value: "нагадує дату, час і деталі" },
@@ -21,6 +32,7 @@ const scenarios = [
   },
   {
     title: "Уточнення замовлення",
+    icon: ShoppingCart,
     details: [
       { label: "Для кого:", value: "інтернет-магазини" },
       { label: "Питає:", value: "товар, адресу, доставку" },
@@ -29,6 +41,7 @@ const scenarios = [
   },
   {
     title: "Кваліфікація ліда",
+    icon: Trophy,
     details: [
       { label: "Для кого:", value: "заявки з реклами" },
       { label: "Питає:", value: "потребу, бюджет, термін" },
@@ -37,6 +50,7 @@ const scenarios = [
   },
   {
     title: "Повторний дзвінок",
+    icon: PhoneCall,
     details: [
       { label: "Для кого:", value: "клієнти з бази" },
       { label: "Робить:", value: "пропонує запис або послугу" },
@@ -45,51 +59,70 @@ const scenarios = [
   },
   {
     title: "Власний сценарій",
+    icon: Settings,
     details: [
       { label: "Для кого:", value: "нестандартні процеси" },
       { label: "Робить:", value: "говорить вашими фразами" },
       { label: "Результат:", value: "сценарій під конкретний бізнес" },
     ],
   },
-];
+] as const satisfies readonly Scenario[];
 
 export function ScenariosSection() {
   return (
-    <section id="features" className="bg-section-tinted px-10 py-20">
+    <section id="features" className="bg-slate-50 px-6 py-20 md:px-10">
       <div className="mx-auto max-w-7xl">
         {/* Heading */}
-        <h2 className="font-display text-text-primary mb-8 max-w-2xl text-4xl md:text-5xl">
-          <span className="text-primary font-bold">Дзвінки,</span>{" "}
-          <span className="font-bold">які агент може забрати одразу</span>
+        <h2 className="font-display mb-6 max-w-2xl text-center text-3xl sm:text-4xl md:text-left md:text-5xl">
+          <span className="text-primary">Дзвінки,</span>{" "}
+          <span className="text-black">які агент може забрати одразу</span>
         </h2>
 
         {/* Subtitle */}
-        <p className="text-text-primary mb-20 max-w-lg text-lg font-normal">
+        <p className="mx-auto mb-12 max-w-md text-center text-base text-black md:mx-0 md:max-w-lg md:text-left md:text-lg">
           Не треба писати сценарій з нуля. Виберіть тип дзвінка, адаптуйте кілька фраз під бізнес і
           запускайте тест.
         </p>
 
-        {/* 3×2 Grid */}
-        <div className="mb-18 grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">
-          {scenarios.map((scenario, index) => (
-            <ScenarioCard key={scenario.title} scenario={scenario} index={index} />
+        {/* Grid: 3 columns on lg, 2 on md, 1 on mobile */}
+        <div className="mb-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {scenarios.map((scenario) => (
+            <ScenarioCard key={scenario.title} scenario={scenario} />
           ))}
         </div>
 
-        {/* Bottom row: text + button (right-aligned) */}
-        <div className="flex flex-col items-end gap-4">
-          <p className="text-text-secondary max-w-xs text-base">
-            Почніть з готового сценарію, фрази можна{" "}
-            <span className="font-medium">змінити під ваш бізнес.</span>
-          </p>
-          <Link
-            href="/sign-up"
-            aria-label="Вибрати сценарій і запустити тест"
-            className="rounded-badge bg-primary text-primary-foreground hover:bg-primary-hover inline-flex h-12 items-center gap-3.5 px-6 text-lg font-normal transition-colors"
+        {/* CTA Buttons */}
+        <div className="flex flex-col items-end gap-4 sm:flex-row sm:justify-center md:justify-end">
+          <div>
+            {/* Bottom helper text */}
+            <p className="mx-auto mb-4 max-w-sm text-center text-base text-neutral-600 md:mx-0 md:text-left">
+              Почніть з готового сценарію, фрази можна{" "}
+              <span className="font-medium">змінити під ваш бізнес.</span>
+            </p>
+
+            <Button
+              asChild
+              size="lg"
+              className="bg-primary hover:bg-primary/90 h-12 rounded-full px-6 text-base text-white"
+            >
+              <Link href="/sign-up">
+                Вибрати сценарій і запустити тест
+                <ArrowUpRight className="ml-2 size-4" aria-hidden="true" />
+              </Link>
+            </Button>
+          </div>
+
+          <Button
+            asChild
+            variant="ghost"
+            size="lg"
+            className="hidden h-12 rounded-full border border-black bg-transparent px-6 text-base text-black hover:bg-black/5 sm:inline-flex"
           >
-            Вибрати сценарій і запустити тест
-            <ArrowUpRight className="size-6" aria-hidden="true" />
-          </Link>
+            <Link href="/sign-up">
+              Створити власний сценарій
+              <ArrowUpRight className="ml-2 size-4" aria-hidden="true" />
+            </Link>
+          </Button>
         </div>
       </div>
     </section>
@@ -97,37 +130,33 @@ export function ScenariosSection() {
 }
 
 interface ScenarioCardProps {
-  scenario: {
-    title: string;
-    details: { label: string; value: string }[];
-  };
-  index: number;
+  readonly scenario: Scenario;
 }
 
-function ScenarioCard({ scenario, index }: ScenarioCardProps) {
-  const isEven = index % 2 === 0;
+function ScenarioCard({ scenario }: ScenarioCardProps) {
+  const Icon = scenario.icon;
 
   return (
-    <div className="relative">
+    <div className="relative pt-4 pl-4">
+      {/* Decorative blue circle with icon */}
       <div
-        className={cn(
-          "bg-primary absolute -top-5 size-14 rounded-full md:-top-5 md:-left-5",
-          isEven ? "-left-5" : "-right-5"
-        )}
+        className="absolute z-50 left-0 top-0 flex size-12 items-center justify-center rounded-full bg-primary shadow-lg shadow-primary/40 md:size-14"
         aria-hidden="true"
-      />
+      >
+        {Icon && <Icon className="size-5 text-white md:size-6" />}
+      </div>
 
-      {/* Card body — relative for stacking context */}
-      <div className="rounded-card border-border bg-card-glass backdrop-blur-card relative h-full border py-5 pr-5 pl-15">
-        {/* Title */}
-        <h3 className="text-text-primary mb-3 text-base font-semibold">{scenario.title}</h3>
+      {/* Card body */}
+      <div className="relative rounded-2xl border border-border bg-card-glass pl-15 pr-8 py-5 backdrop-blur-sm">
+        <h3 className="mb-3 text-base font-medium text-black">
+          {scenario.title}
+        </h3>
 
-        {/* Details */}
-        <div>
-          {scenario.details.map((detail) => (
-            <p key={detail.label} className="text-text-primary text-sm">
-              <span className="font-bold">{detail.label}</span>{" "}
-              <span className="font-normal">{detail.value}</span>
+        <div className="space-y-1">
+          {scenario.details.map((detail: ScenarioDetail) => (
+            <p key={detail.label} className="text-sm text-black">
+              <span className="font-medium">{detail.label}</span>{" "}
+              <span className="font-light">{detail.value}</span>
             </p>
           ))}
         </div>

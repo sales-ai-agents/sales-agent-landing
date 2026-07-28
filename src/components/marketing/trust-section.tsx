@@ -1,10 +1,14 @@
 import Image from "next/image";
+import { Lock, Globe, Shield } from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { TrustItem } from "@/types";
 
-const trustItems = [
+const trustItems: readonly TrustItem[] = [
   {
     icon: "/image/trust-lock.svg",
     title: "Записи у вашому кабінеті",
-    description: "Кожна розмова зберігається разом зі статусом, підсумком і записом дзвінка.",
+    description:
+      "Кожна розмова зберігається разом зі статусом, підсумком і записом дзвінка.",
   },
   {
     icon: "/image/trust-pause.svg",
@@ -24,48 +28,114 @@ const trustItems = [
     description:
       "Контакти клієнтів не передаються третім особам і не використовуються для сторонніх задач.",
   },
-];
+] as const;
 
 export function TrustSection() {
   return (
     <section className="py-20">
-      <div className="mx-auto max-w-7xl px-4">
+      <div className="mx-auto max-w-7xl px-6">
         {/* Heading */}
-        <div className="mb-6 text-center">
-          <h2 className="font-display text-4xl font-bold md:text-5xl">
-            Безпека і <span className="text-primary">контроль</span>
+        <div className="mb-4 text-center">
+          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl">
+            <span className="text-black">Безпека і </span>
+            <span className="text-primary">контроль</span>
           </h2>
         </div>
 
         {/* Subtitle */}
-        <p className="text-text-secondary mx-auto mb-12 max-w-lg text-center text-lg">
-          Дані клієнтів залишаються у вашому кабінеті. Ви керуєте записами, доступами і запуском
-          дзвінків.
+        <p className="mx-auto mb-14 max-w-lg text-center text-base text-black md:text-lg">
+          Дані клієнтів залишаються у вашому кабінеті. Ви керуєте записами,
+          доступами і запуском дзвінків.
         </p>
 
-        {/* Trust items row with line through icon centers */}
-        <div className="relative mt-12">
-          {/* Horizontal line through center of icons — desktop only, spans from first to last icon center */}
+        {/* Trust items — 4 columns on lg with connecting line */}
+        <div className="relative">
+          {/* Decorative horizontal connecting line — desktop only */}
           <div
-            className="bg-border absolute top-7 right-[20%] left-7 hidden h-px lg:block"
+            className="absolute inset-x-8 top-7 hidden h-px bg-gray-300 lg:block"
             aria-hidden="true"
           />
 
-          <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Desktop: 4 columns */}
+          <div className="hidden lg:grid lg:grid-cols-4 lg:gap-8">
             {trustItems.map((item) => (
               <div key={item.title} className="flex flex-col items-start">
-                {/* Icon container — solid blue circle with white icon */}
-                <div className="bg-primary relative z-10 mb-6 flex size-14 items-center justify-center rounded-full">
-                  <Image src={item.icon} alt="" width={24} height={24} aria-hidden="true" />
+                <div className="relative z-10 mb-6 flex size-14 items-center justify-center rounded-full bg-primary">
+                  <Image
+                    src={item.icon}
+                    alt=""
+                    width={28}
+                    height={28}
+                    aria-hidden="true"
+                  />
                 </div>
-
-                {/* Title */}
-                <h3 className="text-text-primary mb-2 text-lg font-semibold">{item.title}</h3>
-
-                {/* Description */}
-                <p className="text-text-primary text-base font-normal">{item.description}</p>
+                <h3 className="mb-2 text-lg font-semibold text-black">
+                  {item.title}
+                </h3>
+                <p className="text-base text-black">{item.description}</p>
               </div>
             ))}
+          </div>
+
+          {/* Mobile: zigzag layout */}
+          <div className="flex flex-col gap-10 lg:hidden">
+            {trustItems.map((item, index) => (
+              <div
+                key={item.title}
+                className={cn(
+                  "flex flex-col",
+                  index % 2 === 0 ? "items-start" : "items-end text-right"
+                )}
+              >
+                <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-primary">
+                  <Image
+                    src={item.icon}
+                    alt=""
+                    width={28}
+                    height={28}
+                    aria-hidden="true"
+                  />
+                </div>
+                <h3 className="mb-2 text-lg font-semibold text-black">
+                  {item.title}
+                </h3>
+                <p className="max-w-xs text-base text-black">
+                  {item.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Compliance bar — desktop */}
+        <div className="mt-16 hidden flex-wrap items-center justify-between gap-6 border-t border-gray-200 pt-8 lg:flex">
+          <div className="flex items-center gap-3">
+            <Lock className="size-5 text-primary" aria-hidden="true" />
+            <span className="text-base font-medium text-black">GDPR Compliant</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Shield className="size-5 text-primary" aria-hidden="true" />
+            <span className="text-base font-medium text-black">End-to-End Шифрування</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Globe className="size-5 text-primary" aria-hidden="true" />
+            <span className="text-base font-medium text-black">Сервери зберігання в ЄС</span>
+          </div>
+        </div>
+
+        {/* Compliance bar — mobile horizontal scroll */}
+        <div className="mt-12 flex gap-6 overflow-x-auto pt-6 lg:hidden" style={{ scrollbarWidth: "none" }}>
+          <div className="flex shrink-0 items-center gap-2">
+            <Lock className="size-4 text-primary" aria-hidden="true" />
+            <span className="whitespace-nowrap text-sm font-medium text-black">GDPR Compliant</span>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <Shield className="size-4 text-primary" aria-hidden="true" />
+            <span className="whitespace-nowrap text-sm font-medium text-black">End-to-End Шифрування</span>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <Globe className="size-4 text-primary" aria-hidden="true" />
+            <span className="whitespace-nowrap text-sm font-medium text-black">Сервери зберігання в ЄС</span>
           </div>
         </div>
       </div>

@@ -3,11 +3,18 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Menu, LogOut, User, Phone } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { LayoutDashboard, Bot, Users, PhoneCall, Settings } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+
+interface NavItem {
+  readonly href: string;
+  readonly icon: LucideIcon;
+  readonly label: string;
+}
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -15,7 +22,7 @@ const navItems = [
   { href: "/dashboard/contacts", icon: Users, label: "Contacts" },
   { href: "/dashboard/call-logs", icon: PhoneCall, label: "Call Logs" },
   { href: "/dashboard/settings", icon: Settings, label: "Settings" },
-];
+] as const satisfies readonly NavItem[];
 
 export function DashboardHeader() {
   const router = useRouter();

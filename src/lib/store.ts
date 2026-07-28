@@ -32,22 +32,3 @@ export const useWizardStore = create<WizardState>((set) => ({
   setTestPhone: (testPhone) => set({ testPhone }),
   reset: () => set(WIZARD_INITIAL_STATE),
 }));
-
-// --- Audio Player Store ---
-interface AudioState {
-  currentTrackId: string | null;
-  isPlaying: boolean;
-  progress: number;
-  setTrack: (id: string | null) => void;
-  setPlaying: (playing: boolean) => void;
-  setProgress: (progress: number) => void;
-}
-
-export const useAudioStore = create<AudioState>((set) => ({
-  currentTrackId: null,
-  isPlaying: false,
-  progress: 0,
-  setTrack: (currentTrackId) => set({ currentTrackId, progress: 0 }),
-  setPlaying: (isPlaying) => set({ isPlaying }),
-  setProgress: (progress) => set({ progress }),
-}));

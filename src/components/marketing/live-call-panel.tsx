@@ -39,13 +39,13 @@ export function LiveCallPanel({ session, agentName }: LiveCallPanelProps) {
           )}
           aria-hidden="true"
         />
-        <p className="text-text-primary text-lg font-medium">
+        <p className="text-lg font-medium text-gray-900">
           {STATUS_LABELS[status] ?? "Невідомо"}
         </p>
       </div>
 
       {/* Agent name */}
-      <p className="text-text-secondary text-base">
+      <p className="text-base text-gray-600">
         {status === "connected" && `Розмовляєте з ${agentName}`}
         {status === "connecting" && "Очікуйте підключення..."}
         {status === "disconnected" && "Дякуємо за тестування!"}
@@ -64,7 +64,7 @@ export function LiveCallPanel({ session, agentName }: LiveCallPanelProps) {
           type="button"
           onClick={disconnect}
           aria-label="Завершити дзвінок"
-          className="bg-destructive hover:bg-destructive/90 flex h-12 items-center gap-2 rounded-full px-6 text-base font-medium text-white transition-colors"
+          className="flex h-12 items-center gap-2 rounded-full bg-red-600 px-6 text-base font-medium text-white transition-colors hover:bg-red-700"
         >
           <PhoneOff className="size-5" aria-hidden="true" />
           Завершити дзвінок

@@ -7,13 +7,16 @@ import { CallLogsSection } from "@/components/marketing/call-logs-section";
 import { HandoffSection } from "@/components/marketing/handoff-section";
 import { IntegrationsSection } from "@/components/marketing/integrations-section";
 import { TrustSection } from "@/components/marketing/trust-section";
-import { FaqSection } from "@/components/marketing/faq-section";
+import { FaqSection, faqs } from "@/components/marketing/faq-section";
 import { FinalCtaSection } from "@/components/marketing/final-cta-section";
 import {
   DynamicAudioDemoSection as AudioDemoSection,
   DynamicCalculatorSection as CalculatorSection,
   DynamicBuilderSection as BuilderSection,
 } from "@/components/marketing/dynamic-sections";
+import { buildFaqPageSchema } from "@/lib/utils";
+
+export const dynamic = "force-static";
 
 export const metadata: Metadata = {
   title: "VoiceAgent — ШІ-агент для автоматизації дзвінків клієнтам",
@@ -73,36 +76,7 @@ export default function MarketingPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            mainEntity: [
-              {
-                "@type": "Question",
-                name: "З чого починається запуск агента?",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "Спочатку обираєте сценарій: підтвердження запису, нагадування, замовлення або заявка. Потім налаштовуєте голос, текст інструкції і перевіряєте дзвінок на собі.",
-                },
-              },
-              {
-                "@type": "Question",
-                name: "Чи можна змінити сценарій після запуску?",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "Так. Можна оновити фрази, правила розмови, час дзвінків і логіку передачі менеджеру.",
-                },
-              },
-              {
-                "@type": "Question",
-                name: "Можна спочатку протестувати без дзвінків клієнтам?",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "Так. Перед запуском по базі можна зробити тестовий дзвінок на свій номер і перевірити голос, сценарій та поведінку агента.",
-                },
-              },
-            ],
-          }),
+          __html: JSON.stringify(buildFaqPageSchema(faqs)),
         }}
       />
     </>

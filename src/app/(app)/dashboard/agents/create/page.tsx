@@ -13,12 +13,18 @@ import { useState } from "react";
 
 const STEPS = ["Name", "Voice", "Instructions", "Test"] as const;
 
+interface VoiceOption {
+  readonly id: string;
+  readonly name: string;
+  readonly type: string;
+}
+
 const VOICES = [
   { id: "sarah", name: "Sarah", type: "Professional Female" },
   { id: "james", name: "James", type: "Professional Male" },
   { id: "emma", name: "Emma", type: "Friendly Female" },
   { id: "michael", name: "Michael", type: "Friendly Male" },
-];
+] as const satisfies readonly VoiceOption[];
 
 export default function CreateAgentPage() {
   const router = useRouter();

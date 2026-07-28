@@ -10,7 +10,13 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const data = [
+interface ChartDataPoint {
+  readonly day: string;
+  readonly calls: number;
+  readonly successful: number;
+}
+
+const data: readonly ChartDataPoint[] = [
   { day: "Mon", calls: 45, successful: 42 },
   { day: "Tue", calls: 52, successful: 48 },
   { day: "Wed", calls: 38, successful: 35 },
@@ -18,7 +24,7 @@ const data = [
   { day: "Fri", calls: 58, successful: 53 },
   { day: "Sat", calls: 22, successful: 20 },
   { day: "Sun", calls: 15, successful: 14 },
-];
+] as const;
 
 export function CallsChart() {
   return (

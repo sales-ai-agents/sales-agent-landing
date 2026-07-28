@@ -8,23 +8,29 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+interface AgentFormData {
+  name: string;
+  voice: string;
+  instructions: string;
+}
+
 export default function EditAgentPage() {
   const router = useRouter();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Mock data — in real app would fetch based on params.id
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<AgentFormData>({
     name: "Appointment Reminder Bot",
     voice: "sarah",
     instructions:
       "Call the customer to remind them about their appointment tomorrow. If they confirm, say 'Great, we'll see you then!' If they want to reschedule, ask for a preferred date and time.",
   });
 
-  const handleSave = () => {
+  const handleSave = (): void => {
     router.push("/dashboard/agents");
   };
 
-  const handleDelete = () => {
+  const handleDelete = (): void => {
     router.push("/dashboard/agents");
   };
 

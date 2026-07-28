@@ -28,10 +28,9 @@ export default function SignInPage() {
     },
   });
 
-  const onSubmit = async (data: SignInFormData) => {
+  const onSubmit = async (_data: SignInFormData) => {
     setIsLoading(true);
     // Mock sign-in — simulates auth
-    console.log("Sign in:", data);
     await new Promise((resolve) => setTimeout(resolve, 1000));
     setIsLoading(false);
     router.push("/dashboard");

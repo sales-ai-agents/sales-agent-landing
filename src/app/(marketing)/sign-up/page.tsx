@@ -24,9 +24,8 @@ export default function SignUpPage() {
     resolver: zodResolver(signUpSchema),
   });
 
-  const onSubmit = async (data: SignUpFormData) => {
+  const onSubmit = async (_data: SignUpFormData) => {
     setIsLoading(true);
-    console.log("Sign up:", data);
     await new Promise((resolve) => setTimeout(resolve, 1000));
     setIsLoading(false);
     router.push("/dashboard");

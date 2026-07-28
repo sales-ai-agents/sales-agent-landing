@@ -6,8 +6,6 @@ const UA_COUNTRY_CODE = "+380";
 const DEMO_CALL_ERROR_MESSAGES: Record<string, string> = {
   invalid_phone: "Невірний формат номера. Перевірте і спробуйте ще раз.",
   phone_cooldown: "Цей номер вже отримував тестовий дзвінок. Спробуйте пізніше.",
-  ip_limit: "Забагато спроб з вашої адреси. Спробуйте пізніше.",
-  busy_try_later: "Сервіс зараз зайнятий. Спробуйте за кілька хвилин.",
 } as const;
 
 const FALLBACK_ERROR_MESSAGE = "Щось пішло не так. Спробуйте ще раз.";

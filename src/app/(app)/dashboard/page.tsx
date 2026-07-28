@@ -17,7 +17,7 @@ interface StatCard {
   bgColor: string;
 }
 
-const STATS: StatCard[] = [
+const STATS = [
   {
     title: "Total Calls",
     value: "1,247",
@@ -50,7 +50,7 @@ const STATS: StatCard[] = [
     color: "text-purple-600",
     bgColor: "bg-purple-100",
   },
-];
+] as const satisfies readonly StatCard[];
 
 interface RecentAgent {
   name: string;
@@ -59,11 +59,11 @@ interface RecentAgent {
   time: string;
 }
 
-const RECENT_ACTIVITY: RecentAgent[] = [
+const RECENT_ACTIVITY = [
   { name: "Appointment Reminder Bot", calls: 45, success: "92%", time: "2 min ago" },
   { name: "Lead Qualifier", calls: 23, success: "87%", time: "15 min ago" },
   { name: "Follow-up Agent", calls: 12, success: "95%", time: "1 hour ago" },
-];
+] as const satisfies readonly RecentAgent[];
 
 export default function DashboardPage() {
   return (

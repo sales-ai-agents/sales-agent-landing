@@ -13,8 +13,15 @@ import {
   ChevronRight,
   Phone,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+
+interface NavItem {
+  readonly href: string;
+  readonly icon: LucideIcon;
+  readonly label: string;
+}
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -22,7 +29,7 @@ const navItems = [
   { href: "/dashboard/contacts", icon: Users, label: "Contacts" },
   { href: "/dashboard/call-logs", icon: PhoneCall, label: "Call Logs" },
   { href: "/dashboard/settings", icon: Settings, label: "Settings" },
-];
+] as const satisfies readonly NavItem[];
 
 export function Sidebar() {
   const pathname = usePathname();

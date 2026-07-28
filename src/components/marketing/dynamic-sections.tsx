@@ -2,6 +2,12 @@
 
 import dynamic from "next/dynamic";
 
+// DemoCallCard — uses useState, fetch, phone formatting (Client Island inside HeroSection)
+export const DynamicDemoCallCard = dynamic(
+  () => import("@/components/marketing/demo-call-card"),
+  { ssr: false }
+);
+
 // AudioDemoSection — uses Howler.js which requires browser APIs
 export const DynamicAudioDemoSection = dynamic(
   () =>

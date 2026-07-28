@@ -1,4 +1,5 @@
-import { Plus } from "lucide-react";
+import { X } from "lucide-react";
+import type { FaqEntry } from "@/types";
 import {
   Accordion,
   AccordionContent,
@@ -6,7 +7,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-const faqs = [
+export const faqs: readonly FaqEntry[] = [
   {
     question: "З чого починається запуск агента?",
     answer:
@@ -40,43 +41,55 @@ const faqs = [
   {
     question: "Для яких дзвінків це підходить найкраще?",
     answer:
-      "Для повторюваних сценаріїв: підтвердження запису, нагадування, уточнення замовлення, кваліфікація лідів, повторні дзвінки клієнтам з бази.",
+      "Для будь-яких рутинних дзвінків: підтвердження замовлень, запис на візит, нагадування та відповіді на часті питання. Якщо запит складний — ШІ одразу передає дзвінок менеджеру.",
   },
-];
+  {
+    question: "Скільки це коштує?",
+    answer: (
+      <>
+        Ви сплачуєте лише за використані хвилини розмови. Усі сценарії, інтеграції з CRM та тестовий баланс вже включені в тарифи.{" "}
+        <span className="text-primary">Тут будуть правки, коли будуть тарифи</span>
+      </>
+    ),
+  },
+] as const;
 
 export function FaqSection() {
   return (
     <section id="faq" className="py-20">
       <div className="mx-auto max-w-7xl px-4">
-        <h2 className="font-display mb-12 text-4xl font-bold md:text-5xl">
-          Часті <span className="text-primary">питання</span>
+        <h2 className="mb-12 font-[family-name:var(--font-display)] text-3xl sm:text-4xl md:text-5xl">
+          <span className="text-black">Часті </span>
+          <span className="text-primary">питання</span>
         </h2>
 
         <Accordion type="single" collapsible className="w-full">
-          {faqs.map((faq, index) => (
-            <AccordionItem
-              key={index}
-              value={`item-${index}`}
-              className="border-border border-b py-0"
-            >
-              <AccordionTrigger
-                hideIcon
-                className="py-5 text-left no-underline hover:no-underline [&[data-state=open]>.faq-icon]:rotate-45"
+          {faqs.map((faq, index) => {
+            return (
+              <AccordionItem
+                key={index}
+                value={`item-${index}`}
+                className="group border-b border-black py-0"
               >
-                <span className="text-2xl font-medium tracking-tight text-black uppercase md:pr-8 md:text-3xl">
-                  {faq.question}
-                </span>
-                <Plus
-                  className="faq-icon size-5 shrink-0 transition-transform duration-200"
-                  strokeWidth={1.5}
-                  aria-hidden="true"
-                />
-              </AccordionTrigger>
-              <AccordionContent className="pb-6 text-lg font-normal text-black">
-                {faq.answer}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
+                <AccordionTrigger
+                  hideIcon
+                  className="py-5 text-left no-underline hover:no-underline"
+                >
+                  <span className="text-xl font-medium tracking-tight text-black uppercase md:pr-8 md:text-3xl">
+                    {faq.question}
+                  </span>
+                  <X
+                    className="size-5 shrink-0"
+                    strokeWidth={1.5}
+                    aria-hidden="true"
+                  />
+                </AccordionTrigger>
+                <AccordionContent className="pb-6 text-base text-black md:text-lg">
+                  {faq.answer}
+                </AccordionContent>
+              </AccordionItem>
+            );
+          })}
         </Accordion>
       </div>
     </section>

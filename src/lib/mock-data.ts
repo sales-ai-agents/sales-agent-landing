@@ -1,12 +1,4 @@
-import type { Agent, CallLog, Contact, User } from "@/types";
-
-export const mockUser: User = {
-  id: "1",
-  name: "John Smith",
-  email: "demo@voiceagent.ai",
-  plan: "pro",
-  createdAt: "2026-05-15",
-};
+import type { Agent, CallLog, Contact, MockCallLogRow } from "@/types";
 
 export const mockAgents: Agent[] = [
   {
@@ -221,3 +213,46 @@ export const mockCallLogs: CallLog[] = [
     crmSynced: false,
   },
 ];
+
+export const mockLandingCallLogs: readonly MockCallLogRow[] = [
+  {
+    id: "1",
+    customer: "Олена Коваленко",
+    time: "09:15",
+    status: "Підтверджено",
+    statusVariant: "success",
+    summary: "Запис підтверджено на 10:00, клієнт запитав про паркування",
+    duration: "0:42",
+    crm: "Синхронізовано",
+  },
+  {
+    id: "2",
+    customer: "Андрій Шевченко",
+    time: "09:08",
+    status: "Переведено",
+    statusVariant: "warning",
+    summary: "Клієнт хотів обговорити рахунок. Переведено на менеджера",
+    duration: "1:15",
+    crm: "Синхронізовано",
+  },
+  {
+    id: "3",
+    customer: "Марія Бондаренко",
+    time: "08:45",
+    status: "Завершено",
+    statusVariant: "secondary",
+    summary: "Підтвердження замовлення на п'ятницю о 15:00",
+    duration: "0:38",
+    crm: "Синхронізовано",
+  },
+  {
+    id: "4",
+    customer: "Ігор Мельник",
+    time: "08:30",
+    status: "Пропущено",
+    statusVariant: "warning",
+    summary: "Немає відповіді після 5 гудків. Повторний дзвінок заплановано",
+    duration: "—",
+    crm: "Очікує",
+  },
+] as const;

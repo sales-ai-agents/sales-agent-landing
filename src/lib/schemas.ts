@@ -29,23 +29,3 @@ export const contactSchema = z.object({
 
 export type ContactFormData = z.infer<typeof contactSchema>;
 
-export const agentStepNameSchema = z.object({
-  name: z.string().min(2, "Agent name must be at least 2 characters"),
-});
-
-export const agentStepVoiceSchema = z.object({
-  voice: z.string().min(1, "Please select a voice"),
-});
-
-export const agentStepInstructionsSchema = z.object({
-  instructions: z.string().min(10, "Instructions must be at least 10 characters"),
-});
-
-export const agentStepTestSchema = z.object({
-  testPhone: z.string().optional(),
-});
-
-export type AgentNameFormData = z.infer<typeof agentStepNameSchema>;
-export type AgentVoiceFormData = z.infer<typeof agentStepVoiceSchema>;
-export type AgentInstructionsFormData = z.infer<typeof agentStepInstructionsSchema>;
-export type AgentTestFormData = z.infer<typeof agentStepTestSchema>;

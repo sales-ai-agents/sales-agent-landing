@@ -10,8 +10,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
+interface ProfileData {
+  name: string;
+  email: string;
+}
+
 export default function SettingsPage() {
-  const [profile, setProfile] = useState({
+  const [profile, setProfile] = useState<ProfileData>({
     name: "John Smith",
     email: "demo@voiceagent.ai",
   });
