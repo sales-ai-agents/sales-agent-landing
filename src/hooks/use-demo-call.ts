@@ -5,7 +5,10 @@ const UA_COUNTRY_CODE = "+380";
 
 const DEMO_CALL_ERROR_MESSAGES: Record<string, string> = {
   invalid_phone: "Невірний формат номера. Перевірте і спробуйте ще раз.",
-  phone_cooldown: "Цей номер вже отримував тестовий дзвінок. Спробуйте пізніше.",
+  invalid_json: "Невірний формат запиту. Спробуйте ще раз.",
+  phone_cooldown: "Ми вже телефонували на цей номер. Спробуйте пізніше.",
+  ip_limit: "Забагато запитів. Спробуйте через годину.",
+  busy_try_later: "Зараз багато заявок. Спробуйте за кілька хвилин.",
 } as const;
 
 const FALLBACK_ERROR_MESSAGE = "Щось пішло не так. Спробуйте ще раз.";
@@ -26,11 +29,11 @@ async function requestDemoCall(subscriberDigits: string): Promise<void> {
     throw new Error(NETWORK_ERROR_MESSAGE);
   }
 
-  if (response.ok) return;
-
   const body = await response.json().catch(() => ({}));
-  const errorCode: string = body?.error ?? body?.code ?? "unknown";
 
+  if (response.ok && body?.ok) return;
+
+  const errorCode: string = body?.error ?? "unknown";
   throw new Error(DEMO_CALL_ERROR_MESSAGES[errorCode] ?? FALLBACK_ERROR_MESSAGE);
 }
 

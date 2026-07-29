@@ -6,12 +6,14 @@ import { Phone, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDemoCall } from "@/hooks/use-demo-call";
+import { LeadFormModal } from "@/components/marketing/lead-form-card";
 import { cn, formatUaPhoneDigits } from "@/lib/utils";
 
 const UA_SUBSCRIBER_DIGITS = 9;
 
 export default function DemoCallCard() {
   const [digits, setDigits] = useState("");
+  const [showLeadForm, setShowLeadForm] = useState(false);
   const { requestCall, isLoading, isSuccess, errorMessage, reset } = useDemoCall();
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>): void {
@@ -44,7 +46,7 @@ export default function DemoCallCard() {
       </div>
 
       {isSuccess ? (
-        <DemoCallSuccess digits={digits} />
+        <DemoCallSuccess digits={digits} onShowForm={() => setShowLeadForm(true)} />
       ) : (
         <DemoCallForm
           displayValue={displayValue}
@@ -55,6 +57,12 @@ export default function DemoCallCard() {
           onSubmit={handleSubmit}
         />
       )}
+
+      <LeadFormModal
+        open={isSuccess && showLeadForm}
+        onClose={() => setShowLeadForm(false)}
+        sourcePage="calls4u.ai/#hero-demo"
+      />
     </div>
   );
 }
@@ -134,13 +142,26 @@ function DemoCallForm({
   );
 }
 
-function DemoCallSuccess({ digits }: { digits: string }): React.JSX.Element {
+function DemoCallSuccess({
+  digits,
+  onShowForm,
+}: {
+  digits: string;
+  onShowForm: () => void;
+}): React.JSX.Element {
   return (
-    <div className="flex max-w-sm flex-col items-center gap-3 py-4 text-center">
+    <div className="flex flex-col items-center gap-3 py-4 text-center">
       <p className="text-foreground text-lg font-medium">Дзвінок на шляху!</p>
       <p className="text-base font-light text-neutral-600">
         Очікуйте дзвінок на номер +380&nbsp;{formatUaPhoneDigits(digits)} протягом 20 секунд.
       </p>
+      <Button
+        type="button"
+        onClick={onShowForm}
+        className="bg-primary hover:bg-primary/90 mt-3 h-11 rounded-full px-6 text-base font-normal text-white"
+      >
+        Отримати розрахунок
+      </Button>
     </div>
   );
 }

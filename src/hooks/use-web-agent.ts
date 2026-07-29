@@ -6,10 +6,21 @@ const NETWORK_ERROR_MESSAGE =
   "Не вдалося з'єднатися з сервером. Перевірте інтернет і спробуйте ще раз.";
 const FALLBACK_ERROR_MESSAGE = "Щось пішло не так. Спробуйте ще раз.";
 
+const WEB_AGENT_ERROR_MESSAGES: Record<string, string> = {
+  instruction_required: "Потрібно вказати інструкцію або обрати пресет.",
+  invalid_json: "Невірний формат запиту. Спробуйте ще раз.",
+  ip_limit: "Забагато запитів. Спробуйте через годину.",
+  busy_try_later: "Зараз багато заявок. Спробуйте за кілька хвилин.",
+  instruction_expand_failed: "Не вдалося згенерувати сценарій. Спробуйте ще раз.",
+  dispatch_failed: "Сервіс дзвінків тимчасово недоступний. Спробуйте пізніше.",
+  livekit_not_configured: "Сервіс голосового зв'язку тимчасово недоступний.",
+} as const;
+
 export interface WebAgentSession {
   room: string;
   token: string;
   url: string;
+  identity: string;
 }
 
 export interface StartWebAgentParams {
@@ -30,14 +41,19 @@ async function startWebAgent(params: StartWebAgentParams): Promise<WebAgentSessi
     throw new Error(NETWORK_ERROR_MESSAGE);
   }
 
-  if (response.ok) {
-    const body = await response.json();
-    return body as WebAgentSession;
+  const body = await response.json().catch(() => ({}));
+
+  if (response.ok && body?.ok) {
+    return {
+      room: body.room,
+      token: body.token,
+      url: body.url,
+      identity: body.identity,
+    };
   }
 
-  const body = await response.json().catch(() => ({}));
-  const errorCode: string = body?.error ?? body?.code ?? "unknown";
-  throw new Error(body?.message ?? errorCode ?? FALLBACK_ERROR_MESSAGE);
+  const errorCode: string = body?.error ?? "unknown";
+  throw new Error(WEB_AGENT_ERROR_MESSAGES[errorCode] ?? FALLBACK_ERROR_MESSAGE);
 }
 
 export function useWebAgent() {
