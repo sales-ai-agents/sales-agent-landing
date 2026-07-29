@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { Check, BarChart3, Headphones, User } from "lucide-react";
 
 const checklist = [
@@ -9,7 +8,7 @@ const checklist = [
 
 function ChecklistIcon() {
   return (
-    <div className="from-primary flex size-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br to-sky-200">
+    <div className="from-primary flex size-8 shrink-0 items-center justify-center rounded-full bg-linear-to-br to-sky-200">
       <Check className="text-primary-foreground size-4" strokeWidth={3} />
     </div>
   );

@@ -64,7 +64,7 @@ export function BuilderSection() {
   }
 
   return (
-    <section className="relative py-20">
+    <section id="builder" className="relative py-20">
       <div className="pointer-events-none absolute inset-0" aria-hidden="true">
         <Image
           src="/image/builder-line.svg"

@@ -36,7 +36,7 @@ export function ScenariosSection() {
               size="lg"
               className="bg-primary hover:bg-primary/90 font-body h-12 w-full rounded-3xl px-8 text-lg font-normal text-white sm:w-auto"
             >
-              <Link href="/sign-up">
+              <Link href="#builder">
                 Вибрати сценарій і запустити тест
                 <ArrowUpRight className="ml-2 size-4" aria-hidden="true" />
               </Link>
@@ -49,7 +49,7 @@ export function ScenariosSection() {
             size="lg"
             className="border-foreground text-foreground hover:bg-foreground/5 font-body h-12 w-full rounded-3xl border bg-transparent px-8 text-lg font-normal sm:w-auto"
           >
-            <Link href="/sign-up">
+            <Link href="#builder">
               Створити власний сценарій
               <ArrowUpRight className="ml-2 size-4" aria-hidden="true" />
             </Link>
