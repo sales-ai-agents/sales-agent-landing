@@ -105,7 +105,7 @@ export function CalculatorSection() {
             size="lg"
             className="bg-primary shadow-primary/30 hover:bg-primary/90 font-body h-12 w-full max-w-sm rounded-2xl px-12 text-lg font-medium text-white shadow-lg sm:h-14 sm:w-auto"
           >
-            <Link href="/sign-up">Порахувати для мого бізнесу</Link>
+            <Link href="/">Порахувати для мого бізнесу</Link>
           </Button>
         </div>
       </div>

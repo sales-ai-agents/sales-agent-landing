@@ -77,7 +77,7 @@ export function FaqSection() {
                 hideIcon
                 className="min-h-11 py-5 text-left no-underline hover:no-underline"
               >
-                <span className="text-foreground text-xl font-medium tracking-tight uppercase md:pr-8 md:text-3xl">
+                <span className="text-foreground font-body cursor-pointer text-xl font-medium tracking-tight uppercase md:pr-8 md:text-3xl">
                   {faq.question}
                 </span>
                 <X className="size-5 shrink-0 md:size-7" strokeWidth={1.5} aria-hidden="true" />

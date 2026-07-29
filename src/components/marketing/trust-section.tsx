@@ -37,7 +37,11 @@ const complianceIndicators = [
 
 export function TrustSection() {
   return (
-    <section className="py-20">
+    <section className="relative py-20">
+      <div
+        className="bg-primary/50 pointer-events-none absolute -top-40 -left-20 -z-20 size-72 rounded-full blur-2xl"
+        aria-hidden="true"
+      />
       <div className="mx-auto max-w-7xl px-6">
         <div className="mb-4 text-center">
           <h2 className="font-display text-3xl sm:text-4xl md:text-5xl">
@@ -57,7 +61,7 @@ export function TrustSection() {
               <div key={item.title} className="relative flex flex-col items-start">
                 {index < trustItems.length - 1 && (
                   <div
-                    className="absolute top-8 right-0 left-16 h-px bg-gray-300"
+                    className="absolute top-8 -right-10 left-16 h-px bg-gray-300"
                     aria-hidden="true"
                   />
                 )}
@@ -70,7 +74,7 @@ export function TrustSection() {
             ))}
           </div>
 
-          <div className="flex flex-col gap-10 lg:hidden">
+          <div className="flex flex-col gap-4 lg:hidden">
             {trustItems.map((item, index) => (
               <div
                 key={item.title}
@@ -98,7 +102,7 @@ export function TrustSection() {
           ))}
         </div>
 
-        <div className="mt-12 overflow-x-auto pt-6 lg:hidden">
+        <div className="mt-12 scrollbar-none overflow-x-auto pt-6 lg:hidden">
           <div className="flex w-max gap-6">
             {complianceIndicators.map(({ icon: Icon, label }) => (
               <div key={label} className="flex shrink-0 items-center gap-2">

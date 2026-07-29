@@ -1,14 +1,13 @@
 import Link from "next/link";
 import { Mail, Phone } from "lucide-react";
-import Image from "next/image";
 
 export function Footer() {
   return (
     <footer className="bg-primary relative overflow-hidden">
       <div className="pointer-events-none overflow-hidden select-none" aria-hidden="true">
         <div className="relative">
-          <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white to-transparent" />
-          <p className="font-display text-center text-6xl font-medium tracking-widest text-white/20 uppercase sm:text-8xl md:text-9xl lg:text-9xl">
+          <div className="absolute inset-x-0 top-0 h-1/2 bg-linear-to-b from-white to-transparent" />
+          <p className="font-display text-center text-6xl font-medium text-white/80 uppercase sm:text-7xl md:text-8xl lg:text-9xl xl:text-[16rem]">
             CALLS4U.AI
           </p>
         </div>
@@ -26,7 +25,7 @@ export function Footer() {
           </div>
 
           <nav aria-label="Навігація по сайту">
-            <h3 className="mb-4 text-xl font-normal text-white uppercase">Навігація</h3>
+            <h3 className="font-body mb-4 text-xl text-white uppercase">Навігація</h3>
             <ul className="flex flex-col gap-3">
               <li>
                 <a
@@ -56,7 +55,7 @@ export function Footer() {
           </nav>
 
           <div>
-            <h3 className="mb-4 text-xl font-normal text-white uppercase">Контакти</h3>
+            <h3 className="font-body mb-4 text-xl text-white uppercase">Контакти</h3>
             <ul className="flex flex-col gap-3">
               <li>
                 <a
@@ -77,33 +76,6 @@ export function Footer() {
                 </a>
               </li>
             </ul>
-
-            <div className="mt-6 flex items-center gap-4">
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Instagram"
-                className="flex size-11 items-center justify-center rounded-full text-white transition-opacity hover:opacity-80"
-              >
-                <Image
-                  src="/image/hero-inst.svg"
-                  alt=""
-                  width={24}
-                  height={24}
-                  aria-hidden="true"
-                />
-              </a>
-              <a
-                href="https://t.me"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Telegram"
-                className="flex size-11 items-center justify-center rounded-full text-white transition-opacity hover:opacity-80"
-              >
-                <Image src="/image/hero-tg.svg" alt="" width={24} height={24} aria-hidden="true" />
-              </a>
-            </div>
           </div>
         </div>
 

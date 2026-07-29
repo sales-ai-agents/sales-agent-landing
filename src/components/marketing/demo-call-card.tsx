@@ -30,8 +30,8 @@ export default function DemoCallCard() {
   const displayValue = digits.length > 0 ? formatUaPhoneDigits(digits) : "";
 
   return (
-    <div className="border-border bg-card-glass relative overflow-hidden rounded-2xl border p-8 backdrop-blur-lg">
-      <div className="mb-2 flex items-center gap-5">
+    <div className="border-border shadow-primary/30 relative rounded-2xl border p-8 shadow-lg backdrop-blur-lg">
+      <div className="mb-4 flex items-center gap-5">
         <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-white shadow-sm">
           <Phone className="text-primary size-6" aria-hidden="true" />
         </div>

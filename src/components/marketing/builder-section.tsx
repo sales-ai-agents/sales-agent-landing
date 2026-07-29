@@ -38,7 +38,7 @@ const CHECKLIST_ITEMS = [
 
 function ChecklistIcon() {
   return (
-    <div className="from-primary flex size-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br to-sky-200">
+    <div className="from-primary flex size-7 shrink-0 items-center justify-center rounded-full bg-linear-to-br to-sky-200">
       <Check className="size-3.5 text-black/70" strokeWidth={3} />
     </div>
   );
@@ -64,7 +64,7 @@ export function BuilderSection() {
   }
 
   return (
-    <section className="relative overflow-hidden py-20">
+    <section className="relative py-20">
       <div className="pointer-events-none absolute inset-0" aria-hidden="true">
         <Image
           src="/image/builder-line.svg"
@@ -76,7 +76,7 @@ export function BuilderSection() {
       </div>
 
       <div className="relative mx-auto max-w-7xl px-6">
-        <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-2">
+        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
           <div className="max-w-lg text-center lg:text-left">
             <h2 className="font-display mb-6 text-3xl sm:text-4xl md:text-5xl">
               <span className="text-foreground">Конструктор агента </span>
@@ -106,11 +106,13 @@ export function BuilderSection() {
               </div>
             </div>
 
-            <div className="border-border to-primary/5 rounded-3xl border bg-gradient-to-br from-gray-100/15 p-6 backdrop-blur-lg sm:p-8 md:p-10 lg:p-15">
-              <h3 className="text-foreground mb-6 text-xl font-semibold">Налаштування агента</h3>
+            <div className="border-border shadow-primary/30 rounded-2xl border p-6 shadow-lg backdrop-blur-lg sm:p-8 md:p-10 lg:p-15">
+              <h3 className="text-foreground font-body mb-6 text-xl font-semibold">
+                Налаштування агента
+              </h3>
 
               <div className="space-y-5">
-                <div className="space-y-2">
+                <div className="flex flex-col gap-2">
                   <label htmlFor="agent-name" className="text-foreground text-base">
                     Імʼя агента
                   </label>
@@ -141,7 +143,7 @@ export function BuilderSection() {
                         }}
                         className={`focus-visible:ring-primary flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border py-2 text-base transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none ${
                           voice === option
-                            ? "border-input-border shadow-primary/20 bg-white shadow-md"
+                            ? "border-input-border shadow-primary/30 bg-white shadow-md"
                             : "border-input-border bg-white"
                         }`}
                       >
@@ -154,7 +156,7 @@ export function BuilderSection() {
 
                 <fieldset className="space-y-2">
                   <legend className="text-foreground text-base">Вибрати сценарій</legend>
-                  <div className="border-input-border flex cursor-pointer items-start gap-3 rounded-2xl border bg-white px-4 py-3">
+                  <div className="border-input-border flex min-h-25 items-start gap-3 rounded-2xl border bg-white px-4 py-3">
                     <Headphones
                       className="text-muted-foreground mt-0.5 size-5 shrink-0"
                       aria-hidden="true"

@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Cog, BarChart3, FileText } from "lucide-react";
-import Image from "next/image";
+import { Cog, BarChart3, FileText, MousePointer2 } from "lucide-react";
 
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -52,7 +51,7 @@ export function LeadFormModal({ open, onClose, sourcePage }: LeadFormModalProps)
         if (!isOpen) onClose();
       }}
     >
-      <DialogContent className="border-border max-w-270 rounded-[20px] border-[1.5px] bg-[linear-gradient(136deg,rgba(255,255,255,0.42)_1.6%,rgba(217,217,217,0.42)_119%)] p-8 backdrop-blur-[34px] sm:p-10 lg:p-14">
+      <DialogContent className="border-border shadow-primary/30 max-w-270 rounded-2xl border p-8 shadow-lg backdrop-blur-lg sm:p-10 lg:p-14">
         <DialogTitle className="sr-only">Отримайте розрахунок ШІ-агента</DialogTitle>
 
         {isSuccess ? (
@@ -70,10 +69,10 @@ export function LeadFormModal({ open, onClose, sourcePage }: LeadFormModalProps)
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[1.2fr_1fr] lg:gap-16">
+          <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-2 lg:gap-16">
             {/* Left — value proposition */}
             <div className="flex flex-col gap-8">
-              <h3 className="font-display text-foreground text-[26px] leading-[1.2] font-bold tracking-[0.3px] sm:text-[30px]">
+              <h3 className="font-display text-foreground text-2xl font-bold">
                 Отримайте <span className="text-primary">розрахунок</span>
                 <br />
                 ШІ-агента під <span className="text-primary">ваш бізнес</span>
@@ -81,42 +80,36 @@ export function LeadFormModal({ open, onClose, sourcePage }: LeadFormModalProps)
 
               <ul className="space-y-6">
                 <li className="flex items-center gap-4">
-                  <Cog className="text-foreground size-6 shrink-0" aria-hidden="true" />
-                  <p className="text-foreground text-lg tracking-[0.36px]">
+                  <Cog className="text-primary size-6 shrink-0" aria-hidden="true" />
+                  <p className="text-foreground text-lg">
                     Покажемо, які <span className="font-semibold">процеси автоматизуємо</span>
                   </p>
                 </li>
                 <li className="flex items-center gap-4">
-                  <BarChart3 className="text-foreground size-6 shrink-0" aria-hidden="true" />
-                  <p className="text-foreground text-lg tracking-[0.36px]">
+                  <BarChart3 className="text-primary size-6 shrink-0" aria-hidden="true" />
+                  <p className="text-foreground text-lg">
                     Порахуємо <span className="font-semibold">економію часу</span> та{" "}
                     <span className="font-semibold">бюджету</span>
                   </p>
                 </li>
                 <li className="flex items-center gap-4">
-                  <FileText className="text-foreground size-6 shrink-0" aria-hidden="true" />
-                  <p className="text-foreground text-lg tracking-[0.36px]">
+                  <FileText className="text-primary size-6 shrink-0" aria-hidden="true" />
+                  <p className="text-foreground text-lg">
                     Запропонуємо <span className="font-semibold">простий сценарій</span>
                   </p>
                 </li>
               </ul>
 
-              <div className="mt-auto pt-4">
-                <p className="mb-3 text-base tracking-[0.32px] text-[#727272]">
-                  Не хочете чекати на відповідь?
-                </p>
+              <div className="mx-auto mt-auto pt-4">
+                <p className="mb-3 text-base text-gray-500">Не хочете чекати на відповідь?</p>
                 <Button
                   asChild
-                  variant="outline"
-                  className="border-primary text-foreground h-12 w-full max-w-75 rounded-full text-lg font-normal"
+                  variant="ghost"
+                  className="border-primary text-foreground h-12 w-full max-w-75 rounded-full border text-lg font-normal"
                 >
                   <a href={TELEGRAM_LINK} target="_blank" rel="noopener noreferrer">
-                    <Image
-                      src="/image/hero-tg.svg"
-                      alt=""
-                      width={20}
-                      height={20}
-                      className="mr-2"
+                    <MousePointer2
+                      className="text-primary size-6 shrink-0 rotate-90"
                       aria-hidden="true"
                     />
                     Напишіть в Telegram
@@ -127,7 +120,7 @@ export function LeadFormModal({ open, onClose, sourcePage }: LeadFormModalProps)
 
             {/* Right — form */}
             <form onSubmit={handleSubmit} className="flex flex-col">
-              <p className="text-foreground mb-8 text-center text-xl font-medium tracking-[0.4px]">
+              <p className="text-foreground mb-8 text-center text-xl font-medium">
                 Заповніть заявку
               </p>
 
@@ -139,7 +132,7 @@ export function LeadFormModal({ open, onClose, sourcePage }: LeadFormModalProps)
                 disabled={isLoading}
                 maxLength={500}
                 aria-label="Ім'я"
-                className="text-foreground h-auto rounded-none border-0 border-b border-border bg-transparent px-0 py-4 text-lg font-normal tracking-[0.02em] shadow-none placeholder:text-[#3e3d3d] focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="text-foreground border-primary h-auto rounded-none border-0 border-b bg-transparent px-0 py-2 text-lg font-normal shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
               />
               <Input
                 placeholder="Номер телефону"
@@ -150,7 +143,7 @@ export function LeadFormModal({ open, onClose, sourcePage }: LeadFormModalProps)
                 disabled={isLoading}
                 maxLength={500}
                 aria-label="Номер телефону"
-                className="text-foreground h-auto rounded-none border-0 border-b border-border bg-transparent px-0 py-4 text-lg font-normal tracking-[0.02em] shadow-none placeholder:text-[#3e3d3d] focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="text-foreground border-primary h-auto rounded-none border-0 border-b bg-transparent px-0 py-2 text-lg font-normal shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
               />
               <Input
                 placeholder="Сфера діяльності / Ніша"
@@ -159,7 +152,7 @@ export function LeadFormModal({ open, onClose, sourcePage }: LeadFormModalProps)
                 disabled={isLoading}
                 maxLength={500}
                 aria-label="Сфера діяльності / Ніша"
-                className="text-foreground h-auto rounded-none border-0 border-b border-border bg-transparent px-0 py-4 text-lg font-normal tracking-[0.02em] shadow-none placeholder:text-[#3e3d3d] focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="text-foreground border-primary h-auto rounded-none border-0 border-b bg-transparent px-0 py-2 text-lg font-normal shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
               />
               <Input
                 placeholder="Telegram / email"
@@ -168,7 +161,7 @@ export function LeadFormModal({ open, onClose, sourcePage }: LeadFormModalProps)
                 disabled={isLoading}
                 maxLength={500}
                 aria-label="Telegram / email"
-                className="text-foreground h-auto rounded-none border-0 bg-transparent px-0 py-4 text-lg font-normal tracking-[0.02em] shadow-none placeholder:text-[#3e3d3d] focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="text-foreground border-primary h-auto rounded-none border-0 border-b bg-transparent px-0 py-2 text-lg font-normal shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
               />
 
               {errorMessage && (
@@ -180,7 +173,7 @@ export function LeadFormModal({ open, onClose, sourcePage }: LeadFormModalProps)
               <Button
                 type="submit"
                 disabled={isLoading || !name.trim() || !phone.trim()}
-                className="bg-primary hover:bg-primary/90 mt-8 h-12 w-full rounded-[25px] text-lg font-medium text-white shadow-[1px_4px_4.5px_0px_rgba(0,91,255,0.25)] disabled:opacity-50"
+                className="bg-primary hover:bg-primary/90 rounded-6 shadow-primary/30 mt-8 h-12 w-full text-lg font-medium text-white disabled:opacity-50"
               >
                 {isLoading ? "Надсилаємо…" : "Отримати розрахунок"}
               </Button>

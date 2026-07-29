@@ -7,37 +7,12 @@ import {
   CarouselNext,
 } from "@/components/ui/carousel";
 import type { IndustryCard } from "@/types";
-
-const industries: IndustryCard[] = [
-  {
-    title: "ЛОГІСТИКА",
-    task: "Клієнти залишають заявки на перевезення, але менеджери витрачають час на уточнення маршруту, вантажу, дати й деталей оплати.",
-    agentDoes:
-      "Дзвонить клієнту, уточнює маршрут, тип вантажу, дату відправки, контактну особу та передає готову заявку менеджеру",
-    status: "Заявку уточнено / потрібен дзвінок менеджера",
-    imageSrc: "/image/industries-logistics.png",
-  },
-  {
-    title: "СЛУЖБА ДОСТАВКИ",
-    task: "Оператори вручну підтверджують адресу, час отримання, зміни в замовленні й повторно дзвонять клієнтам.",
-    agentDoes:
-      "Підтверджує адресу, зручний час доставки, фіксує зміну даних і передає статус в кабінет.",
-    status: "Доставку підтверджено / потрібно змінити час",
-    imageSrc: "/image/industries-delivery.png",
-  },
-  {
-    title: "АВТОСЕРВІСИ ТА СТО",
-    task: "Клієнти дзвонять дізнатися вартість ТО та наявність вільних підйомників. Адміністратор витрачає час на ручний запис.",
-    agentDoes: "Звіряє вільні слоти в CRM, уточнює марку авто, записує на час і надсилає SMS.",
-    status: "Запис підтверджено / Внесено в CRM",
-    imageSrc: "/image/industries-cto.png",
-  },
-];
+import { industries } from "@/lib/mock-data";
 
 export function IndustriesSection() {
   return (
-    <section className="py-20">
-      <div className="mx-auto max-w-7xl px-4">
+    <section className="px-6 py-20 md:px-0">
+      <div className="mx-auto">
         <div className="mb-6 text-center">
           <h2 className="font-display mb-4 text-3xl sm:text-4xl md:text-5xl">
             <span className="text-foreground">Для яких бізнесів </span>
@@ -53,26 +28,25 @@ export function IndustriesSection() {
           opts={{
             align: "start",
             slidesToScroll: 1,
-            loop: true,
           }}
           aria-label="Галузі"
         >
-          <div className="mb-6 flex items-center justify-center gap-3 md:justify-end">
+          <div className="mb-6 flex items-center justify-center gap-3">
             <CarouselPrevious
               variant="ghost"
-              className="border-border static size-11 translate-y-0 rounded-full border"
+              className="static size-10 translate-y-0"
               aria-label="Попередній слайд"
             />
             <CarouselNext
               variant="ghost"
-              className="border-border static size-11 translate-y-0 rounded-full border"
+              className="static size-10 translate-y-0"
               aria-label="Наступний слайд"
             />
           </div>
 
-          <CarouselContent>
+          <CarouselContent className="xl:pl-60">
             {industries.map((industry, index) => (
-              <CarouselItem key={index} className="basis-4/5 md:basis-2/5">
+              <CarouselItem key={index} className="basis-5/5 md:basis-2/5">
                 <IndustryCardComponent industry={industry} />
               </CarouselItem>
             ))}
@@ -111,7 +85,7 @@ function IndustryCardComponent({ industry }: { industry: IndustryCard }) {
           alt={`${industry.title} — приклад роботи агента`}
           width={473}
           height={273}
-          className="h-auto w-full object-cover"
+          className="h-80 w-full object-cover"
         />
       </div>
     </div>

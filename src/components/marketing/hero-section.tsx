@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Clock, Link2, PhoneCall } from "lucide-react";
+import { Clock, Link2, PhoneCall, Play } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Navbar, MobileNavbar } from "@/components/marketing/navbar";
@@ -8,17 +8,17 @@ import { DynamicDemoCallCard as DemoCallCard } from "@/components/marketing/dyna
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-screen overflow-hidden">
+    <section className="relative min-h-screen">
       <Navbar />
       <MobileNavbar />
 
-      <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+      <div className="pointer-events-none absolute inset-0 -z-10 -mt-20" aria-hidden="true">
         <Image src="/image/hero-bg.jpg" alt="" fill className="object-cover" priority />
       </div>
 
-      <div className="mx-auto max-w-7xl px-6 pt-32 pb-16 lg:px-16 lg:pt-56">
+      <div className="lg:pb:16 mx-auto px-6 pt-32 pb-0 lg:px-16 lg:pt-60">
         <div className="flex flex-col items-center gap-12 lg:flex-row lg:items-start lg:justify-between">
-          <div className="max-w-2xl text-center lg:text-left">
+          <div className="max-w-3xl text-center lg:text-left">
             <p className="text-foreground mb-4 hidden text-lg lg:block">
               Голосовий <span className="font-semibold">ШІ-агент</span>
             </p>
@@ -45,18 +45,11 @@ export function HeroSection() {
               <Button
                 asChild
                 size="lg"
-                variant="outline"
-                className="border-border bg-card-glass text-foreground hover:bg-card-glass/80 font-body h-12 w-full rounded-full border px-8 text-lg font-normal backdrop-blur-md sm:w-auto"
+                variant="ghost"
+                className="border-border text-foreground font-body h-12 w-full rounded-full border bg-white/45 px-8 text-lg font-normal backdrop-blur-xl sm:w-auto"
               >
                 <a href="#audio-demo">
-                  <svg
-                    className="mr-1.5 size-4"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <polygon points="6,4 16,10 6,16" />
-                  </svg>
+                  <Play className="size-4" aria-hidden="true" />
                   Прослухати демо
                 </a>
               </Button>

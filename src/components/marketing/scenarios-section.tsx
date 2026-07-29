@@ -1,72 +1,8 @@
 import Link from "next/link";
-import {
-  ArrowUpRight,
-  ClipboardCheck,
-  Bell,
-  ShoppingCart,
-  Trophy,
-  PhoneCall,
-  Settings,
-} from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Scenario, ScenarioDetail } from "@/types";
-
-const scenarios = [
-  {
-    title: "Підтвердження запису",
-    icon: ClipboardCheck,
-    details: [
-      { label: "Для кого:", value: "салони, клініки, СТО" },
-      { label: "Питає:", value: "чи клієнт прийде у вибраний час" },
-      { label: "Результат:", value: "підтверджено / перенос" },
-    ],
-  },
-  {
-    title: "Нагадування про візит",
-    icon: Bell,
-    details: [
-      { label: "Для кого:", value: "послуги за записом" },
-      { label: "Робить:", value: "нагадує дату, час і деталі" },
-      { label: "Результат:", value: "менше ручних дзвінків" },
-    ],
-  },
-  {
-    title: "Уточнення замовлення",
-    icon: ShoppingCart,
-    details: [
-      { label: "Для кого:", value: "інтернет-магазини" },
-      { label: "Питає:", value: "товар, адресу, доставку" },
-      { label: "Результат:", value: "замовлення готове до обробки" },
-    ],
-  },
-  {
-    title: "Кваліфікація ліда",
-    icon: Trophy,
-    details: [
-      { label: "Для кого:", value: "заявки з реклами" },
-      { label: "Питає:", value: "потребу, бюджет, термін" },
-      { label: "Результат:", value: "тепла заявка для менеджера" },
-    ],
-  },
-  {
-    title: "Повторний дзвінок",
-    icon: PhoneCall,
-    details: [
-      { label: "Для кого:", value: "клієнти з бази" },
-      { label: "Робить:", value: "пропонує запис або послугу" },
-      { label: "Результат:", value: "статус і наступна дія" },
-    ],
-  },
-  {
-    title: "Власний сценарій",
-    icon: Settings,
-    details: [
-      { label: "Для кого:", value: "нестандартні процеси" },
-      { label: "Робить:", value: "говорить вашими фразами" },
-      { label: "Результат:", value: "сценарій під конкретний бізнес" },
-    ],
-  },
-] as const satisfies readonly Scenario[];
+import { scenarios } from "@/lib/mock-data";
 
 export function ScenariosSection() {
   return (
@@ -74,7 +10,8 @@ export function ScenariosSection() {
       <div className="mx-auto max-w-7xl">
         <h2 className="mb-4 text-3xl font-bold sm:text-4xl md:text-5xl">
           <span className="text-primary">Дзвінки,</span>{" "}
-          <span className="text-foreground">які агент може забрати одразу</span>
+          <span className="text-foreground">які агент</span> <br />
+          <span className="text-foreground">може забрати одразу</span>
         </h2>
 
         <p className="text-foreground mb-12 max-w-lg text-base tracking-wide md:text-lg">
@@ -88,13 +25,12 @@ export function ScenariosSection() {
           ))}
         </div>
 
-        <div className="flex flex-col items-center gap-6">
-          <p className="text-muted-foreground max-w-sm text-center text-base">
-            Почніть з готового сценарію, фрази можна{" "}
-            <span className="font-medium">змінити під ваш бізнес.</span>
-          </p>
-
-          <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:justify-end">
+        <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-end sm:justify-end md:gap-10">
+          <div className="flex w-full flex-col gap-4 md:w-fit">
+            <p className="text-muted-foreground max-w-sm text-center text-base md:text-start">
+              Почніть з готового сценарію, фрази <br />
+              <span className="font-medium">можна змінити під ваш бізнес.</span>
+            </p>
             <Button
               asChild
               size="lg"
@@ -105,19 +41,19 @@ export function ScenariosSection() {
                 <ArrowUpRight className="ml-2 size-4" aria-hidden="true" />
               </Link>
             </Button>
-
-            <Button
-              asChild
-              variant="ghost"
-              size="lg"
-              className="border-foreground text-foreground hover:bg-foreground/5 font-body h-12 w-full rounded-3xl border bg-transparent px-8 text-lg font-normal sm:w-auto"
-            >
-              <Link href="/sign-up">
-                Створити власний сценарій
-                <ArrowUpRight className="ml-2 size-4" aria-hidden="true" />
-              </Link>
-            </Button>
           </div>
+
+          <Button
+            asChild
+            variant="ghost"
+            size="lg"
+            className="border-foreground text-foreground hover:bg-foreground/5 font-body h-12 w-full rounded-3xl border bg-transparent px-8 text-lg font-normal sm:w-auto"
+          >
+            <Link href="/sign-up">
+              Створити власний сценарій
+              <ArrowUpRight className="ml-2 size-4" aria-hidden="true" />
+            </Link>
+          </Button>
         </div>
       </div>
     </section>
@@ -133,9 +69,9 @@ function ScenarioCard({ scenario, alignRight }: ScenarioCardProps) {
   const Icon = scenario.icon;
 
   return (
-    <div className={`relative pt-4 sm:pl-4 ${alignRight ? "pr-4 sm:pr-0" : "pl-4"}`}>
+    <div className={`relative pt-4 sm:pl-4 ${alignRight ? "pr-20 sm:pr-0" : "pl-20 sm:pl-0"}`}>
       <div
-        className={`bg-primary shadow-primary/30 absolute top-0 z-10 flex size-14 items-center justify-center rounded-full shadow-lg sm:left-0 ${alignRight ? "right-0 sm:right-auto" : "left-0"}`}
+        className={`bg-primary shadow-primary/30 absolute top-0 z-10 flex size-14 items-center justify-center rounded-full shadow-lg sm:left-0 ${alignRight ? "right-15 sm:right-auto" : "left-15"}`}
         aria-hidden="true"
       >
         {Icon && <Icon className="size-6 text-white" />}

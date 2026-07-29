@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Howl } from "howler";
-import { ChevronLeft, ChevronRight, Square } from "lucide-react";
+import { ChevronLeft, ChevronRight, Square, Play } from "lucide-react";
 import {
   Carousel,
   type CarouselApi,
@@ -13,47 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { DemoCard } from "@/types";
-
-const demos: readonly DemoCard[] = [
-  {
-    id: "delivery",
-    category: "Служба доставки",
-    description: "Підтвердження доставки",
-    scenario: "Агент підтверджує адресу, зручний час отримання та фіксує статус для оператора",
-    result: "Результат:",
-    resultBold: "доставку підтверджено",
-    src: "/audio/audio.ogg",
-  },
-  {
-    id: "logistics",
-    category: "Логістика",
-    description: "Уточнення заявки на перевезення",
-    scenario:
-      "Агент дзвонить клієнту, уточнює маршрут, тип вантажу, дату відправки та передає заявку менеджеру",
-    result: "Результат:",
-    resultBold: "заявку уточнено",
-    src: "/audio/audio.ogg",
-  },
-  {
-    id: "warehouse",
-    category: "Склад / B2B-постачання",
-    description: "Уточнення замовлення",
-    scenario:
-      "Агент перевіряє позиції в замовленні, кількість, дату відвантаження та передає зміни в кабінет",
-    result: "Результат:",
-    resultBold: "замовлення оновлено",
-    src: "/audio/audio.ogg",
-  },
-  {
-    id: "service",
-    category: "Сервісна компанія",
-    description: "Запис на виїзд спеціаліста",
-    scenario: "Агент уточнює проблему, адресу, зручний час візиту та створює заявку для майстра",
-    result: "Результат:",
-    resultBold: "візит заплановано",
-    src: "/audio/audio.ogg",
-  },
-] as const;
+import { demos } from "@/lib/mock-data";
 
 export function AudioDemoSection() {
   const [playing, setPlaying] = useState<string | null>(null);
@@ -150,7 +110,7 @@ export function AudioDemoSection() {
   return (
     <section id="audio-demo" className="relative overflow-hidden px-4 py-20 md:px-8">
       <div
-        className="pointer-events-none absolute top-1/8 left-0 hidden -translate-y-1/8 opacity-50 lg:block"
+        className="pointer-events-none absolute top-1/10 left-0 hidden -translate-y-1/10 opacity-50 lg:block"
         aria-hidden="true"
       >
         <Image src="/image/audio-demo-waveform.jpg" alt="" width={400} height={200} />
@@ -179,7 +139,7 @@ export function AudioDemoSection() {
         <button
           onClick={scrollPrev}
           aria-label="Попередній слайд"
-          className="focus-visible:ring-primary absolute top-1/2 -left-12 z-10 hidden size-11 -translate-y-1/2 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none md:flex"
+          className="focus-visible:ring-primary absolute top-1/2 -left-12 z-10 hidden size-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none md:flex"
         >
           <ChevronLeft className="size-8 text-gray-400" aria-hidden="true" />
         </button>
@@ -187,7 +147,7 @@ export function AudioDemoSection() {
         <button
           onClick={scrollNext}
           aria-label="Наступний слайд"
-          className="focus-visible:ring-primary absolute top-1/2 -right-12 z-10 hidden size-11 -translate-y-1/2 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none md:flex"
+          className="focus-visible:ring-primary absolute top-1/2 -right-12 z-10 hidden size-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none md:flex"
         >
           <ChevronRight className="size-8 text-gray-400" aria-hidden="true" />
         </button>
@@ -238,23 +198,6 @@ export function AudioDemoSection() {
             })}
           </CarouselContent>
         </Carousel>
-
-        <div className="mt-4 flex items-center justify-between px-2 md:hidden">
-          <button
-            onClick={scrollPrev}
-            aria-label="Попередній слайд"
-            className="focus-visible:ring-primary flex size-11 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-          >
-            <ChevronLeft className="size-6 text-gray-400" aria-hidden="true" />
-          </button>
-          <button
-            onClick={scrollNext}
-            aria-label="Наступний слайд"
-            className="focus-visible:ring-primary flex size-11 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-          >
-            <ChevronRight className="size-6 text-gray-400" aria-hidden="true" />
-          </button>
-        </div>
       </div>
 
       <div className="mt-8 flex items-center justify-center gap-4">
@@ -263,7 +206,7 @@ export function AudioDemoSection() {
             key={demo.id}
             onClick={() => handleSlideClick(index)}
             aria-label={`Слайд ${index + 1}`}
-            className="focus-visible:ring-primary flex size-11 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none md:size-auto"
+            className="focus-visible:ring-primary flex size-5 cursor-pointer items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
           >
             <span
               className={cn(
@@ -288,7 +231,7 @@ interface DemoPlayerCardProps {
 function DemoPlayerCard({ demo, isPlaying, hasError, onTogglePlay }: DemoPlayerCardProps) {
   return (
     <div className="border-border bg-card-glass flex h-full flex-col rounded-2xl border p-6 backdrop-blur-lg">
-      <div className="bg-primary text-primary-foreground mb-4 inline-flex h-9 w-fit items-center justify-center rounded-full px-7 text-base font-semibold">
+      <div className="bg-primary text-primary-foreground mb-4 inline-flex h-9 w-fit min-w-3xs items-center justify-center rounded-full px-7 text-base font-semibold">
         {demo.category}
       </div>
 
@@ -298,10 +241,7 @@ function DemoPlayerCard({ demo, isPlaying, hasError, onTogglePlay }: DemoPlayerC
         <Button
           variant="ghost"
           size="icon"
-          onClick={(e) => {
-            e.stopPropagation();
-            onTogglePlay();
-          }}
+          onClick={onTogglePlay}
           aria-label={isPlaying ? `Зупинити ${demo.category}` : `Грати ${demo.category}`}
           className="size-11 shrink-0"
           disabled={hasError}
@@ -314,7 +254,12 @@ function DemoPlayerCard({ demo, isPlaying, hasError, onTogglePlay }: DemoPlayerC
               />
             </div>
           ) : (
-            <Image src="/image/audio-play.svg" alt="" width={42} height={42} aria-hidden="true" />
+            <div className="bg-primary flex size-9 items-center justify-center rounded-full">
+              <Play
+                className="fill-primary-foreground text-primary-foreground size-3.5"
+                aria-hidden="true"
+              />
+            </div>
           )}
         </Button>
         <Image
@@ -322,7 +267,7 @@ function DemoPlayerCard({ demo, isPlaying, hasError, onTogglePlay }: DemoPlayerC
           alt=""
           width={200}
           height={32}
-          className="h-10 flex-1"
+          className="h-12 flex-1"
           aria-hidden="true"
         />
       </div>

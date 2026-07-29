@@ -1,65 +1,19 @@
 import { Play, RefreshCw } from "lucide-react";
-
-const callLogs = [
-  {
-    id: "1",
-    customer: "Олена К.",
-    time: "10:24",
-    status: "Підтверджено",
-    statusVariant: "green" as const,
-    summary: "Буде завтра о 14:00",
-    duration: "1:02",
-    crm: "Оновлено",
-    crmSynced: true,
-  },
-  {
-    id: "2",
-    customer: "Ігор М.",
-    time: "10:31",
-    status: "Перенесено",
-    statusVariant: "yellow" as const,
-    summary: "Пʼятниця, 17:30",
-    duration: "1:45",
-    crm: "Оновлено",
-    crmSynced: true,
-  },
-  {
-    id: "3",
-    customer: "Світлана Т.",
-    time: "10:38",
-    status: "Не відповіла",
-    statusVariant: "red" as const,
-    summary: "Повторний дзвінок заплановано",
-    duration: "0:15",
-    crm: "Очікує",
-    crmSynced: false,
-  },
-  {
-    id: "4",
-    customer: "Андрій В.",
-    time: "10:45",
-    status: "Нова заявка",
-    statusVariant: "green" as const,
-    summary: "Хоче запис на ТО в суботу",
-    duration: "2:55",
-    crm: "Оновлено",
-    crmSynced: true,
-  },
-] as const;
+import { callLogs } from "@/lib/mock-data";
 
 const statusStyles = {
-  green: "bg-green-100 text-green-800",
-  yellow: "bg-yellow-100 text-yellow-800",
-  red: "bg-red-100 text-red-800",
+  success: "bg-green-100 text-green-800",
+  secondary: "bg-yellow-100 text-yellow-800",
+  warning: "bg-red-100 text-red-800",
 } as const;
 
 export function CallLogsSection() {
   return (
     <section className="relative overflow-hidden py-20">
-      <div className="relative mx-auto max-w-5xl px-6">
+      <div className="relative mx-auto max-w-7xl px-6">
         <div className="mb-10 text-center">
-          <h2 className="font-display mb-4 text-3xl leading-tight sm:text-4xl md:text-5xl">
-            <span className="text-primary">Повний контроль</span>{" "}
+          <h2 className="font-display mb-4 text-3xl sm:text-4xl md:text-5xl">
+            <span className="text-primary">Повний контроль</span> <br />
             <span className="text-foreground">після кожного дзвінка</span>
           </h2>
           <p className="text-foreground mx-auto max-w-lg text-base md:text-lg">
@@ -68,7 +22,7 @@ export function CallLogsSection() {
         </div>
 
         <div
-          className="bg-primary/30 pointer-events-none absolute -top-10 -right-20 size-72 rounded-full blur-3xl"
+          className="bg-primary/80 pointer-events-none absolute top-20 -right-20 -z-20 size-72 rounded-full blur-2xl"
           aria-hidden="true"
         />
 

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Check, BarChart3 } from "lucide-react";
+import { Check, BarChart3, Headphones, User } from "lucide-react";
 
 const checklist = [
   "Розпізнає нестандартні запити",
@@ -24,8 +24,8 @@ interface HandoffCardProps {
 function HandoffCard({ icon, title, description }: HandoffCardProps) {
   return (
     <div className="border-border bg-card-glass w-full max-w-sm rounded-2xl border p-5 backdrop-blur-sm">
-      <div className="flex items-start gap-4">
-        <div className="bg-primary/10 flex size-12 shrink-0 items-center justify-center rounded-full">
+      <div className="flex items-center gap-4">
+        <div className="bg-primary/10 shadow-primary/30 flex size-12 shrink-0 items-center justify-center rounded-full shadow-lg">
           {icon}
         </div>
         <div>
@@ -54,7 +54,7 @@ export function HandoffSection() {
         </p>
 
         <h2 className="font-display mb-6 max-w-4xl text-3xl sm:text-4xl md:text-5xl lg:text-left">
-          <span className="text-foreground">Складні питання </span>
+          <span className="text-foreground">Складні питання</span> <br />
           <span className="text-primary">переходять до менеджера</span>
         </h2>
 
@@ -77,16 +77,7 @@ export function HandoffSection() {
 
           <div className="flex flex-col items-center gap-0 lg:items-end">
             <HandoffCard
-              icon={
-                <Image
-                  src="/image/handoff-headphone.svg"
-                  alt=""
-                  width={24}
-                  height={24}
-                  className="size-6"
-                  aria-hidden="true"
-                />
-              }
+              icon={<Headphones className="text-primary size-6" aria-hidden="true" />}
               title="ШI-агент"
               description={"\u201CЦе питання краще вирішить менеджер. Зараз зʼєднаю вас.\u201D"}
             />
@@ -94,16 +85,7 @@ export function HandoffSection() {
             <DashedConnector />
 
             <HandoffCard
-              icon={
-                <Image
-                  src="/image/handoff-union.svg"
-                  alt=""
-                  width={24}
-                  height={24}
-                  className="size-6"
-                  aria-hidden="true"
-                />
-              }
+              icon={<User className="text-primary size-6" aria-hidden="true" />}
               title="Менеджер"
               description="Отримує дзвінок, підсумок і причину передачі."
             />

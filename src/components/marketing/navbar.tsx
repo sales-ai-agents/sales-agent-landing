@@ -30,7 +30,7 @@ export function Navbar() {
             </a>
           ))}
           <Button asChild className="rounded-2xl px-5 text-lg">
-            <Link href="/sign-up">Реєстрація</Link>
+            <Link href="/">Реєстрація</Link>
           </Button>
         </div>
       </nav>
@@ -48,7 +48,7 @@ export function MobileNavbar() {
 
         <div className="flex items-center gap-3">
           <Button asChild size="sm" className="min-h-11 rounded-full px-4 text-sm">
-            <Link href="/sign-up">Реєстрація</Link>
+            <Link href="/">Реєстрація</Link>
           </Button>
           <Sheet>
             <SheetTrigger asChild>

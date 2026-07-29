@@ -46,7 +46,7 @@ const integrations: readonly (Integration & { icon: React.ReactNode })[] = [
 
 export function IntegrationsSection() {
   return (
-    <section id="integrations" className="py-20">
+    <section id="integrations" className="pt-20">
       <div className="mx-auto max-w-7xl px-6">
         <div className="mb-12 text-center">
           <h2 className="font-display mx-auto max-w-3xl text-3xl sm:text-4xl md:text-5xl">
@@ -115,7 +115,7 @@ export function IntegrationsSection() {
           </div>
         </div>
 
-        <div className="bg-border mt-12 h-px w-full" aria-hidden="true" />
+        <div className="bg-border mt-20 h-px w-full" aria-hidden="true" />
       </div>
     </section>
   );
