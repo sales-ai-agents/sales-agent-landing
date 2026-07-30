@@ -26,33 +26,37 @@ export function HowItWorksSection() {
                 index % 2 === 0 ? "pr-20 sm:pr-0" : "pl-20 sm:pl-0"
               )}
             >
-              <div className="flex w-full flex-col md:w-64">
-                <h3 className="text-foreground mb-6 text-xl font-semibold">{step.title}</h3>
+              <div className="flex flex-col">
+                <h3 className="text-foreground font-body text-md mb-6 font-semibold md:text-lg">
+                  {step.title}
+                </h3>
 
                 <div className="relative">
                   <span
-                    className="font-display text-foreground/5 pointer-events-none absolute -top-8 left-0 text-8xl font-semibold tracking-wide uppercase"
+                    className="font-gilroy pointer-events-none absolute -top-10 left-0 text-8xl leading-tight font-semibold tracking-wide text-transparent uppercase [-webkit-text-stroke-color:#E6E6E6] [-webkit-text-stroke-width:2px]"
                     aria-hidden="true"
                   >
                     {step.number}
                   </span>
 
-                  <div className="border-border bg-card-glass relative flex h-32 flex-col justify-between rounded-2xl border p-4 backdrop-blur-sm">
+                  <div className="border-border bg-card-glass relative flex flex-col justify-between rounded-2xl border pt-4 pr-2 pl-4 backdrop-blur-sm">
                     <p className="text-foreground text-base">{step.description}</p>
                     <div className="flex justify-end">
-                      <span className="text-primary text-xl font-semibold">{step.number}</span>
+                      <span className="font-gilroy text-primary text-2xl font-semibold">
+                        {step.number}
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
 
               {index < steps.length - 1 && (
-                <div className="shrink-0 self-end pb-4" aria-hidden="true">
+                <div className="shrink-0 self-end" aria-hidden="true">
                   <Image
                     src="/image/how-arrow.svg"
                     alt=""
-                    width={31}
-                    height={37}
+                    width={30}
+                    height={40}
                     className="pointer-events-none"
                   />
                 </div>

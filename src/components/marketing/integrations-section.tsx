@@ -4,7 +4,7 @@ import type { Integration } from "@/types";
 const integrations: readonly (Integration & { icon: React.ReactNode })[] = [
   {
     title: "CRM",
-    icon: <Users className="text-foreground size-8" aria-hidden="true" />,
+    icon: <Users className="text-foreground size-4 md:size-8" aria-hidden="true" />,
     description: (
       <>
         Результат дзвінка потрапляє в <span className="font-medium">картку клієнта</span>: статус,
@@ -14,7 +14,7 @@ const integrations: readonly (Integration & { icon: React.ReactNode })[] = [
   },
   {
     title: "Google Sheets",
-    icon: <Sheet className="text-foreground size-8" aria-hidden="true" />,
+    icon: <Sheet className="text-foreground size-4 md:size-8" aria-hidden="true" />,
     description: (
       <>
         Журнал дзвінків оновлюється в <span className="font-medium">таблиці автоматично</span>:
@@ -24,7 +24,7 @@ const integrations: readonly (Integration & { icon: React.ReactNode })[] = [
   },
   {
     title: "CSV",
-    icon: <FileSpreadsheet className="text-foreground size-8" aria-hidden="true" />,
+    icon: <FileSpreadsheet className="text-foreground size-4 md:size-8" aria-hidden="true" />,
     description: (
       <>
         Завантажуйте базу контактів і вивантажуйте{" "}
@@ -34,7 +34,7 @@ const integrations: readonly (Integration & { icon: React.ReactNode })[] = [
   },
   {
     title: "Webhooks",
-    icon: <Code className="text-foreground size-8" aria-hidden="true" />,
+    icon: <Code className="text-foreground size-4 md:size-8" aria-hidden="true" />,
     description: (
       <>
         Передавайте події після дзвінка у <span className="font-medium">вашу систему</span>: CRM,
@@ -76,8 +76,8 @@ export function IntegrationsSection() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:hidden">
-          <div className="flex flex-col gap-4 sm:mt-10">
+        <div className="grid grid-cols-2 gap-4 lg:hidden">
+          <div className="mt-10 flex flex-col gap-4">
             {integrations
               .filter((_, i) => i % 2 === 0)
               .map((integration) => (
@@ -86,7 +86,7 @@ export function IntegrationsSection() {
                   className="border-border bg-card-glass rounded-2xl border p-4 backdrop-blur-sm"
                 >
                   <div className="mb-3">{integration.icon}</div>
-                  <h3 className="text-foreground mb-2 text-xl font-semibold">
+                  <h3 className="text-foreground mb-2 text-sm font-semibold md:text-xl">
                     {integration.title}
                   </h3>
                   <p className="text-foreground text-sm leading-relaxed tracking-wide">
@@ -104,7 +104,7 @@ export function IntegrationsSection() {
                   className="border-border bg-card-glass rounded-2xl border p-4 backdrop-blur-sm"
                 >
                   <div className="mb-3">{integration.icon}</div>
-                  <h3 className="text-foreground mb-2 text-xl font-semibold">
+                  <h3 className="text-foreground mb-2 text-sm font-semibold md:text-xl">
                     {integration.title}
                   </h3>
                   <p className="text-foreground text-sm leading-relaxed tracking-wide">

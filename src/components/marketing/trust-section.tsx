@@ -56,7 +56,7 @@ export function TrustSection() {
         </p>
 
         <div className="relative">
-          <div className="hidden lg:grid lg:grid-cols-4 lg:gap-8">
+          <div className="hidden md:grid md:grid-cols-4 md:gap-8">
             {trustItems.map((item, index) => (
               <div key={item.title} className="relative flex flex-col items-start">
                 {index < trustItems.length - 1 && (
@@ -68,32 +68,36 @@ export function TrustSection() {
                 <div className="bg-primary relative z-10 mb-6 flex size-16 items-center justify-center rounded-full">
                   <Image src={item.icon} alt="" width={32} height={32} aria-hidden="true" />
                 </div>
-                <h3 className="text-foreground mb-2 text-xl font-semibold">{item.title}</h3>
+                <h3 className="text-foreground font-body mb-2 text-lg font-semibold">
+                  {item.title}
+                </h3>
                 <p className="text-foreground text-base">{item.description}</p>
               </div>
             ))}
           </div>
 
-          <div className="flex flex-col gap-4 lg:hidden">
+          <div className="flex flex-col gap-4 md:hidden">
             {trustItems.map((item, index) => (
               <div
                 key={item.title}
                 className={cn(
                   "flex flex-col",
-                  index % 2 === 0 ? "items-start" : "items-end text-right"
+                  index % 2 === 0 ? "items-start" : "items-end text-left"
                 )}
               >
-                <div className="bg-primary mb-4 flex size-14 items-center justify-center rounded-full">
-                  <Image src={item.icon} alt="" width={28} height={28} aria-hidden="true" />
+                <div className="flex flex-col gap-2">
+                  <div className="bg-primary flex size-14 items-center justify-center rounded-full">
+                    <Image src={item.icon} alt="" width={28} height={28} aria-hidden="true" />
+                  </div>
+                  <h3 className="text-foreground font-body text-lg font-semibold">{item.title}</h3>
+                  <p className="text-foreground max-w-xs text-base">{item.description}</p>
                 </div>
-                <h3 className="text-foreground mb-2 text-xl font-semibold">{item.title}</h3>
-                <p className="text-foreground max-w-xs text-base">{item.description}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="mt-16 hidden items-center justify-between pt-8 lg:flex">
+        <div className="mt-16 hidden items-center justify-between pt-8 md:flex">
           {complianceIndicators.map(({ icon: Icon, label }) => (
             <div key={label} className="flex items-center gap-3">
               <Icon className="text-primary size-5" aria-hidden="true" />
@@ -102,8 +106,8 @@ export function TrustSection() {
           ))}
         </div>
 
-        <div className="mt-12 scrollbar-none overflow-x-auto pt-6 lg:hidden">
-          <div className="flex w-max gap-6">
+        <div className="shadow-primary/30 -mx-6 w-screen scrollbar-none overflow-x-auto bg-white pt-12 shadow-md md:hidden">
+          <div className="flex w-max gap-6 p-2 px-6">
             {complianceIndicators.map(({ icon: Icon, label }) => (
               <div key={label} className="flex shrink-0 items-center gap-2">
                 <Icon className="text-primary size-4" aria-hidden="true" />

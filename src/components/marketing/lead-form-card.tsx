@@ -7,8 +7,10 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLeadForm } from "@/hooks/use-lead-form";
+import { formatUaPhoneDigits } from "@/lib/utils";
 
 const TELEGRAM_LINK = "https://t.me/calls4u_ai";
+const UA_SUBSCRIBER_DIGITS = 9;
 
 interface LeadFormModalProps {
   open: boolean;
@@ -26,15 +28,21 @@ export function LeadFormModal({ open, onClose, sourcePage }: LeadFormModalProps)
 
   function handleSubmit(e: React.FormEvent): void {
     e.preventDefault();
-    if (!name.trim() || !phone.trim()) return;
+    if (!name.trim() || phone.length !== UA_SUBSCRIBER_DIGITS) return;
 
     submitLead({
       name: name.trim(),
-      phone: phone.trim(),
+      phone: `+380${phone}`,
       niche: niche.trim() || undefined,
       contact: contact.trim() || undefined,
       source_page: sourcePage,
     });
+  }
+
+  function handlePhoneChange(e: React.ChangeEvent<HTMLInputElement>): void {
+    const raw = e.target.value.replace(/\D/g, "").slice(0, UA_SUBSCRIBER_DIGITS);
+    setPhone(raw);
+    if (errorMessage) reset();
   }
 
   function handleChange(setter: (v: string) => void) {
@@ -134,17 +142,23 @@ export function LeadFormModal({ open, onClose, sourcePage }: LeadFormModalProps)
                 aria-label="Ім'я"
                 className="text-foreground border-primary h-auto rounded-none border-0 border-b bg-transparent px-0 py-2 text-lg font-normal shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
               />
-              <Input
-                placeholder="Номер телефону"
-                type="tel"
-                value={phone}
-                onChange={handleChange(setPhone)}
-                required
-                disabled={isLoading}
-                maxLength={500}
-                aria-label="Номер телефону"
-                className="text-foreground border-primary h-auto rounded-none border-0 border-b bg-transparent px-0 py-2 text-lg font-normal shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
-              />
+              <div className="border-primary flex items-center border-0 border-b">
+                <span className="text-foreground shrink-0 py-2 text-lg font-normal">
+                  +380&nbsp;
+                </span>
+                <Input
+                  placeholder="___ ___ ___"
+                  type="tel"
+                  inputMode="numeric"
+                  value={phone.length > 0 ? formatUaPhoneDigits(phone) : ""}
+                  onChange={handlePhoneChange}
+                  required
+                  disabled={isLoading}
+                  maxLength={11}
+                  aria-label="Номер телефону після +380"
+                  className="text-foreground h-auto rounded-none border-0 bg-transparent px-0 py-2 text-lg font-normal shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                />
+              </div>
               <Input
                 placeholder="Сфера діяльності / Ніша"
                 value={niche}
@@ -172,8 +186,8 @@ export function LeadFormModal({ open, onClose, sourcePage }: LeadFormModalProps)
 
               <Button
                 type="submit"
-                disabled={isLoading || !name.trim() || !phone.trim()}
-                className="bg-primary hover:bg-primary/90 rounded-6 shadow-primary/30 mt-8 h-12 w-full text-lg font-medium text-white disabled:opacity-50"
+                disabled={isLoading || !name.trim() || phone.length !== UA_SUBSCRIBER_DIGITS}
+                className="bg-primary hover:bg-primary/90 shadow-primary/30 mt-8 h-12 w-full rounded-full text-lg font-medium text-white disabled:opacity-50"
               >
                 {isLoading ? "Надсилаємо…" : "Отримати розрахунок"}
               </Button>

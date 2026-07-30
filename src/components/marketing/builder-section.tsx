@@ -1,32 +1,16 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
-import { Check, Headphones, UserRound } from "lucide-react";
+import { Check, Headset, UserRound, Venus } from "lucide-react";
 
 import { useWebAgent } from "@/hooks/use-web-agent";
+import { usePresets } from "@/hooks/use-presets";
+import { useBuilderForm, VOICE_OPTIONS } from "@/hooks/use-builder-form";
 import { LiveCallPanel } from "@/components/marketing/live-call-panel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
-const VOICE_OPTIONS = ["Жіночий", "Чоловічий"] as const;
-type VoiceOption = (typeof VOICE_OPTIONS)[number];
-
-const ROLE_OPTIONS = ["Адміністратор", "Логіст", "Замовлення"] as const;
-type RoleOption = (typeof ROLE_OPTIONS)[number];
-
-const SCENARIO_MAP: Record<RoleOption, string> = {
-  Адміністратор: "Агент нагадає про запис, запитає підтвердження та передасть відповідь менеджеру",
-  Логіст:
-    "Агент уточнить маршрут, тип вантажу, дату, контактну особу та передасть заявку менеджеру",
-  Замовлення:
-    "Агент підтвердить адресу, час отримання, контактний номер і зафіксує результат дзвінка",
-} as const;
-
-const VOICE_API_MAP: Record<VoiceOption, string> = {
-  Жіночий: "жіночий",
-  Чоловічий: "чоловічий",
-} as const;
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
 const CHECKLIST_ITEMS = [
   "Голос: жіночий або чоловічий",
@@ -36,30 +20,18 @@ const CHECKLIST_ITEMS = [
   "Тестовий дзвінок перед запуском",
 ] as const;
 
-function ChecklistIcon() {
-  return (
-    <div className="from-primary flex size-7 shrink-0 items-center justify-center rounded-full bg-linear-to-br to-sky-200">
-      <Check className="size-3.5 text-black/70" strokeWidth={3} />
-    </div>
-  );
-}
-
 export function BuilderSection() {
-  const [name, setName] = useState("Марія");
-  const [voice, setVoice] = useState<VoiceOption>("Жіночий");
-  const [role, setRole] = useState<RoleOption>("Логіст");
-
+  const { presets, isLoading: presetsLoading } = usePresets();
   const { startAgent, isLoading, isSuccess, session, errorMessage, reset } = useWebAgent();
-
-  const scenario = SCENARIO_MAP[role];
-  const isNameEmpty = name.trim().length === 0;
+  const form = useBuilderForm(presets);
 
   function handleStart(): void {
-    if (isNameEmpty) return;
+    if (!form.isValid) return;
     startAgent({
-      instruction: scenario,
-      voice: VOICE_API_MAP[voice],
-      agent_name: name,
+      instruction: form.instruction,
+      voice: form.voiceApiValue,
+      agent_name: form.name,
+      ...(form.activePreset ? { preset: form.activePreset.id } : {}),
     });
   }
 
@@ -69,9 +41,13 @@ export function BuilderSection() {
         <Image
           src="/image/builder-line.svg"
           alt=""
-          width={1400}
-          height={600}
-          className="absolute top-1/2 left-0 h-auto w-full -translate-y-1/2 opacity-60"
+          fill
+          priority
+          className="absolute top-1/2! left-0 -z-20 w-full -translate-y-1/2! object-cover"
+        />
+        <div
+          className="bg-primary/80 pointer-events-none absolute top-0 -right-40 -z-20 size-72 rounded-full blur-2xl"
+          aria-hidden="true"
         />
       </div>
 
@@ -90,9 +66,15 @@ export function BuilderSection() {
 
             <ul className="space-y-5">
               {CHECKLIST_ITEMS.map((item) => (
-                <li key={item} className="flex items-center gap-4">
-                  <ChecklistIcon />
-                  <span className="text-muted-foreground text-lg">{item}</span>
+                <li key={item} className="relative flex gap-4">
+                  <div
+                    className="bg-primary/80 pointer-events-none absolute top-1 left-4 -z-20 size-6 rounded-full blur-xs"
+                    aria-hidden="true"
+                  />
+                  <div className="bg-card-glass flex size-8 shrink-0 items-center justify-center rounded-full border border-white">
+                    <Check className="size-4" strokeWidth={3} />
+                  </div>
+                  <span className="text-foreground text-left text-lg">{item}</span>
                 </li>
               ))}
             </ul>
@@ -106,7 +88,7 @@ export function BuilderSection() {
               </div>
             </div>
 
-            <div className="border-border shadow-primary/30 rounded-2xl border p-6 shadow-lg backdrop-blur-lg sm:p-8 md:p-10 lg:p-15">
+            <div className="border-border shadow-primary/30 rounded-2xl border p-6 shadow-lg backdrop-blur-lg sm:p-10">
               <h3 className="text-foreground font-body mb-6 text-xl font-semibold">
                 Налаштування агента
               </h3>
@@ -119,10 +101,10 @@ export function BuilderSection() {
                   <Input
                     id="agent-name"
                     type="text"
-                    value={name}
+                    value={form.name}
                     maxLength={50}
                     onChange={(e) => {
-                      setName(e.target.value);
+                      form.setName(e.target.value);
                       reset();
                     }}
                     className="border-input-border h-9 rounded-lg bg-white text-base"
@@ -136,18 +118,23 @@ export function BuilderSection() {
                       <button
                         key={option}
                         type="button"
-                        aria-pressed={voice === option}
+                        aria-pressed={form.voice === option}
                         onClick={() => {
-                          setVoice(option);
+                          form.setVoice(option);
                           reset();
                         }}
-                        className={`focus-visible:ring-primary flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border py-2 text-base transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none ${
-                          voice === option
+                        className={cn(
+                          "focus-visible:ring-primary flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border py-2 text-base transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+                          form.voice === option
                             ? "border-input-border shadow-primary/30 bg-white shadow-md"
                             : "border-input-border bg-white"
-                        }`}
+                        )}
                       >
-                        <UserRound className="size-4" aria-hidden="true" />
+                        {option === "Жіночий" ? (
+                          <Venus className="size-4" aria-hidden="true" />
+                        ) : (
+                          <UserRound className="size-4" aria-hidden="true" />
+                        )}
                         {option}
                       </button>
                     ))}
@@ -156,40 +143,72 @@ export function BuilderSection() {
 
                 <fieldset className="space-y-2">
                   <legend className="text-foreground text-base">Вибрати сценарій</legend>
-                  <div className="border-input-border flex min-h-25 items-start gap-3 rounded-2xl border bg-white px-4 py-3">
-                    <Headphones
-                      className="text-muted-foreground mt-0.5 size-5 shrink-0"
+
+                  <div className="relative">
+                    <Headset
+                      className="text-muted-foreground absolute top-6 left-4 size-8 shrink-0"
                       aria-hidden="true"
                     />
-                    <p className="text-foreground text-base" aria-live="polite">
-                      {scenario}
-                    </p>
+                    <Textarea
+                      id="agent-instruction"
+                      value={form.instruction}
+                      onChange={(e) => {
+                        form.updateInstruction(e.target.value);
+                        reset();
+                      }}
+                      placeholder="Опишіть, що має робити агент під час дзвінка…"
+                      className="border-input-border text-foreground placeholder:text-muted-foreground focus:ring-primary/30 max-h-20 w-full resize-none rounded-2xl border bg-white py-3 pr-4 pl-16 text-base focus:ring-2 focus:outline-none"
+                      aria-label="Інструкція для агента"
+                    />
                   </div>
 
-                  <div className="flex gap-3">
-                    {ROLE_OPTIONS.map((option) => (
-                      <button
-                        key={option}
-                        type="button"
-                        aria-pressed={role === option}
-                        onClick={() => {
-                          setRole(option);
-                          reset();
-                        }}
-                        className={`focus-visible:ring-primary flex-1 cursor-pointer rounded-lg border px-3 py-2 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none ${
-                          role === option
-                            ? "border-primary bg-primary text-white"
-                            : "border-primary text-foreground bg-white"
-                        }`}
-                      >
-                        {option}
-                      </button>
-                    ))}
-                  </div>
+                  {presetsLoading ? (
+                    <div className="flex gap-3">
+                      {[1, 2, 3].map((i) => (
+                        <div
+                          key={i}
+                          className="border-input-border h-10 flex-1 animate-pulse rounded-lg border bg-gray-100"
+                        />
+                      ))}
+                    </div>
+                  ) : presets.length > 0 ? (
+                    <div className="mt-4 space-y-2">
+                      <div className="flex flex-wrap gap-3">
+                        {presets.map((preset) => {
+                          const isActive = form.activePreset?.id === preset.id;
+                          return (
+                            <button
+                              key={preset.id}
+                              type="button"
+                              aria-pressed={isActive}
+                              onClick={() => {
+                                form.selectPreset(preset);
+                                reset();
+                              }}
+                              title={preset.description}
+                              className={cn(
+                                "focus-visible:ring-primary flex-1 cursor-pointer rounded-lg border px-3 py-2 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+                                isActive
+                                  ? "border-primary bg-primary text-white"
+                                  : "border-primary text-foreground bg-white"
+                              )}
+                            >
+                              {preset.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {form.activePreset && (
+                        <p className="text-muted-foreground text-sm">
+                          {form.activePreset.description}
+                        </p>
+                      )}
+                    </div>
+                  ) : null}
                 </fieldset>
 
                 {isSuccess && session ? (
-                  <LiveCallPanel session={session} agentName={name} />
+                  <LiveCallPanel session={session} agentName={form.name} />
                 ) : (
                   <>
                     {errorMessage && (
@@ -201,7 +220,7 @@ export function BuilderSection() {
                     <Button
                       type="button"
                       onClick={handleStart}
-                      disabled={isLoading || isNameEmpty}
+                      disabled={isLoading || !form.isValid}
                       className="bg-primary hover:bg-primary/90 h-10 w-full rounded-lg text-base text-white disabled:opacity-50"
                       size="lg"
                     >

@@ -16,7 +16,7 @@ export function formatUaPhoneDigits(digits: string): string {
   return `${cleaned.slice(0, 3)} ${cleaned.slice(3, 6)} ${cleaned.slice(6)}`;
 }
 
-// ── ROI Calculator Helpers ──────────────────────────────────────────────────
+// ROI Calculator Helpers
 
 export function calcHoursPerDay(inputs: CalculatorInputs): number {
   return Number(((inputs.callsPerDay * inputs.avgDuration) / 60).toFixed(1));
@@ -26,7 +26,7 @@ export function calcCostPerDay(inputs: CalculatorInputs): number {
   return Math.round(calcHoursPerDay(inputs) * inputs.hourlyRate);
 }
 
-// ── FAQ Schema Builder ──────────────────────────────────────────────────────
+// FAQ Schema Builder
 
 export function buildFaqPageSchema(faqs: readonly FaqEntry[]): object {
   return {

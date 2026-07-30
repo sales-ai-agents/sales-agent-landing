@@ -167,7 +167,7 @@ const CarouselPrevious = React.forwardRef<HTMLButtonElement, React.ComponentProp
         onClick={scrollPrev}
         {...props}
       >
-        <ChevronLeft className="h-4 w-4" />
+        <ChevronLeft className="size-6! text-gray-400" />
         <span className="sr-only">Previous slide</span>
       </Button>
     );
@@ -195,13 +195,67 @@ const CarouselNext = React.forwardRef<HTMLButtonElement, React.ComponentProps<ty
         onClick={scrollNext}
         {...props}
       >
-        <ChevronRight className="h-4 w-4" />
+        <ChevronRight className="size-6! text-gray-400" />
         <span className="sr-only">Next slide</span>
       </Button>
     );
   }
 );
 CarouselNext.displayName = "CarouselNext";
+
+const CarouselDots = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => {
+    const { api } = useCarousel();
+    const [selectedIndex, setSelectedIndex] = React.useState(() => api?.selectedScrollSnap() ?? 0);
+    const [scrollSnaps, setScrollSnaps] = React.useState<number[]>(
+      () => api?.scrollSnapList() ?? []
+    );
+
+    React.useEffect(() => {
+      if (!api) return;
+
+      const onSelect = () => {
+        setSelectedIndex(api.selectedScrollSnap());
+      };
+
+      const onReInit = () => {
+        setScrollSnaps(api.scrollSnapList());
+        setSelectedIndex(api.selectedScrollSnap());
+      };
+
+      api.on("select", onSelect);
+      api.on("reInit", onReInit);
+
+      return () => {
+        api.off("select", onSelect);
+        api.off("reInit", onReInit);
+      };
+    }, [api]);
+
+    if (scrollSnaps.length <= 1) return null;
+
+    return (
+      <div ref={ref} className={cn("flex items-center justify-center gap-4", className)} {...props}>
+        {scrollSnaps.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => api?.scrollTo(index)}
+            aria-label={`Слайд ${index + 1}`}
+            className="focus-visible:ring-primary flex size-5 cursor-pointer items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+          >
+            <span
+              className={cn(
+                "block size-3 rounded-full transition-colors",
+                selectedIndex === index ? "bg-primary" : "bg-gray-300"
+              )}
+            />
+          </button>
+        ))}
+      </div>
+    );
+  }
+);
+CarouselDots.displayName = "CarouselDots";
 
 export {
   type CarouselApi,
@@ -210,4 +264,5 @@ export {
   CarouselItem,
   CarouselPrevious,
   CarouselNext,
+  CarouselDots,
 };

@@ -27,6 +27,7 @@ export interface StartWebAgentParams {
   instruction: string;
   voice: string;
   agent_name: string;
+  preset?: string;
 }
 
 async function startWebAgent(params: StartWebAgentParams): Promise<WebAgentSession> {

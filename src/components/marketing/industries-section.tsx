@@ -5,6 +5,7 @@ import {
   CarouselItem,
   CarouselPrevious,
   CarouselNext,
+  CarouselDots,
 } from "@/components/ui/carousel";
 import type { IndustryCard } from "@/types";
 import { industries } from "@/lib/mock-data";
@@ -31,7 +32,7 @@ export function IndustriesSection() {
           }}
           aria-label="Галузі"
         >
-          <div className="mb-6 flex items-center justify-center gap-3">
+          <div className="flex items-center justify-end gap-3 sm:ml-auto sm:max-w-3xl sm:justify-center">
             <CarouselPrevious
               variant="ghost"
               className="static size-10 translate-y-0"
@@ -51,6 +52,8 @@ export function IndustriesSection() {
               </CarouselItem>
             ))}
           </CarouselContent>
+
+          <CarouselDots className="mt-1 flex sm:hidden" />
         </Carousel>
       </div>
     </section>

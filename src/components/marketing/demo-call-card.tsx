@@ -31,12 +31,12 @@ export default function DemoCallCard() {
 
   return (
     <div className="border-border shadow-primary/30 relative rounded-2xl border p-8 shadow-lg backdrop-blur-lg">
-      <div className="mb-4 flex items-center gap-5">
+      <div className="mb-4 flex items-center gap-6">
         <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-white shadow-sm">
           <Phone className="text-primary size-6" aria-hidden="true" />
         </div>
-        <div className="flex flex-col gap-2">
-          <p className="text-foreground max-w-xs text-lg leading-snug font-medium">
+        <div className="flex max-w-xs flex-col gap-2">
+          <p className="text-foreground text-lg font-medium">
             Протестуйте ШI-агента в реальному часі
           </p>
           <p className="text-lg font-light text-neutral-600">

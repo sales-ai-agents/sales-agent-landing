@@ -1,5 +1,6 @@
 import { Play, RefreshCw } from "lucide-react";
 import { callLogs } from "@/lib/mock-data";
+import Image from "next/image";
 
 const statusStyles = {
   success: "bg-green-100 text-green-800",
@@ -9,7 +10,7 @@ const statusStyles = {
 
 export function CallLogsSection() {
   return (
-    <section className="relative overflow-hidden py-20">
+    <section className="py-20">
       <div className="relative mx-auto max-w-7xl px-6">
         <div className="mb-10 text-center">
           <h2 className="font-display mb-4 text-3xl sm:text-4xl md:text-5xl">
@@ -22,46 +23,50 @@ export function CallLogsSection() {
         </div>
 
         <div
-          className="bg-primary/80 pointer-events-none absolute top-20 -right-20 -z-20 size-72 rounded-full blur-2xl"
+          className="bg-primary/80 pointer-events-none absolute -bottom-20 -left-20 -z-20 size-72 rounded-full blur-2xl sm:top-20 sm:-right-20 sm:bottom-auto sm:left-auto"
           aria-hidden="true"
         />
 
-        <div className="border-border relative overflow-hidden rounded-2xl border bg-white shadow-sm">
-          <div className="overflow-x-auto">
+        <div className="flex justify-end pb-2 sm:hidden">
+          <Image src="/image/table-pointer.svg" alt="" width={35} height={35} />
+        </div>
+
+        <div className="border-border relative rounded-2xl border bg-white shadow-sm">
+          <div className="scrollbar-none overflow-x-auto">
             <table className="w-full min-w-2xl text-left text-base">
-              <caption className="text-foreground px-6 pt-6 pb-4 text-left text-lg font-semibold">
+              <caption className="text-foreground px-4 pt-6 pb-4 text-left text-lg font-semibold">
                 Журнал дзвінків · Сьогодні
               </caption>
               <thead>
                 <tr className="border-border text-foreground border-b text-sm">
-                  <th className="px-6 py-3 font-normal">Клієнт</th>
-                  <th className="px-6 py-3 font-normal">Статус</th>
-                  <th className="px-6 py-3 font-normal">Підсумок дзвінка</th>
-                  <th className="px-6 py-3 font-normal">Аудіо</th>
-                  <th className="px-6 py-3 font-normal">CRM</th>
+                  <th className="px-4 py-2 font-normal">Клієнт</th>
+                  <th className="px-4 py-2 font-normal">Статус</th>
+                  <th className="px-4 py-2 font-normal">Підсумок дзвінка</th>
+                  <th className="px-4 py-2 font-normal">Аудіо</th>
+                  <th className="px-4 py-2 font-normal">CRM</th>
                 </tr>
               </thead>
               <tbody>
                 {callLogs.map((row) => (
-                  <tr key={row.id} className="border-b border-gray-100 last:border-0">
-                    <td className="text-foreground px-6 py-4 whitespace-nowrap">
+                  <tr key={row.id} className="border-border border-b last:border-0">
+                    <td className="text-foreground px-4 py-4 whitespace-nowrap">
                       {row.customer} <span className="text-foreground font-light">{row.time}</span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-2">
                       <span
                         className={`inline-block rounded-full px-3 py-0.5 text-sm font-medium ${statusStyles[row.statusVariant]}`}
                       >
                         {row.status}
                       </span>
                     </td>
-                    <td className="text-foreground px-6 py-4">{row.summary}</td>
-                    <td className="text-foreground px-6 py-4 whitespace-nowrap">
+                    <td className="text-foreground px-4 py-2">{row.summary}</td>
+                    <td className="text-foreground px-4 py-2 whitespace-nowrap">
                       <span className="inline-flex items-center gap-2">
                         <Play className="text-foreground size-3.5" aria-hidden="true" />
                         {row.duration}
                       </span>
                     </td>
-                    <td className="text-foreground px-6 py-4 whitespace-nowrap">
+                    <td className="text-foreground px-4 py-2 whitespace-nowrap">
                       <span className="inline-flex items-center gap-2">
                         <RefreshCw className="text-foreground size-3.5" aria-hidden="true" />
                         {row.crm}

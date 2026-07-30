@@ -26,6 +26,13 @@ const actayWideBold = localFont({
   fallback: ["Inter", "sans-serif"],
 });
 
+const gilroy = localFont({
+  src: "../fonts/Gilroy-SemiBold.woff",
+  variable: "--font-gilroy",
+  weight: "600",
+  fallback: ["Inter", "sans-serif"],
+});
+
 export const metadata: Metadata = {
   title: {
     default: "VoiceAgent — AI Phone Call Automation",
@@ -42,7 +49,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${actayWideBold.variable}`}
+      className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${actayWideBold.variable} ${gilroy.variable}`}
     >
       <body suppressHydrationWarning>
         <Providers>{children}</Providers>

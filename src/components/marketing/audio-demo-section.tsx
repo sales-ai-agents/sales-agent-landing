@@ -3,12 +3,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Howl } from "howler";
-import { ChevronLeft, ChevronRight, Square, Play } from "lucide-react";
+import { Square, Play } from "lucide-react";
 import {
   Carousel,
   type CarouselApi,
   CarouselContent,
+  CarouselDots,
   CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
 } from "@/components/ui/carousel";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -104,9 +107,6 @@ export function AudioDemoSection() {
     api.scrollTo(index);
   };
 
-  const scrollPrev = () => api?.scrollPrev();
-  const scrollNext = () => api?.scrollNext();
-
   return (
     <section id="audio-demo" className="relative overflow-hidden px-4 py-20 md:px-8">
       <div
@@ -130,28 +130,12 @@ export function AudioDemoSection() {
         <span className="text-foreground">агента</span>
       </h2>
 
-      <p className="text-muted-foreground mx-auto mb-16 max-w-lg text-center text-base font-normal md:text-lg">
+      <p className="text-muted-foreground mx-auto mb-6 max-w-lg text-center text-base font-normal md:text-lg">
         Послухайте, як агент підтверджує запис, ставить уточнюючі питання і фіксує результат дзвінка
         в кабінеті.
       </p>
 
       <div className="relative mx-auto max-w-6xl">
-        <button
-          onClick={scrollPrev}
-          aria-label="Попередній слайд"
-          className="focus-visible:ring-primary absolute top-1/2 -left-12 z-10 hidden size-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none md:flex"
-        >
-          <ChevronLeft className="size-8 text-gray-400" aria-hidden="true" />
-        </button>
-
-        <button
-          onClick={scrollNext}
-          aria-label="Наступний слайд"
-          className="focus-visible:ring-primary absolute top-1/2 -right-12 z-10 hidden size-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none md:flex"
-        >
-          <ChevronRight className="size-8 text-gray-400" aria-hidden="true" />
-        </button>
-
         <Carousel
           setApi={setApi}
           opts={{
@@ -162,12 +146,22 @@ export function AudioDemoSection() {
           }}
           aria-label="Демо дзвінки"
         >
+          <CarouselPrevious
+            variant="ghost"
+            className="absolute top-1/2 -left-5 z-10 size-11 -translate-y-1/2 sm:-left-12"
+            aria-label="Попередній слайд"
+          />
+          <CarouselNext
+            variant="ghost"
+            className="absolute top-1/2 -right-5 z-10 size-11 -translate-y-1/2 sm:-right-12"
+            aria-label="Наступний слайд"
+          />
           <CarouselContent>
             {demos.map((demo, index) => {
               const isCenter = selectedSnap === index;
 
               return (
-                <CarouselItem key={demo.id} className="p-2 sm:basis-1/2 lg:basis-1/3">
+                <CarouselItem key={demo.id} className="px-6 sm:basis-1/2 sm:p-2 lg:basis-1/3">
                   <div
                     role={!isCenter ? "button" : undefined}
                     tabIndex={!isCenter ? 0 : undefined}
@@ -197,25 +191,9 @@ export function AudioDemoSection() {
               );
             })}
           </CarouselContent>
-        </Carousel>
-      </div>
 
-      <div className="mt-8 flex items-center justify-center gap-4">
-        {demos.map((demo, index) => (
-          <button
-            key={demo.id}
-            onClick={() => handleSlideClick(index)}
-            aria-label={`Слайд ${index + 1}`}
-            className="focus-visible:ring-primary flex size-5 cursor-pointer items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-          >
-            <span
-              className={cn(
-                "block size-3 rounded-full transition-colors",
-                selectedSnap === index ? "bg-primary" : "bg-gray-300"
-              )}
-            />
-          </button>
-        ))}
+          <CarouselDots className="mt-1 flex sm:hidden" />
+        </Carousel>
       </div>
     </section>
   );

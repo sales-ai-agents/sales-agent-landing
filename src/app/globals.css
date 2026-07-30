@@ -1,4 +1,8 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-primary: #005bff;
@@ -12,6 +16,7 @@
   --color-slider-track: #d9d9d9;
   --font-body: var(--font-inter), sans-serif;
   --font-display: var(--font-display), sans-serif;
+  --font-gilroy: var(--font-gilroy), sans-serif;
 }
 
 @layer base {
