@@ -118,8 +118,8 @@ export function BuilderSection() {
                         className={cn(
                           "flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border py-2 text-base",
                           form.voice === option
-                            ? "border-input-border shadow-primary/30 shadow-md"
-                            : "border-input-border"
+                            ? "border-input-border shadow-primary/30 bg-white shadow-md"
+                            : "border-input-border bg-white"
                         )}
                       >
                         {option === "Жіночий" ? (

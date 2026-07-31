@@ -26,11 +26,24 @@ const gilroy = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.calls4u.ai"),
   title: {
     default: "calls4u — AI Phone Call Automation",
     template: "%s | calls4u",
   },
-  description: "Automate routine phone calls with AI voice agents. Built for small businesses.",
+  description:
+    "Automate routine phone calls with AI voice agents. Confirm appointments, remind clients, qualify leads — no developers needed.",
+  alternates: {
+    canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
 };
 
 export default function RootLayout({
