@@ -10,7 +10,7 @@ interface HandoffCardProps {
 
 function HandoffCard({ icon, title, description }: HandoffCardProps) {
   return (
-    <div className="border-border bg-card-glass w-full max-w-sm rounded-2xl border p-5 backdrop-blur-sm">
+    <div className="border-border bg-card-glass w-full max-w-sm rounded-2xl border p-5 shadow-md backdrop-blur-sm">
       <div className="flex items-center gap-4">
         <div className="relative flex items-center justify-center p-3">
           <div

@@ -87,7 +87,7 @@ function ScenarioCard({ scenario, alignRight, isLast }: ScenarioCardProps) {
 
       <div
         className={cn(
-          "border-border bg-card-glass h-full rounded-2xl border py-5 backdrop-blur-sm sm:pr-6 sm:pl-14",
+          "border-border bg-card-glass h-full rounded-2xl border py-5 shadow-md backdrop-blur-sm sm:pr-6 sm:pl-14",
           alignRight ? "pr-14 pl-6 sm:pr-6 sm:pl-14" : "pr-6 pl-14"
         )}
       >

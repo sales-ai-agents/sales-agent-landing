@@ -15,8 +15,18 @@
   --color-input-border: #afafaf;
   --color-slider-track: #d9d9d9;
   --font-body: var(--font-inter), sans-serif;
-  --font-display: var(--font-display), sans-serif;
-  --font-gilroy: var(--font-gilroy), sans-serif;
+  --font-display: var(--font-actay-wide), sans-serif;
+  --font-gilroy: var(--font-gilroy-face), sans-serif;
+  --animate-marquee: marquee 20s linear infinite;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 @layer base {

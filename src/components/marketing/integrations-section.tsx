@@ -11,7 +11,7 @@ function IntegrationCard({
   const Icon = integration.icon;
 
   return (
-    <div className="border-border bg-card-glass rounded-2xl border p-4 backdrop-blur-sm">
+    <div className="border-border bg-card-glass rounded-2xl border p-4 shadow-md backdrop-blur-sm">
       <div className="mb-3">
         <Icon
           className={cn("text-foreground", compact ? "size-4 md:size-8" : "size-4 md:size-8")}

@@ -39,7 +39,7 @@ export function HowItWorksSection() {
                     {step.number}
                   </span>
 
-                  <div className="border-border bg-card-glass relative flex flex-col justify-between rounded-2xl border pt-4 pr-2 pl-4 backdrop-blur-sm">
+                  <div className="border-border bg-card-glass relative flex flex-col justify-between rounded-2xl border pt-4 pr-2 pl-4 opacity-80 shadow-md backdrop-blur-sm">
                     <p className="text-foreground text-base">{step.description}</p>
                     <div className="flex justify-end">
                       <span className="font-gilroy text-primary text-2xl font-semibold">

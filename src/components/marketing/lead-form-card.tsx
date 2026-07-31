@@ -60,7 +60,7 @@ export function LeadFormModal({ open, onClose, sourcePage }: LeadFormModalProps)
         if (!isOpen) onClose();
       }}
     >
-      <DialogContent className="border-border shadow-primary/30 max-w-270 rounded-2xl border p-8 shadow-lg backdrop-blur-lg sm:p-10 lg:p-14">
+      <DialogContent className="border-border shadow-primary/30 rounded-none border bg-linear-to-br from-white p-6 shadow-lg backdrop-blur-2xl sm:max-w-270 sm:rounded-2xl sm:p-10 lg:p-14">
         <DialogTitle className="sr-only">Отримайте розрахунок ШІ-агента</DialogTitle>
 
         {isSuccess ? (
@@ -78,16 +78,16 @@ export function LeadFormModal({ open, onClose, sourcePage }: LeadFormModalProps)
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-2 lg:gap-16">
+          <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2 lg:gap-12">
             {/* Left — value proposition */}
-            <div className="flex flex-col gap-8">
-              <h3 className="font-display text-foreground text-2xl font-bold">
+            <div className="flex flex-col gap-2 md:gap-8">
+              <h3 className="font-display text-foreground text-3xl font-bold">
                 Отримайте <span className="text-primary">розрахунок</span>
                 <br />
                 ШІ-агента під <span className="text-primary">ваш бізнес</span>
               </h3>
 
-              <ul className="space-y-6">
+              <ul className="space-y-4">
                 <li className="flex items-center gap-4">
                   <Cog className="text-primary size-6 shrink-0" aria-hidden="true" />
                   <p className="text-foreground text-lg">
@@ -110,14 +110,16 @@ export function LeadFormModal({ open, onClose, sourcePage }: LeadFormModalProps)
               </ul>
 
               <div className="mx-auto mt-auto pt-4">
-                <p className="mb-3 text-base text-gray-500">Не хочете чекати на відповідь?</p>
+                <p className="mb-3 text-center text-base text-gray-500">
+                  Не хочете чекати на відповідь?
+                </p>
                 <a
                   href={TELEGRAM_LINK}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={cn(
                     buttonVariants({ variant: "ghost" }),
-                    "border-primary text-foreground h-12 w-full max-w-75 rounded-full border text-lg font-normal"
+                    "border-primary text-foreground h-12 w-full max-w-75 rounded-full border px-8 text-lg font-normal"
                   )}
                 >
                   <MousePointer2
@@ -130,62 +132,64 @@ export function LeadFormModal({ open, onClose, sourcePage }: LeadFormModalProps)
             </div>
 
             {/* Right — form */}
-            <form onSubmit={handleSubmit} className="flex flex-col">
+            <form onSubmit={handleSubmit} className="flex h-full flex-col justify-between">
               <p className="text-foreground mb-8 text-center text-xl font-medium">
                 Заповніть заявку
               </p>
 
-              <Input
-                placeholder="Ім'я"
-                value={name}
-                onChange={handleChange(setName)}
-                required
-                disabled={isLoading}
-                maxLength={500}
-                aria-label="Ім'я"
-                className="text-foreground border-primary h-auto rounded-none border-0 border-b bg-transparent px-0 py-2 text-lg font-normal shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
-              />
-              <div className="border-primary flex items-center border-0 border-b">
-                <span className="text-foreground shrink-0 py-2 text-lg font-normal">
-                  +380&nbsp;
-                </span>
+              <div>
                 <Input
-                  placeholder="___ ___ ___"
-                  type="tel"
-                  inputMode="numeric"
-                  value={phone.length > 0 ? formatUaPhoneDigits(phone) : ""}
-                  onChange={handlePhoneChange}
+                  placeholder="Ім'я"
+                  value={name}
+                  onChange={handleChange(setName)}
                   required
                   disabled={isLoading}
-                  maxLength={11}
-                  aria-label="Номер телефону після +380"
-                  className="text-foreground h-auto rounded-none border-0 bg-transparent px-0 py-2 text-lg font-normal shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                  maxLength={500}
+                  aria-label="Ім'я"
+                  className="text-foreground border-primary h-auto rounded-none border-0 border-b bg-transparent px-0 py-2 text-lg font-normal shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
                 />
-              </div>
-              <Input
-                placeholder="Сфера діяльності / Ніша"
-                value={niche}
-                onChange={handleChange(setNiche)}
-                disabled={isLoading}
-                maxLength={500}
-                aria-label="Сфера діяльності / Ніша"
-                className="text-foreground border-primary h-auto rounded-none border-0 border-b bg-transparent px-0 py-2 text-lg font-normal shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
-              />
-              <Input
-                placeholder="Telegram / email"
-                value={contact}
-                onChange={handleChange(setContact)}
-                disabled={isLoading}
-                maxLength={500}
-                aria-label="Telegram / email"
-                className="text-foreground border-primary h-auto rounded-none border-0 border-b bg-transparent px-0 py-2 text-lg font-normal shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
-              />
+                <div className="border-primary flex items-center border-0 border-b">
+                  <span className="text-foreground shrink-0 py-2 text-lg font-normal">
+                    +380&nbsp;
+                  </span>
+                  <Input
+                    placeholder="___ ___ ___"
+                    type="tel"
+                    inputMode="numeric"
+                    value={phone.length > 0 ? formatUaPhoneDigits(phone) : ""}
+                    onChange={handlePhoneChange}
+                    required
+                    disabled={isLoading}
+                    maxLength={11}
+                    aria-label="Номер телефону після +380"
+                    className="text-foreground h-auto rounded-none border-0 bg-transparent px-0 py-2 text-lg font-normal shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                  />
+                </div>
+                <Input
+                  placeholder="Сфера діяльності / Ніша"
+                  value={niche}
+                  onChange={handleChange(setNiche)}
+                  disabled={isLoading}
+                  maxLength={500}
+                  aria-label="Сфера діяльності / Ніша"
+                  className="text-foreground border-primary h-auto rounded-none border-0 border-b bg-transparent px-0 py-2 text-lg font-normal shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                />
+                <Input
+                  placeholder="Telegram / email"
+                  value={contact}
+                  onChange={handleChange(setContact)}
+                  disabled={isLoading}
+                  maxLength={500}
+                  aria-label="Telegram / email"
+                  className="text-foreground border-primary h-auto rounded-none border-0 border-b bg-transparent px-0 py-2 text-lg font-normal shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                />
 
-              {errorMessage && (
-                <p role="alert" className="mt-3 text-center text-sm text-red-600">
-                  {errorMessage}
-                </p>
-              )}
+                {errorMessage && (
+                  <p role="alert" className="mt-3 text-center text-sm text-red-600">
+                    {errorMessage}
+                  </p>
+                )}
+              </div>
 
               <Button
                 type="submit"

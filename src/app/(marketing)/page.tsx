@@ -20,19 +20,19 @@ import { FAQ_ENTRIES } from "@/lib/marketing-data";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "VoiceAgent — ШІ-агент для автоматизації дзвінків клієнтам",
+  title: "calls4u — ШІ-агент для автоматизації дзвінків клієнтам",
   description:
     "Автоматизуйте підтвердження записів, нагадування, уточнення замовлень та кваліфікацію лідів за допомогою голосового ШІ-агента. Без програмістів.",
   openGraph: {
-    title: "VoiceAgent — ШІ-агент, який телефонує клієнтам",
+    title: "calls4u — ШІ-агент, який телефонує клієнтам",
     description:
       "Підтверджує записи, нагадує про візити, уточнює замовлення і фіксує результат у CRM. Автоматично.",
     type: "website",
-    url: "https://voiceagent.ai",
+    url: "https://www.calls4u.ai",
   },
   twitter: {
     card: "summary_large_image",
-    title: "VoiceAgent — Голосовий ШІ-агент для бізнесу",
+    title: "calls4u — Голосовий ШІ-агент для бізнесу",
     description: "Автоматизуйте рутинні дзвінки клієнтам. Без розробника.",
   },
 };
@@ -60,7 +60,7 @@ export default function MarketingPage() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "SoftwareApplication",
-            name: "VoiceAgent",
+            name: "calls4u",
             description: "ШІ-агент, який автоматизує рутинні дзвінки клієнтам для малого бізнесу.",
             applicationCategory: "BusinessApplication",
             operatingSystem: "Web",

@@ -26,7 +26,7 @@ export function DashboardHeader() {
           <SheetTitle>
             <div className="mb-6 flex items-center gap-2">
               <Phone className="text-primary h-6 w-6" />
-              <span className="text-lg font-bold">VoiceAgent</span>
+              <span className="text-lg font-bold">calls4u</span>
             </div>
           </SheetTitle>
           <nav className="space-y-1">

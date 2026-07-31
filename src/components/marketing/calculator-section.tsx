@@ -44,7 +44,7 @@ export function CalculatorSection() {
           розмови.
         </p>
 
-        <div className="border-border bg-card-glass mx-auto w-full max-w-4xl rounded-2xl border backdrop-blur-sm">
+        <div className="border-border bg-card-glass mx-auto w-full max-w-4xl rounded-2xl border shadow-md backdrop-blur-sm">
           <div className="px-4 pt-8 pb-6 sm:px-6 sm:pt-10 sm:pb-8 md:px-10">
             <div className="mb-8">
               <div className="mb-3 flex items-center justify-between md:mb-4">

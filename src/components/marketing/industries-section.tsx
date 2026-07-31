@@ -32,7 +32,7 @@ export function IndustriesSection() {
           }}
           aria-label="Галузі"
         >
-          <div className="mb-4 flex items-center justify-end gap-3 sm:ml-auto sm:max-w-3xl sm:justify-center">
+          <div className="mb-2 flex items-center justify-end gap-3 sm:ml-auto sm:max-w-3xl sm:justify-center">
             <CarouselPrevious
               variant="ghost"
               className="static size-10 translate-y-0"
@@ -45,9 +45,9 @@ export function IndustriesSection() {
             />
           </div>
 
-          <CarouselContent className="xl:pl-60">
+          <CarouselContent className="xl:pl-40">
             {INDUSTRIES.map((industry, index) => (
-              <CarouselItem key={index} className="basis-5/5 md:basis-2/5">
+              <CarouselItem key={index} className="md:basis-2/5">
                 <IndustryCardComponent industry={industry} />
               </CarouselItem>
             ))}
@@ -62,23 +62,23 @@ export function IndustriesSection() {
 
 function IndustryCardComponent({ industry }: { industry: IndustryCard }) {
   return (
-    <div className="border-border bg-card-glass flex h-full flex-col rounded-3xl border backdrop-blur-lg">
-      <div className="flex flex-1 flex-col px-8 pt-8">
-        <h3 className="mb-6 text-2xl tracking-wide uppercase md:text-3xl">{industry.title}</h3>
+    <div className="border-border bg-card-glass flex h-full flex-col rounded-3xl border shadow-md backdrop-blur-lg">
+      <div className="flex flex-1 flex-col px-6 pt-6">
+        <h3 className="font-body mb-6 text-xl uppercase md:text-2xl">{industry.title}</h3>
 
         <div className="mb-5">
-          <p className="text-foreground mb-1 text-lg font-semibold">Завдання</p>
-          <p className="text-foreground text-base">{industry.task}</p>
+          <p className="text-foreground mb-1 font-semibold">Завдання</p>
+          <p className="text-foreground text-sm">{industry.task}</p>
         </div>
 
         <div className="mb-5">
-          <p className="text-foreground mb-1 text-lg font-semibold">Що робить агент</p>
-          <p className="text-foreground text-base">{industry.agentDoes}</p>
+          <p className="text-foreground mb-1 font-semibold">Що робить агент</p>
+          <p className="text-foreground text-sm">{industry.agentDoes}</p>
         </div>
 
         <div className="mb-6">
-          <p className="text-foreground mb-1 text-lg font-semibold">Cтатус</p>
-          <p className="text-foreground text-base">{industry.status}</p>
+          <p className="text-foreground mb-1 font-semibold">Cтатус</p>
+          <p className="text-foreground text-sm">{industry.status}</p>
         </div>
       </div>
 
@@ -86,9 +86,9 @@ function IndustryCardComponent({ industry }: { industry: IndustryCard }) {
         <Image
           src={industry.imageSrc}
           alt={`${industry.title} — приклад роботи агента`}
-          width={473}
-          height={273}
-          className="h-80 w-full object-cover"
+          width={400}
+          height={200}
+          className="h-50 w-full object-cover"
         />
       </div>
     </div>

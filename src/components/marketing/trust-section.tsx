@@ -53,7 +53,7 @@ export function TrustSection() {
               <div key={item.title} className="relative flex flex-col items-start">
                 {index < TRUST_ITEMS.length - 1 && (
                   <div
-                    className="absolute top-8 -right-10 left-16 h-px bg-gray-300"
+                    className="absolute top-8 -right-10 left-16 h-px bg-gray-600"
                     aria-hidden="true"
                   />
                 )}
@@ -95,10 +95,13 @@ export function TrustSection() {
           ))}
         </div>
 
-        <div className="shadow-primary/30 -mx-6 w-screen scrollbar-none overflow-x-auto bg-white pt-12 shadow-md md:hidden">
-          <div className="flex w-max gap-6 px-6 py-2">
+        <div className="shadow-primary/30 -mx-6 w-screen overflow-hidden bg-white pt-12 shadow-md md:hidden">
+          <div className="motion-safe:animate-marquee hover:paused flex w-max gap-6 px-6 py-2">
             {COMPLIANCE_INDICATORS.map((indicator) => (
               <ComplianceIndicator key={indicator.label} {...indicator} size="sm" />
+            ))}
+            {COMPLIANCE_INDICATORS.map((indicator) => (
+              <ComplianceIndicator key={`dup-${indicator.label}`} {...indicator} size="sm" />
             ))}
           </div>
         </div>

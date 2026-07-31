@@ -87,10 +87,18 @@ export function HeroSection() {
             </div>
           </div>
 
-          <div className="shadow-primary/30 -mx-6 w-screen scrollbar-none overflow-x-auto bg-white shadow-md md:hidden">
-            <div className="flex w-max gap-6 px-6 py-2">
+          <div className="shadow-primary/30 -mx-6 w-screen overflow-hidden bg-white shadow-md md:hidden">
+            <div className="motion-safe:animate-marquee hover:paused flex w-max gap-6 px-6 py-2">
               {HERO_BADGES.map((badge) => (
                 <HeroBadge key={badge.label} icon={badge.icon} label={badge.label} compact />
+              ))}
+              {HERO_BADGES.map((badge) => (
+                <HeroBadge
+                  key={`dup-${badge.label}`}
+                  icon={badge.icon}
+                  label={badge.label}
+                  compact
+                />
               ))}
             </div>
           </div>

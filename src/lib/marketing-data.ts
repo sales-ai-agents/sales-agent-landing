@@ -107,6 +107,14 @@ export const INDUSTRIES: readonly IndustryCard[] = [
     status: "Запис підтверджено / Внесено в CRM",
     imageSrc: "/image/industries-cto.png",
   },
+  {
+    title: "E-COMMERCE",
+    task: "Менеджери витрачають час на уточнення замовлень: адреса, спосіб оплати, наявність товару та зміни у складі замовлення.",
+    agentDoes:
+      "Дзвонить клієнту, підтверджує склад замовлення, адресу доставки, спосіб оплати та фіксує зміни в системі.",
+    status: "Замовлення підтверджено / потрібна корекція",
+    imageSrc: "/image/industries-ecommerce.jpg",
+  },
 ] as const;
 
 // --- How It Works Section ---

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Mail, Phone } from "lucide-react";
 
@@ -17,7 +18,13 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
           <div className="flex flex-col gap-4">
             <Link href="/" className="text-base font-semibold text-white">
-              Logo
+              <Image
+                src="/image/Logo.svg"
+                alt="Calls4u.ai"
+                width={40}
+                height={40}
+                className="h-auto w-auto"
+              />
             </Link>
             <p className="max-w-xs text-base text-white">
               AI-агент для рутинних дзвінків: підтверджує записи та передає в CRM або менеджеру.

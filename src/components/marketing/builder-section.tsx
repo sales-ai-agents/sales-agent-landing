@@ -116,10 +116,10 @@ export function BuilderSection() {
                           reset();
                         }}
                         className={cn(
-                          "focus-visible:ring-primary flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border py-2 text-base transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+                          "flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border py-2 text-base",
                           form.voice === option
-                            ? "border-input-border shadow-primary/30 bg-white shadow-md"
-                            : "border-input-border bg-white"
+                            ? "border-input-border shadow-primary/30 shadow-md"
+                            : "border-input-border"
                         )}
                       >
                         {option === "Жіночий" ? (
@@ -163,7 +163,7 @@ export function BuilderSection() {
                         reset();
                       }}
                       placeholder="Опишіть, що має робити агент під час дзвінка…"
-                      className="border-input-border text-foreground placeholder:text-muted-foreground focus:ring-primary/30 max-h-20 w-full resize-none rounded-2xl border bg-white py-3 pr-4 pl-16 text-base focus:ring-2 focus:outline-none"
+                      className="border-input-border text-foreground placeholder:text-muted-foreground focus:ring-primary/30 h-20 w-full rounded-2xl border bg-white py-3 pr-4 pl-16 text-base focus:ring-2 focus:outline-none"
                       aria-label="Інструкція для агента"
                     />
                   </div>

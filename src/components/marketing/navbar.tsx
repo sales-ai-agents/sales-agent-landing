@@ -2,11 +2,10 @@
 
 import { useState } from "react";
 
+import Image from "next/image";
 import Link from "next/link";
-import { Menu } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { LeadFormModal } from "@/components/marketing/lead-form-card";
 import { NAV_LINKS } from "@/lib/content";
 
@@ -20,9 +19,24 @@ export function Navbar() {
           aria-label="Головне меню"
           className="border-border bg-card-glass flex w-full items-center justify-between rounded-2xl border px-8 py-2 backdrop-blur-lg"
         >
-          <Link href="/" className="text-foreground text-lg font-bold">
-            LOGO
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-5">
+              <Image
+                src="/image/Logo.svg"
+                alt="Calls4u.ai"
+                width={40}
+                height={40}
+                className="h-auto w-auto"
+              />
+              <Image
+                src="/image/calls4u.svg"
+                alt="Calls4u.ai"
+                width={40}
+                height={40}
+                className="h-auto w-auto"
+              />
+            </Link>
+          </div>
 
           <div className="flex items-center gap-5">
             {NAV_LINKS.map((link) => (
@@ -34,7 +48,10 @@ export function Navbar() {
                 {link.label}
               </a>
             ))}
-            <Button className="rounded-2xl px-5 text-lg" onClick={() => setIsLeadFormOpen(true)}>
+            <Button
+              className="rounded-full px-5 py-5 text-lg"
+              onClick={() => setIsLeadFormOpen(true)}
+            >
               Реєстрація
             </Button>
           </div>
@@ -56,41 +73,24 @@ export function MobileNavbar() {
   return (
     <>
       <header className="absolute top-0 z-50 w-full md:hidden">
-        <div className="flex items-center justify-between px-4 py-4">
-          <Link href="/" className="text-foreground text-base font-bold">
-            LOGO
+        <div className="flex items-center justify-between p-4">
+          <Link href="/">
+            <Image
+              src="/image/Logo.svg"
+              alt="Calls4u.ai"
+              width={40}
+              height={40}
+              className="h-auto w-auto"
+            />
           </Link>
 
-          <div className="flex items-center gap-3">
-            <Button
-              size="sm"
-              className="min-h-11 rounded-full px-4 text-sm"
-              onClick={() => setIsLeadFormOpen(true)}
-            >
-              Реєстрація
-            </Button>
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label="Відкрити меню" className="size-11">
-                  <Menu aria-hidden="true" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right">
-                <SheetTitle>Навігація</SheetTitle>
-                <nav aria-label="Мобільне меню" className="mt-6 flex flex-col gap-2">
-                  {NAV_LINKS.map((link) => (
-                    <a
-                      key={link.label}
-                      href={link.href}
-                      className="text-foreground hover:text-foreground/70 rounded-lg px-3 py-3 text-lg transition-colors"
-                    >
-                      {link.label}
-                    </a>
-                  ))}
-                </nav>
-              </SheetContent>
-            </Sheet>
-          </div>
+          <Button
+            size="sm"
+            className="rounded-full px-5 py-4 text-sm"
+            onClick={() => setIsLeadFormOpen(true)}
+          >
+            Реєстрація
+          </Button>
         </div>
       </header>
 
