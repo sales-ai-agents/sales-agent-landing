@@ -1,8 +1,10 @@
 import { Play, RefreshCw } from "lucide-react";
-import { callLogs } from "@/lib/mock-data";
+import { CALL_LOG_PREVIEW } from "@/lib/marketing-data";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
+import type { BadgeVariant } from "@/types";
 
-const statusStyles = {
+const STATUS_STYLES: Record<BadgeVariant, string> = {
   success: "bg-green-100 text-green-800",
   secondary: "bg-yellow-100 text-yellow-800",
   warning: "bg-red-100 text-red-800",
@@ -47,14 +49,17 @@ export function CallLogsSection() {
                 </tr>
               </thead>
               <tbody>
-                {callLogs.map((row) => (
+                {CALL_LOG_PREVIEW.map((row) => (
                   <tr key={row.id} className="border-border border-b last:border-0">
                     <td className="text-foreground px-4 py-4 whitespace-nowrap">
                       {row.customer} <span className="text-foreground font-light">{row.time}</span>
                     </td>
                     <td className="px-4 py-2">
                       <span
-                        className={`inline-block rounded-full px-3 py-0.5 text-sm font-medium ${statusStyles[row.statusVariant]}`}
+                        className={cn(
+                          "inline-block rounded-full px-3 py-0.5 text-sm font-medium",
+                          STATUS_STYLES[row.statusVariant]
+                        )}
                       >
                         {row.status}
                       </span>

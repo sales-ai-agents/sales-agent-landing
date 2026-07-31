@@ -11,14 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-
-const CHECKLIST_ITEMS = [
-  "Голос: жіночий або чоловічий",
-  "Інструкція звичайною мовою",
-  "Готові шаблони під вашу нішу",
-  "Миттєва інтеграція з CRM",
-  "Тестовий дзвінок перед запуском",
-] as const;
+import { BUILDER_CHECKLIST } from "@/lib/content";
 
 export function BuilderSection() {
   const { presets, isLoading: presetsLoading } = usePresets();
@@ -64,7 +57,7 @@ export function BuilderSection() {
             </p>
 
             <ul className="space-y-5">
-              {CHECKLIST_ITEMS.map((item) => (
+              {BUILDER_CHECKLIST.map((item) => (
                 <li key={item} className="relative flex gap-4">
                   <div
                     className="bg-primary/80 pointer-events-none absolute top-1 left-4 -z-20 size-6 rounded-full blur-xs"

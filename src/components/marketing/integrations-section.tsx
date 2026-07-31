@@ -1,48 +1,37 @@
-import { Users, FileSpreadsheet, Code, Sheet } from "lucide-react";
-import type { Integration } from "@/types";
+import { cn } from "@/lib/utils";
+import { INTEGRATIONS, type MarketingIntegration } from "@/lib/marketing-data";
 
-const integrations: readonly (Integration & { icon: React.ReactNode })[] = [
-  {
-    title: "CRM",
-    icon: <Users className="text-foreground size-4 md:size-8" aria-hidden="true" />,
-    description: (
-      <>
-        Результат дзвінка потрапляє в <span className="font-medium">картку клієнта</span>: статус,
-        короткий підсумок і запис розмови
-      </>
-    ),
-  },
-  {
-    title: "Google Sheets",
-    icon: <Sheet className="text-foreground size-4 md:size-8" aria-hidden="true" />,
-    description: (
-      <>
-        Журнал дзвінків оновлюється в <span className="font-medium">таблиці автоматично</span>:
-        клієнт, статус, підсумок і наступна дія
-      </>
-    ),
-  },
-  {
-    title: "CSV",
-    icon: <FileSpreadsheet className="text-foreground size-4 md:size-8" aria-hidden="true" />,
-    description: (
-      <>
-        Завантажуйте базу контактів і вивантажуйте{" "}
-        <span className="font-medium">результати дзвінків</span> у зручному форматі
-      </>
-    ),
-  },
-  {
-    title: "Webhooks",
-    icon: <Code className="text-foreground size-4 md:size-8" aria-hidden="true" />,
-    description: (
-      <>
-        Передавайте події після дзвінка у <span className="font-medium">вашу систему</span>: CRM,
-        чат, аналітику або автоматизацію
-      </>
-    ),
-  },
-];
+function IntegrationCard({
+  integration,
+  compact,
+}: {
+  integration: MarketingIntegration;
+  compact?: boolean;
+}) {
+  const Icon = integration.icon;
+
+  return (
+    <div className="border-border bg-card-glass rounded-2xl border p-4 backdrop-blur-sm">
+      <div className="mb-3">
+        <Icon
+          className={cn("text-foreground", compact ? "size-4 md:size-8" : "size-4 md:size-8")}
+          aria-hidden="true"
+        />
+      </div>
+      <h3
+        className={cn(
+          "text-foreground mb-2 font-semibold",
+          compact ? "text-sm md:text-xl" : "text-xl"
+        )}
+      >
+        {integration.title}
+      </h3>
+      <p className="text-foreground text-sm leading-relaxed tracking-wide">
+        {integration.description}
+      </p>
+    </div>
+  );
+}
 
 export function IntegrationsSection() {
   return (
@@ -61,57 +50,24 @@ export function IntegrationsSection() {
           </p>
         </div>
 
+        {/* Desktop: 4-column grid */}
         <div className="hidden gap-5 lg:grid lg:grid-cols-4">
-          {integrations.map((integration) => (
-            <div
-              key={integration.title}
-              className="border-border bg-card-glass rounded-2xl border p-4 backdrop-blur-sm"
-            >
-              <div className="mb-3">{integration.icon}</div>
-              <h3 className="text-foreground mb-2 text-xl font-semibold">{integration.title}</h3>
-              <p className="text-foreground text-sm leading-relaxed tracking-wide">
-                {integration.description}
-              </p>
-            </div>
+          {INTEGRATIONS.map((integration) => (
+            <IntegrationCard key={integration.title} integration={integration} />
           ))}
         </div>
 
+        {/* Mobile: masonry-style 2-column layout */}
         <div className="grid grid-cols-2 gap-4 lg:hidden">
           <div className="mt-10 flex flex-col gap-4">
-            {integrations
-              .filter((_, i) => i % 2 === 0)
-              .map((integration) => (
-                <div
-                  key={integration.title}
-                  className="border-border bg-card-glass rounded-2xl border p-4 backdrop-blur-sm"
-                >
-                  <div className="mb-3">{integration.icon}</div>
-                  <h3 className="text-foreground mb-2 text-sm font-semibold md:text-xl">
-                    {integration.title}
-                  </h3>
-                  <p className="text-foreground text-sm leading-relaxed tracking-wide">
-                    {integration.description}
-                  </p>
-                </div>
-              ))}
+            {INTEGRATIONS.filter((_, i) => i % 2 === 0).map((integration) => (
+              <IntegrationCard key={integration.title} integration={integration} compact />
+            ))}
           </div>
           <div className="flex flex-col gap-4">
-            {integrations
-              .filter((_, i) => i % 2 !== 0)
-              .map((integration) => (
-                <div
-                  key={integration.title}
-                  className="border-border bg-card-glass rounded-2xl border p-4 backdrop-blur-sm"
-                >
-                  <div className="mb-3">{integration.icon}</div>
-                  <h3 className="text-foreground mb-2 text-sm font-semibold md:text-xl">
-                    {integration.title}
-                  </h3>
-                  <p className="text-foreground text-sm leading-relaxed tracking-wide">
-                    {integration.description}
-                  </p>
-                </div>
-              ))}
+            {INTEGRATIONS.filter((_, i) => i % 2 !== 0).map((integration) => (
+              <IntegrationCard key={integration.title} integration={integration} compact />
+            ))}
           </div>
         </div>
 

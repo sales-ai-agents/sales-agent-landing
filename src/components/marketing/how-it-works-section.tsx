@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { steps } from "@/lib/mock-data";
+import { ONBOARDING_STEPS } from "@/lib/marketing-data";
 import { cn } from "@/lib/utils";
 
 export function HowItWorksSection() {
@@ -18,7 +18,7 @@ export function HowItWorksSection() {
         </div>
 
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:gap-4">
-          {steps.map((step, index) => (
+          {ONBOARDING_STEPS.map((step, index) => (
             <div
               key={step.number}
               className={cn(
@@ -50,7 +50,7 @@ export function HowItWorksSection() {
                 </div>
               </div>
 
-              {index < steps.length - 1 && (
+              {index < ONBOARDING_STEPS.length - 1 && (
                 <div className="shrink-0 self-end" aria-hidden="true">
                   <Image
                     src="/image/how-arrow.svg"

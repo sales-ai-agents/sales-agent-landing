@@ -1,4 +1,5 @@
 import type React from "react";
+import type { LucideIcon } from "lucide-react";
 
 // --- Agent ---
 export interface Agent {
@@ -128,4 +129,16 @@ export interface CalculatorInputs {
   readonly callsPerDay: number;
   readonly avgDuration: number;
   readonly hourlyRate: number;
+}
+
+// Hero / Compliance Badges
+export interface IconBadge {
+  readonly icon: LucideIcon;
+  readonly label: string;
+}
+
+// Navbar
+export interface NavLink {
+  readonly href: string;
+  readonly label: string;
 }

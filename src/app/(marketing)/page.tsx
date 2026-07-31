@@ -7,7 +7,7 @@ import { CallLogsSection } from "@/components/marketing/call-logs-section";
 import { HandoffSection } from "@/components/marketing/handoff-section";
 import { IntegrationsSection } from "@/components/marketing/integrations-section";
 import { TrustSection } from "@/components/marketing/trust-section";
-import { FaqSection, faqs } from "@/components/marketing/faq-section";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { FinalCtaSection } from "@/components/marketing/final-cta-section";
 import {
   DynamicAudioDemoSection as AudioDemoSection,
@@ -15,6 +15,7 @@ import {
   DynamicBuilderSection as BuilderSection,
 } from "@/components/marketing/dynamic-sections";
 import { buildFaqPageSchema } from "@/lib/utils";
+import { FAQ_ENTRIES } from "@/lib/marketing-data";
 
 export const dynamic = "force-static";
 
@@ -75,7 +76,7 @@ export default function MarketingPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(buildFaqPageSchema(faqs)).replace(/</g, "\\u003c"),
+          __html: JSON.stringify(buildFaqPageSchema(FAQ_ENTRIES)).replace(/</g, "\\u003c"),
         }}
       />
     </>

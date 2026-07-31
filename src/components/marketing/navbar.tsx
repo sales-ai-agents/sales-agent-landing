@@ -8,11 +8,7 @@ import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { LeadFormModal } from "@/components/marketing/lead-form-card";
-
-const navLinks = [
-  { href: "#features", label: "Продукт" },
-  { href: "#pricing", label: "Тарифи" },
-] as const;
+import { NAV_LINKS } from "@/lib/content";
 
 export function Navbar() {
   const [isLeadFormOpen, setIsLeadFormOpen] = useState(false);
@@ -29,7 +25,7 @@ export function Navbar() {
           </Link>
 
           <div className="flex items-center gap-5">
-            {navLinks.map((link) => (
+            {NAV_LINKS.map((link) => (
               <a
                 key={link.label}
                 href={link.href}
@@ -82,7 +78,7 @@ export function MobileNavbar() {
               <SheetContent side="right">
                 <SheetTitle>Навігація</SheetTitle>
                 <nav aria-label="Мобільне меню" className="mt-6 flex flex-col gap-2">
-                  {navLinks.map((link) => (
+                  {NAV_LINKS.map((link) => (
                     <a
                       key={link.label}
                       href={link.href}

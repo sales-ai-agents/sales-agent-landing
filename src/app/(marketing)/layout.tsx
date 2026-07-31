@@ -1,5 +1,6 @@
 import localFont from "next/font/local";
 import { Footer } from "@/components/marketing/footer";
+import { cn } from "@/lib/utils";
 
 const actayWideBold = localFont({
   src: "../../fonts/ActayWide-Bold.woff2",
@@ -20,7 +21,11 @@ const gilroy = localFont({
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className={`font-body relative overflow-x-hidden ${actayWideBold.variable} ${gilroy.variable}`}
+      className={cn(
+        "font-body relative overflow-x-hidden",
+        actayWideBold.variable,
+        gilroy.variable
+      )}
     >
       <main>{children}</main>
       <Footer />

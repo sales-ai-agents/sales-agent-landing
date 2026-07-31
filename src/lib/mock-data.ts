@@ -1,17 +1,8 @@
-import type {
-  Agent,
-  CallLog,
-  Contact,
-  DemoCard,
-  IndustryCard,
-  MockCallLogRow,
-  OnboardingStep,
-  Scenario,
-} from "@/types";
+import type { Agent, CallLog, Contact } from "@/types";
 import type { LucideIcon } from "lucide-react";
-import { Bell, ClipboardCheck, PhoneCall, Settings, ShoppingCart, Trophy } from "lucide-react";
 
 // --- Dashboard Chart Data ---
+
 export interface ChartDataPoint {
   readonly day: string;
   readonly calls: number;
@@ -29,6 +20,7 @@ export const chartData: readonly ChartDataPoint[] = [
 ] as const;
 
 // --- Dashboard Stats ---
+
 export interface StatCard {
   readonly title: string;
   readonly value: string;
@@ -51,152 +43,7 @@ export const recentActivity: readonly RecentAgent[] = [
   { name: "Follow-up Agent", calls: 12, success: "95%", time: "1 hour ago" },
 ] as const;
 
-export const steps: readonly OnboardingStep[] = [
-  {
-    number: "01",
-    title: "Оберіть сценарій",
-    description: "Готовий шаблон для запису, нагадування, замовлення або заявки.",
-  },
-  {
-    number: "02",
-    title: "Налаштуйте агента",
-    description: "Виберіть голос, додайте фрази і правила розмови для агента.",
-  },
-  {
-    number: "03",
-    title: "Додайте контакти",
-    description: "Завантажте номери через CSV, Google Sheets або підключену CRM.",
-  },
-  {
-    number: "04",
-    title: "Перевірте дзвінок",
-    description: "Перевірте сценарій на собі, і тільки потім запускайте дзвінки клієнтам.",
-  },
-] as const;
-
-export const industries: IndustryCard[] = [
-  {
-    title: "ЛОГІСТИКА",
-    task: "Клієнти залишають заявки на перевезення, але менеджери витрачають час на уточнення маршруту, вантажу, дати й деталей оплати.",
-    agentDoes:
-      "Дзвонить клієнту, уточнює маршрут, тип вантажу, дату відправки, контактну особу та передає готову заявку менеджеру",
-    status: "Заявку уточнено / потрібен дзвінок менеджера",
-    imageSrc: "/image/industries-logistics.png",
-  },
-  {
-    title: "СЛУЖБА ДОСТАВКИ",
-    task: "Оператори вручну підтверджують адресу, час отримання, зміни в замовленні й повторно дзвонять клієнтам.",
-    agentDoes:
-      "Підтверджує адресу, зручний час доставки, фіксує зміну даних і передає статус в кабінет.",
-    status: "Доставку підтверджено / потрібно змінити час",
-    imageSrc: "/image/industries-delivery.png",
-  },
-  {
-    title: "АВТОСЕРВІСИ ТА СТО",
-    task: "Клієнти дзвонять дізнатися вартість ТО та наявність вільних підйомників. Адміністратор витрачає час на ручний запис.",
-    agentDoes: "Звіряє вільні слоти в CRM, уточнює марку авто, записує на час і надсилає SMS.",
-    status: "Запис підтверджено / Внесено в CRM",
-    imageSrc: "/image/industries-cto.png",
-  },
-];
-
-export const scenarios = [
-  {
-    title: "Підтвердження запису",
-    icon: ClipboardCheck,
-    details: [
-      { label: "Для кого:", value: "салони, клініки, СТО" },
-      { label: "Питає:", value: "чи клієнт прийде у вибраний час" },
-      { label: "Результат:", value: "підтверджено / перенос" },
-    ],
-  },
-  {
-    title: "Нагадування про візит",
-    icon: Bell,
-    details: [
-      { label: "Для кого:", value: "послуги за записом" },
-      { label: "Робить:", value: "нагадує дату, час і деталі" },
-      { label: "Результат:", value: "менше ручних дзвінків" },
-    ],
-  },
-  {
-    title: "Уточнення замовлення",
-    icon: ShoppingCart,
-    details: [
-      { label: "Для кого:", value: "інтернет-магазини" },
-      { label: "Питає:", value: "товар, адресу, доставку" },
-      { label: "Результат:", value: "замовлення готове до обробки" },
-    ],
-  },
-  {
-    title: "Кваліфікація ліда",
-    icon: Trophy,
-    details: [
-      { label: "Для кого:", value: "заявки з реклами" },
-      { label: "Питає:", value: "потребу, бюджет, термін" },
-      { label: "Результат:", value: "тепла заявка для менеджера" },
-    ],
-  },
-  {
-    title: "Повторний дзвінок",
-    icon: PhoneCall,
-    details: [
-      { label: "Для кого:", value: "клієнти з бази" },
-      { label: "Робить:", value: "пропонує запис або послугу" },
-      { label: "Результат:", value: "статус і наступна дія" },
-    ],
-  },
-  {
-    title: "Власний сценарій",
-    icon: Settings,
-    details: [
-      { label: "Для кого:", value: "нестандартні процеси" },
-      { label: "Робить:", value: "говорить вашими фразами" },
-      { label: "Результат:", value: "сценарій під конкретний бізнес" },
-    ],
-  },
-] as const satisfies readonly Scenario[];
-
-export const demos: readonly DemoCard[] = [
-  {
-    id: "delivery",
-    category: "Служба доставки",
-    description: "Підтвердження доставки",
-    scenario: "Агент підтверджує адресу, зручний час отримання та фіксує статус для оператора",
-    result: "Результат:",
-    resultBold: "доставку підтверджено",
-    src: "/audio/audio.ogg",
-  },
-  {
-    id: "logistics",
-    category: "Логістика",
-    description: "Уточнення заявки на перевезення",
-    scenario:
-      "Агент дзвонить клієнту, уточнює маршрут, тип вантажу, дату відправки та передає заявку менеджеру",
-    result: "Результат:",
-    resultBold: "заявку уточнено",
-    src: "/audio/audio.ogg",
-  },
-  {
-    id: "warehouse",
-    category: "Склад / B2B-постачання",
-    description: "Уточнення замовлення",
-    scenario:
-      "Агент перевіряє позиції в замовленні, кількість, дату відвантаження та передає зміни в кабінет",
-    result: "Результат:",
-    resultBold: "замовлення оновлено",
-    src: "/audio/audio.ogg",
-  },
-  {
-    id: "service",
-    category: "Сервісна компанія",
-    description: "Запис на виїзд спеціаліста",
-    scenario: "Агент уточнює проблему, адресу, зручний час візиту та створює заявку для майстра",
-    result: "Результат:",
-    resultBold: "візит заплановано",
-    src: "/audio/audio.ogg",
-  },
-] as const;
+// --- Mock Agents ---
 
 export const mockAgents: Agent[] = [
   {
@@ -260,6 +107,8 @@ export const mockAgents: Agent[] = [
     createdAt: "2026-06-25",
   },
 ];
+
+// --- Mock Contacts ---
 
 export const mockContacts: Contact[] = [
   {
@@ -333,6 +182,8 @@ export const mockContacts: Contact[] = [
     dateAdded: "2026-06-15",
   },
 ];
+
+// --- Mock Call Logs ---
 
 export const mockCallLogs: CallLog[] = [
   {
@@ -411,46 +262,3 @@ export const mockCallLogs: CallLog[] = [
     crmSynced: false,
   },
 ];
-
-export const callLogs: MockCallLogRow[] = [
-  {
-    id: "1",
-    customer: "Олена К.",
-    time: "10:24",
-    status: "Підтверджено",
-    statusVariant: "success",
-    summary: "Буде завтра о 14:00",
-    duration: "1:02",
-    crm: "Оновлено",
-  },
-  {
-    id: "2",
-    customer: "Ігор М.",
-    time: "10:31",
-    status: "Перенесено",
-    statusVariant: "secondary",
-    summary: "Пʼятниця, 17:30",
-    duration: "1:45",
-    crm: "Оновлено",
-  },
-  {
-    id: "3",
-    customer: "Світлана Т.",
-    time: "10:38",
-    status: "Не відповіла",
-    statusVariant: "warning",
-    summary: "Повторний дзвінок заплановано",
-    duration: "0:15",
-    crm: "Очікує",
-  },
-  {
-    id: "4",
-    customer: "Андрій В.",
-    time: "10:45",
-    status: "Нова заявка",
-    statusVariant: "success",
-    summary: "Хоче запис на ТО в суботу",
-    duration: "2:55",
-    crm: "Оновлено",
-  },
-] as const;

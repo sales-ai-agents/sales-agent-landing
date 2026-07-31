@@ -17,6 +17,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CallLogDetailDrawer } from "@/components/dashboard/call-log-detail-drawer";
 import { useCallLogs } from "@/hooks/use-call-logs";
+import { cn } from "@/lib/utils";
 import type { CallLog, CallStatus } from "@/types";
 
 const STATUS_CONFIG: Record<
@@ -151,7 +152,7 @@ export default function CallLogsPage() {
                       return (
                         <th
                           key={header.id}
-                          className={`p-3 text-left font-medium ${meta?.className ?? ""}`}
+                          className={cn("p-3 text-left font-medium", meta?.className)}
                         >
                           {header.isPlaceholder
                             ? null
@@ -172,7 +173,7 @@ export default function CallLogsPage() {
                     {row.getVisibleCells().map((cell) => {
                       const meta = cell.column.columnDef.meta as { className?: string } | undefined;
                       return (
-                        <td key={cell.id} className={`p-3 ${meta?.className ?? ""}`}>
+                        <td key={cell.id} className={cn("p-3", meta?.className)}>
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </td>
                       );

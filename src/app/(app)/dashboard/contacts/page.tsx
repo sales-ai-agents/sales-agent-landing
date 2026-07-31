@@ -28,6 +28,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AddContactDialog } from "@/components/dashboard/add-contact-dialog";
 import { UploadCsvDialog } from "@/components/dashboard/upload-csv-dialog";
 import { useContacts, useCreateContact, useDeleteContact } from "@/hooks/use-contacts";
+import { cn } from "@/lib/utils";
 import type { ContactFormData } from "@/lib/schemas";
 import type { Contact } from "@/types";
 
@@ -163,7 +164,7 @@ export default function ContactsPage() {
                       const meta = header.column.columnDef.meta as
                         { className?: string } | undefined;
                       return (
-                        <th key={header.id} className={`p-3 text-left ${meta?.className ?? ""}`}>
+                        <th key={header.id} className={cn("p-3 text-left", meta?.className)}>
                           {header.isPlaceholder
                             ? null
                             : flexRender(header.column.columnDef.header, header.getContext())}
@@ -179,7 +180,7 @@ export default function ContactsPage() {
                     {row.getVisibleCells().map((cell) => {
                       const meta = cell.column.columnDef.meta as { className?: string } | undefined;
                       return (
-                        <td key={cell.id} className={`p-3 ${meta?.className ?? ""}`}>
+                        <td key={cell.id} className={cn("p-3", meta?.className)}>
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </td>
                       );

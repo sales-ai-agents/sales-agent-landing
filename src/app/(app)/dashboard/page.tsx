@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { CallsChart } from "@/components/dashboard/calls-chart";
 import { recentActivity, type StatCard } from "@/lib/mock-data";
+import { cn } from "@/lib/utils";
 
 const STATS: readonly StatCard[] = [
   {
@@ -77,8 +78,8 @@ export default function DashboardPage() {
                       vs last week
                     </p>
                   </div>
-                  <div className={`rounded-full p-3 ${stat.bgColor}`}>
-                    <Icon className={`h-5 w-5 ${stat.color}`} />
+                  <div className={cn("rounded-full p-3", stat.bgColor)}>
+                    <Icon className={cn("h-5 w-5", stat.color)} />
                   </div>
                 </div>
               </CardContent>

@@ -3,7 +3,7 @@ import { ArrowUpRight } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Scenario, ScenarioDetail } from "@/types";
-import { scenarios } from "@/lib/mock-data";
+import { SCENARIOS } from "@/lib/marketing-data";
 
 export function ScenariosSection() {
   return (
@@ -20,13 +20,13 @@ export function ScenariosSection() {
           запускайте тест.
         </p>
 
-        <div className="mb-12 grid auto-rows-[1fr] grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {scenarios.map((scenario, index) => (
+        <div className="mb-12 grid auto-rows-[1fr] grid-cols-1 gap-5 sm:grid-cols-2 md:gap-10 lg:grid-cols-3">
+          {SCENARIOS.map((scenario, index) => (
             <ScenarioCard
               key={scenario.title}
               scenario={scenario}
               alignRight={index % 2 !== 0}
-              isLast={index === scenarios.length - 1}
+              isLast={index === SCENARIOS.length - 1}
             />
           ))}
         </div>
@@ -62,27 +62,22 @@ function ScenarioCard({ scenario, alignRight, isLast }: ScenarioCardProps) {
   const Icon = scenario.icon;
 
   return (
-    <div
-      className={cn(
-        "relative min-h-50 pt-4 sm:pl-4",
-        alignRight ? "pr-20 sm:pr-0" : "pl-20 sm:pl-0"
-      )}
-    >
+    <div className={cn("relative min-h-40 pt-4", alignRight ? "pr-20 sm:pr-0" : "pl-20 sm:pl-0")}>
       {!isLast && (
         <Image
           src={alignRight ? "/image/scenarios-arrow-right.svg" : "/image/scenarios-arrow-left.svg"}
           alt=""
-          width={alignRight ? 80 : 95}
-          height={90}
+          width={110}
+          height={110}
           aria-hidden="true"
           className={cn("absolute top-2/3 sm:hidden", alignRight ? "right-0" : "left-0")}
-          style={{ width: "auto", height: "auto" }}
+          style={{ width: "110px", height: "110px" }}
         />
       )}
 
       <div
         className={cn(
-          "bg-primary shadow-primary/30 absolute top-0 z-10 flex size-14 items-center justify-center rounded-full shadow-lg sm:left-0",
+          "bg-primary shadow-primary/30 absolute top-0 z-10 flex size-14 items-center justify-center rounded-full shadow-lg sm:-left-5",
           alignRight ? "right-15 sm:right-auto" : "left-15"
         )}
         aria-hidden="true"

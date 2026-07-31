@@ -1,11 +1,6 @@
 import { Check, BarChart3, Headset, User } from "lucide-react";
 import Image from "next/image";
-
-const checklist = [
-  "Розпізнає нестандартні запити",
-  "Реагує на прохання поговорити з людиною",
-  "Передає менеджеру дзвінок і короткий підсумок",
-] as const;
+import { HANDOFF_CHECKLIST } from "@/lib/content";
 
 interface HandoffCardProps {
   icon: React.ReactNode;
@@ -63,7 +58,7 @@ export function HandoffSection() {
             </p>
 
             <ul className="space-y-5">
-              {checklist.map((item) => (
+              {HANDOFF_CHECKLIST.map((item) => (
                 <li key={item} className="relative flex gap-4">
                   <div
                     className="bg-primary/80 pointer-events-none absolute top-1 left-4 -z-20 size-6 rounded-full blur-xs"
@@ -114,10 +109,10 @@ export function HandoffSection() {
               <Image
                 src="/image/handoff-crm-arrow.svg"
                 alt=""
-                width={130}
+                width={140}
                 height={60}
                 aria-hidden="true"
-                className="absolute top-30 left-2 hidden lg:block"
+                className="absolute top-30 left-4 hidden lg:block"
                 style={{ width: "auto", height: "auto" }}
               />
               <Image

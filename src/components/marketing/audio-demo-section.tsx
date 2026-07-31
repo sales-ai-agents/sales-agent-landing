@@ -16,7 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { DemoCard } from "@/types";
-import { demos } from "@/lib/mock-data";
+import { DEMOS } from "@/lib/marketing-data";
 
 export function AudioDemoSection() {
   const [playing, setPlaying] = useState<string | null>(null);
@@ -67,7 +67,7 @@ export function AudioDemoSection() {
         howlRef.current = null;
       }
 
-      const demo = demos.find((d) => d.id === id);
+      const demo = DEMOS.find((d) => d.id === id);
       if (!demo) return;
 
       const howl = new Howl({
@@ -110,7 +110,7 @@ export function AudioDemoSection() {
   return (
     <section id="audio-demo" className="relative overflow-hidden px-4 py-20 md:px-8">
       <div
-        className="pointer-events-none absolute top-1/10 left-0 hidden -translate-y-1/10 opacity-50 lg:block"
+        className="pointer-events-none absolute top-1/10 left-0 hidden -translate-y-1/10 opacity-50 xl:block"
         aria-hidden="true"
       >
         <Image
@@ -118,11 +118,11 @@ export function AudioDemoSection() {
           alt=""
           width={400}
           height={200}
-          style={{ width: "auto", height: "auto" }}
+          style={{ width: "400px", height: "auto" }}
         />
       </div>
       <div
-        className="pointer-events-none absolute top-1/8 right-0 hidden -translate-y-1/8 opacity-50 lg:block"
+        className="pointer-events-none absolute top-1/8 right-0 hidden -translate-y-1/8 opacity-50 xl:block"
         aria-hidden="true"
       >
         <Image
@@ -130,7 +130,7 @@ export function AudioDemoSection() {
           alt=""
           width={400}
           height={200}
-          style={{ width: "auto", height: "auto" }}
+          style={{ width: "400px", height: "auto" }}
         />
       </div>
 
@@ -169,7 +169,7 @@ export function AudioDemoSection() {
             aria-label="Наступний слайд"
           />
           <CarouselContent>
-            {demos.map((demo, index) => {
+            {DEMOS.map((demo, index) => {
               const isCenter = selectedSnap === index;
 
               return (

@@ -1,17 +1,34 @@
 import Image from "next/image";
 import type { LucideIcon } from "lucide-react";
-import { Clock, Link2, PhoneCall, Play } from "lucide-react";
+import { Play } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { Navbar, MobileNavbar } from "@/components/marketing/navbar";
 import { DynamicDemoCallCard as DemoCallCard } from "@/components/marketing/dynamic-sections";
+import { HERO_BADGES } from "@/lib/content";
 
-const HERO_BADGES: { icon: LucideIcon; label: string }[] = [
-  { icon: Clock, label: "Запуск за 1 день" },
-  { icon: Link2, label: "Інтеграція з CRM" },
-  { icon: PhoneCall, label: "Дзвінки 24/7" },
-];
+function HeroBadge({
+  icon: Icon,
+  label,
+  compact,
+}: {
+  icon: LucideIcon;
+  label: string;
+  compact?: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-2 text-sm text-neutral-700",
+        compact && "shrink-0 whitespace-nowrap"
+      )}
+    >
+      <Icon className="text-primary size-4 shrink-0" aria-hidden="true" />
+      <span>{label}</span>
+    </div>
+  );
+}
 
 export function HeroSection() {
   return (
@@ -64,25 +81,16 @@ export function HeroSection() {
             </div>
 
             <div className="mt-10 hidden flex-wrap items-center justify-center gap-6 md:flex lg:justify-start">
-              {HERO_BADGES.map(({ icon: Icon, label }) => (
-                <div key={label} className="flex items-center gap-2 text-sm text-neutral-700">
-                  <Icon className="text-primary size-4" aria-hidden="true" />
-                  <span>{label}</span>
-                </div>
+              {HERO_BADGES.map((badge) => (
+                <HeroBadge key={badge.label} icon={badge.icon} label={badge.label} />
               ))}
             </div>
           </div>
 
           <div className="shadow-primary/30 -mx-6 w-screen scrollbar-none overflow-x-auto bg-white shadow-md md:hidden">
             <div className="flex w-max gap-6 px-6 py-2">
-              {HERO_BADGES.map(({ icon: Icon, label }) => (
-                <div
-                  key={label}
-                  className="flex items-center gap-2 text-sm whitespace-nowrap text-neutral-700"
-                >
-                  <Icon className="text-primary size-4 shrink-0" aria-hidden="true" />
-                  <span>{label}</span>
-                </div>
+              {HERO_BADGES.map((badge) => (
+                <HeroBadge key={badge.label} icon={badge.icon} label={badge.label} compact />
               ))}
             </div>
           </div>

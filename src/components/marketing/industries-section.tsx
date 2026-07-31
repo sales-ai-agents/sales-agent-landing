@@ -8,7 +8,7 @@ import {
   CarouselDots,
 } from "@/components/ui/carousel";
 import type { IndustryCard } from "@/types";
-import { industries } from "@/lib/mock-data";
+import { INDUSTRIES } from "@/lib/marketing-data";
 
 export function IndustriesSection() {
   return (
@@ -46,7 +46,7 @@ export function IndustriesSection() {
           </div>
 
           <CarouselContent className="xl:pl-60">
-            {industries.map((industry, index) => (
+            {INDUSTRIES.map((industry, index) => (
               <CarouselItem key={index} className="basis-5/5 md:basis-2/5">
                 <IndustryCardComponent industry={industry} />
               </CarouselItem>
