@@ -53,7 +53,7 @@ export function IndustriesSection() {
             ))}
           </CarouselContent>
 
-          <CarouselDots className="mt-1 flex sm:hidden" />
+          <CarouselDots className="mt-2 flex sm:hidden" />
         </Carousel>
       </div>
     </section>

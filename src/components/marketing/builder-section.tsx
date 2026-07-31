@@ -131,9 +131,21 @@ export function BuilderSection() {
                         )}
                       >
                         {option === "Жіночий" ? (
-                          <Venus className="size-4" aria-hidden="true" />
+                          <Image
+                            src="/image/woman.svg"
+                            alt=""
+                            aria-hidden="true"
+                            width={10}
+                            height={16}
+                          />
                         ) : (
-                          <UserRound className="size-4" aria-hidden="true" />
+                          <Image
+                            src="/image/man.svg"
+                            alt=""
+                            aria-hidden="true"
+                            width={10}
+                            height={16}
+                          />
                         )}
                         {option}
                       </button>

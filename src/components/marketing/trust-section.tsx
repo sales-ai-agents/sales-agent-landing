@@ -39,7 +39,7 @@ export function TrustSection() {
   return (
     <section className="relative py-20">
       <div
-        className="bg-primary/50 pointer-events-none absolute -top-40 -left-20 -z-20 size-72 rounded-full blur-2xl"
+        className="bg-primary/50 pointer-events-none absolute -top-40 -left-20 -z-20 hidden size-72 rounded-full blur-2xl md:block"
         aria-hidden="true"
       />
       <div className="mx-auto max-w-7xl px-6">

@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { CallsChart } from "@/components/dashboard/calls-chart";
 
 interface StatCard {
@@ -73,12 +73,10 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-bold">Dashboard</h1>
           <p className="text-muted-foreground">Overview of your AI voice agents performance</p>
         </div>
-        <Button asChild>
-          <Link href="/dashboard/agents/create">
-            <Plus className="mr-2 h-4 w-4" />
-            New Agent
-          </Link>
-        </Button>
+        <Link href="/dashboard/agents/create" className={buttonVariants()}>
+          <Plus className="mr-2 h-4 w-4" />
+          New Agent
+        </Link>
       </div>
 
       {/* Stats Grid */}

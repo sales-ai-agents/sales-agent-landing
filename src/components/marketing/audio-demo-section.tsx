@@ -148,12 +148,12 @@ export function AudioDemoSection() {
         >
           <CarouselPrevious
             variant="ghost"
-            className="absolute top-1/2 -left-5 z-10 size-11 -translate-y-1/2 sm:-left-12"
+            className="absolute top-0 -left-4 z-10 sm:-left-10"
             aria-label="Попередній слайд"
           />
           <CarouselNext
             variant="ghost"
-            className="absolute top-1/2 -right-5 z-10 size-11 -translate-y-1/2 sm:-right-12"
+            className="absolute top-0 -right-4 z-10 sm:-right-10"
             aria-label="Наступний слайд"
           />
           <CarouselContent>
@@ -161,7 +161,7 @@ export function AudioDemoSection() {
               const isCenter = selectedSnap === index;
 
               return (
-                <CarouselItem key={demo.id} className="px-6 sm:basis-1/2 sm:p-2 lg:basis-1/3">
+                <CarouselItem key={demo.id} className="px-6 py-2 sm:basis-1/2 sm:p-2 lg:basis-1/3">
                   <div
                     role={!isCenter ? "button" : undefined}
                     tabIndex={!isCenter ? 0 : undefined}
@@ -192,7 +192,7 @@ export function AudioDemoSection() {
             })}
           </CarouselContent>
 
-          <CarouselDots className="mt-1 flex sm:hidden" />
+          <CarouselDots className="mt-2 flex sm:hidden" />
         </Carousel>
       </div>
     </section>

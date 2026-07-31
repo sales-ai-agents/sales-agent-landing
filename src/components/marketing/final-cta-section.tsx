@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { LeadFormModal } from "@/components/marketing/lead-form-card";
 
 export function FinalCtaSection() {
@@ -21,12 +22,15 @@ export function FinalCtaSection() {
         </p>
 
         <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <Button
-            asChild
-            className="font-body h-12 w-full rounded-xl bg-white px-7 text-lg font-normal text-black hover:bg-gray-100 sm:w-sm"
+          <a
+            href="#hero"
+            className={cn(
+              buttonVariants(),
+              "font-body h-12 w-full rounded-xl bg-white px-7 text-lg font-normal text-black hover:bg-gray-100 sm:w-sm"
+            )}
           >
-            <a href="#hero">Запустити тестовий дзвінок</a>
-          </Button>
+            Запустити тестовий дзвінок
+          </a>
 
           <Button
             variant="outline"

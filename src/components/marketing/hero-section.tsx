@@ -1,7 +1,8 @@
 import Image from "next/image";
 import { Clock, Link2, LucideIcon, PhoneCall, Play } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
 import { Navbar, MobileNavbar } from "@/components/marketing/navbar";
 import { DynamicDemoCallCard as DemoCallCard } from "@/components/marketing/dynamic-sections";
 
@@ -39,25 +40,26 @@ export function HeroSection() {
             </p>
 
             <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4 lg:items-start lg:justify-start">
-              <Button
-                asChild
-                size="lg"
-                className="bg-primary text-primary-foreground hover:bg-primary/90 font-body h-12 w-full rounded-full px-8 text-lg font-normal sm:w-auto"
+              <a
+                href="#builder"
+                className={cn(
+                  buttonVariants({ size: "lg" }),
+                  "bg-primary text-primary-foreground hover:bg-primary/90 font-body h-12 w-full rounded-full px-8 text-lg font-normal sm:w-auto"
+                )}
               >
-                <a href="#builder">Спробувати безкоштовно</a>
-              </Button>
+                Спробувати безкоштовно
+              </a>
 
-              <Button
-                asChild
-                size="lg"
-                variant="ghost"
-                className="border-border text-foreground font-body h-12 w-full rounded-full border bg-white/45 px-8 text-lg font-normal backdrop-blur-xl sm:w-auto"
+              <a
+                href="#audio-demo"
+                className={cn(
+                  buttonVariants({ size: "lg", variant: "ghost" }),
+                  "border-border text-foreground font-body h-12 w-full rounded-full border bg-white/45 px-8 text-lg font-normal backdrop-blur-xl sm:w-auto"
+                )}
               >
-                <a href="#audio-demo">
-                  <Play className="size-4" aria-hidden="true" />
-                  Прослухати демо
-                </a>
-              </Button>
+                <Play className="size-4" aria-hidden="true" />
+                Прослухати демо
+              </a>
             </div>
 
             <div className="mt-10 hidden flex-wrap items-center justify-center gap-6 md:flex lg:justify-start">

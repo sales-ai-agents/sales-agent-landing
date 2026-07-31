@@ -4,10 +4,10 @@ import React, { useState } from "react";
 import { Cog, BarChart3, FileText, MousePointer2 } from "lucide-react";
 
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLeadForm } from "@/hooks/use-lead-form";
-import { formatUaPhoneDigits } from "@/lib/utils";
+import { cn, formatUaPhoneDigits } from "@/lib/utils";
 
 const TELEGRAM_LINK = "https://t.me/calls4u_ai";
 const UA_SUBSCRIBER_DIGITS = 9;
@@ -110,19 +110,21 @@ export function LeadFormModal({ open, onClose, sourcePage }: LeadFormModalProps)
 
               <div className="mx-auto mt-auto pt-4">
                 <p className="mb-3 text-base text-gray-500">Не хочете чекати на відповідь?</p>
-                <Button
-                  asChild
-                  variant="ghost"
-                  className="border-primary text-foreground h-12 w-full max-w-75 rounded-full border text-lg font-normal"
+                <a
+                  href={TELEGRAM_LINK}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    buttonVariants({ variant: "ghost" }),
+                    "border-primary text-foreground h-12 w-full max-w-75 rounded-full border text-lg font-normal"
+                  )}
                 >
-                  <a href={TELEGRAM_LINK} target="_blank" rel="noopener noreferrer">
-                    <MousePointer2
-                      className="text-primary size-6 shrink-0 rotate-90"
-                      aria-hidden="true"
-                    />
-                    Напишіть в Telegram
-                  </a>
-                </Button>
+                  <MousePointer2
+                    className="text-primary size-6 shrink-0 rotate-90"
+                    aria-hidden="true"
+                  />
+                  Напишіть в Telegram
+                </a>
               </div>
             </div>
 

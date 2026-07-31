@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Bot, Plus, Play, Pause, Edit, PhoneCall } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAgents, useToggleAgentStatus } from "@/hooks/use-agents";
 import type { Agent, AgentStatus } from "@/types";
@@ -25,12 +25,10 @@ export default function AgentsPage() {
           <h1 className="text-2xl font-bold">Agents</h1>
           <p className="text-muted-foreground">Manage your AI voice agents</p>
         </div>
-        <Button asChild>
-          <Link href="/dashboard/agents/create">
-            <Plus className="mr-2 h-4 w-4" />
-            Create Agent
-          </Link>
-        </Button>
+        <Link href="/dashboard/agents/create" className={buttonVariants()}>
+          <Plus className="mr-2 h-4 w-4" />
+          Create Agent
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -76,12 +74,13 @@ function AgentCard({ agent, onToggle }: AgentCardProps) {
         </div>
         <p className="text-muted-foreground mb-4 text-xs">Last active: {agent.lastActive}</p>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" asChild>
-            <Link href={`/dashboard/agents/${agent.id}/edit`}>
-              <Edit className="mr-1 h-3 w-3" />
-              Edit
-            </Link>
-          </Button>
+          <Link
+            href={`/dashboard/agents/${agent.id}/edit`}
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            <Edit className="mr-1 h-3 w-3" />
+            Edit
+          </Link>
           <Button variant="outline" size="sm">
             <PhoneCall className="mr-1 h-3 w-3" />
             Test

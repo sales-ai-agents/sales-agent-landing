@@ -1,7 +1,7 @@
-import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import type { Scenario, ScenarioDetail } from "@/types";
 import { scenarios } from "@/lib/mock-data";
 
@@ -36,16 +36,16 @@ export function ScenariosSection() {
             Почніть з готового сценарію, фрази <br />
             <span className="font-medium">можна змінити під ваш бізнес.</span>
           </p>
-          <Button
-            asChild
-            size="lg"
-            className="bg-primary hover:bg-primary/90 font-body h-12 rounded-3xl px-8 font-normal text-white sm:w-auto sm:text-lg"
+          <a
+            href="#builder"
+            className={cn(
+              buttonVariants({ size: "lg" }),
+              "bg-primary hover:bg-primary/90 font-body h-12 rounded-3xl px-8 font-normal text-white sm:w-auto sm:text-lg"
+            )}
           >
-            <Link href="#builder">
-              Вибрати сценарій і запустити тест
-              <ArrowUpRight className="ml-2 size-4" aria-hidden="true" />
-            </Link>
-          </Button>
+            Вибрати сценарій і запустити тест
+            <ArrowUpRight className="ml-2 size-4" aria-hidden="true" />
+          </a>
         </div>
       </div>
     </section>
