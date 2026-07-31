@@ -3,33 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  Bot,
-  Users,
-  PhoneCall,
-  Settings,
-  ChevronLeft,
-  ChevronRight,
-  Phone,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-
-interface NavItem {
-  readonly href: string;
-  readonly icon: LucideIcon;
-  readonly label: string;
-}
-
-const navItems = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/dashboard/agents", icon: Bot, label: "Agents" },
-  { href: "/dashboard/contacts", icon: Users, label: "Contacts" },
-  { href: "/dashboard/call-logs", icon: PhoneCall, label: "Call Logs" },
-  { href: "/dashboard/settings", icon: Settings, label: "Settings" },
-] as const satisfies readonly NavItem[];
+import { DASHBOARD_NAV_ITEMS } from "@/lib/constants";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -50,7 +27,7 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 space-y-1 p-3">
-        {navItems.map((item) => {
+        {DASHBOARD_NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
           return (

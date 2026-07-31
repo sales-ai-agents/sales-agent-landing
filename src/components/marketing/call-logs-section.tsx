@@ -28,7 +28,7 @@ export function CallLogsSection() {
         />
 
         <div className="flex justify-end pb-2 sm:hidden">
-          <Image src="/image/table-pointer.svg" alt="" width={35} height={35} />
+          <Image src="/image/table-pointer.svg" alt="" width={35} height={35} aria-hidden="true" />
         </div>
 
         <div className="border-border relative rounded-2xl border bg-white shadow-sm">

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-const PRESETS_URL = "https://api.calls4u.ai/webhook/constructor/presets";
+import { API_ENDPOINTS } from "@/lib/api-config";
 
 const NETWORK_ERROR_MESSAGE =
   "Не вдалося з'єднатися з сервером. Перевірте інтернет і спробуйте ще раз.";
@@ -21,7 +21,7 @@ interface PresetsResponse {
 async function fetchPresets(): Promise<Preset[]> {
   let response: Response;
   try {
-    response = await fetch(PRESETS_URL, {
+    response = await fetch(API_ENDPOINTS.PRESETS, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     });

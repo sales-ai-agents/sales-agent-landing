@@ -1,36 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
-import localFont from "next/font/local";
+import { Inter } from "next/font/google";
 import { Providers } from "@/components/providers";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin", "cyrillic"],
-});
-
-const actayWideBold = localFont({
-  src: "../fonts/ActayWide-Bold.woff2",
-  variable: "--font-display",
-  weight: "700",
-  fallback: ["Inter", "sans-serif"],
-});
-
-const gilroy = localFont({
-  src: "../fonts/Gilroy-SemiBold.woff",
-  variable: "--font-gilroy",
-  weight: "600",
-  fallback: ["Inter", "sans-serif"],
 });
 
 export const metadata: Metadata = {
@@ -47,10 +22,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${actayWideBold.variable} ${gilroy.variable}`}
-    >
+    <html lang="uk" className={inter.variable}>
       <body suppressHydrationWarning>
         <Providers>{children}</Providers>
       </body>

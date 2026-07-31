@@ -1,9 +1,10 @@
 "use client";
 
-import { X, Play } from "lucide-react";
+import { Play } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import type { CallLog, CallStatus } from "@/types";
 
 const STATUS_CONFIG: Record<
@@ -25,19 +26,18 @@ export function CallLogDetailDrawer({ callLog, onClose }: CallLogDetailDrawerPro
   const statusConfig = STATUS_CONFIG[callLog.status];
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/50" onClick={onClose}>
-      <div
-        className="bg-background w-full max-w-md overflow-y-auto border-l p-6 shadow-xl"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Call Details</h2>
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
+    <Sheet
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
+      <SheetContent side="right" className="overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle>Call Details</SheetTitle>
+        </SheetHeader>
 
-        <div className="space-y-4">
+        <div className="mt-6 space-y-4">
           <DetailField label="Customer">
             <p className="font-medium">{callLog.customerName}</p>
             <p className="text-muted-foreground text-sm">{callLog.phone}</p>
@@ -87,8 +87,8 @@ export function CallLogDetailDrawer({ callLog, onClose }: CallLogDetailDrawerPro
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </SheetContent>
+    </Sheet>
   );
 }
 

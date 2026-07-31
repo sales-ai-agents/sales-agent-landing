@@ -107,7 +107,7 @@ export function TrustSection() {
         </div>
 
         <div className="shadow-primary/30 -mx-6 w-screen scrollbar-none overflow-x-auto bg-white pt-12 shadow-md md:hidden">
-          <div className="flex w-max gap-6 p-2 px-6">
+          <div className="flex w-max gap-6 px-6 py-2">
             {complianceIndicators.map(({ icon: Icon, label }) => (
               <div key={label} className="flex shrink-0 items-center gap-2">
                 <Icon className="text-primary size-4" aria-hidden="true" />

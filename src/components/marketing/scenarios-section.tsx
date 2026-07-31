@@ -63,7 +63,10 @@ function ScenarioCard({ scenario, alignRight, isLast }: ScenarioCardProps) {
 
   return (
     <div
-      className={`relative min-h-50 pt-4 sm:pl-4 ${alignRight ? "pr-20 sm:pr-0" : "pl-20 sm:pl-0"}`}
+      className={cn(
+        "relative min-h-50 pt-4 sm:pl-4",
+        alignRight ? "pr-20 sm:pr-0" : "pl-20 sm:pl-0"
+      )}
     >
       {!isLast && (
         <Image
@@ -72,19 +75,26 @@ function ScenarioCard({ scenario, alignRight, isLast }: ScenarioCardProps) {
           width={alignRight ? 80 : 95}
           height={90}
           aria-hidden="true"
-          className={`absolute top-2/3 sm:hidden ${alignRight ? "right-0" : "left-0"}`}
+          className={cn("absolute top-2/3 sm:hidden", alignRight ? "right-0" : "left-0")}
+          style={{ width: "auto", height: "auto" }}
         />
       )}
 
       <div
-        className={`bg-primary shadow-primary/30 absolute top-0 z-10 flex size-14 items-center justify-center rounded-full shadow-lg sm:left-0 ${alignRight ? "right-15 sm:right-auto" : "left-15"}`}
+        className={cn(
+          "bg-primary shadow-primary/30 absolute top-0 z-10 flex size-14 items-center justify-center rounded-full shadow-lg sm:left-0",
+          alignRight ? "right-15 sm:right-auto" : "left-15"
+        )}
         aria-hidden="true"
       >
         {Icon && <Icon className="size-6 text-white" />}
       </div>
 
       <div
-        className={`border-border bg-card-glass h-full rounded-2xl border py-5 backdrop-blur-sm sm:pr-6 sm:pl-14 ${alignRight ? "pr-14 pl-6 sm:pr-6 sm:pl-14" : "pr-6 pl-14"}`}
+        className={cn(
+          "border-border bg-card-glass h-full rounded-2xl border py-5 backdrop-blur-sm sm:pr-6 sm:pl-14",
+          alignRight ? "pr-14 pl-6 sm:pr-6 sm:pl-14" : "pr-6 pl-14"
+        )}
       >
         <h3 className="text-foreground mb-3 text-xl font-medium">{scenario.title}</h3>
 

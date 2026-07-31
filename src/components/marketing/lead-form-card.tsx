@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import type { ChangeEvent, FormEvent } from "react";
+import { useState } from "react";
 import { Cog, BarChart3, FileText, MousePointer2 } from "lucide-react";
 
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -26,7 +27,7 @@ export function LeadFormModal({ open, onClose, sourcePage }: LeadFormModalProps)
 
   const { submitLead, isLoading, isSuccess, errorMessage, reset } = useLeadForm();
 
-  function handleSubmit(e: React.FormEvent): void {
+  function handleSubmit(e: FormEvent): void {
     e.preventDefault();
     if (!name.trim() || phone.length !== UA_SUBSCRIBER_DIGITS) return;
 
@@ -39,14 +40,14 @@ export function LeadFormModal({ open, onClose, sourcePage }: LeadFormModalProps)
     });
   }
 
-  function handlePhoneChange(e: React.ChangeEvent<HTMLInputElement>): void {
+  function handlePhoneChange(e: ChangeEvent<HTMLInputElement>): void {
     const raw = e.target.value.replace(/\D/g, "").slice(0, UA_SUBSCRIBER_DIGITS);
     setPhone(raw);
     if (errorMessage) reset();
   }
 
   function handleChange(setter: (v: string) => void) {
-    return (e: React.ChangeEvent<HTMLInputElement>) => {
+    return (e: ChangeEvent<HTMLInputElement>) => {
       setter(e.target.value);
       if (errorMessage) reset();
     };

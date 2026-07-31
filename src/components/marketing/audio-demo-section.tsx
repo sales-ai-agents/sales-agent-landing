@@ -113,13 +113,25 @@ export function AudioDemoSection() {
         className="pointer-events-none absolute top-1/10 left-0 hidden -translate-y-1/10 opacity-50 lg:block"
         aria-hidden="true"
       >
-        <Image src="/image/audio-demo-waveform.jpg" alt="" width={400} height={200} />
+        <Image
+          src="/image/audio-demo-waveform.jpg"
+          alt=""
+          width={400}
+          height={200}
+          style={{ width: "auto", height: "auto" }}
+        />
       </div>
       <div
         className="pointer-events-none absolute top-1/8 right-0 hidden -translate-y-1/8 opacity-50 lg:block"
         aria-hidden="true"
       >
-        <Image src="/image/audio-demo-waveform.jpg" alt="" width={400} height={200} />
+        <Image
+          src="/image/audio-demo-waveform.jpg"
+          alt=""
+          width={400}
+          height={200}
+          style={{ width: "auto", height: "auto" }}
+        />
       </div>
 
       <h2 className="font-display mx-auto mb-5 max-w-4xl text-center text-3xl sm:text-4xl md:text-5xl">

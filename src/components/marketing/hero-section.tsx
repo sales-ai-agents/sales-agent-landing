@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { Clock, Link2, LucideIcon, PhoneCall, Play } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { Clock, Link2, PhoneCall, Play } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";

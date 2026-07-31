@@ -1,5 +1,4 @@
 import { Check, BarChart3, Headset, User } from "lucide-react";
-import React from "react";
 import Image from "next/image";
 
 const checklist = [
@@ -42,7 +41,9 @@ export function HandoffSection() {
         alt=""
         width={230}
         height={200}
+        aria-hidden="true"
         className="absolute bottom-0 left-0 -z-10 hidden lg:block"
+        style={{ width: "auto", height: "auto" }}
       />
       <div className="mx-auto max-w-7xl px-6">
         <p className="text-foreground mb-4 text-center text-base font-light tracking-wide uppercase lg:text-left">
@@ -89,14 +90,18 @@ export function HandoffSection() {
                 alt=""
                 width={125}
                 height={60}
+                aria-hidden="true"
                 className="absolute top-14 -right-14 hidden lg:block"
+                style={{ width: "auto", height: "auto" }}
               />
               <Image
                 src="/image/handoff-crm-mobile-arrow.svg"
                 alt=""
                 width={130}
                 height={60}
+                aria-hidden="true"
                 className="block lg:hidden"
+                style={{ width: "auto", height: "auto" }}
               />
             </div>
 
@@ -111,14 +116,18 @@ export function HandoffSection() {
                 alt=""
                 width={130}
                 height={60}
+                aria-hidden="true"
                 className="absolute top-30 left-2 hidden lg:block"
+                style={{ width: "auto", height: "auto" }}
               />
               <Image
                 src="/image/handoff-mobile-ai-arrow.svg"
                 alt=""
                 width={125}
                 height={60}
+                aria-hidden="true"
                 className="block lg:hidden"
+                style={{ width: "auto", height: "auto" }}
               />
             </div>
           </div>

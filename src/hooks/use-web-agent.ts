@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 
-const WEB_AGENT_URL = "https://api.calls4u.ai/webhook/web-agent/start";
+import { API_ENDPOINTS } from "@/lib/api-config";
 
 const NETWORK_ERROR_MESSAGE =
   "Не вдалося з'єднатися з сервером. Перевірте інтернет і спробуйте ще раз.";
@@ -33,7 +33,7 @@ export interface StartWebAgentParams {
 async function startWebAgent(params: StartWebAgentParams): Promise<WebAgentSession> {
   let response: Response;
   try {
-    response = await fetch(WEB_AGENT_URL, {
+    response = await fetch(API_ENDPOINTS.WEB_AGENT, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(params),

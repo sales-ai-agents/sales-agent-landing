@@ -8,7 +8,48 @@ import type {
   OnboardingStep,
   Scenario,
 } from "@/types";
+import type { LucideIcon } from "lucide-react";
 import { Bell, ClipboardCheck, PhoneCall, Settings, ShoppingCart, Trophy } from "lucide-react";
+
+// --- Dashboard Chart Data ---
+export interface ChartDataPoint {
+  readonly day: string;
+  readonly calls: number;
+  readonly successful: number;
+}
+
+export const chartData: readonly ChartDataPoint[] = [
+  { day: "Mon", calls: 45, successful: 42 },
+  { day: "Tue", calls: 52, successful: 48 },
+  { day: "Wed", calls: 38, successful: 35 },
+  { day: "Thu", calls: 65, successful: 60 },
+  { day: "Fri", calls: 58, successful: 53 },
+  { day: "Sat", calls: 22, successful: 20 },
+  { day: "Sun", calls: 15, successful: 14 },
+] as const;
+
+// --- Dashboard Stats ---
+export interface StatCard {
+  readonly title: string;
+  readonly value: string;
+  readonly change: string;
+  readonly icon: LucideIcon;
+  readonly color: string;
+  readonly bgColor: string;
+}
+
+export interface RecentAgent {
+  readonly name: string;
+  readonly calls: number;
+  readonly success: string;
+  readonly time: string;
+}
+
+export const recentActivity: readonly RecentAgent[] = [
+  { name: "Appointment Reminder Bot", calls: 45, success: "92%", time: "2 min ago" },
+  { name: "Lead Qualifier", calls: 23, success: "87%", time: "15 min ago" },
+  { name: "Follow-up Agent", calls: 12, success: "95%", time: "1 hour ago" },
+] as const;
 
 export const steps: readonly OnboardingStep[] = [
   {

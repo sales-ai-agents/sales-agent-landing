@@ -3,26 +3,11 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Menu, LogOut, User, Phone } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
-import { LayoutDashboard, Bot, Users, PhoneCall, Settings } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-
-interface NavItem {
-  readonly href: string;
-  readonly icon: LucideIcon;
-  readonly label: string;
-}
-
-const navItems = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/dashboard/agents", icon: Bot, label: "Agents" },
-  { href: "/dashboard/contacts", icon: Users, label: "Contacts" },
-  { href: "/dashboard/call-logs", icon: PhoneCall, label: "Call Logs" },
-  { href: "/dashboard/settings", icon: Settings, label: "Settings" },
-] as const satisfies readonly NavItem[];
+import { DASHBOARD_NAV_ITEMS } from "@/lib/constants";
 
 export function DashboardHeader() {
   const router = useRouter();
@@ -45,7 +30,7 @@ export function DashboardHeader() {
             </div>
           </SheetTitle>
           <nav className="space-y-1">
-            {navItems.map((item) => {
+            {DASHBOARD_NAV_ITEMS.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
               return (

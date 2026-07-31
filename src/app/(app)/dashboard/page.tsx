@@ -2,22 +2,13 @@
 
 import { PhoneCall, CheckCircle, XCircle, UserCheck, Bot, Plus } from "lucide-react";
 import Link from "next/link";
-import type { LucideIcon } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { CallsChart } from "@/components/dashboard/calls-chart";
+import { recentActivity, type StatCard } from "@/lib/mock-data";
 
-interface StatCard {
-  title: string;
-  value: string;
-  change: string;
-  icon: LucideIcon;
-  color: string;
-  bgColor: string;
-}
-
-const STATS = [
+const STATS: readonly StatCard[] = [
   {
     title: "Total Calls",
     value: "1,247",
@@ -50,20 +41,7 @@ const STATS = [
     color: "text-purple-600",
     bgColor: "bg-purple-100",
   },
-] as const satisfies readonly StatCard[];
-
-interface RecentAgent {
-  name: string;
-  calls: number;
-  success: string;
-  time: string;
-}
-
-const RECENT_ACTIVITY = [
-  { name: "Appointment Reminder Bot", calls: 45, success: "92%", time: "2 min ago" },
-  { name: "Lead Qualifier", calls: 23, success: "87%", time: "15 min ago" },
-  { name: "Follow-up Agent", calls: 12, success: "95%", time: "1 hour ago" },
-] as const satisfies readonly RecentAgent[];
+] as const;
 
 export default function DashboardPage() {
   return (
@@ -126,7 +104,7 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {RECENT_ACTIVITY.map((agent) => (
+            {recentActivity.map((agent) => (
               <div
                 key={agent.name}
                 className="flex items-center justify-between border-b py-2 last:border-0"

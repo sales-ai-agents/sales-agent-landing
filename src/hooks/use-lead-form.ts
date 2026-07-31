@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 
-const LEAD_URL = "https://api.calls4u.ai/webhook/website/lead";
+import { API_ENDPOINTS } from "@/lib/api-config";
 
 const NETWORK_ERROR_MESSAGE =
   "Не вдалося з'єднатися з сервером. Перевірте інтернет і спробуйте ще раз.";
@@ -32,7 +32,7 @@ export interface LeadFormResult {
 async function submitLead(params: LeadFormParams): Promise<LeadFormResult> {
   let response: Response;
   try {
-    response = await fetch(LEAD_URL, {
+    response = await fetch(API_ENDPOINTS.LEAD, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(params),

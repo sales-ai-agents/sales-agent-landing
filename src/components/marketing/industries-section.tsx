@@ -32,7 +32,7 @@ export function IndustriesSection() {
           }}
           aria-label="Галузі"
         >
-          <div className="flex items-center justify-end gap-3 sm:ml-auto sm:max-w-3xl sm:justify-center">
+          <div className="mb-4 flex items-center justify-end gap-3 sm:ml-auto sm:max-w-3xl sm:justify-center">
             <CarouselPrevious
               variant="ghost"
               className="static size-10 translate-y-0"

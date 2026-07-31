@@ -57,7 +57,9 @@ export function HowItWorksSection() {
                     alt=""
                     width={30}
                     height={40}
+                    aria-hidden="true"
                     className="pointer-events-none"
+                    style={{ width: "auto", height: "auto" }}
                   />
                 </div>
               )}

@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight, Check, Play, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useWizardStore } from "@/lib/store";
@@ -171,13 +172,12 @@ export default function CreateAgentPage() {
               </CardHeader>
               <div className="space-y-2">
                 <Label htmlFor="instructions">Instructions</Label>
-                <textarea
+                <Textarea
                   id="instructions"
                   rows={6}
                   placeholder="Call the customer to remind them about their appointment tomorrow. If they confirm, say 'Great, we'll see you then!' If they want to reschedule, ask for a preferred date and time. Always be polite and professional."
                   value={instructions}
                   onChange={(event) => setInstructions(event.target.value)}
-                  className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                 />
                 <p className="text-muted-foreground text-xs">
                   Write as if you&apos;re explaining to a real person what to say on the call.

@@ -6,11 +6,11 @@
 
 @theme inline {
   --color-primary: #005bff;
-  --color-primary-foreground: #ffffff;
+  --color-primary-foreground: #fff;
   --color-card-glass: rgba(207, 207, 207, 0.28);
   --color-border: #e0e0e0;
-  --color-background: #ffffff;
-  --color-foreground: #000000;
+  --color-background: #fff;
+  --color-foreground: #000;
   --color-muted-foreground: rgba(0, 0, 0, 0.6);
   --color-input-border: #afafaf;
   --color-slider-track: #d9d9d9;

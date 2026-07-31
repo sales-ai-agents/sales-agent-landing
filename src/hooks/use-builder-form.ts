@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 
 import type { Preset } from "@/hooks/use-presets";
 
@@ -17,16 +17,20 @@ export function useBuilderForm(presets: Preset[]) {
   const [voice, setVoice] = useState<VoiceOption>("Жіночий");
   const [instruction, setInstruction] = useState("");
   const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null);
+  const hasInitializedRef = useRef(false);
 
   const activePreset = useMemo(
     () => presets.find((p) => p.id === selectedPresetId) ?? null,
     [presets, selectedPresetId]
   );
 
-  if (presets.length > 0 && !selectedPresetId && instruction === "") {
-    setSelectedPresetId(presets[0].id);
-    setInstruction(presets[0].prompt);
-  }
+  useEffect(() => {
+    if (presets.length > 0 && !hasInitializedRef.current) {
+      hasInitializedRef.current = true;
+      setSelectedPresetId(presets[0].id);
+      setInstruction(presets[0].prompt);
+    }
+  }, [presets]);
 
   const selectPreset = useCallback((preset: Preset) => {
     setSelectedPresetId(preset.id);

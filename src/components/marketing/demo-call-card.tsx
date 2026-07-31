@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import type { ChangeEvent, JSX } from "react";
+import { useState } from "react";
 import { Phone, Lock } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,7 @@ export default function DemoCallCard() {
   const [showLeadForm, setShowLeadForm] = useState(false);
   const { requestCall, isLoading, isSuccess, errorMessage, reset } = useDemoCall();
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>): void {
+  function handleChange(e: ChangeEvent<HTMLInputElement>): void {
     const raw = e.target.value.replace(/\D/g, "").slice(0, UA_SUBSCRIBER_DIGITS);
     setDigits(raw);
     if (errorMessage) reset();
@@ -72,7 +73,7 @@ interface DemoCallFormProps {
   isComplete: boolean;
   isLoading: boolean;
   errorMessage: string | null;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
   onSubmit: () => void;
 }
 
@@ -83,7 +84,7 @@ function DemoCallForm({
   errorMessage,
   onChange,
   onSubmit,
-}: DemoCallFormProps): React.JSX.Element {
+}: DemoCallFormProps): JSX.Element {
   return (
     <>
       <div
@@ -148,7 +149,7 @@ function DemoCallSuccess({
 }: {
   digits: string;
   onShowForm: () => void;
-}): React.JSX.Element {
+}): JSX.Element {
   return (
     <div className="flex flex-col items-center gap-3 py-4 text-center">
       <p className="text-foreground text-lg font-medium">Дзвінок на шляху!</p>

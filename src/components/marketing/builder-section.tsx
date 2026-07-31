@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Check, Headset, UserRound, Venus } from "lucide-react";
+import { Check, Headset } from "lucide-react";
 
 import { useWebAgent } from "@/hooks/use-web-agent";
 import { usePresets } from "@/hooks/use-presets";
@@ -42,7 +42,6 @@ export function BuilderSection() {
           src="/image/builder-line.svg"
           alt=""
           fill
-          priority
           className="absolute top-1/2! left-0 -z-20 w-full -translate-y-1/2! object-cover"
         />
         <div
@@ -137,6 +136,7 @@ export function BuilderSection() {
                             aria-hidden="true"
                             width={10}
                             height={16}
+                            style={{ width: "10px", height: "16px" }}
                           />
                         ) : (
                           <Image
@@ -145,6 +145,7 @@ export function BuilderSection() {
                             aria-hidden="true"
                             width={10}
                             height={16}
+                            style={{ width: "10px", height: "16px" }}
                           />
                         )}
                         {option}

@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 
-const DEMO_CALL_URL = "https://api.calls4u.ai/webhook/demo-call";
+import { API_ENDPOINTS } from "@/lib/api-config";
+
 const UA_COUNTRY_CODE = "+380";
 
 const DEMO_CALL_ERROR_MESSAGES: Record<string, string> = {
@@ -20,7 +21,7 @@ async function requestDemoCall(subscriberDigits: string): Promise<void> {
 
   let response: Response;
   try {
-    response = await fetch(DEMO_CALL_URL, {
+    response = await fetch(API_ENDPOINTS.DEMO_CALL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ phone }),
