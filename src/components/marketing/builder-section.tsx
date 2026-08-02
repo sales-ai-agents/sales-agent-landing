@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { ScrollReveal, ScaleReveal } from "@/components/marketing/scroll-reveal";
 import { BUILDER_CHECKLIST } from "@/lib/content";
 
 export function BuilderSection() {
@@ -45,7 +46,11 @@ export function BuilderSection() {
 
       <div className="relative mx-auto max-w-7xl px-6">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
-          <div className="max-w-lg text-center lg:text-left">
+          <ScrollReveal
+            direction="left"
+            distance={35}
+            className="max-w-lg text-center lg:text-left"
+          >
             <h2 className="font-display mb-6 text-3xl sm:text-4xl md:text-5xl">
               <span className="text-foreground">Конструктор агента </span>
               <span className="text-primary">без коду</span>
@@ -70,9 +75,13 @@ export function BuilderSection() {
                 </li>
               ))}
             </ul>
-          </div>
+          </ScrollReveal>
 
-          <div className="mx-auto w-full max-w-xl lg:mx-0 lg:ml-auto">
+          <ScaleReveal
+            delay={0.2}
+            duration={0.7}
+            className="mx-auto w-full max-w-xl lg:mx-0 lg:ml-auto"
+          >
             <div className="mb-6 flex justify-center">
               <div className="border-primary flex items-center gap-3 rounded-full border px-6 py-2">
                 <div className="bg-primary size-3 rounded-full" aria-hidden="true" />
@@ -236,7 +245,7 @@ export function BuilderSection() {
                 )}
               </div>
             </div>
-          </div>
+          </ScaleReveal>
         </div>
       </div>
     </section>

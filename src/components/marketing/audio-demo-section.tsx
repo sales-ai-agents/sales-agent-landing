@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/carousel";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { ScrollReveal } from "@/components/marketing/scroll-reveal";
 import type { DemoCard } from "@/types";
 import { DEMOS } from "@/lib/marketing-data";
 
@@ -110,103 +111,110 @@ export function AudioDemoSection() {
   return (
     <section id="audio-demo" className="relative overflow-hidden px-4 py-20 md:px-8">
       <div
-        className="pointer-events-none absolute top-1/10 left-0 hidden -translate-y-1/10 opacity-50 xl:block"
+        className="pointer-events-none absolute top-1/10 left-0 -z-20 hidden -translate-y-1/10 opacity-40 xl:block"
         aria-hidden="true"
       >
         <Image
           src="/image/audio-demo-waveform.jpg"
           alt=""
-          width={400}
+          width={350}
           height={200}
-          style={{ width: "400px", height: "auto" }}
+          style={{ width: "350px", height: "auto" }}
         />
       </div>
       <div
-        className="pointer-events-none absolute top-1/8 right-0 hidden -translate-y-1/8 opacity-50 xl:block"
+        className="pointer-events-none absolute top-1/8 right-0 -z-20 hidden -translate-y-1/8 opacity-40 xl:block"
         aria-hidden="true"
       >
         <Image
           src="/image/audio-demo-waveform.jpg"
           alt=""
-          width={400}
+          width={350}
           height={200}
-          style={{ width: "400px", height: "auto" }}
+          style={{ width: "350px", height: "auto" }}
         />
       </div>
 
-      <h2 className="font-display mx-auto mb-5 max-w-4xl text-center text-3xl sm:text-4xl md:text-5xl">
-        <span className="text-foreground">Не презентація. </span>
-        <span className="text-primary">Реальний</span>{" "}
-        <span className="text-foreground">тестовий </span>
-        <span className="text-primary">дзвінок</span>{" "}
-        <span className="text-foreground">агента</span>
-      </h2>
+      <ScrollReveal direction="up" distance={30}>
+        <h2 className="font-display mx-auto mb-5 max-w-4xl text-center text-3xl sm:text-4xl md:text-5xl">
+          <span className="text-foreground">Не презентація. </span>
+          <span className="text-primary">Реальний</span>{" "}
+          <span className="text-foreground">тестовий </span>
+          <span className="text-primary">дзвінок</span>{" "}
+          <span className="text-foreground">агента</span>
+        </h2>
 
-      <p className="text-muted-foreground mx-auto mb-6 max-w-lg text-center text-base font-normal md:text-lg">
-        Послухайте, як агент підтверджує запис, ставить уточнюючі питання і фіксує результат дзвінка
-        в кабінеті.
-      </p>
+        <p className="text-muted-foreground mx-auto mb-6 max-w-lg text-center text-base font-normal md:text-lg">
+          Послухайте, як агент підтверджує запис, ставить уточнюючі питання і фіксує результат
+          дзвінка в кабінеті.
+        </p>
+      </ScrollReveal>
 
-      <div className="relative mx-auto max-w-6xl">
-        <Carousel
-          setApi={setApi}
-          opts={{
-            align: "center",
-            loop: true,
-            startIndex: 1,
-            containScroll: "keepSnaps",
-          }}
-          aria-label="Демо дзвінки"
-        >
-          <CarouselPrevious
-            variant="ghost"
-            className="absolute top-0 -left-4 z-10 sm:-left-10"
-            aria-label="Попередній слайд"
-          />
-          <CarouselNext
-            variant="ghost"
-            className="absolute top-0 -right-4 z-10 sm:-right-10"
-            aria-label="Наступний слайд"
-          />
-          <CarouselContent>
-            {DEMOS.map((demo, index) => {
-              const isCenter = selectedSnap === index;
+      <ScrollReveal direction="up" delay={0.2} distance={20} threshold={0.1}>
+        <div className="relative mx-auto max-w-6xl">
+          <Carousel
+            setApi={setApi}
+            opts={{
+              align: "center",
+              loop: true,
+              startIndex: 1,
+              containScroll: "keepSnaps",
+            }}
+            aria-label="Демо дзвінки"
+          >
+            <CarouselPrevious
+              variant="ghost"
+              className="absolute top-0 -left-4 z-10 sm:-left-10"
+              aria-label="Попередній слайд"
+            />
+            <CarouselNext
+              variant="ghost"
+              className="absolute top-0 -right-4 z-10 sm:-right-10"
+              aria-label="Наступний слайд"
+            />
+            <CarouselContent>
+              {DEMOS.map((demo, index) => {
+                const isCenter = selectedSnap === index;
 
-              return (
-                <CarouselItem key={demo.id} className="px-6 py-2 sm:basis-1/2 sm:p-2 lg:basis-1/3">
-                  <div
-                    role={!isCenter ? "button" : undefined}
-                    tabIndex={!isCenter ? 0 : undefined}
-                    aria-label={!isCenter ? `Перейти до ${demo.category}` : undefined}
-                    onClick={() => handleSlideClick(index)}
-                    onKeyDown={(e) => {
-                      if (!isCenter && (e.key === "Enter" || e.key === " ")) {
-                        e.preventDefault();
-                        handleSlideClick(index);
-                      }
-                    }}
-                    className={cn(
-                      "h-full rounded-2xl transition-all duration-500 ease-out",
-                      isCenter
-                        ? "shadow-primary/30 scale-100 opacity-100 shadow-md"
-                        : "scale-90 cursor-pointer opacity-50"
-                    )}
+                return (
+                  <CarouselItem
+                    key={demo.id}
+                    className="px-6 py-2 sm:basis-1/2 sm:p-2 lg:basis-1/3"
                   >
-                    <DemoPlayerCard
-                      demo={demo}
-                      isPlaying={playing === demo.id}
-                      hasError={error === demo.id}
-                      onTogglePlay={() => togglePlay(demo.id)}
-                    />
-                  </div>
-                </CarouselItem>
-              );
-            })}
-          </CarouselContent>
+                    <div
+                      role={!isCenter ? "button" : undefined}
+                      tabIndex={!isCenter ? 0 : undefined}
+                      aria-label={!isCenter ? `Перейти до ${demo.category}` : undefined}
+                      onClick={() => handleSlideClick(index)}
+                      onKeyDown={(e) => {
+                        if (!isCenter && (e.key === "Enter" || e.key === " ")) {
+                          e.preventDefault();
+                          handleSlideClick(index);
+                        }
+                      }}
+                      className={cn(
+                        "h-full rounded-2xl transition-all duration-500 ease-out",
+                        isCenter
+                          ? "shadow-primary/30 scale-100 opacity-100 shadow-md"
+                          : "scale-90 cursor-pointer opacity-50"
+                      )}
+                    >
+                      <DemoPlayerCard
+                        demo={demo}
+                        isPlaying={playing === demo.id}
+                        hasError={error === demo.id}
+                        onTogglePlay={() => togglePlay(demo.id)}
+                      />
+                    </div>
+                  </CarouselItem>
+                );
+              })}
+            </CarouselContent>
 
-          <CarouselDots className="mt-2 flex sm:hidden" />
-        </Carousel>
-      </div>
+            <CarouselDots className="mt-2 flex sm:hidden" />
+          </Carousel>
+        </div>
+      </ScrollReveal>
     </section>
   );
 }

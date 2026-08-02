@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Mail, Phone } from "lucide-react";
+import { ScrollReveal, StaggerReveal } from "@/components/marketing/scroll-reveal";
 
 export function Footer() {
   return (
@@ -15,7 +16,13 @@ export function Footer() {
       </div>
 
       <div className="mx-auto max-w-7xl px-6 pt-8 pb-10">
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
+        <StaggerReveal
+          staggerDelay={0.12}
+          direction="up"
+          distance={25}
+          threshold={0.15}
+          className="grid grid-cols-1 gap-10 md:grid-cols-3"
+        >
           <div className="flex flex-col gap-4">
             <Link href="/" className="text-base font-semibold text-white">
               <Image
@@ -84,15 +91,17 @@ export function Footer() {
               </li>
             </ul>
           </div>
-        </div>
+        </StaggerReveal>
 
-        <p className="mt-10 text-base text-white">
-          © 2026{" "}
-          <Link href="/" className="underline">
-            Calls4u.ai
-          </Link>{" "}
-          Всі права захищені.
-        </p>
+        <ScrollReveal direction="up" delay={0.3} distance={15}>
+          <p className="mt-10 text-base text-white">
+            © 2026{" "}
+            <Link href="/" className="underline">
+              Calls4u.ai
+            </Link>{" "}
+            Всі права захищені.
+          </p>
+        </ScrollReveal>
       </div>
     </footer>
   );

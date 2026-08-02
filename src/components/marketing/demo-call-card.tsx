@@ -99,7 +99,7 @@ function DemoCallForm({
           inputMode="numeric"
           value={displayValue}
           onChange={onChange}
-          placeholder="___ ___ ___"
+          placeholder="__ ___ __ __"
           aria-label="Номер телефону після +380"
           aria-invalid={errorMessage ? true : undefined}
           aria-describedby={errorMessage ? "demo-call-error" : undefined}

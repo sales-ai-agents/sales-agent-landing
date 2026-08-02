@@ -7,6 +7,7 @@ import {
   CarouselNext,
   CarouselDots,
 } from "@/components/ui/carousel";
+import { ScrollReveal } from "@/components/marketing/scroll-reveal";
 import type { IndustryCard } from "@/types";
 import { INDUSTRIES } from "@/lib/marketing-data";
 
@@ -14,47 +15,51 @@ export function IndustriesSection() {
   return (
     <section className="px-6 py-20 md:px-0">
       <div className="mx-auto">
-        <div className="mb-6 text-center">
-          <h2 className="font-display mb-4 text-3xl sm:text-4xl md:text-5xl">
-            <span className="text-foreground">Для яких бізнесів </span>
-            <span className="text-primary">це працює</span>
-          </h2>
-          <p className="text-foreground mx-auto max-w-xl text-base md:text-lg">
-            Подивіться, які <span className="font-semibold">дзвінки агент може забрати</span> у
-            адміністратора: запис, нагадування, підтвердження замовлень і повторні звернення.
-          </p>
-        </div>
-
-        <Carousel
-          opts={{
-            align: "start",
-            slidesToScroll: 1,
-          }}
-          aria-label="Галузі"
-        >
-          <div className="mb-2 flex items-center justify-end gap-3 sm:ml-auto sm:max-w-3xl sm:justify-center">
-            <CarouselPrevious
-              variant="ghost"
-              className="static size-10 translate-y-0"
-              aria-label="Попередній слайд"
-            />
-            <CarouselNext
-              variant="ghost"
-              className="static size-10 translate-y-0"
-              aria-label="Наступний слайд"
-            />
+        <ScrollReveal direction="up" distance={30}>
+          <div className="mb-6 text-center">
+            <h2 className="font-display mb-4 text-3xl sm:text-4xl md:text-5xl">
+              <span className="text-foreground">Для яких бізнесів </span>
+              <span className="text-primary">це працює</span>
+            </h2>
+            <p className="text-foreground mx-auto max-w-xl text-base md:text-lg">
+              Подивіться, які <span className="font-semibold">дзвінки агент може забрати</span> у
+              адміністратора: запис, нагадування, підтвердження замовлень і повторні звернення.
+            </p>
           </div>
+        </ScrollReveal>
 
-          <CarouselContent className="xl:pl-40">
-            {INDUSTRIES.map((industry, index) => (
-              <CarouselItem key={index} className="md:basis-2/5">
-                <IndustryCardComponent industry={industry} />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
+        <ScrollReveal direction="up" delay={0.15} distance={20} threshold={0.1}>
+          <Carousel
+            opts={{
+              align: "start",
+              slidesToScroll: 1,
+            }}
+            aria-label="Галузі"
+          >
+            <div className="mb-2 flex items-center justify-end gap-3 sm:ml-auto sm:max-w-3xl sm:justify-center">
+              <CarouselPrevious
+                variant="ghost"
+                className="static size-10 translate-y-0"
+                aria-label="Попередній слайд"
+              />
+              <CarouselNext
+                variant="ghost"
+                className="static size-10 translate-y-0"
+                aria-label="Наступний слайд"
+              />
+            </div>
 
-          <CarouselDots className="mt-2 flex sm:hidden" />
-        </Carousel>
+            <CarouselContent className="xl:pl-40">
+              {INDUSTRIES.map((industry, index) => (
+                <CarouselItem key={index} className="md:basis-2/5">
+                  <IndustryCardComponent industry={industry} />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+
+            <CarouselDots className="mt-2 flex sm:hidden" />
+          </Carousel>
+        </ScrollReveal>
       </div>
     </section>
   );

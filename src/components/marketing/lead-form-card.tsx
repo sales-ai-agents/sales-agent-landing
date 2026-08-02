@@ -153,7 +153,7 @@ export function LeadFormModal({ open, onClose, sourcePage }: LeadFormModalProps)
                     +380&nbsp;
                   </span>
                   <Input
-                    placeholder="___ ___ ___"
+                    placeholder="__ ___ __ __"
                     type="tel"
                     inputMode="numeric"
                     value={phone.length > 0 ? formatUaPhoneDigits(phone) : ""}

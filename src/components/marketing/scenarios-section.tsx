@@ -2,6 +2,7 @@ import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { ScrollReveal, StaggerReveal } from "@/components/marketing/scroll-reveal";
 import type { Scenario, ScenarioDetail } from "@/types";
 import { SCENARIOS } from "@/lib/marketing-data";
 
@@ -9,18 +10,25 @@ export function ScenariosSection() {
   return (
     <section id="features" className="bg-slate-50 px-6 py-20 md:px-10">
       <div className="mx-auto max-w-7xl">
-        <h2 className="mb-4 text-center text-3xl font-bold sm:text-4xl md:text-left md:text-5xl">
-          <span className="text-primary">Дзвінки,</span>{" "}
-          <span className="text-foreground">які агент</span> <br />
-          <span className="text-foreground">може забрати одразу</span>
-        </h2>
+        <ScrollReveal direction="up" distance={30}>
+          <h2 className="mb-4 text-center text-3xl font-bold sm:text-4xl md:text-left md:text-5xl">
+            <span className="text-primary">Дзвінки,</span>{" "}
+            <span className="text-foreground">які агент</span> <br />
+            <span className="text-foreground">може забрати одразу</span>
+          </h2>
 
-        <p className="text-foreground mb-12 max-w-lg text-center text-base tracking-wide md:text-left md:text-lg">
-          Не треба писати сценарій з нуля. Виберіть тип дзвінка, адаптуйте кілька фраз під бізнес і
-          запускайте тест.
-        </p>
+          <p className="text-foreground mb-12 max-w-lg text-center text-base tracking-wide md:text-left md:text-lg">
+            Не треба писати сценарій з нуля. Виберіть тип дзвінка, адаптуйте кілька фраз під бізнес
+            і запускайте тест.
+          </p>
+        </ScrollReveal>
 
-        <div className="mb-12 grid auto-rows-[1fr] grid-cols-1 gap-5 sm:grid-cols-2 md:gap-10 lg:grid-cols-3">
+        <StaggerReveal
+          staggerDelay={0.12}
+          direction="up"
+          distance={35}
+          className="mb-12 grid auto-rows-[1fr] grid-cols-1 gap-5 sm:grid-cols-2 md:gap-10 lg:grid-cols-3"
+        >
           {SCENARIOS.map((scenario, index) => (
             <ScenarioCard
               key={scenario.title}
@@ -29,24 +37,26 @@ export function ScenariosSection() {
               isLast={index === SCENARIOS.length - 1}
             />
           ))}
-        </div>
+        </StaggerReveal>
 
-        <div className="flex flex-col items-center gap-4 md:items-end">
-          <p className="text-muted-foreground w-full max-w-sm text-center text-base md:text-start">
-            Почніть з готового сценарію, фрази <br />
-            <span className="font-medium">можна змінити під ваш бізнес.</span>
-          </p>
-          <a
-            href="#builder"
-            className={cn(
-              buttonVariants({ size: "lg" }),
-              "bg-primary hover:bg-primary/90 font-body h-12 rounded-3xl px-8 font-normal text-white sm:w-auto sm:text-lg"
-            )}
-          >
-            Вибрати сценарій і запустити тест
-            <ArrowUpRight className="ml-2 size-4" aria-hidden="true" />
-          </a>
-        </div>
+        <ScrollReveal direction="up" delay={0.2} distance={20}>
+          <div className="flex flex-col items-center gap-4 md:items-end">
+            <p className="text-muted-foreground w-full max-w-sm text-center text-base md:text-start">
+              Почніть з готового сценарію, фрази <br />
+              <span className="font-medium">можна змінити під ваш бізнес.</span>
+            </p>
+            <a
+              href="#builder"
+              className={cn(
+                buttonVariants({ size: "lg" }),
+                "bg-primary hover:bg-primary/90 font-body h-12 rounded-3xl px-8 font-normal text-white sm:w-auto sm:text-lg"
+              )}
+            >
+              Вибрати сценарій і запустити тест
+              <ArrowUpRight className="ml-2 size-4" aria-hidden="true" />
+            </a>
+          </div>
+        </ScrollReveal>
       </div>
     </section>
   );

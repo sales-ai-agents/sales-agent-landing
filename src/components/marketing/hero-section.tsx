@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { Navbar, MobileNavbar } from "@/components/marketing/navbar";
 import { DynamicDemoCallCard as DemoCallCard } from "@/components/marketing/dynamic-sections";
+import { ScrollReveal } from "@/components/marketing/scroll-reveal";
 import { HERO_BADGES } from "@/lib/content";
 
 function HeroBadge({
@@ -43,48 +44,56 @@ export function HeroSection() {
       <div className="mx-auto px-6 pt-32 pb-16 lg:px-16 lg:pt-60">
         <div className="flex flex-col items-center gap-12 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-3xl text-center lg:text-left">
-            <p className="text-foreground mb-4 hidden text-lg lg:block">
-              Голосовий <span className="font-semibold">ШІ-агент</span>
-            </p>
+            <ScrollReveal direction="up" duration={0.7} distance={30}>
+              <p className="text-foreground mb-4 hidden text-lg lg:block">
+                Голосовий <span className="font-semibold">ШІ-агент</span>
+              </p>
 
-            <h1 className="font-display text-foreground mb-6 text-3xl uppercase sm:text-4xl lg:text-5xl">
-              ШІ-агент <span className="text-primary">телефонує за вас</span> – економить до 70%
-              часу менеджера
-            </h1>
+              <h1 className="font-display text-foreground mb-6 text-3xl uppercase sm:text-4xl lg:text-5xl">
+                ШІ-агент <span className="text-primary">телефонує за вас</span> – економить до 70%
+                часу менеджера
+              </h1>
+            </ScrollReveal>
 
-            <p className="text-foreground mx-auto mb-10 max-w-md text-base lg:mx-0 lg:max-w-lg">
-              ШI-агент телефонує клієнтам, уточнює деталі та передає результат у CRM. Без
-              програмістів і зайвих ручних дзвінків.
-            </p>
+            <ScrollReveal direction="up" delay={0.2} duration={0.7} distance={25}>
+              <p className="text-foreground mx-auto mb-10 max-w-md text-base lg:mx-0 lg:max-w-lg">
+                ШI-агент телефонує клієнтам, уточнює деталі та передає результат у CRM. Без
+                програмістів і зайвих ручних дзвінків.
+              </p>
+            </ScrollReveal>
 
-            <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4 lg:items-start lg:justify-start">
-              <a
-                href="#builder"
-                className={cn(
-                  buttonVariants({ size: "lg" }),
-                  "bg-primary text-primary-foreground hover:bg-primary/90 font-body h-12 w-full rounded-full px-8 text-lg font-normal sm:w-auto"
-                )}
-              >
-                Спробувати безкоштовно
-              </a>
+            <ScrollReveal direction="up" delay={0.4} duration={0.6} distance={20}>
+              <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4 lg:items-start lg:justify-start">
+                <a
+                  href="#builder"
+                  className={cn(
+                    buttonVariants({ size: "lg" }),
+                    "bg-primary text-primary-foreground hover:bg-primary/90 font-body h-12 w-full rounded-full px-8 text-lg font-normal sm:w-auto"
+                  )}
+                >
+                  Спробувати безкоштовно
+                </a>
 
-              <a
-                href="#audio-demo"
-                className={cn(
-                  buttonVariants({ size: "lg", variant: "ghost" }),
-                  "border-border text-foreground font-body h-12 w-full rounded-full border bg-white/45 px-8 text-lg font-normal backdrop-blur-xl sm:w-auto"
-                )}
-              >
-                <Play className="size-4" aria-hidden="true" />
-                Прослухати демо
-              </a>
-            </div>
+                <a
+                  href="#audio-demo"
+                  className={cn(
+                    buttonVariants({ size: "lg", variant: "ghost" }),
+                    "border-border text-foreground font-body h-12 w-full rounded-full border bg-white/45 px-8 text-lg font-normal backdrop-blur-xl sm:w-auto"
+                  )}
+                >
+                  <Play className="size-4" aria-hidden="true" />
+                  Прослухати демо
+                </a>
+              </div>
+            </ScrollReveal>
 
-            <div className="mt-10 hidden flex-wrap items-center justify-center gap-6 md:flex lg:justify-start">
-              {HERO_BADGES.map((badge) => (
-                <HeroBadge key={badge.label} icon={badge.icon} label={badge.label} />
-              ))}
-            </div>
+            <ScrollReveal direction="up" delay={0.55} duration={0.5} distance={15}>
+              <div className="mt-10 hidden flex-wrap items-center justify-center gap-6 md:flex lg:justify-start">
+                {HERO_BADGES.map((badge) => (
+                  <HeroBadge key={badge.label} icon={badge.icon} label={badge.label} />
+                ))}
+              </div>
+            </ScrollReveal>
           </div>
 
           <div className="shadow-primary/30 -mx-6 w-screen overflow-hidden bg-white shadow-md md:hidden">
@@ -104,7 +113,9 @@ export function HeroSection() {
           </div>
 
           <div className="w-full max-w-sm lg:max-w-lg">
-            <DemoCallCard />
+            <ScrollReveal direction="right" delay={0.3} duration={0.8} distance={50}>
+              <DemoCallCard />
+            </ScrollReveal>
           </div>
         </div>
       </div>

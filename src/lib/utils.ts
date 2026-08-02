@@ -6,28 +6,24 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// Formats up to 9 raw UA subscriber digits into the display pattern: ___ ___ ___
+// Formats up to 9 raw UA subscriber digits into the display pattern: __ ___ __ __
 export function formatUaPhoneDigits(digits: string): string {
   const cleaned = digits.replace(/\D/g, "").slice(0, 9);
 
-  if (cleaned.length <= 3) return cleaned;
-  if (cleaned.length <= 6) return `${cleaned.slice(0, 3)} ${cleaned.slice(3)}`;
+  if (cleaned.length <= 2) return cleaned;
+  if (cleaned.length <= 5) return `${cleaned.slice(0, 2)} ${cleaned.slice(2)}`;
+  if (cleaned.length <= 7)
+    return `${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5)}`;
 
-  return `${cleaned.slice(0, 3)} ${cleaned.slice(3, 6)} ${cleaned.slice(6)}`;
+  return `${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5, 7)} ${cleaned.slice(7)}`;
 }
 
 // ROI Calculator Helpers
-
 export function calcHoursPerDay(inputs: CalculatorInputs): number {
   return Number(((inputs.callsPerDay * inputs.avgDuration) / 60).toFixed(1));
 }
 
-export function calcCostPerDay(inputs: CalculatorInputs): number {
-  return Math.round(calcHoursPerDay(inputs) * inputs.hourlyRate);
-}
-
 // FAQ Schema Builder
-
 export function buildFaqPageSchema(faqs: readonly FaqEntry[]): object {
   return {
     "@context": "https://schema.org",

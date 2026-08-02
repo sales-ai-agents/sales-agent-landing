@@ -1,26 +1,32 @@
 import Image from "next/image";
 import { ONBOARDING_STEPS } from "@/lib/marketing-data";
 import { cn } from "@/lib/utils";
+import { ScrollReveal } from "@/components/marketing/scroll-reveal";
 
 export function HowItWorksSection() {
   return (
     <section id="how-it-works" className="py-20">
       <div className="mx-auto max-w-7xl px-6">
-        <div className="mb-12 max-w-2xl text-center md:text-left">
-          <h2 className="font-display mb-4 text-3xl sm:text-4xl md:text-5xl">
-            <span className="text-foreground">До першого тестового дзвінка - </span>
-            <span className="text-primary">4 кроки</span>
-          </h2>
-          <p className="text-foreground mx-auto max-w-lg text-lg md:mx-0">
-            Оберіть сценарій, налаштуйте голос, додайте контакти і перевірте дзвінок на собі перед
-            запуском.
-          </p>
-        </div>
+        <ScrollReveal direction="up" distance={30}>
+          <div className="mb-12 max-w-2xl text-center md:text-left">
+            <h2 className="font-display mb-4 text-3xl sm:text-4xl md:text-5xl">
+              <span className="text-foreground">До першого тестового дзвінка - </span>
+              <span className="text-primary">4 кроки</span>
+            </h2>
+            <p className="text-foreground mx-auto max-w-lg text-lg md:mx-0">
+              Оберіть сценарій, налаштуйте голос, додайте контакти і перевірте дзвінок на собі перед
+              запуском.
+            </p>
+          </div>
+        </ScrollReveal>
 
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:gap-4">
           {ONBOARDING_STEPS.map((step, index) => (
-            <div
+            <ScrollReveal
               key={step.number}
+              direction="up"
+              delay={index * 0.15}
+              distance={25}
               className={cn(
                 "flex items-center gap-3",
                 index % 2 === 0 ? "pr-20 sm:pr-0" : "pl-20 sm:pl-0"
@@ -63,7 +69,7 @@ export function HowItWorksSection() {
                   />
                 </div>
               )}
-            </div>
+            </ScrollReveal>
           ))}
         </div>
       </div>

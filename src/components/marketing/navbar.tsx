@@ -7,6 +7,7 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { LeadFormModal } from "@/components/marketing/lead-form-card";
+import { ScrollReveal } from "@/components/marketing/scroll-reveal";
 import { NAV_LINKS } from "@/lib/content";
 
 export function Navbar() {
@@ -14,7 +15,13 @@ export function Navbar() {
 
   return (
     <>
-      <header className="fixed top-6 left-1/2 z-50 hidden w-full max-w-5xl -translate-x-1/2 px-4 md:block">
+      <ScrollReveal
+        direction="down"
+        distance={20}
+        duration={0.6}
+        delay={0.3}
+        className="fixed top-6 left-1/2 z-50 hidden w-full max-w-5xl -translate-x-1/2 px-4 md:block"
+      >
         <nav
           aria-label="Головне меню"
           className="border-border bg-card-glass flex w-full items-center justify-between rounded-2xl border px-8 py-2 backdrop-blur-lg"
@@ -56,7 +63,7 @@ export function Navbar() {
             </Button>
           </div>
         </nav>
-      </header>
+      </ScrollReveal>
 
       <LeadFormModal
         open={isLeadFormOpen}
@@ -72,7 +79,13 @@ export function MobileNavbar() {
 
   return (
     <>
-      <header className="absolute top-0 z-50 w-full md:hidden">
+      <ScrollReveal
+        direction="down"
+        distance={15}
+        duration={0.5}
+        delay={0.2}
+        className="absolute top-0 z-50 w-full md:hidden"
+      >
         <div className="flex items-center justify-between p-4">
           <Link href="/">
             <Image
@@ -92,7 +105,7 @@ export function MobileNavbar() {
             Реєстрація
           </Button>
         </div>
-      </header>
+      </ScrollReveal>
 
       <LeadFormModal
         open={isLeadFormOpen}
