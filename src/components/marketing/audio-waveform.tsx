@@ -101,7 +101,11 @@ export function AudioWaveform({ howlRef, isActive, isPlaying, onSeek }: AudioWav
         onPointerDown={handleSeekStart}
         onPointerUp={handleSeekEnd}
         aria-label="Прогрес аудіо"
-        className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+        disabled={!isActive}
+        className={cn(
+          "absolute inset-0 h-full w-full opacity-0",
+          isActive ? "cursor-pointer" : "pointer-events-none"
+        )}
       />
     </div>
   );
