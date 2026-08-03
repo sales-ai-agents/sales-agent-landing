@@ -146,33 +146,24 @@ export const ONBOARDING_STEPS: readonly OnboardingStep[] = [
 
 export const DEMOS: readonly DemoCard[] = [
   {
-    id: "delivery",
-    category: "Служба доставки",
-    description: "Підтвердження доставки",
-    scenario: "Агент підтверджує адресу, зручний час отримання та фіксує статус для оператора",
-    result: "Результат:",
-    resultBold: "доставку підтверджено",
-    src: "/audio/demo-1.ogg",
-  },
-  {
-    id: "warehouse",
-    category: "Запис на стрижку",
-    description: "Барбершоп",
-    scenario:
-      "Агент уточнює деталі запису, зручний час візиту , майстра, консультує по питанням та створює заявку для майстра.",
-    result: "Результат:",
-    resultBold: "запис підтверджено",
-    src: "/audio/demo-3.ogg",
-  },
-  {
     id: "logistics",
     category: "Створення замовлення",
-    description: "Замовлення для відправки",
+    description: "Створення замовлення для відправки",
     scenario:
       "Агент уточнює деталі замовлення, зручний час доставки , адресу, консультує по питанням та створює заявку для відправлення",
     result: "Результат:",
     resultBold: "замовлення створено",
     src: "/audio/demo-5.ogg",
+  },
+  {
+    id: "warehouse",
+    category: "Уточнення доставки",
+    description: "Уточнення деталей доставки",
+    scenario:
+      "Агент уточнює деталі замовлення, зручний час доставки , адресу, консультує по питанням та уточнює заявку для відправлення",
+    result: "Результат:",
+    resultBold: "доставку підтверджено",
+    src: "/audio/demo-3.ogg",
   },
 
   {
@@ -184,6 +175,15 @@ export const DEMOS: readonly DemoCard[] = [
     result: "Результат:",
     resultBold: "автоматизацію підтверджено",
     src: "/audio/demo-4.mp3",
+  },
+  {
+    id: "delivery",
+    category: "Служба доставки",
+    description: "Підтвердження доставки",
+    scenario: "Агент підтверджує адресу, зручний час отримання та фіксує статус для оператора",
+    result: "Результат:",
+    resultBold: "доставку підтверджено",
+    src: "/audio/demo-1.ogg",
   },
 ] as const;
 

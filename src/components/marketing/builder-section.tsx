@@ -172,7 +172,7 @@ export function BuilderSection() {
                         reset();
                       }}
                       placeholder="Опишіть, що має робити агент під час дзвінка…"
-                      className="border-input-border text-foreground placeholder:text-muted-foreground focus:ring-primary/30 h-20 w-full rounded-2xl border bg-white py-3 pr-4 pl-16 text-base focus:ring-2 focus:outline-none"
+                      className="border-input-border text-foreground placeholder:text-muted-foreground focus:ring-primary/30 h-40 w-full rounded-2xl border bg-white py-3 pr-4 pl-16 text-base focus:ring-2 focus:outline-none"
                       aria-label="Інструкція для агента"
                     />
                   </div>

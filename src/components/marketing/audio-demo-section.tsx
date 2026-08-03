@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Howl } from "howler";
-import { Square, Play } from "lucide-react";
+import { Pause, Play } from "lucide-react";
 import {
   Carousel,
   type CarouselApi,
@@ -16,16 +16,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ScrollReveal } from "@/components/marketing/scroll-reveal";
+import { AudioWaveform } from "@/components/marketing/audio-waveform";
 import type { DemoCard } from "@/types";
 import { DEMOS } from "@/lib/marketing-data";
 
 export function AudioDemoSection() {
   const [playing, setPlaying] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [api, setApi] = useState<CarouselApi>();
   const [selectedSnap, setSelectedSnap] = useState(1);
   const howlRef = useRef<Howl | null>(null);
-  const playingIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     return () => {
@@ -43,7 +44,6 @@ export function AudioDemoSection() {
 
     updateSelected();
     api.on("select", updateSelected);
-
     return () => {
       api.off("select", updateSelected);
     };
@@ -54,18 +54,21 @@ export function AudioDemoSection() {
       setError(null);
 
       if (playing === id) {
-        howlRef.current?.stop();
-        howlRef.current?.unload();
-        howlRef.current = null;
-        playingIdRef.current = null;
+        howlRef.current?.pause();
         setPlaying(null);
         return;
       }
 
-      if (howlRef.current) {
+      if (howlRef.current && activeId !== id) {
         howlRef.current.stop();
         howlRef.current.unload();
         howlRef.current = null;
+      }
+
+      if (howlRef.current && activeId === id) {
+        howlRef.current.play();
+        setPlaying(id);
+        return;
       }
 
       const demo = DEMOS.find((d) => d.id === id);
@@ -75,33 +78,39 @@ export function AudioDemoSection() {
         src: [demo.src],
         html5: true,
         onend: () => {
-          if (playingIdRef.current === id) {
-            howlRef.current = null;
-            playingIdRef.current = null;
-            setPlaying(null);
-          }
+          setPlaying(null);
         },
         onloaderror: () => {
           setError(id);
           howlRef.current = null;
-          playingIdRef.current = null;
+          setActiveId(null);
           setPlaying(null);
         },
         onplayerror: () => {
           setError(id);
           howlRef.current = null;
-          playingIdRef.current = null;
+          setActiveId(null);
           setPlaying(null);
         },
       });
 
       howlRef.current = howl;
-      playingIdRef.current = id;
-      howl.play();
+      setActiveId(id);
       setPlaying(id);
+      howl.play();
     },
-    [playing]
+    [playing, activeId]
   );
+
+  const handleSeek = useCallback((progress: number) => {
+    const howl = howlRef.current;
+    if (!howl) return;
+
+    const duration = howl.duration();
+    if (duration > 0) {
+      howl.seek(progress * duration);
+    }
+  }, []);
 
   const handleSlideClick = (index: number) => {
     if (!api) return;
@@ -201,9 +210,12 @@ export function AudioDemoSection() {
                     >
                       <DemoPlayerCard
                         demo={demo}
+                        isActive={activeId === demo.id}
                         isPlaying={playing === demo.id}
                         hasError={error === demo.id}
+                        howlRef={howlRef}
                         onTogglePlay={() => togglePlay(demo.id)}
+                        onSeek={handleSeek}
                       />
                     </div>
                   </CarouselItem>
@@ -221,12 +233,23 @@ export function AudioDemoSection() {
 
 interface DemoPlayerCardProps {
   demo: DemoCard;
+  isActive: boolean;
   isPlaying: boolean;
   hasError: boolean;
+  howlRef: React.RefObject<Howl | null>;
   onTogglePlay: () => void;
+  onSeek: (progress: number) => void;
 }
 
-function DemoPlayerCard({ demo, isPlaying, hasError, onTogglePlay }: DemoPlayerCardProps) {
+function DemoPlayerCard({
+  demo,
+  isActive,
+  isPlaying,
+  hasError,
+  howlRef,
+  onTogglePlay,
+  onSeek,
+}: DemoPlayerCardProps) {
   return (
     <div className="border-border bg-card-glass flex h-full flex-col rounded-2xl border p-6 backdrop-blur-lg">
       <div className="bg-primary text-primary-foreground mb-4 inline-flex h-9 w-fit min-w-3xs items-center justify-center rounded-full px-7 text-base font-semibold">
@@ -240,13 +263,13 @@ function DemoPlayerCard({ demo, isPlaying, hasError, onTogglePlay }: DemoPlayerC
           variant="ghost"
           size="icon"
           onClick={onTogglePlay}
-          aria-label={isPlaying ? `Зупинити ${demo.category}` : `Грати ${demo.category}`}
+          aria-label={isPlaying ? `Пауза ${demo.category}` : `Грати ${demo.category}`}
           className="size-11 shrink-0"
           disabled={hasError}
         >
           {isPlaying ? (
             <div className="bg-primary flex size-9 items-center justify-center rounded-full">
-              <Square
+              <Pause
                 className="fill-primary-foreground text-primary-foreground size-3.5"
                 aria-hidden="true"
               />
@@ -260,13 +283,11 @@ function DemoPlayerCard({ demo, isPlaying, hasError, onTogglePlay }: DemoPlayerC
             </div>
           )}
         </Button>
-        <Image
-          src="/image/audio-wave.svg"
-          alt=""
-          width={200}
-          height={32}
-          className="h-12 flex-1"
-          aria-hidden="true"
+        <AudioWaveform
+          howlRef={howlRef}
+          isActive={isActive}
+          isPlaying={isPlaying}
+          onSeek={onSeek}
         />
       </div>
 
