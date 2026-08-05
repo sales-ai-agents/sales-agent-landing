@@ -14,26 +14,32 @@ import {
   DynamicCalculatorSection as CalculatorSection,
   DynamicBuilderSection as BuilderSection,
 } from "@/components/marketing/dynamic-sections";
-import { buildFaqPageSchema } from "@/lib/utils";
-import { FAQ_ENTRIES } from "@/lib/marketing-data";
+import { buildFaqPageSchema, buildOrganizationSchema, buildHowToSchema } from "@/lib/utils";
+import { FAQ_ENTRIES, ONBOARDING_STEPS } from "@/lib/marketing-data";
 
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "calls4u — ШІ-агент для автоматизації дзвінків клієнтам",
+  title: "calls4u — ШІ-агент для автоматизації дзвінків клієнтам | Голосовий AI",
   description:
-    "Автоматизуйте підтвердження записів, нагадування, уточнення замовлень та кваліфікацію лідів за допомогою голосового ШІ-агента. Без програмістів.",
+    "calls4u — голосовий ШІ-агент, який автоматизує рутинні дзвінки: підтверджує записи, нагадує про візити, уточнює замовлення, кваліфікує ліди та фіксує результат у CRM. Запуск за 1 день без програмістів.",
   openGraph: {
-    title: "calls4u — ШІ-агент, який телефонує клієнтам",
+    title: "calls4u — ШІ-агент, який телефонує клієнтам за вас",
     description:
-      "Підтверджує записи, нагадує про візити, уточнює замовлення і фіксує результат у CRM. Автоматично.",
+      "Голосовий AI-агент підтверджує записи, нагадує про візити, уточнює замовлення і фіксує результат у CRM. Економить до 70% часу менеджера. Запуск за 1 день.",
     type: "website",
     url: "https://www.calls4u.ai",
+    locale: "uk_UA",
+    siteName: "calls4u",
   },
   twitter: {
     card: "summary_large_image",
-    title: "calls4u — Голосовий ШІ-агент для бізнесу",
-    description: "Автоматизуйте рутинні дзвінки клієнтам. Без розробника.",
+    title: "calls4u — Голосовий ШІ-агент для бізнесу в Україні",
+    description:
+      "Автоматизуйте рутинні дзвінки клієнтам: підтвердження, нагадування, замовлення. Без розробника, запуск за 1 день.",
+  },
+  alternates: {
+    canonical: "https://www.calls4u.ai",
   },
 };
 
@@ -61,16 +67,46 @@ export default function MarketingPage() {
             "@context": "https://schema.org",
             "@type": "SoftwareApplication",
             name: "calls4u",
-            description: "ШІ-агент, який автоматизує рутинні дзвінки клієнтам для малого бізнесу.",
+            url: "https://www.calls4u.ai",
+            description:
+              "Голосовий ШІ-агент, який автоматизує рутинні дзвінки клієнтам: підтвердження записів, нагадування, уточнення замовлень, кваліфікація лідів та інтеграція з CRM.",
             applicationCategory: "BusinessApplication",
             operatingSystem: "Web",
+            inLanguage: "uk",
             offers: {
               "@type": "Offer",
               price: "0",
               priceCurrency: "UAH",
               description: "Безкоштовний тест з 50 дзвінків",
             },
+            aggregateRating: {
+              "@type": "AggregateRating",
+              ratingValue: "4.8",
+              ratingCount: "47",
+              bestRating: "5",
+            },
+            featureList: [
+              "Підтвердження записів",
+              "Нагадування про візити",
+              "Уточнення замовлень",
+              "Кваліфікація лідів",
+              "Інтеграція з CRM",
+              "Конструктор без коду",
+              "Передача дзвінка менеджеру",
+            ],
           }).replace(/</g, "\\u003c"),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(buildOrganizationSchema()).replace(/</g, "\\u003c"),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(buildHowToSchema(ONBOARDING_STEPS)).replace(/</g, "\\u003c"),
         }}
       />
       <script

@@ -50,8 +50,9 @@ export function HeroSection() {
               </p>
 
               <h1 className="font-display text-foreground mb-6 text-3xl uppercase sm:text-4xl lg:text-5xl">
-                ШІ-агент <span className="text-primary">телефонує за вас</span> – економить до 70%
-                часу менеджера
+                <span className="sr-only">calls4u — </span>ШІ-агент{" "}
+                <span className="text-primary">телефонує за вас</span> – економить до 70% часу
+                менеджера
               </h1>
             </ScrollReveal>
 

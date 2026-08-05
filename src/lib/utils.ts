@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import type { CalculatorInputs, FaqEntry } from "@/types";
+import type { CalculatorInputs, FaqEntry, OnboardingStep } from "@/types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -35,6 +35,46 @@ export function buildFaqPageSchema(faqs: readonly FaqEntry[]): object {
         "@type": "Answer",
         text: typeof faq.answer === "string" ? faq.answer : (faq.textAnswer ?? ""),
       },
+    })),
+  };
+}
+
+// Organization Schema Builder (GEO + SEO)
+export function buildOrganizationSchema(): object {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "calls4u",
+    url: "https://www.calls4u.ai",
+    logo: "https://www.calls4u.ai/image/Logo.svg",
+    description:
+      "calls4u — платформа голосових ШІ-агентів для автоматизації рутинних дзвінків малого бізнесу в Україні.",
+    email: "salesagentswork@gmail.com",
+    telephone: "+380914810542",
+    areaServed: {
+      "@type": "Country",
+      name: "Ukraine",
+    },
+    serviceType: "AI Voice Agent Platform",
+    knowsLanguage: "uk",
+    sameAs: [],
+  };
+}
+
+// HowTo Schema Builder (GEO — step-by-step for AI extraction)
+export function buildHowToSchema(steps: readonly OnboardingStep[]): object {
+  return {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: "Як запустити ШІ-агента для дзвінків за 4 кроки",
+    description:
+      "Покрокова інструкція створення голосового AI-агента для автоматизації дзвінків клієнтам на платформі calls4u.",
+    totalTime: "PT15M",
+    step: steps.map((step, index) => ({
+      "@type": "HowToStep",
+      position: index + 1,
+      name: step.title,
+      text: step.description,
     })),
   };
 }

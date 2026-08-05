@@ -5,12 +5,14 @@ import { ScrollReveal, StaggerReveal } from "@/components/marketing/scroll-revea
 
 export function Footer() {
   return (
-    <footer className="bg-primary">
+    <footer className="bg-primary" itemScope itemType="https://schema.org/Organization">
+      <meta itemProp="name" content="calls4u" />
+      <meta itemProp="url" content="https://www.calls4u.ai" />
       <div
         className="@container pointer-events-none relative h-[10cqw] overflow-hidden bg-linear-to-b from-white to-transparent select-none"
         aria-hidden="true"
       >
-        <p className="font-gilroy absolute bottom-0 w-full text-center text-[17cqw] leading-[0.8] text-white/70">
+        <p className="font-gilroy absolute bottom-0 w-full text-center text-[17cqw] leading-[0.8] font-semibold tracking-wide text-white/70">
           CALLS4U.AI
         </p>
       </div>
@@ -74,6 +76,7 @@ export function Footer() {
               <li>
                 <a
                   href="mailto:salesagentswork@gmail.com"
+                  itemProp="email"
                   className="flex items-center gap-2 text-base text-white transition-colors hover:text-white/80"
                 >
                   <Mail className="size-4 shrink-0" aria-hidden="true" />
@@ -83,6 +86,7 @@ export function Footer() {
               <li>
                 <a
                   href="tel:+380914810542"
+                  itemProp="telephone"
                   className="flex items-center gap-2 text-base text-white transition-colors hover:text-white/80"
                 >
                   <Phone className="size-4 shrink-0" aria-hidden="true" />

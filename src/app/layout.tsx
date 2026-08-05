@@ -28,13 +28,16 @@ const gilroy = localFont({
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.calls4u.ai"),
   title: {
-    default: "calls4u — AI Phone Call Automation",
+    default: "calls4u — ШІ-агент для автоматизації дзвінків",
     template: "%s | calls4u",
   },
   description:
-    "Automate routine phone calls with AI voice agents. Confirm appointments, remind clients, qualify leads — no developers needed.",
+    "Голосовий ШІ-агент автоматизує рутинні дзвінки клієнтам: підтверджує записи, нагадує про візити, уточнює замовлення та передає результат у CRM, без програмістів.",
   alternates: {
     canonical: "/",
+    languages: {
+      uk: "https://www.calls4u.ai",
+    },
   },
   robots: {
     index: true,
@@ -42,7 +45,37 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
     },
+  },
+  openGraph: {
+    type: "website",
+    locale: "uk_UA",
+    siteName: "calls4u",
+    url: "https://www.calls4u.ai",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
+  keywords: [
+    "ШІ-агент",
+    "голосовий агент",
+    "автоматизація дзвінків",
+    "AI voice agent",
+    "calls4u",
+    "підтвердження запису",
+    "CRM інтеграція",
+    "автодзвінки",
+    "голосовий бот",
+    "штучний інтелект для бізнесу",
+    "автоматизація бізнесу Україна",
+  ],
+  other: {
+    "geo.region": "UA",
+    "geo.placename": "Україна",
+    "content-language": "uk",
   },
 };
 
