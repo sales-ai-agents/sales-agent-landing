@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import { Providers } from "@/components/providers";
+import { GoogleAnalytics } from "@/components/google-analytics";
 import "./globals.css";
 
 const inter = Inter({
@@ -87,6 +88,7 @@ export default function RootLayout({
   return (
     <html lang="uk" className={`${inter.variable} ${actayWideBold.variable} ${gilroy.variable}`}>
       <body suppressHydrationWarning>
+        <GoogleAnalytics />
         <Providers>{children}</Providers>
       </body>
     </html>
