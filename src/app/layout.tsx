@@ -57,9 +57,18 @@ export const metadata: Metadata = {
     locale: "uk_UA",
     siteName: "Calls4U",
     url: "https://www.calls4u.ai",
+    images: [
+      {
+        url: "/opengraph-image.jpg",
+        width: 1200,
+        height: 630,
+        type: "image/jpeg",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
+    images: ["/twitter-image.jpg"],
   },
   keywords: [
     "Calls4U",

@@ -31,12 +31,21 @@ export const metadata: Metadata = {
     url: "https://www.calls4u.ai",
     locale: "uk_UA",
     siteName: "Calls4U",
+    images: [
+      {
+        url: "/opengraph-image.jpg",
+        width: 1200,
+        height: 630,
+        type: "image/jpeg",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Calls4U | ШІ-агент для бізнесу",
     description:
       "Автоматизуйте рутинні дзвінки клієнтам: підтвердження записів, нагадування, замовлення. Без розробника, запуск за 1 день.",
+    images: ["/twitter-image.jpg"],
   },
   alternates: {
     canonical: "https://www.calls4u.ai",
