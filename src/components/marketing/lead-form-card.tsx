@@ -9,6 +9,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLeadForm } from "@/hooks/use-lead-form";
 import { cn, formatUaPhoneDigits } from "@/lib/utils";
+import { trackEvent } from "@/lib/analytics";
 
 const TELEGRAM_LINK = "https://t.me/calls4u_ai";
 const UA_SUBSCRIBER_DIGITS = 9;
@@ -30,6 +31,11 @@ export function LeadFormModal({ open, onClose, sourcePage }: LeadFormModalProps)
   function handleSubmit(e: FormEvent): void {
     e.preventDefault();
     if (!name.trim() || phone.length !== UA_SUBSCRIBER_DIGITS) return;
+
+    trackEvent("lead_form_submit", {
+      name: name.trim(),
+      source: sourcePage ?? "unknown",
+    });
 
     submitLead({
       name: name.trim(),

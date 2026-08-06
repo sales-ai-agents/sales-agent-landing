@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { trackEvent } from "@/lib/analytics";
 import { ScrollReveal, ScaleReveal } from "@/components/marketing/scroll-reveal";
 import { BUILDER_CHECKLIST } from "@/lib/content";
 
@@ -21,6 +22,10 @@ export function BuilderSection() {
 
   function handleStart(): void {
     if (!form.isValid) return;
+    trackEvent("builder_start_call", {
+      voice: form.voiceApiValue,
+      preset: form.activePreset?.id ?? "custom",
+    });
     startAgent({
       instruction: form.instruction,
       voice: form.voiceApiValue,

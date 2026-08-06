@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { trackEvent } from "@/lib/analytics";
 import { LeadFormModal } from "@/components/marketing/lead-form-card";
 import { ScaleReveal } from "@/components/marketing/scroll-reveal";
 
@@ -26,6 +27,7 @@ export function FinalCtaSection() {
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <a
               href="#hero"
+              onClick={() => trackEvent("cta_click", { button: "href_test_call" })}
               className={cn(
                 buttonVariants(),
                 "font-body h-12 w-full rounded-xl bg-white px-7 text-lg font-normal text-black hover:bg-gray-100 sm:w-sm"
@@ -36,7 +38,10 @@ export function FinalCtaSection() {
 
             <Button
               variant="outline"
-              onClick={() => setLeadFormOpen(true)}
+              onClick={() => {
+                trackEvent("cta_click", { button: "final_book_demo" });
+                setLeadFormOpen(true);
+              }}
               className="font-body h-12 w-full rounded-xl border-white/30 bg-transparent px-7 text-lg font-normal text-white hover:bg-white/10 sm:w-sm"
             >
               Забронювати демо

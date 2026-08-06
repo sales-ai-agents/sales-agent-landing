@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { useDemoCall } from "@/hooks/use-demo-call";
 import { LeadFormModal } from "@/components/marketing/lead-form-card";
 import { cn, formatUaPhoneDigits } from "@/lib/utils";
+import { trackEvent } from "@/lib/analytics";
 
 const UA_SUBSCRIBER_DIGITS = 9;
 
@@ -24,7 +25,10 @@ export default function DemoCallCard() {
   }
 
   function handleSubmit(): void {
-    if (digits.length === UA_SUBSCRIBER_DIGITS) requestCall(digits);
+    if (digits.length === UA_SUBSCRIBER_DIGITS) {
+      trackEvent("cta_click", { button: "test_call" });
+      requestCall(digits);
+    }
   }
 
   const isComplete = digits.length === UA_SUBSCRIBER_DIGITS;

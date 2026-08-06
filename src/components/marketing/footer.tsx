@@ -6,7 +6,7 @@ import { ScrollReveal, StaggerReveal } from "@/components/marketing/scroll-revea
 export function Footer() {
   return (
     <footer className="bg-primary" itemScope itemType="https://schema.org/Organization">
-      <meta itemProp="name" content="calls4u" />
+      <meta itemProp="name" content="Calls4U" />
       <meta itemProp="url" content="https://www.calls4u.ai" />
       <div
         className="@container pointer-events-none relative h-[10cqw] overflow-hidden bg-linear-to-b from-white to-transparent select-none"

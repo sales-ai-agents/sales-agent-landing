@@ -5,6 +5,7 @@ import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { ScrollReveal, ScaleReveal } from "@/components/marketing/scroll-reveal";
+import { trackEvent } from "@/lib/analytics";
 
 interface CalculationResult {
   hoursPerMonth: string;
@@ -23,6 +24,11 @@ export function CalculatorSection() {
     const costPerMonth = Math.round(parseFloat(hoursPerMonth) * hourlyRate).toLocaleString("uk-UA");
 
     setResult({ hoursPerMonth, costPerMonth });
+    trackEvent("calculator_submit", {
+      calls_per_month: callsPerMonth,
+      avg_duration: avgDuration,
+      hourly_rate: hourlyRate,
+    });
   }, [callsPerMonth, avgDuration, hourlyRate]);
 
   return (

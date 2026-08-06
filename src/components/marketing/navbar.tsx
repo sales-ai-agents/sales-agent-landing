@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { LeadFormModal } from "@/components/marketing/lead-form-card";
 import { ScrollReveal } from "@/components/marketing/scroll-reveal";
 import { NAV_LINKS } from "@/lib/content";
+import { trackEvent } from "@/lib/analytics";
 
 export function Navbar() {
   const [isLeadFormOpen, setIsLeadFormOpen] = useState(false);
@@ -57,7 +58,10 @@ export function Navbar() {
             ))}
             <Button
               className="rounded-full px-5 py-5 text-lg"
-              onClick={() => setIsLeadFormOpen(true)}
+              onClick={() => {
+                trackEvent("cta_click", { button: "navbar_register" });
+                setIsLeadFormOpen(true);
+              }}
             >
               Реєстрація
             </Button>
@@ -100,7 +104,10 @@ export function MobileNavbar() {
           <Button
             size="sm"
             className="rounded-full px-5 py-4 text-sm"
-            onClick={() => setIsLeadFormOpen(true)}
+            onClick={() => {
+              trackEvent("cta_click", { button: "navbar_mobile_register" });
+              setIsLeadFormOpen(true);
+            }}
           >
             Реєстрація
           </Button>

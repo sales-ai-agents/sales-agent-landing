@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import { Providers } from "@/components/providers";
-import { GoogleAnalytics } from "@/components/google-analytics";
+import { GoogleAnalytics } from "@/lib/google-analytics";
 import "./globals.css";
 
 const inter = Inter({
@@ -29,15 +29,16 @@ const gilroy = localFont({
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.calls4u.ai"),
   title: {
-    default: "calls4u — ШІ-агент для автоматизації дзвінків",
-    template: "%s | calls4u",
+    default: "Calls4U | ШІ-агент для бізнесу",
+    template: "%s | Calls4U",
   },
   description:
-    "Голосовий ШІ-агент автоматизує рутинні дзвінки клієнтам: підтверджує записи, нагадує про візити, уточнює замовлення та передає результат у CRM, без програмістів.",
+    "Calls4U — голосовий ШІ-агент, який телефонує клієнтам за вас: підтверджує записи, нагадує про візити, уточнює замовлення та передає результат у CRM. Запуск за 1 день, без програмістів.",
   alternates: {
     canonical: "/",
     languages: {
       uk: "https://www.calls4u.ai",
+      ru: "https://www.calls4u.ai",
     },
   },
   robots: {
@@ -54,24 +55,33 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "uk_UA",
-    siteName: "calls4u",
+    siteName: "Calls4U",
     url: "https://www.calls4u.ai",
   },
   twitter: {
     card: "summary_large_image",
   },
   keywords: [
+    "Calls4U",
     "ШІ-агент",
     "голосовий агент",
     "автоматизація дзвінків",
     "AI voice agent",
-    "calls4u",
     "підтвердження запису",
     "CRM інтеграція",
     "автодзвінки",
     "голосовий бот",
     "штучний інтелект для бізнесу",
     "автоматизація бізнесу Україна",
+    "ШІ-агент для бізнесу",
+    "ИИ-агент для бизнеса",
+    "голосовой бот",
+    "автоматизация звонков",
+    "ИИ-агент для звонков",
+    "голосовой агент",
+    "автоматизация бизнеса",
+    "подтверждение записи",
+    "CRM интеграция",
   ],
   other: {
     "geo.region": "UA",

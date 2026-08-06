@@ -44,11 +44,11 @@ export function buildOrganizationSchema(): object {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "calls4u",
+    name: "Calls4U",
     url: "https://www.calls4u.ai",
     logo: "https://www.calls4u.ai/image/Logo.svg",
     description:
-      "calls4u — платформа голосових ШІ-агентів для автоматизації рутинних дзвінків малого бізнесу в Україні.",
+      "Calls4U — платформа голосових ШІ-агентів для автоматизації рутинних дзвінків малого та середнього бізнесу в Україні.",
     email: "salesagentswork@gmail.com",
     telephone: "+380914810542",
     areaServed: {
@@ -56,7 +56,7 @@ export function buildOrganizationSchema(): object {
       name: "Ukraine",
     },
     serviceType: "AI Voice Agent Platform",
-    knowsLanguage: "uk",
+    knowsLanguage: ["uk", "ru"],
     sameAs: [],
   };
 }

@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/carousel";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { trackEvent } from "@/lib/analytics";
 import { ScrollReveal } from "@/components/marketing/scroll-reveal";
 import { AudioWaveform } from "@/components/marketing/audio-waveform";
 import type { DemoCard } from "@/types";
@@ -98,6 +99,7 @@ export function AudioDemoSection() {
       setActiveId(id);
       setPlaying(id);
       howl.play();
+      trackEvent("demo_play", { demo_id: id, category: demo.category });
     },
     [playing, activeId]
   );
