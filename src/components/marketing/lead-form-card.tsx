@@ -166,7 +166,7 @@ export function LeadFormModal({ open, onClose, sourcePage }: LeadFormModalProps)
                     onChange={handlePhoneChange}
                     required
                     disabled={isLoading}
-                    maxLength={11}
+
                     aria-label="Номер телефону після +380"
                     className="text-foreground h-auto rounded-none border-0 bg-transparent px-0 py-2 text-lg font-normal shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
                   />
