@@ -22,10 +22,7 @@ export function BuilderSection() {
 
   function handleStart(): void {
     if (!form.isValid) return;
-    trackEvent("builder_start_call", {
-      voice: form.voiceApiValue,
-      preset: form.activePreset?.id ?? "custom",
-    });
+    trackEvent("check_test_call");
     startAgent({
       instruction: form.instruction,
       voice: form.voiceApiValue,

@@ -26,7 +26,7 @@ export default function DemoCallCard() {
 
   function handleSubmit(): void {
     if (digits.length === UA_SUBSCRIBER_DIGITS) {
-      trackEvent("cta_click", { button: "test_call" });
+      trackEvent("start_test_call");
       requestCall(digits);
     }
   }

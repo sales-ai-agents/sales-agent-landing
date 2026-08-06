@@ -32,10 +32,7 @@ export function LeadFormModal({ open, onClose, sourcePage }: LeadFormModalProps)
     e.preventDefault();
     if (!name.trim() || phone.length !== UA_SUBSCRIBER_DIGITS) return;
 
-    trackEvent("lead_form_submit", {
-      name: name.trim(),
-      source: sourcePage ?? "unknown",
-    });
+    trackEvent("lead_form_submit");
 
     submitLead({
       name: name.trim(),

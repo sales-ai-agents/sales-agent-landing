@@ -59,7 +59,7 @@ export function Navbar() {
             <Button
               className="rounded-full px-5 py-5 text-lg"
               onClick={() => {
-                trackEvent("cta_click", { button: "navbar_register" });
+                trackEvent("navbar_lead_form");
                 setIsLeadFormOpen(true);
               }}
             >
@@ -105,7 +105,7 @@ export function MobileNavbar() {
             size="sm"
             className="rounded-full px-5 py-4 text-sm"
             onClick={() => {
-              trackEvent("cta_click", { button: "navbar_mobile_register" });
+              trackEvent("mobile_navbar_lead_form");
               setIsLeadFormOpen(true);
             }}
           >

@@ -27,7 +27,7 @@ export function FinalCtaSection() {
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <a
               href="#hero"
-              onClick={() => trackEvent("cta_click", { button: "href_test_call" })}
+              onClick={() => trackEvent("footer_start_test_call")}
               className={cn(
                 buttonVariants(),
                 "font-body h-12 w-full rounded-xl bg-white px-7 text-lg font-normal text-black hover:bg-gray-100 sm:w-sm"
@@ -39,7 +39,7 @@ export function FinalCtaSection() {
             <Button
               variant="outline"
               onClick={() => {
-                trackEvent("cta_click", { button: "final_book_demo" });
+                trackEvent("footer_lead_form");
                 setLeadFormOpen(true);
               }}
               className="font-body h-12 w-full rounded-xl border-white/30 bg-transparent px-7 text-lg font-normal text-white hover:bg-white/10 sm:w-sm"
