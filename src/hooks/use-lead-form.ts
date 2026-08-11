@@ -30,12 +30,18 @@ export interface LeadFormResult {
 }
 
 async function submitLead(params: LeadFormParams): Promise<LeadFormResult> {
+  const payload = {
+    ...params,
+    page_url: window.location.href,
+    referrer: document.referrer,
+  };
+
   let response: Response;
   try {
     response = await fetch(API_ENDPOINTS.LEAD, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(params),
+      body: JSON.stringify(payload),
     });
   } catch {
     throw new Error(NETWORK_ERROR_MESSAGE);
