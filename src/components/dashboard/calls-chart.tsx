@@ -19,8 +19,8 @@ export function CallsChart() {
         <AreaChart data={[...chartData]} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
           <defs>
             <linearGradient id="colorCalls" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="hsl(221.2, 83.2%, 53.3%)" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="hsl(221.2, 83.2%, 53.3%)" stopOpacity={0} />
+              <stop offset="5%" stopColor="#005bff" stopOpacity={0.3} />
+              <stop offset="95%" stopColor="#005bff" stopOpacity={0} />
             </linearGradient>
             <linearGradient id="colorSuccess" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="hsl(142, 71%, 45%)" stopOpacity={0.3} />
@@ -32,8 +32,8 @@ export function CallsChart() {
           <YAxis className="text-xs" tick={{ fontSize: 12 }} />
           <Tooltip
             contentStyle={{
-              backgroundColor: "hsl(0, 0%, 100%)",
-              border: "1px solid hsl(214.3, 31.8%, 91.4%)",
+              backgroundColor: "white",
+              border: "1px solid var(--color-border)",
               borderRadius: "8px",
               fontSize: "12px",
             }}
@@ -41,7 +41,7 @@ export function CallsChart() {
           <Area
             type="monotone"
             dataKey="calls"
-            stroke="hsl(221.2, 83.2%, 53.3%)"
+            stroke="#005bff"
             fillOpacity={1}
             fill="url(#colorCalls)"
             name="Total Calls"

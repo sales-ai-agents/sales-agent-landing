@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Phone } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { signUpSchema, type SignUpFormData } from "@/lib/schemas";
 
 export default function SignUpPage() {
@@ -32,28 +32,51 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="flex min-h-[80vh] items-center justify-center px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="mb-4 flex justify-center">
-            <div className="bg-primary/10 rounded-lg p-2">
-              <Phone className="text-primary h-6 w-6" />
-            </div>
+    <div className="flex min-h-screen items-center justify-center px-4">
+      <div className="w-full max-w-md">
+        <div className="mb-6 flex items-center justify-center gap-5">
+          <Image
+            src="/image/Logo.svg"
+            alt="Calls4U logo"
+            width={40}
+            height={40}
+            className="h-auto w-auto"
+          />
+          <Image
+            src="/image/calls4u.svg"
+            alt="Calls4U"
+            width={100}
+            height={24}
+            className="h-auto w-auto"
+          />
+        </div>
+
+        <div className="border-border shadow-primary/30 rounded-2xl border p-6 shadow-lg backdrop-blur-lg sm:p-10">
+          <div className="mb-6 text-center">
+            <h2 className="font-display text-2xl font-bold">Create your account</h2>
+            <p className="font-body text-muted-foreground mt-2">
+              Start automating your phone calls in minutes
+            </p>
           </div>
-          <CardTitle className="text-2xl">Create your account</CardTitle>
-          <CardDescription>Start automating your phone calls in minutes</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
               <Input id="name" placeholder="John Smith" {...register("name")} />
-              {errors.name && <p className="text-destructive text-sm">{errors.name.message}</p>}
+              {errors.name && (
+                <p className="text-destructive text-sm" role="alert">
+                  {errors.name.message}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input id="email" type="email" placeholder="you@example.com" {...register("email")} />
-              {errors.email && <p className="text-destructive text-sm">{errors.email.message}</p>}
+              {errors.email && (
+                <p className="text-destructive text-sm" role="alert">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
@@ -64,7 +87,9 @@ export default function SignUpPage() {
                 {...register("password")}
               />
               {errors.password && (
-                <p className="text-destructive text-sm">{errors.password.message}</p>
+                <p className="text-destructive text-sm" role="alert">
+                  {errors.password.message}
+                </p>
               )}
             </div>
             <div className="space-y-2">
@@ -76,21 +101,28 @@ export default function SignUpPage() {
                 {...register("confirmPassword")}
               />
               {errors.confirmPassword && (
-                <p className="text-destructive text-sm">{errors.confirmPassword.message}</p>
+                <p className="text-destructive text-sm" role="alert">
+                  {errors.confirmPassword.message}
+                </p>
               )}
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button
+              type="submit"
+              className="bg-primary hover:bg-primary/90 h-10 w-full rounded-lg text-base text-white"
+              disabled={isLoading}
+            >
               {isLoading ? "Creating account..." : "Create Account"}
             </Button>
           </form>
-          <p className="text-muted-foreground mt-4 text-center text-sm">
+
+          <p className="font-body text-muted-foreground mt-4 text-center text-sm">
             Already have an account?{" "}
             <Link href="/sign-in" className="text-primary font-medium hover:underline">
               Sign in
             </Link>
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

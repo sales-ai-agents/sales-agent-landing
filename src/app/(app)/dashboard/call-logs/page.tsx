@@ -79,7 +79,7 @@ export default function CallLogsPage() {
           const value = info.getValue();
           if (value === "—") return <span className="text-muted-foreground text-xs">—</span>;
           return (
-            <button className="text-primary hover:text-primary/80 inline-flex items-center gap-1">
+            <button className="text-primary hover:text-primary/80 inline-flex cursor-pointer items-center gap-1">
               <Play className="h-3 w-3" />
               <span className="text-xs">{value}</span>
             </button>
@@ -113,11 +113,10 @@ export default function CallLogsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Call Logs</h1>
+        <h1 className="font-display text-2xl font-bold">Call Logs</h1>
         <p className="text-muted-foreground">{callLogs.length} total calls</p>
       </div>
 
-      {/* Status Filters */}
       <div className="flex flex-wrap gap-2">
         <Button
           variant={statusFilter === "all" ? "default" : "outline"}
@@ -138,7 +137,6 @@ export default function CallLogsPage() {
         ))}
       </div>
 
-      {/* Table */}
       <Card>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -184,7 +182,6 @@ export default function CallLogsPage() {
             </table>
           </div>
 
-          {/* Pagination */}
           <div className="flex items-center justify-between border-t p-3">
             <p className="text-muted-foreground text-sm">
               Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
@@ -196,6 +193,7 @@ export default function CallLogsPage() {
                 className="h-8 w-8"
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
+                aria-label="Previous page"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
@@ -205,6 +203,7 @@ export default function CallLogsPage() {
                 className="h-8 w-8"
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
+                aria-label="Next page"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
@@ -213,7 +212,6 @@ export default function CallLogsPage() {
         </CardContent>
       </Card>
 
-      {/* Detail Drawer */}
       {selectedLog && (
         <CallLogDetailDrawer callLog={selectedLog} onClose={() => setSelectedLog(null)} />
       )}

@@ -3,11 +3,10 @@
 import { PhoneCall, CheckCircle, XCircle, UserCheck, Bot, Plus } from "lucide-react";
 import Link from "next/link";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { CallsChart } from "@/components/dashboard/calls-chart";
 import { recentActivity, type StatCard } from "@/lib/mock-data";
-import { cn } from "@/lib/utils";
 
 const STATS: readonly StatCard[] = [
   {
@@ -15,32 +14,24 @@ const STATS: readonly StatCard[] = [
     value: "1,247",
     change: "+12%",
     icon: PhoneCall,
-    color: "text-blue-600",
-    bgColor: "bg-blue-100",
   },
   {
     title: "Successful Calls",
     value: "1,089",
     change: "+8%",
     icon: CheckCircle,
-    color: "text-green-600",
-    bgColor: "bg-green-100",
   },
   {
     title: "Missed Calls",
     value: "98",
     change: "-3%",
     icon: XCircle,
-    color: "text-red-600",
-    bgColor: "bg-red-100",
   },
   {
     title: "Human Follow-up",
     value: "60",
     change: "+2%",
     icon: UserCheck,
-    color: "text-purple-600",
-    bgColor: "bg-purple-100",
   },
 ] as const;
 
@@ -49,7 +40,7 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <h1 className="font-display text-2xl font-bold">Dashboard</h1>
           <p className="text-muted-foreground">Overview of your AI voice agents performance</p>
         </div>
         <Link href="/dashboard/agents/create" className={buttonVariants()}>
@@ -58,12 +49,14 @@ export default function DashboardPage() {
         </Link>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {STATS.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.title}>
+            <Card
+              key={stat.title}
+              className="border-border shadow-primary/30 rounded-2xl shadow-lg"
+            >
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -78,8 +71,8 @@ export default function DashboardPage() {
                       vs last week
                     </p>
                   </div>
-                  <div className={cn("rounded-full p-3", stat.bgColor)}>
-                    <Icon className={cn("h-5 w-5", stat.color)} />
+                  <div className="bg-primary/10 rounded-full p-3">
+                    <Icon className="text-primary h-5 w-5" />
                   </div>
                 </div>
               </CardContent>
@@ -88,20 +81,18 @@ export default function DashboardPage() {
         })}
       </div>
 
-      {/* Chart */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Calls This Week</CardTitle>
+          <h2 className="font-display text-lg font-semibold">Calls This Week</h2>
         </CardHeader>
         <CardContent>
           <CallsChart />
         </CardContent>
       </Card>
 
-      {/* Recent Activity */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Recent Agent Activity</CardTitle>
+          <h2 className="font-display text-lg font-semibold">Recent Agent Activity</h2>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">

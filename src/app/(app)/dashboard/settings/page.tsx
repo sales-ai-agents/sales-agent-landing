@@ -5,7 +5,7 @@ import { Save, Link2, FileSpreadsheet, Webhook } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -24,7 +24,7 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Settings</h1>
+        <h1 className="font-display text-2xl font-bold">Settings</h1>
         <p className="text-muted-foreground">Manage your account and integrations</p>
       </div>
 
@@ -35,11 +35,10 @@ export default function SettingsPage() {
           <TabsTrigger value="billing">Billing</TabsTrigger>
         </TabsList>
 
-        {/* Profile Tab */}
         <TabsContent value="profile" className="space-y-4">
-          <Card>
+          <Card className="border-border shadow-primary/30 rounded-2xl shadow-lg">
             <CardHeader>
-              <CardTitle>Profile Information</CardTitle>
+              <h2 className="font-display text-2xl font-semibold">Profile Information</h2>
               <CardDescription>Update your account details</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -57,16 +56,16 @@ export default function SettingsPage() {
                   onChange={(e) => setProfile({ ...profile, email: e.target.value })}
                 />
               </div>
-              <Button>
+              <Button className="bg-primary hover:bg-primary/90 text-white">
                 <Save className="mr-2 h-4 w-4" />
                 Save Changes
               </Button>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-border shadow-primary/30 rounded-2xl shadow-lg">
             <CardHeader>
-              <CardTitle>Change Password</CardTitle>
+              <h2 className="font-display text-2xl font-semibold">Change Password</h2>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -81,19 +80,18 @@ export default function SettingsPage() {
                 <Label>Confirm New Password</Label>
                 <Input type="password" placeholder="••••••••" />
               </div>
-              <Button>Update Password</Button>
+              <Button className="bg-primary hover:bg-primary/90 text-white">Update Password</Button>
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* Integrations Tab */}
         <TabsContent value="integrations" className="space-y-4">
-          <Card>
+          <Card className="border-border shadow-primary/30 rounded-2xl shadow-lg">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <h2 className="font-display flex items-center gap-2 text-2xl font-semibold">
                 <Webhook className="h-5 w-5" />
                 Webhook URL
-              </CardTitle>
+              </h2>
               <CardDescription>Receive real-time notifications when calls complete</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -104,12 +102,12 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-border shadow-primary/30 rounded-2xl shadow-lg">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <h2 className="font-display flex items-center gap-2 text-2xl font-semibold">
                 <Link2 className="h-5 w-5" />
                 Google Sheets
-              </CardTitle>
+              </h2>
               <CardDescription>Automatically log call results to a Google Sheet</CardDescription>
             </CardHeader>
             <CardContent className="flex items-center justify-between">
@@ -120,12 +118,12 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-border shadow-primary/30 rounded-2xl shadow-lg">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <h2 className="font-display flex items-center gap-2 text-2xl font-semibold">
                 <FileSpreadsheet className="h-5 w-5" />
                 CSV Export
-              </CardTitle>
+              </h2>
               <CardDescription>Download all call logs and contacts as CSV</CardDescription>
             </CardHeader>
             <CardContent className="flex gap-2">
@@ -139,11 +137,10 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
 
-        {/* Billing Tab */}
         <TabsContent value="billing" className="space-y-4">
-          <Card>
+          <Card className="border-border shadow-primary/30 rounded-2xl shadow-lg">
             <CardHeader>
-              <CardTitle>Current Plan</CardTitle>
+              <h2 className="font-display text-2xl font-semibold">Current Plan</h2>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
@@ -157,9 +154,9 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-border shadow-primary/30 rounded-2xl shadow-lg">
             <CardHeader>
-              <CardTitle>Usage This Month</CardTitle>
+              <h2 className="font-display text-2xl font-semibold">Usage This Month</h2>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -182,9 +179,9 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-border shadow-primary/30 rounded-2xl shadow-lg">
             <CardHeader>
-              <CardTitle>Pricing</CardTitle>
+              <h2 className="font-display text-2xl font-semibold">Pricing</h2>
             </CardHeader>
             <CardContent>
               <div className="space-y-2 text-sm">

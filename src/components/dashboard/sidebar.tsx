@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronLeft, ChevronRight, Phone } from "lucide-react";
+import Image from "next/image";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { DASHBOARD_NAV_ITEMS } from "@/lib/constants";
@@ -12,6 +13,11 @@ export function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
 
+  function isNavActive(href: string): boolean {
+    if (href === "/dashboard") return pathname === "/dashboard";
+    return pathname === href || pathname.startsWith(href + "/");
+  }
+
   return (
     <aside
       className={cn(
@@ -19,24 +25,36 @@ export function Sidebar() {
         collapsed ? "w-16" : "w-64"
       )}
     >
-      {/* Logo */}
       <div className="flex h-16 items-center gap-2 border-b p-4">
-        <Phone className="text-primary h-6 w-6 shrink-0" />
-        {!collapsed && <span className="text-lg font-bold">VoiceAgent</span>}
+        <Image
+          src="/image/Logo.svg"
+          alt="Calls4u.ai"
+          width={32}
+          height={32}
+          className="h-auto w-auto shrink-0"
+        />
+        {!collapsed && (
+          <Image
+            src="/image/calls4u.svg"
+            alt="Calls4u.ai"
+            width={80}
+            height={18}
+            className="h-auto w-auto"
+          />
+        )}
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 space-y-1 p-3">
         {DASHBOARD_NAV_ITEMS.map((item) => {
           const Icon = item.icon;
-          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+          const active = isNavActive(item.href);
           return (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
                 "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                isActive
+                active
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
@@ -48,13 +66,13 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Collapse toggle */}
       <div className="border-t p-3">
         <Button
           variant="ghost"
           size="sm"
           className="w-full justify-center"
           onClick={() => setCollapsed(!collapsed)}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </Button>

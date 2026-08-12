@@ -22,7 +22,7 @@ export default function AgentsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Agents</h1>
+          <h1 className="font-display text-2xl font-bold">Agents</h1>
           <p className="text-muted-foreground">Manage your AI voice agents</p>
         </div>
         <Link href="/dashboard/agents/create" className={buttonVariants()}>
@@ -31,6 +31,7 @@ export default function AgentsPage() {
         </Link>
       </div>
 
+      <h2 className="sr-only">Agent List</h2>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {agents.map((agent: Agent) => (
           <AgentCard key={agent.id} agent={agent} onToggle={() => handleToggle(agent)} />
@@ -47,7 +48,7 @@ interface AgentCardProps {
 
 function AgentCard({ agent, onToggle }: AgentCardProps) {
   return (
-    <Card className="transition-shadow hover:shadow-md">
+    <Card className="border-border shadow-primary/30 rounded-2xl shadow-lg transition-shadow hover:shadow-md">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

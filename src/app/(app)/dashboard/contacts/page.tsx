@@ -50,7 +50,7 @@ export default function ContactsPage() {
       columnHelper.accessor("name", {
         header: ({ column }) => (
           <button
-            className="flex items-center gap-1 font-medium"
+            className="flex cursor-pointer items-center gap-1 font-medium"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Name
@@ -71,7 +71,7 @@ export default function ContactsPage() {
       columnHelper.accessor("dateAdded", {
         header: ({ column }) => (
           <button
-            className="flex items-center gap-1 font-medium"
+            className="flex cursor-pointer items-center gap-1 font-medium"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Added
@@ -86,7 +86,7 @@ export default function ContactsPage() {
         header: () => <span className="sr-only">Actions</span>,
         cell: ({ row }) => (
           <div className="flex justify-end gap-1">
-            <Button variant="ghost" size="icon" className="h-8 w-8">
+            <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Edit contact">
               <Edit className="h-3 w-3" />
             </Button>
             <Button
@@ -94,6 +94,7 @@ export default function ContactsPage() {
               size="icon"
               className="text-destructive h-8 w-8"
               onClick={() => deleteContact.mutate(row.original.id)}
+              aria-label="Delete contact"
             >
               <Trash2 className="h-3 w-3" />
             </Button>
@@ -126,7 +127,7 @@ export default function ContactsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Contacts</h1>
+          <h1 className="font-display text-2xl font-bold">Contacts</h1>
           <p className="text-muted-foreground">{contacts.length} total contacts</p>
         </div>
         <div className="flex gap-2">
@@ -141,7 +142,6 @@ export default function ContactsPage() {
         </div>
       </div>
 
-      {/* Search */}
       <div className="relative max-w-sm">
         <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
         <Input
@@ -152,7 +152,6 @@ export default function ContactsPage() {
         />
       </div>
 
-      {/* Table */}
       <Card>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -164,7 +163,10 @@ export default function ContactsPage() {
                       const meta = header.column.columnDef.meta as
                         { className?: string } | undefined;
                       return (
-                        <th key={header.id} className={cn("p-3 text-left", meta?.className)}>
+                        <th
+                          key={header.id}
+                          className={cn("p-3 text-left font-medium", meta?.className)}
+                        >
                           {header.isPlaceholder
                             ? null
                             : flexRender(header.column.columnDef.header, header.getContext())}
@@ -191,7 +193,6 @@ export default function ContactsPage() {
             </table>
           </div>
 
-          {/* Pagination */}
           <div className="flex items-center justify-between border-t p-3">
             <p className="text-muted-foreground text-sm">
               Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
@@ -203,6 +204,7 @@ export default function ContactsPage() {
                 className="h-8 w-8"
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
+                aria-label="Previous page"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
@@ -212,6 +214,7 @@ export default function ContactsPage() {
                 className="h-8 w-8"
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
+                aria-label="Next page"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
@@ -220,7 +223,6 @@ export default function ContactsPage() {
         </CardContent>
       </Card>
 
-      {/* Dialogs */}
       {showAddDialog && (
         <AddContactDialog onSubmit={handleAddContact} onClose={() => setShowAddDialog(false)} />
       )}

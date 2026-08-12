@@ -37,9 +37,9 @@ export function CallLogDetailDrawer({ callLog, onClose }: CallLogDetailDrawerPro
           <SheetTitle>Call Details</SheetTitle>
         </SheetHeader>
 
-        <div className="mt-6 space-y-4">
+        <div className="mt-6 space-y-5">
           <DetailField label="Customer">
-            <p className="font-medium">{callLog.customerName}</p>
+            <p className="text-sm font-medium">{callLog.customerName}</p>
             <p className="text-muted-foreground text-sm">{callLog.phone}</p>
           </DetailField>
 
@@ -48,23 +48,22 @@ export function CallLogDetailDrawer({ callLog, onClose }: CallLogDetailDrawerPro
           </DetailField>
 
           <DetailField label="Agent">
-            <p className="font-medium">{callLog.agentName}</p>
+            <p className="text-sm font-medium">{callLog.agentName}</p>
           </DetailField>
 
           <DetailField label="Date & Time">
-            <p className="font-medium">
+            <p className="text-sm font-medium">
               {callLog.date} at {callLog.time}
             </p>
           </DetailField>
 
           <DetailField label="Duration">
-            <p className="font-medium">{callLog.duration}</p>
+            <p className="text-sm font-medium">{callLog.duration}</p>
           </DetailField>
 
-          <div>
-            <p className="text-muted-foreground mb-1 text-sm">AI Summary</p>
+          <DetailField label="AI Summary">
             <p className="bg-muted rounded-md p-3 text-sm">{callLog.summary}</p>
-          </div>
+          </DetailField>
 
           <DetailField label="CRM Sync">
             <Badge variant={callLog.crmSynced ? "success" : "warning"}>
@@ -73,18 +72,22 @@ export function CallLogDetailDrawer({ callLog, onClose }: CallLogDetailDrawerPro
           </DetailField>
 
           {callLog.duration !== "—" && (
-            <div>
-              <p className="text-muted-foreground mb-2 text-sm">Recording</p>
+            <DetailField label="Recording">
               <div className="bg-muted flex items-center gap-3 rounded-md p-3">
-                <Button variant="outline" size="icon" className="h-8 w-8 rounded-full">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8 cursor-pointer rounded-full"
+                  aria-label="Play recording"
+                >
                   <Play className="h-3 w-3" />
                 </Button>
                 <div className="bg-border h-2 flex-1 rounded-full">
                   <div className="bg-primary h-full w-0 rounded-full" />
                 </div>
-                <span className="text-xs">{callLog.duration}</span>
+                <span className="text-muted-foreground text-xs">{callLog.duration}</span>
               </div>
-            </div>
+            </DetailField>
           )}
         </div>
       </SheetContent>
@@ -94,8 +97,8 @@ export function CallLogDetailDrawer({ callLog, onClose }: CallLogDetailDrawerPro
 
 function DetailField({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div>
-      <p className="text-muted-foreground text-sm">{label}</p>
+    <div className="space-y-1">
+      <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">{label}</p>
       {children}
     </div>
   );

@@ -1,9 +1,3 @@
-/**
- * Centralized API endpoint configuration.
- * All external API URLs are defined here to ensure consistency
- * and make environment-based overrides straightforward.
- */
-
 const API_BASE_URL = "https://api.calls4u.ai";
 
 export const API_ENDPOINTS = {

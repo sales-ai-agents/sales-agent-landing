@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardDescription } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useWizardStore } from "@/lib/store";
 import { useState } from "react";
@@ -74,14 +74,13 @@ export default function CreateAgentPage() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold">Create New Agent</h1>
+          <h1 className="font-display text-2xl font-bold">Create New Agent</h1>
           <p className="text-muted-foreground">
             Step {step + 1} of {STEPS.length}
           </p>
         </div>
       </div>
 
-      {/* Progress dots */}
       <div className="flex items-center justify-center gap-2">
         {STEPS.map((label, index) => (
           <div key={label} className="flex items-center gap-2">
@@ -102,13 +101,12 @@ export default function CreateAgentPage() {
         ))}
       </div>
 
-      <Card>
+      <Card className="border-border shadow-primary/30 rounded-2xl shadow-lg">
         <CardContent className="p-6">
-          {/* Step 1: Name */}
           {step === 0 && (
             <div className="space-y-4">
               <CardHeader className="p-0 pb-4">
-                <CardTitle>Name your agent</CardTitle>
+                <h2 className="font-display text-2xl font-semibold">Name your agent</h2>
                 <CardDescription>
                   Choose a descriptive name for your AI voice agent.
                 </CardDescription>
@@ -125,11 +123,10 @@ export default function CreateAgentPage() {
             </div>
           )}
 
-          {/* Step 2: Voice */}
           {step === 1 && (
             <div className="space-y-4">
               <CardHeader className="p-0 pb-4">
-                <CardTitle>Select a voice</CardTitle>
+                <h2 className="font-display text-2xl font-semibold">Select a voice</h2>
                 <CardDescription>
                   Choose the voice your agent will use during calls.
                 </CardDescription>
@@ -161,11 +158,10 @@ export default function CreateAgentPage() {
             </div>
           )}
 
-          {/* Step 3: Instructions */}
           {step === 2 && (
             <div className="space-y-4">
               <CardHeader className="p-0 pb-4">
-                <CardTitle>Write instructions</CardTitle>
+                <h2 className="font-display text-2xl font-semibold">Write instructions</h2>
                 <CardDescription>
                   Tell your agent what to do in plain language. No code needed.
                 </CardDescription>
@@ -186,11 +182,10 @@ export default function CreateAgentPage() {
             </div>
           )}
 
-          {/* Step 4: Test Call */}
           {step === 3 && (
             <div className="space-y-4">
               <CardHeader className="p-0 pb-4">
-                <CardTitle>Test your agent</CardTitle>
+                <h2 className="font-display text-2xl font-semibold">Test your agent</h2>
                 <CardDescription>
                   Enter your phone number and we&apos;ll call you so you can hear your agent in
                   action.
@@ -225,9 +220,8 @@ export default function CreateAgentPage() {
                   </p>
                 )}
 
-                {/* Review summary */}
                 <div className="bg-muted mt-6 space-y-2 rounded-lg p-4">
-                  <h4 className="text-sm font-medium">Agent Summary</h4>
+                  <h3 className="text-sm font-medium">Agent Summary</h3>
                   <div className="space-y-1 text-sm">
                     <p>
                       <span className="text-muted-foreground">Name:</span> {name || "—"}
@@ -248,7 +242,6 @@ export default function CreateAgentPage() {
         </CardContent>
       </Card>
 
-      {/* Navigation */}
       <div className="flex justify-between">
         <Button variant="outline" onClick={handleBack} disabled={step === 0}>
           <ArrowLeft className="mr-2 h-4 w-4" />

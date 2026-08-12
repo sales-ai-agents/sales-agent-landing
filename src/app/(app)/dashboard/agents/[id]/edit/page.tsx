@@ -7,7 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -27,7 +34,6 @@ export default function EditAgentPage() {
   const router = useRouter();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Mock data — in real app would fetch based on params.id
   const [formData, setFormData] = useState<AgentFormData>({
     name: "Appointment Reminder Bot",
     voice: "sarah",
@@ -46,18 +52,18 @@ export default function EditAgentPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => router.back()}>
+        <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Go back">
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold">Edit Agent</h1>
+          <h1 className="font-display text-2xl font-bold">Edit Agent</h1>
           <p className="text-muted-foreground">Update your agent configuration</p>
         </div>
       </div>
 
-      <Card>
+      <Card className="border-border shadow-primary/30 rounded-2xl shadow-lg">
         <CardHeader>
-          <CardTitle>Agent Configuration</CardTitle>
+          <h2 className="font-display text-2xl font-semibold">Agent Configuration</h2>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -71,17 +77,20 @@ export default function EditAgentPage() {
 
           <div className="space-y-2">
             <Label htmlFor="voice">Voice</Label>
-            <select
-              id="voice"
+            <Select
               value={formData.voice}
-              onChange={(e) => setFormData({ ...formData, voice: e.target.value })}
-              className="border-input bg-background flex h-10 w-full rounded-md border px-3 py-2 text-sm"
+              onValueChange={(value) => setFormData({ ...formData, voice: value ?? "" })}
             >
-              <option value="sarah">Sarah — Professional Female</option>
-              <option value="james">James — Professional Male</option>
-              <option value="emma">Emma — Friendly Female</option>
-              <option value="michael">Michael — Friendly Male</option>
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a voice" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="sarah">Sarah — Professional Female</SelectItem>
+                <SelectItem value="james">James — Professional Male</SelectItem>
+                <SelectItem value="emma">Emma — Friendly Female</SelectItem>
+                <SelectItem value="michael">Michael — Friendly Male</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
@@ -101,13 +110,12 @@ export default function EditAgentPage() {
           <Trash2 className="mr-2 h-4 w-4" />
           Delete Agent
         </Button>
-        <Button onClick={handleSave}>
+        <Button className="bg-primary hover:bg-primary/90 text-white" onClick={handleSave}>
           <Save className="mr-2 h-4 w-4" />
           Save Changes
         </Button>
       </div>
 
-      {/* Delete confirmation */}
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <DialogContent>
           <DialogHeader>

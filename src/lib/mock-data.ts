@@ -26,8 +26,10 @@ export interface StatCard {
   readonly value: string;
   readonly change: string;
   readonly icon: LucideIcon;
-  readonly color: string;
-  readonly bgColor: string;
+  /** @deprecated Use unified `text-primary` token instead */
+  readonly color?: string;
+  /** @deprecated Use unified `bg-primary/10` token instead */
+  readonly bgColor?: string;
 }
 
 export interface RecentAgent {

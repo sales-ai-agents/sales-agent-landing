@@ -2,14 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { signInSchema, type SignInFormData } from "@/lib/schemas";
 
 export default function SignInPage() {
@@ -30,30 +29,48 @@ export default function SignInPage() {
 
   const onSubmit = async (_data: SignInFormData) => {
     setIsLoading(true);
-    // Mock sign-in — simulates auth
     await new Promise((resolve) => setTimeout(resolve, 1000));
     setIsLoading(false);
     router.push("/dashboard");
   };
 
   return (
-    <div className="flex min-h-[80vh] items-center justify-center px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="mb-4 flex justify-center">
-            <div className="bg-primary/10 rounded-lg p-2">
-              <Phone className="text-primary h-6 w-6" />
-            </div>
+    <div className="flex min-h-screen items-center justify-center px-4">
+      <div className="w-full max-w-md">
+        <div className="mb-6 flex items-center justify-center gap-5">
+          <Image
+            src="/image/Logo.svg"
+            alt="Calls4u.ai logo"
+            width={40}
+            height={40}
+            className="h-auto w-auto"
+          />
+          <Image
+            src="/image/calls4u.svg"
+            alt="Calls4u.ai"
+            width={40}
+            height={40}
+            className="h-auto w-auto"
+          />
+        </div>
+
+        <div className="border-border shadow-primary/30 rounded-2xl border p-6 shadow-lg backdrop-blur-lg sm:p-10">
+          <div className="mb-6 text-center">
+            <h2 className="font-display text-2xl font-bold">Welcome back</h2>
+            <p className="font-body text-muted-foreground mt-2 text-sm">
+              Sign in to your VoiceAgent account
+            </p>
           </div>
-          <CardTitle className="text-2xl">Welcome back</CardTitle>
-          <CardDescription>Sign in to your VoiceAgent account</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input id="email" type="email" placeholder="you@example.com" {...register("email")} />
-              {errors.email && <p className="text-destructive text-sm">{errors.email.message}</p>}
+              {errors.email && (
+                <p role="alert" className="text-destructive text-sm">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
@@ -64,21 +81,28 @@ export default function SignInPage() {
                 {...register("password")}
               />
               {errors.password && (
-                <p className="text-destructive text-sm">{errors.password.message}</p>
+                <p role="alert" className="text-destructive text-sm">
+                  {errors.password.message}
+                </p>
               )}
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button
+              type="submit"
+              className="bg-primary hover:bg-primary/90 h-10 w-full rounded-lg text-base text-white"
+              disabled={isLoading}
+            >
               {isLoading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
-          <p className="text-muted-foreground mt-4 text-center text-sm">
+
+          <p className="font-body text-muted-foreground mt-4 text-center text-sm">
             Don&apos;t have an account?{" "}
             <Link href="/sign-up" className="text-primary font-medium hover:underline">
               Sign up
             </Link>
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
