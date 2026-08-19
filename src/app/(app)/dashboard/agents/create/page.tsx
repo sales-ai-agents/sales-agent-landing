@@ -1,7 +1,11 @@
 "use client";
 
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, ArrowRight, Check, Play, Phone } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,45 +13,48 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardDescription } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { useWizardStore } from "@/lib/store";
-import { useCreateAgent, useTestCall } from "@/hooks/use-agents";
+import { createAgentSchema, type CreateAgentFormData } from "@/lib/schemas";
+import { VOICE_OPTIONS } from "@/lib/constants";
+import { useCreateAgent, useTestCall } from "@dashboard/hooks/use-agents";
+import { ApiError } from "@/lib/api-client";
+import { resolveErrorMessage, AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
 
 const STEPS = ["Назва", "Голос", "Інструкції", "Тест"] as const;
-
-interface VoiceOption {
-  readonly id: string;
-  readonly name: string;
-  readonly type: string;
-}
-
-const VOICES = [
-  { id: "sarah", name: "Sarah", type: "Професійний жіночий" },
-  { id: "james", name: "James", type: "Професійний чоловічий" },
-  { id: "emma", name: "Emma", type: "Дружній жіночий" },
-  { id: "michael", name: "Michael", type: "Дружній чоловічий" },
-] as const satisfies readonly VoiceOption[];
 
 export default function CreateAgentPage() {
   const router = useRouter();
   const createAgent = useCreateAgent();
   const testCall = useTestCall();
+  const [step, setStep] = useState(0);
+  const createdAgentIdRef = useRef<number | null>(null);
 
   const {
-    step,
-    name,
-    voice,
-    instructions,
-    testPhone,
-    setStep,
-    setName,
-    setVoice,
-    setInstructions,
-    setTestPhone,
-    reset,
-  } = useWizardStore();
+    register,
+    watch,
+    setValue,
+    getValues,
+    trigger,
+    formState: { errors },
+  } = useForm<CreateAgentFormData>({
+    resolver: zodResolver(createAgentSchema),
+    defaultValues: { name: "", voice: "", instructions: "", testPhone: "" },
+    mode: "onChange",
+  });
 
-  function handleNext(): void {
-    if (step < STEPS.length - 1) {
+  const name = watch("name");
+  const voice = watch("voice");
+  const instructions = watch("instructions");
+
+  const STEP_FIELDS: (keyof CreateAgentFormData)[][] = [
+    ["name"],
+    ["voice"],
+    ["instructions"],
+    ["testPhone"],
+  ];
+
+  async function handleNext(): Promise<void> {
+    const valid = await trigger(STEP_FIELDS[step]);
+    if (valid && step < STEPS.length - 1) {
       setStep(step + 1);
     }
   }
@@ -59,29 +66,55 @@ export default function CreateAgentPage() {
   }
 
   async function handleCreate(): Promise<void> {
+    const valid = await trigger(["name", "voice", "instructions"]);
+    if (!valid) return;
+
+    if (createdAgentIdRef.current) {
+      toast.success("Агента створено");
+      router.push("/dashboard/agents");
+      return;
+    }
+
+    const { name, voice, instructions } = getValues();
     try {
       await createAgent.mutateAsync({ name, voice, instructions });
-      reset();
+      toast.success("Агента створено");
       router.push("/dashboard/agents");
-    } catch {
-      // error surfaced via toast
+    } catch (error) {
+      if (error instanceof ApiError) {
+        toast.error(resolveErrorMessage(error.code, AGENT_ERROR_MESSAGES));
+      } else {
+        toast.error("Щось пішло не так.");
+      }
     }
   }
 
   async function handleTestCall(): Promise<void> {
+    const { name, voice, instructions, testPhone } = getValues();
     if (!testPhone) return;
+
     try {
-      const agent = await createAgent.mutateAsync({ name, voice, instructions });
-      await testCall.mutateAsync({ agent_id: agent.id, phone: testPhone });
-    } catch {
-      // error surfaced via toast
+      let agentId = createdAgentIdRef.current;
+      if (!agentId) {
+        const agent = await createAgent.mutateAsync({ name, voice, instructions });
+        agentId = agent.id;
+        createdAgentIdRef.current = agentId;
+      }
+      await testCall.mutateAsync({ agent_id: agentId, phone: testPhone });
+      toast.success("Дзвінок ініційовано — очікуйте виклик");
+    } catch (error) {
+      if (error instanceof ApiError) {
+        toast.error(resolveErrorMessage(error.code, AGENT_ERROR_MESSAGES));
+      } else {
+        toast.error("Щось пішло не так.");
+      }
     }
   }
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => router.back()}>
+        <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Назад">
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
@@ -127,9 +160,9 @@ export default function CreateAgentPage() {
                 <Input
                   id="agent-name"
                   placeholder="напр., Бот нагадування про зустрічі"
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
+                  {...register("name")}
                 />
+                {errors.name && <p className="text-sm text-red-600">{errors.name.message}</p>}
               </div>
             </div>
           )}
@@ -142,13 +175,26 @@ export default function CreateAgentPage() {
                   Оберіть голос, який ваш агент використовуватиме під час дзвінків.
                 </CardDescription>
               </CardHeader>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {VOICES.map((voiceOption) => (
+              <div
+                className="grid grid-cols-1 gap-3 sm:grid-cols-2"
+                role="radiogroup"
+                aria-label="Оберіть голос"
+              >
+                {VOICE_OPTIONS.map((voiceOption) => (
                   <div
                     key={voiceOption.id}
-                    onClick={() => setVoice(voiceOption.id)}
+                    role="radio"
+                    aria-checked={voice === voiceOption.id}
+                    tabIndex={0}
+                    onClick={() => setValue("voice", voiceOption.id, { shouldValidate: true })}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setValue("voice", voiceOption.id, { shouldValidate: true });
+                      }
+                    }}
                     className={cn(
-                      "cursor-pointer rounded-lg border p-4 transition-colors",
+                      "focus-visible:ring-ring cursor-pointer rounded-lg border p-4 transition-colors focus-visible:ring-2 focus-visible:outline-none",
                       voice === voiceOption.id
                         ? "border-primary bg-primary/5"
                         : "hover:border-primary/50"
@@ -159,13 +205,19 @@ export default function CreateAgentPage() {
                         <p className="font-medium">{voiceOption.name}</p>
                         <p className="text-muted-foreground text-sm">{voiceOption.type}</p>
                       </div>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        aria-label={`Прослухати голос ${voiceOption.name}`}
+                      >
                         <Play className="h-3 w-3" />
                       </Button>
                     </div>
                   </div>
                 ))}
               </div>
+              {errors.voice && <p className="text-sm text-red-600">{errors.voice.message}</p>}
             </div>
           )}
 
@@ -183,9 +235,11 @@ export default function CreateAgentPage() {
                   id="instructions"
                   rows={6}
                   placeholder="Зателефонуйте клієнту, щоб нагадати про зустріч завтра. Якщо підтвердить — скажіть 'Чудово, чекаємо на вас!' Якщо хоче перенести — запитайте бажану дату і час. Завжди будьте ввічливі та професійні."
-                  value={instructions}
-                  onChange={(event) => setInstructions(event.target.value)}
+                  {...register("instructions")}
                 />
+                {errors.instructions && (
+                  <p className="text-sm text-red-600">{errors.instructions.message}</p>
+                )}
                 <p className="text-muted-foreground text-xs">
                   Пишіть так, ніби пояснюєте реальній людині, що говорити під час дзвінка.
                 </p>
@@ -208,8 +262,7 @@ export default function CreateAgentPage() {
                   <Input
                     id="test-phone"
                     placeholder="+380 XX XXX XXXX"
-                    value={testPhone}
-                    onChange={(event) => setTestPhone(event.target.value)}
+                    {...register("testPhone")}
                   />
                 </div>
 
@@ -218,7 +271,7 @@ export default function CreateAgentPage() {
                   onClick={handleTestCall}
                   disabled={testCall.isPending || createAgent.isPending}
                 >
-                  {testCall.isPending || createAgent.isPending ? (
+                  {testCall.isPending ? (
                     <>
                       <Phone className="mr-2 h-4 w-4 animate-pulse" />
                       Дзвінок...
@@ -244,11 +297,15 @@ export default function CreateAgentPage() {
                     </p>
                     <p>
                       <span className="text-muted-foreground">Голос:</span>{" "}
-                      {VOICES.find((v) => v.id === voice)?.name || "—"}
+                      {VOICE_OPTIONS.find((v) => v.id === voice)?.name || "—"}
                     </p>
                     <p>
                       <span className="text-muted-foreground">Інструкції:</span>{" "}
-                      {instructions ? instructions.slice(0, 60) + "..." : "—"}
+                      {instructions
+                        ? instructions.length > 60
+                          ? instructions.slice(0, 60) + "..."
+                          : instructions
+                        : "—"}
                     </p>
                   </div>
                 </div>

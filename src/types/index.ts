@@ -1,9 +1,0 @@
-export type * from "./auth";
-export type * from "./agent";
-export type * from "./contact";
-export type * from "./call";
-export type * from "./preset";
-export type * from "./lead";
-export type * from "./web-agent";
-export type * from "./marketing";
-export type * from "./campaign";

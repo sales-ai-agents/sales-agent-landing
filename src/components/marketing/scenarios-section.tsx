@@ -3,8 +3,8 @@ import { ArrowUpRight } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ScrollReveal, StaggerReveal } from "@/components/marketing/scroll-reveal";
-import type { Scenario, ScenarioDetail } from "@/types";
-import { SCENARIOS } from "@/lib/marketing-data";
+import type { Scenario, ScenarioDetail } from "@marketing/types";
+import { SCENARIOS } from "@marketing/data";
 
 export function ScenariosSection() {
   return (

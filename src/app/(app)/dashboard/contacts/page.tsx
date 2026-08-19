@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -20,23 +20,29 @@ import {
   ArrowUpDown,
   ChevronLeft,
   ChevronRight,
+  Users,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { PageError, PageEmpty } from "@/components/dashboard/page-states";
+import { TableSkeleton } from "@/components/dashboard/skeletons";
 import { AddContactDialog } from "@/components/dashboard/add-contact-dialog";
 import { UploadCsvDialog } from "@/components/dashboard/upload-csv-dialog";
-import { useContacts, useCreateContact, useDeleteContact } from "@/hooks/use-contacts";
+import { useContacts, useCreateContact, useDeleteContact } from "@dashboard/hooks/use-contacts";
+import { ApiError } from "@/lib/api-client";
+import { resolveErrorMessage } from "@/lib/error-messages";
 import { cn } from "@/lib/utils";
 import type { ContactFormData } from "@/lib/schemas";
-import type { Contact } from "@/types";
+import type { Contact } from "@dashboard/types";
 
 const PAGE_SIZE = 8;
 const columnHelper = createColumnHelper<Contact>();
 
 export default function ContactsPage() {
-  const { data: contacts = [] } = useContacts();
+  const { data: contacts = [], isLoading, error, refetch } = useContacts();
   const createContact = useCreateContact();
   const deleteContact = useDeleteContact();
 
@@ -44,6 +50,40 @@ export default function ContactsPage() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
+
+  const handleAddContact = (data: ContactFormData): void => {
+    createContact.mutate(data, {
+      onSuccess: () => {
+        toast.success("Контакт додано");
+        setShowAddDialog(false);
+      },
+      onError: (error) => {
+        if (error instanceof ApiError) {
+          toast.error(resolveErrorMessage(error.code));
+        } else {
+          toast.error("Щось пішло не так.");
+        }
+      },
+    });
+  };
+
+  const handleDeleteContact = useCallback(
+    (id: number) => {
+      deleteContact.mutate(id, {
+        onSuccess: () => {
+          toast.success("Контакт видалено");
+        },
+        onError: (error) => {
+          if (error instanceof ApiError) {
+            toast.error(resolveErrorMessage(error.code));
+          } else {
+            toast.error("Щось пішло не так.");
+          }
+        },
+      });
+    },
+    [deleteContact]
+  );
 
   const columns = useMemo(
     () => [
@@ -104,7 +144,7 @@ export default function ContactsPage() {
               variant="ghost"
               size="icon"
               className="h-8 w-8 text-red-600"
-              onClick={() => deleteContact.mutate(row.original.id)}
+              onClick={() => handleDeleteContact(row.original.id)}
               aria-label="Видалити контакт"
             >
               <Trash2 className="h-3 w-3" />
@@ -113,7 +153,7 @@ export default function ContactsPage() {
         ),
       }),
     ],
-    [deleteContact]
+    [handleDeleteContact]
   );
 
   const table = useReactTable({
@@ -129,10 +169,22 @@ export default function ContactsPage() {
     initialState: { pagination: { pageSize: PAGE_SIZE } },
   });
 
-  function handleAddContact(data: ContactFormData): void {
-    createContact.mutate(data);
-    setShowAddDialog(false);
-  }
+  if (isLoading) return <TableSkeleton />;
+  if (error) return <PageError message={error.message} onRetry={refetch} />;
+  if (!contacts.length)
+    return (
+      <PageEmpty
+        icon={Users}
+        title="Контактів ще немає"
+        description="Додайте перший контакт, щоб почати"
+        action={
+          <Button onClick={() => setShowAddDialog(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Додати контакт
+          </Button>
+        }
+      />
+    );
 
   return (
     <div className="space-y-6">
@@ -156,6 +208,7 @@ export default function ContactsPage() {
       <div className="relative max-w-sm">
         <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
         <Input
+          aria-label="Пошук контактів"
           placeholder="Пошук за ім'ям або телефоном..."
           value={globalFilter}
           onChange={(event) => setGlobalFilter(event.target.value)}

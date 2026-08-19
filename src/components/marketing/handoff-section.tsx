@@ -1,6 +1,6 @@
 import { Check, BarChart3, Headset, User } from "lucide-react";
 import Image from "next/image";
-import { HANDOFF_CHECKLIST } from "@/lib/content";
+import { HANDOFF_CHECKLIST } from "@marketing/content";
 import { ScrollReveal } from "@/components/marketing/scroll-reveal";
 import React from "react";
 

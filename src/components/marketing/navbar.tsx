@@ -8,7 +8,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { LeadFormModal } from "@/components/marketing/lead-form-card";
 import { ScrollReveal } from "@/components/marketing/scroll-reveal";
-import { NAV_LINKS } from "@/lib/content";
+import { NAV_LINKS } from "@marketing/content";
 import { trackEvent } from "@/lib/analytics";
 
 export function Navbar() {

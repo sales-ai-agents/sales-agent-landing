@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { ONBOARDING_STEPS } from "@/lib/marketing-data";
+import { ONBOARDING_STEPS } from "@marketing/data";
 import { cn } from "@/lib/utils";
 import { ScrollReveal } from "@/components/marketing/scroll-reveal";
 

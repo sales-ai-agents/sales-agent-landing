@@ -14,3 +14,16 @@ export const DASHBOARD_NAV_ITEMS = [
   { href: "/dashboard/call-logs", icon: PhoneCall, label: "Журнал дзвінків" },
   { href: "/dashboard/settings", icon: Settings, label: "Налаштування" },
 ] as const satisfies readonly NavItem[];
+
+export interface VoiceOption {
+  readonly id: string;
+  readonly name: string;
+  readonly type: string;
+}
+
+export const VOICE_OPTIONS = [
+  { id: "sarah", name: "Sarah", type: "Професійний жіночий" },
+  { id: "james", name: "James", type: "Професійний чоловічий" },
+  { id: "emma", name: "Emma", type: "Дружній жіночий" },
+  { id: "michael", name: "Michael", type: "Дружній чоловічий" },
+] as const satisfies readonly VoiceOption[];

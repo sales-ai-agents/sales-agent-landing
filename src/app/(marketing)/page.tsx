@@ -14,8 +14,13 @@ import {
   DynamicCalculatorSection as CalculatorSection,
   DynamicBuilderSection as BuilderSection,
 } from "@/components/marketing/dynamic-sections";
-import { buildFaqPageSchema, buildOrganizationSchema, buildHowToSchema } from "@/lib/utils";
-import { FAQ_ENTRIES, FAQ_ENTRIES_RU, ONBOARDING_STEPS } from "@/lib/marketing-data";
+import { JsonLd } from "@/components/marketing/json-ld";
+import {
+  buildFaqPageSchema,
+  buildOrganizationSchema,
+  buildHowToSchema,
+} from "@marketing/structured-data";
+import { FAQ_ENTRIES, FAQ_ENTRIES_RU, ONBOARDING_STEPS } from "@marketing/data";
 
 export const dynamic = "force-static";
 
@@ -73,64 +78,43 @@ export default function MarketingPage() {
       <FaqSection />
       <FinalCtaSection />
 
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "SoftwareApplication",
-            name: "Calls4U",
-            url: "https://www.calls4u.ai",
-            description:
-              "Голосовий ШІ-агент, який автоматизує рутинні дзвінки клієнтам: підтвердження записів, нагадування, уточнення замовлень, кваліфікація лідів та інтеграція з CRM.",
-            applicationCategory: "BusinessApplication",
-            operatingSystem: "Web",
-            inLanguage: ["uk", "ru"],
-            offers: {
-              "@type": "Offer",
-              price: "0",
-              priceCurrency: "UAH",
-              description: "Безкоштовний тест з 50 дзвінків",
-            },
-            aggregateRating: {
-              "@type": "AggregateRating",
-              ratingValue: "4.8",
-              ratingCount: "47",
-              bestRating: "5",
-            },
-            featureList: [
-              "Підтвердження записів",
-              "Нагадування про візити",
-              "Уточнення замовлень",
-              "Кваліфікація лідів",
-              "Інтеграція з CRM",
-              "Конструктор без коду",
-              "Передача дзвінка менеджеру",
-            ],
-          }).replace(/</g, "\\u003c"),
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: "Calls4U",
+          url: "https://www.calls4u.ai",
+          description:
+            "Голосовий ШІ-агент, який автоматизує рутинні дзвінки клієнтам: підтвердження записів, нагадування, уточнення замовлень, кваліфікація лідів та інтеграція з CRM.",
+          applicationCategory: "BusinessApplication",
+          operatingSystem: "Web",
+          inLanguage: ["uk", "ru"],
+          offers: {
+            "@type": "Offer",
+            price: "0",
+            priceCurrency: "UAH",
+            description: "Безкоштовний тест з 50 дзвінків",
+          },
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: "4.8",
+            ratingCount: "47",
+            bestRating: "5",
+          },
+          featureList: [
+            "Підтвердження записів",
+            "Нагадування про візити",
+            "Уточнення замовлень",
+            "Кваліфікація лідів",
+            "Інтеграція з CRM",
+            "Конструктор без коду",
+            "Передача дзвінка менеджеру",
+          ],
         }}
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(buildOrganizationSchema()).replace(/</g, "\\u003c"),
-        }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(buildHowToSchema(ONBOARDING_STEPS)).replace(/</g, "\\u003c"),
-        }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(buildFaqPageSchema([...FAQ_ENTRIES, ...FAQ_ENTRIES_RU])).replace(
-            /</g,
-            "\\u003c"
-          ),
-        }}
-      />
+      <JsonLd data={buildOrganizationSchema()} />
+      <JsonLd data={buildHowToSchema(ONBOARDING_STEPS)} />
+      <JsonLd data={buildFaqPageSchema([...FAQ_ENTRIES, ...FAQ_ENTRIES_RU])} />
     </>
   );
 }

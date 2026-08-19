@@ -18,8 +18,8 @@ import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
 import { ScrollReveal } from "@/components/marketing/scroll-reveal";
 import { AudioWaveform } from "@/components/marketing/audio-waveform";
-import type { DemoCard } from "@/types";
-import { DEMOS } from "@/lib/marketing-data";
+import type { DemoCard } from "@marketing/types";
+import { DEMOS } from "@marketing/data";
 
 export function AudioDemoSection() {
   const [playing, setPlaying] = useState<string | null>(null);

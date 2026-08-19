@@ -2,15 +2,20 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signInSchema, type SignInFormData } from "@/lib/schemas";
-import { useLogin } from "@/hooks/use-auth";
+import { useLogin } from "@/lib/hooks/use-auth";
+import { ApiError } from "@/lib/api-client";
+import { resolveErrorMessage, AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
 
 export default function SignInPage() {
+  const router = useRouter();
   const login = useLogin();
 
   const {
@@ -26,7 +31,19 @@ export default function SignInPage() {
   });
 
   const onSubmit = (data: SignInFormData): void => {
-    login.mutate(data);
+    login.mutate(data, {
+      onSuccess: () => {
+        toast.success("Вхід виконано успішно");
+        router.push("/dashboard");
+      },
+      onError: (error) => {
+        if (error instanceof ApiError) {
+          toast.error(resolveErrorMessage(error.code, AUTH_ERROR_MESSAGES));
+        } else {
+          toast.error("Щось пішло не так.");
+        }
+      },
+    });
   };
 
   return (

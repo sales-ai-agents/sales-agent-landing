@@ -1,9 +1,9 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { TRUST_ITEMS } from "@/lib/marketing-data";
-import { COMPLIANCE_INDICATORS } from "@/lib/content";
+import { TRUST_ITEMS } from "@marketing/data";
+import { COMPLIANCE_INDICATORS } from "@marketing/content";
 import { ScrollReveal, StaggerReveal } from "@/components/marketing/scroll-reveal";
-import type { IconBadge } from "@/types";
+import type { IconBadge } from "@marketing/types";
 
 function ComplianceIndicator({ icon: Icon, label }: IconBadge) {
   return (

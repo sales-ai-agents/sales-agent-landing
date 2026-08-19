@@ -24,10 +24,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useAgent, useDeleteAgent, useTestCall } from "@/hooks/use-agents";
-import { apiPost, ApiRequestError } from "@/lib/api-client";
-import { API_ENDPOINTS } from "@/lib/api-config";
-import type { Agent } from "@/types";
+import { PageLoading } from "@/components/dashboard/page-states";
+import { useAgent, useUpdateAgent, useDeleteAgent, useTestCall } from "@dashboard/hooks/use-agents";
+import { ApiError } from "@/lib/api-client";
+import { resolveErrorMessage, AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
+import { VOICE_OPTIONS } from "@/lib/constants";
+import type { Agent } from "@dashboard/types";
 
 interface AgentFormData {
   name: string;
@@ -38,17 +40,8 @@ interface AgentFormData {
 export default function EditAgentPage() {
   const { data: agent, isLoading } = useAgent(useParams().id as string);
 
-  if (isLoading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="border-primary h-8 w-8 animate-spin rounded-full border-2 border-t-transparent" />
-      </div>
-    );
-  }
-
-  if (!agent) {
-    return <AgentNotFound />;
-  }
+  if (isLoading) return <PageLoading />;
+  if (!agent) return <AgentNotFound />;
 
   return <EditAgentForm key={agent.id} agent={agent} />;
 }
@@ -72,11 +65,11 @@ interface EditAgentFormProps {
 
 function EditAgentForm({ agent }: EditAgentFormProps) {
   const router = useRouter();
+  const updateAgent = useUpdateAgent();
   const deleteAgent = useDeleteAgent();
   const testCall = useTestCall();
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [testPhone, setTestPhone] = useState("");
   const [formData, setFormData] = useState<AgentFormData>({
     name: agent.name,
@@ -85,32 +78,55 @@ function EditAgentForm({ agent }: EditAgentFormProps) {
   });
 
   async function handleSave(): Promise<void> {
-    setIsSaving(true);
-    try {
-      await apiPost(`${API_ENDPOINTS.APP_AGENTS}/${agent.id}`, formData);
-      toast.success("Зміни збережено");
-      router.push("/dashboard/agents");
-    } catch (error) {
-      if (error instanceof ApiRequestError) {
-        toast.error(error.message);
+    updateAgent.mutate(
+      { id: agent.id, ...formData },
+      {
+        onSuccess: () => {
+          toast.success("Зміни збережено");
+          router.push("/dashboard/agents");
+        },
+        onError: (error) => {
+          if (error instanceof ApiError) {
+            toast.error(resolveErrorMessage(error.code, AGENT_ERROR_MESSAGES));
+          } else {
+            toast.error("Щось пішло не так.");
+          }
+        },
       }
-    } finally {
-      setIsSaving(false);
-    }
+    );
   }
 
   async function handleDelete(): Promise<void> {
     try {
       await deleteAgent.mutateAsync(agent.id);
+      toast.success("Агента видалено");
       router.push("/dashboard/agents");
-    } catch {
-      // error surfaced via toast
+    } catch (error) {
+      if (error instanceof ApiError) {
+        toast.error(resolveErrorMessage(error.code, AGENT_ERROR_MESSAGES));
+      } else {
+        toast.error("Щось пішло не так.");
+      }
     }
   }
 
   function handleTestCall(): void {
     if (!testPhone) return;
-    testCall.mutate({ agent_id: agent.id, phone: testPhone });
+    testCall.mutate(
+      { agent_id: agent.id, phone: testPhone },
+      {
+        onSuccess: () => {
+          toast.success("Дзвінок ініційовано — очікуйте виклик");
+        },
+        onError: (error) => {
+          if (error instanceof ApiError) {
+            toast.error(resolveErrorMessage(error.code, AGENT_ERROR_MESSAGES));
+          } else {
+            toast.error("Щось пішло не так.");
+          }
+        },
+      }
+    );
   }
 
   return (
@@ -149,10 +165,11 @@ function EditAgentForm({ agent }: EditAgentFormProps) {
                 <SelectValue placeholder="Оберіть голос" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="sarah">Sarah — Професійний жіночий</SelectItem>
-                <SelectItem value="james">James — Професійний чоловічий</SelectItem>
-                <SelectItem value="emma">Emma — Дружній жіночий</SelectItem>
-                <SelectItem value="michael">Michael — Дружній чоловічий</SelectItem>
+                {VOICE_OPTIONS.map((v) => (
+                  <SelectItem key={v.id} value={v.id}>
+                    {v.name} — {v.type}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -176,6 +193,7 @@ function EditAgentForm({ agent }: EditAgentFormProps) {
         <CardContent className="space-y-3">
           <div className="flex gap-2">
             <Input
+              aria-label="Номер телефону для тестового дзвінка"
               placeholder="+380 XX XXX XXXX"
               value={testPhone}
               onChange={(e) => setTestPhone(e.target.value)}
@@ -197,13 +215,9 @@ function EditAgentForm({ agent }: EditAgentFormProps) {
           <Trash2 className="mr-2 h-4 w-4" />
           Видалити агента
         </Button>
-        <Button
-          className="bg-primary hover:bg-primary/90 text-white"
-          onClick={handleSave}
-          disabled={isSaving}
-        >
+        <Button onClick={handleSave} disabled={updateAgent.isPending}>
           <Save className="mr-2 h-4 w-4" />
-          {isSaving ? "Збереження..." : "Зберегти зміни"}
+          {updateAgent.isPending ? "Збереження..." : "Зберегти зміни"}
         </Button>
       </div>
 

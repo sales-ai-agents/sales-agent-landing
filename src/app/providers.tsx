@@ -4,24 +4,13 @@ import { QueryClient, QueryClientProvider, QueryCache, MutationCache } from "@ta
 import React, { useState } from "react";
 import { toast } from "sonner";
 
-import { ApiRequestError } from "@/lib/api-client";
-
-const AUTH_FLOW_ERRORS = new Set([
-  "bad_credentials",
-  "invalid_email",
-  "weak_password",
-  "email_taken",
-]);
+import { ApiError, AUTH_FLOW_CODES } from "@/lib/api-client";
 
 let isRedirecting = false;
 
 function handleGlobal401(error: Error): void {
   if (isRedirecting) return;
-  if (
-    error instanceof ApiRequestError &&
-    error.status === 401 &&
-    !AUTH_FLOW_ERRORS.has(error.code)
-  ) {
+  if (error instanceof ApiError && error.status === 401 && !AUTH_FLOW_CODES.has(error.code)) {
     isRedirecting = true;
     toast.error("Сесія закінчилася. Увійдіть знову.");
     window.location.href = "/sign-in";
@@ -48,9 +37,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
             staleTime: 60 * 1000,
             refetchOnWindowFocus: false,
             retry: (failureCount, error) => {
-              if (error && "status" in error) {
-                const status = (error as { status: number }).status;
-                if (status === 401 || status === 403) return false;
+              if (error instanceof ApiError) {
+                if (error.status === 401 || error.status === 403) return false;
               }
               return failureCount < 2;
             },

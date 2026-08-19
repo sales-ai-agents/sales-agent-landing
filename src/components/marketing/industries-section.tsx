@@ -8,8 +8,8 @@ import {
   CarouselDots,
 } from "@/components/ui/carousel";
 import { ScrollReveal } from "@/components/marketing/scroll-reveal";
-import type { IndustryCard } from "@/types";
-import { INDUSTRIES } from "@/lib/marketing-data";
+import type { IndustryCard } from "@marketing/types";
+import { INDUSTRIES } from "@marketing/data";
 
 export function IndustriesSection() {
   return (

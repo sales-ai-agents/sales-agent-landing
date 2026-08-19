@@ -3,9 +3,9 @@
 import Image from "next/image";
 import { Check, Headset } from "lucide-react";
 
-import { useWebAgent } from "@/hooks/use-web-agent";
-import { usePresets } from "@/hooks/use-presets";
-import { useBuilderForm, VOICE_OPTIONS } from "@/hooks/use-builder-form";
+import { useWebAgent } from "@marketing/hooks/use-web-agent";
+import { usePresets } from "@marketing/hooks/use-presets";
+import { useBuilderForm, VOICE_OPTIONS } from "@marketing/hooks/use-builder-form";
 import { LiveCallPanel } from "@/components/marketing/live-call-panel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
 import { ScrollReveal, ScaleReveal } from "@/components/marketing/scroll-reveal";
-import { BUILDER_CHECKLIST } from "@/lib/content";
+import { BUILDER_CHECKLIST } from "@marketing/content";
 
 export function BuilderSection() {
   const { presets, isLoading: presetsLoading } = usePresets();

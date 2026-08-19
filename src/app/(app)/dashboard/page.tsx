@@ -6,13 +6,16 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { CallsChart } from "@/components/dashboard/calls-chart";
-import { useStats } from "@/hooks/use-stats";
-import { useAgents } from "@/hooks/use-agents";
-import type { Agent } from "@/types";
+import { DashboardSkeleton } from "@/components/dashboard/skeletons";
+import { useStats } from "@dashboard/hooks/use-stats";
+import { useAgents } from "@dashboard/hooks/use-agents";
+import type { Agent } from "@dashboard/types";
 
 export default function DashboardPage() {
-  const { data: stats } = useStats();
-  const { data: agents = [] } = useAgents();
+  const { data: stats, isLoading: statsLoading } = useStats();
+  const { data: agents = [], isLoading: agentsLoading } = useAgents();
+
+  if (statsLoading && agentsLoading) return <DashboardSkeleton />;
 
   const totalCalls = stats?.total_calls ?? 0;
   const successfulCalls = stats?.successful_calls ?? 0;
@@ -35,8 +38,6 @@ export default function DashboardPage() {
       icon: XCircle,
     },
   ] as const;
-
-  const recentAgents = agents.slice(0, 3);
 
   return (
     <div className="space-y-6">
@@ -84,14 +85,14 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
 
-      {recentAgents.length > 0 && (
+      {agents.length > 0 && (
         <Card>
           <CardHeader>
             <h2 className="font-display text-lg font-semibold">Ваші агенти</h2>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentAgents.map((agent: Agent) => (
+              {agents.map((agent: Agent) => (
                 <div
                   key={agent.id}
                   className="flex items-center justify-between border-b py-2 last:border-0"

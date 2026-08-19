@@ -99,7 +99,7 @@ export function Footer() {
 
         <ScrollReveal direction="up" delay={0.3} distance={15}>
           <p className="mt-10 text-base text-white">
-            © 2026{" "}
+            © {new Date().getFullYear()}{" "}
             <Link href="/" className="underline">
               Calls4u.ai
             </Link>{" "}

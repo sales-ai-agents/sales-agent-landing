@@ -10,22 +10,24 @@ import {
   flexRender,
   createColumnHelper,
 } from "@tanstack/react-table";
-import { Play, ChevronLeft, ChevronRight } from "lucide-react";
+import { Play, ChevronLeft, ChevronRight, Phone } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { PageError, PageEmpty } from "@/components/dashboard/page-states";
+import { TableSkeleton } from "@/components/dashboard/skeletons";
 import { CallLogDetailDrawer } from "@/components/dashboard/call-log-detail-drawer";
-import { useCallLogs } from "@/hooks/use-call-logs";
-import { getOutcomeConfig, getOutcomeEntries, formatDuration } from "@/lib/call-utils";
-import { cn } from "@/lib/utils";
-import type { CallLog } from "@/types";
+import { useCallLogs } from "@dashboard/hooks/use-call-logs";
+import { getOutcomeConfig, getOutcomeEntries } from "./_lib/utils";
+import { formatDuration, cn } from "@/lib/utils";
+import type { CallLog } from "@dashboard/types";
 
 const PAGE_SIZE = 8;
 const columnHelper = createColumnHelper<CallLog>();
 
 export default function CallLogsPage() {
-  const { data } = useCallLogs();
+  const { data, isLoading, error, refetch } = useCallLogs();
   const callLogs = useMemo(() => data?.calls ?? [], [data?.calls]);
   const [outcomeFilter, setOutcomeFilter] = useState<string>("all");
   const [selectedLog, setSelectedLog] = useState<CallLog | null>(null);
@@ -106,6 +108,17 @@ export default function CallLogsPage() {
     initialState: { pagination: { pageSize: PAGE_SIZE } },
   });
 
+  if (isLoading) return <TableSkeleton rows={8} />;
+  if (error) return <PageError message={error.message} onRetry={refetch} />;
+  if (!callLogs.length)
+    return (
+      <PageEmpty
+        icon={Phone}
+        title="Дзвінків ще немає"
+        description="Тут з'являться ваші дзвінки після першого виклику"
+      />
+    );
+
   return (
     <div className="space-y-6">
       <div>
@@ -161,8 +174,15 @@ export default function CallLogsPage() {
                 {table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    className="hover:bg-muted/20 cursor-pointer border-b last:border-0"
+                    className="hover:bg-muted/20 focus-visible:ring-ring cursor-pointer border-b last:border-0 focus-visible:ring-2 focus-visible:outline-none"
+                    tabIndex={0}
                     onClick={() => setSelectedLog(row.original)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setSelectedLog(row.original);
+                      }
+                    }}
                   >
                     {row.getVisibleCells().map((cell) => {
                       const meta = cell.column.columnDef.meta as { className?: string } | undefined;

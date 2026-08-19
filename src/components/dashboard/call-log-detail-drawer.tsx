@@ -5,8 +5,9 @@ import { Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { getOutcomeConfig, formatDuration } from "@/lib/call-utils";
-import type { CallLog } from "@/types";
+import { getOutcomeConfig } from "@/app/(app)/dashboard/call-logs/_lib/utils";
+import { formatDuration } from "@/lib/utils";
+import type { CallLog } from "@dashboard/types";
 
 interface CallLogDetailDrawerProps {
   callLog: CallLog;

@@ -21,6 +21,15 @@ export const signUpSchema = z
 
 export type SignUpFormData = z.infer<typeof signUpSchema>;
 
+export const createAgentSchema = z.object({
+  name: z.string().min(1, "Назва агента обов'язкова"),
+  voice: z.string().min(1, "Оберіть голос"),
+  instructions: z.string().min(1, "Інструкції обов'язкові"),
+  testPhone: z.string(),
+});
+
+export type CreateAgentFormData = z.infer<typeof createAgentSchema>;
+
 export const contactSchema = z.object({
   name: z.string().min(2, "Ім'я обов'язкове"),
   phone: z.string().min(7, "Введіть коректний номер телефону"),

@@ -6,7 +6,7 @@ import { Phone, Lock } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useDemoCall } from "@/hooks/use-demo-call";
+import { useDemoCall } from "@marketing/hooks/use-demo-call";
 import { LeadFormModal } from "@/components/marketing/lead-form-card";
 import { cn, formatUaPhoneDigits } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";

@@ -17,7 +17,7 @@ interface ScrollRevealProps {
   threshold?: number;
 }
 
-const directionOffset = {
+const DIRECTION_OFFSET = {
   up: { y: 1, x: 0 },
   down: { y: -1, x: 0 },
   left: { x: 1, y: 0 },
@@ -38,7 +38,7 @@ export function ScrollReveal({
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once, amount: threshold });
 
-  const offset = directionOffset[direction];
+  const offset = DIRECTION_OFFSET[direction];
 
   return (
     <motion.div
@@ -89,7 +89,7 @@ export function StaggerReveal({
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once, amount: threshold });
 
-  const offset = directionOffset[direction];
+  const offset = DIRECTION_OFFSET[direction];
 
   return (
     <motion.div

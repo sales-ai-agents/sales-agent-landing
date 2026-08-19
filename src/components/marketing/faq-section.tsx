@@ -6,7 +6,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { ScrollReveal, StaggerReveal } from "@/components/marketing/scroll-reveal";
-import { FAQ_ENTRIES } from "@/lib/marketing-data";
+import { FAQ_ENTRIES } from "@marketing/data";
 
 export function FaqSection() {
   return (

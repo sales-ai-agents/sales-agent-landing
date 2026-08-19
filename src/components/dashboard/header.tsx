@@ -3,15 +3,18 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Menu, LogOut, User } from "lucide-react";
+import { useRouter } from "next/navigation";
+
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { DASHBOARD_NAV_ITEMS } from "@/lib/constants";
-import { useLogout, useMe } from "@/hooks/use-auth";
+import { useLogout, useMe } from "@/lib/hooks/use-auth";
 
 export function DashboardHeader() {
   const pathname = usePathname();
+  const router = useRouter();
   const { data: account } = useMe();
   const logout = useLogout();
 
@@ -21,7 +24,11 @@ export function DashboardHeader() {
   }
 
   function handleLogout(): void {
-    logout.mutate();
+    logout.mutate(undefined, {
+      onSettled: () => {
+        router.push("/sign-in");
+      },
+    });
   }
 
   const displayName = account?.name ?? account?.email ?? "Користувач";

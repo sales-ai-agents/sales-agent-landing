@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { ScrollReveal, StaggerReveal } from "@/components/marketing/scroll-reveal";
-import { INTEGRATIONS, type MarketingIntegration } from "@/lib/marketing-data";
+import { INTEGRATIONS, type MarketingIntegration } from "@marketing/data";
 
 function IntegrationCard({
   integration,

@@ -19,7 +19,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@dashboard/*": ["./src/app/(app)/_lib/*"],
+      "@marketing/*": ["./src/app/(marketing)/_lib/*"]
     }
   },
   "include": [

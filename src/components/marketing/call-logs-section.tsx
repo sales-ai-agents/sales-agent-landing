@@ -1,9 +1,9 @@
 import { Play, RefreshCw } from "lucide-react";
-import { CALL_LOG_PREVIEW } from "@/lib/marketing-data";
+import { CALL_LOG_PREVIEW } from "@marketing/data";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { ScrollReveal, ScaleReveal } from "@/components/marketing/scroll-reveal";
-import type { BadgeVariant } from "@/types";
+import type { BadgeVariant } from "@marketing/types";
 
 const STATUS_STYLES: Record<BadgeVariant, string> = {
   success: "bg-green-100 text-green-800",

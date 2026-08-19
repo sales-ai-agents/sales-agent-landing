@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-import type { DayStats } from "@/types";
+import type { DayStats } from "@dashboard/types";
 
 interface CallsChartProps {
   data?: DayStats[];
@@ -26,6 +26,14 @@ export function CallsChart({ data }: CallsChartProps) {
     ...item,
     label: formatDate(item.date),
   }));
+
+  if (chartData.length === 0) {
+    return (
+      <div className="flex h-60 w-full items-center justify-center">
+        <p className="text-muted-foreground text-sm">Дані з&apos;являться після першого дзвінка</p>
+      </div>
+    );
+  }
 
   return (
     <div className="h-60 w-full">

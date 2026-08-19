@@ -1,34 +1,51 @@
-const AUTH_FLOW_ERRORS = new Set([
+export type AuthFlowCode = "bad_credentials" | "invalid_email" | "weak_password" | "email_taken";
+
+export const AUTH_FLOW_CODES: ReadonlySet<string> = new Set<AuthFlowCode>([
   "bad_credentials",
   "invalid_email",
   "weak_password",
   "email_taken",
 ]);
 
-export class ApiRequestError extends Error {
-  status: number;
-  code: string;
+export class ApiError extends Error {
+  readonly status: number;
+  readonly code: string;
 
   constructor(status: number, code: string, message: string) {
     super(message);
+    this.name = "ApiError";
     this.status = status;
     this.code = code;
-    this.name = "ApiRequestError";
   }
 }
 
-async function request<T>(url: string, method: "GET" | "POST", data?: unknown): Promise<T> {
+interface ApiErrorBody {
+  error?: string;
+  message?: string;
+}
+
+type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+
+interface RequestOptions {
+  body?: unknown;
+  headers?: Record<string, string>;
+}
+
+async function request<T>(url: string, method: HttpMethod, options?: RequestOptions): Promise<T> {
   let response: Response;
 
   try {
     response = await fetch(url, {
       method,
       credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: data ? JSON.stringify(data) : undefined,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+      },
+      body: options?.body ? JSON.stringify(options.body) : undefined,
     });
   } catch {
-    throw new ApiRequestError(
+    throw new ApiError(
       0,
       "network_error",
       "Не вдалося з'єднатися з сервером. Перевірте інтернет і спробуйте ще раз."
@@ -36,15 +53,15 @@ async function request<T>(url: string, method: "GET" | "POST", data?: unknown): 
   }
 
   if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
+    const body: ApiErrorBody = await response.json().catch(() => ({}));
     const code: string = body?.error ?? "unknown";
     const message: string = body?.message ?? "Щось пішло не так.";
 
-    if (response.status === 401 && !AUTH_FLOW_ERRORS.has(code)) {
-      throw new ApiRequestError(401, "session_expired", "Сесія закінчилася. Увійдіть знову.");
+    if (response.status === 401 && !AUTH_FLOW_CODES.has(code)) {
+      throw new ApiError(401, "session_expired", "Сесія закінчилася. Увійдіть знову.");
     }
 
-    throw new ApiRequestError(response.status, code, message);
+    throw new ApiError(response.status, code, message);
   }
 
   return response.json();
@@ -54,6 +71,18 @@ export function apiGet<T>(url: string): Promise<T> {
   return request<T>(url, "GET");
 }
 
-export function apiPost<T>(url: string, data?: unknown): Promise<T> {
-  return request<T>(url, "POST", data);
+export function apiPost<T>(url: string, body?: unknown): Promise<T> {
+  return request<T>(url, "POST", { body });
+}
+
+export function apiPut<T>(url: string, body: unknown): Promise<T> {
+  return request<T>(url, "PUT", { body });
+}
+
+export function apiPatch<T>(url: string, body: unknown): Promise<T> {
+  return request<T>(url, "PATCH", { body });
+}
+
+export function apiDelete<T>(url: string): Promise<T> {
+  return request<T>(url, "DELETE");
 }

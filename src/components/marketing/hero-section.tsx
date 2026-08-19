@@ -7,7 +7,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Navbar, MobileNavbar } from "@/components/marketing/navbar";
 import { DynamicDemoCallCard as DemoCallCard } from "@/components/marketing/dynamic-sections";
 import { ScrollReveal } from "@/components/marketing/scroll-reveal";
-import { HERO_BADGES } from "@/lib/content";
+import { HERO_BADGES } from "@marketing/content";
 
 function HeroBadge({
   icon: Icon,

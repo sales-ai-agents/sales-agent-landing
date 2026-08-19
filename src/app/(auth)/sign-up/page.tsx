@@ -2,15 +2,20 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signUpSchema, type SignUpFormData } from "@/lib/schemas";
-import { useRegister } from "@/hooks/use-auth";
+import { useRegister } from "@/lib/hooks/use-auth";
+import { ApiError } from "@/lib/api-client";
+import { resolveErrorMessage, AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
 
 export default function SignUpPage() {
+  const router = useRouter();
   const registerMutation = useRegister();
 
   const {
@@ -27,12 +32,27 @@ export default function SignUpPage() {
     },
   });
 
-  const onSubmit = async (data: SignUpFormData): Promise<void> => {
-    registerMutation.mutate({
-      email: data.email,
-      password: data.password,
-      name: data.name,
-    });
+  const onSubmit = (data: SignUpFormData): void => {
+    registerMutation.mutate(
+      {
+        email: data.email,
+        password: data.password,
+        name: data.name,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Акаунт створено");
+          router.push("/dashboard");
+        },
+        onError: (error) => {
+          if (error instanceof ApiError) {
+            toast.error(resolveErrorMessage(error.code, AUTH_ERROR_MESSAGES));
+          } else {
+            toast.error("Щось пішло не так.");
+          }
+        },
+      }
+    );
   };
 
   return (
