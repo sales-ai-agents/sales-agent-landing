@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import localFont from "next/font/local";
-import { Providers } from "@/components/providers";
+import { Providers } from "@/app/providers";
+import { Toaster } from "@/components/ui/sonner";
 import { GoogleAnalytics } from "@/lib/google-analytics";
 import "./globals.css";
 
@@ -109,6 +110,7 @@ export default function RootLayout({
       <body suppressHydrationWarning>
         <GoogleAnalytics />
         <Providers>{children}</Providers>
+        <Toaster />
       </body>
     </html>
   );

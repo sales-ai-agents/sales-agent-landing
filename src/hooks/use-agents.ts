@@ -1,29 +1,27 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
-import { mockAgents } from "@/lib/mock-data";
-import type { Agent } from "@/types";
-
-async function fetchAgents(): Promise<Agent[]> {
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  return mockAgents;
-}
-
-async function fetchAgent(id: string): Promise<Agent | undefined> {
-  await new Promise((resolve) => setTimeout(resolve, 300));
-  return mockAgents.find((agent) => agent.id === id);
-}
+import { apiGet, apiPost, ApiRequestError } from "@/lib/api-client";
+import { API_ENDPOINTS } from "@/lib/api-config";
+import type { Agent, AgentsResponse, CreateAgentParams, TestCallParams } from "@/types";
 
 export function useAgents() {
   return useQuery<Agent[]>({
     queryKey: ["agents"],
-    queryFn: fetchAgents,
+    queryFn: async () => {
+      const data = await apiGet<AgentsResponse>(API_ENDPOINTS.APP_AGENTS);
+      return data.agents;
+    },
   });
 }
 
 export function useAgent(id: string) {
-  return useQuery<Agent | undefined>({
+  return useQuery<Agent | null>({
     queryKey: ["agents", id],
-    queryFn: () => fetchAgent(id),
+    queryFn: async () => {
+      const data = await apiGet<AgentsResponse>(API_ENDPOINTS.APP_AGENTS);
+      return data.agents.find((agent) => String(agent.id) === id) ?? null;
+    },
     enabled: !!id,
   });
 }
@@ -32,26 +30,15 @@ export function useCreateAgent() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: {
-      name: string;
-      voice: string;
-      instructions: string;
-    }): Promise<Agent> => {
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      return {
-        id: String(Date.now()),
-        name: data.name,
-        voice: data.voice,
-        instructions: data.instructions,
-        status: "paused",
-        totalCalls: 0,
-        successRate: 0,
-        lastActive: "Just created",
-        createdAt: new Date().toISOString().split("T")[0],
-      };
+    mutationFn: async (data: CreateAgentParams): Promise<Agent> => {
+      return apiPost<Agent>(API_ENDPOINTS.APP_AGENTS, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["agents"] });
+      toast.success("Агента створено");
+    },
+    onError: (error: ApiRequestError) => {
+      toast.error(error.message);
     },
   });
 }
@@ -60,12 +47,16 @@ export function useToggleAgentStatus() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: "active" | "paused" }) => {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return { id, status };
+    mutationFn: async ({ id, status }: { id: number; status: "active" | "paused" }) => {
+      return apiPost(`${API_ENDPOINTS.APP_AGENTS}/${id}/status`, { status });
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["agents"] });
+      const label = variables.status === "active" ? "активовано" : "призупинено";
+      toast.success(`Агента ${label}`);
+    },
+    onError: (error: ApiRequestError) => {
+      toast.error(error.message);
     },
   });
 }
@@ -74,12 +65,33 @@ export function useDeleteAgent() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      return id;
+    mutationFn: async (id: number | string) => {
+      return apiPost(`${API_ENDPOINTS.APP_AGENTS}/${id}/delete`, {});
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["agents"] });
+      toast.success("Агента видалено");
+    },
+    onError: (error: ApiRequestError) => {
+      toast.error(error.message);
+    },
+  });
+}
+
+export function useTestCall() {
+  return useMutation({
+    mutationFn: async (params: TestCallParams) => {
+      return apiPost(API_ENDPOINTS.APP_TEST_CALL, params);
+    },
+    onSuccess: () => {
+      toast.success("Дзвінок ініційовано — очікуйте виклик");
+    },
+    onError: (error: ApiRequestError) => {
+      if (error.code === "too_soon") {
+        toast.error("Лише один тестовий дзвінок на хвилину. Спробуйте пізніше.");
+      } else {
+        toast.error(error.message);
+      }
     },
   });
 }

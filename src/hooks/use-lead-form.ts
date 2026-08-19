@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 
 import { API_ENDPOINTS } from "@/lib/api-config";
+import type { LeadFormParams, LeadFormResult } from "@/types";
 
 const NETWORK_ERROR_MESSAGE =
   "Не вдалося з'єднатися з сервером. Перевірте інтернет і спробуйте ще раз.";
@@ -11,23 +12,7 @@ const LEAD_ERROR_MESSAGES: Record<string, string> = {
   invalid_json: "Невірний формат запиту. Спробуйте ще раз.",
   too_many_requests: "Забагато запитів. Спробуйте через 20 секунд.",
   internal_error: "Сервер тимчасово недоступний. Спробуйте пізніше.",
-} as const;
-
-export interface LeadFormParams {
-  name: string;
-  phone: string;
-  niche?: string;
-  contact?: string;
-  email?: string;
-  telegram?: string;
-  company?: string;
-  message?: string;
-  source_page?: string;
-}
-
-export interface LeadFormResult {
-  id: number;
-}
+};
 
 async function submitLead(params: LeadFormParams): Promise<LeadFormResult> {
   const payload = {

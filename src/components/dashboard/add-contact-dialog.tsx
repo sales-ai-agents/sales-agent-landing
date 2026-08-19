@@ -38,29 +38,29 @@ export function AddContactDialog({ onSubmit, onClose }: AddContactDialogProps) {
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add Contact</DialogTitle>
+          <DialogTitle>Додати контакт</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="contact-name">Name</Label>
-            <Input id="contact-name" placeholder="Full name" {...register("name")} />
-            {errors.name && <p className="text-destructive text-sm">{errors.name.message}</p>}
+            <Label htmlFor="contact-name">Ім&apos;я</Label>
+            <Input id="contact-name" placeholder="Повне ім'я" {...register("name")} />
+            {errors.name && <p className="text-sm text-red-600">{errors.name.message}</p>}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="contact-phone">Phone</Label>
-            <Input id="contact-phone" placeholder="+1 (555) 000-0000" {...register("phone")} />
-            {errors.phone && <p className="text-destructive text-sm">{errors.phone.message}</p>}
+            <Label htmlFor="contact-phone">Телефон</Label>
+            <Input id="contact-phone" placeholder="+380 XX XXX XXXX" {...register("phone")} />
+            {errors.phone && <p className="text-sm text-red-600">{errors.phone.message}</p>}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="contact-email">Email</Label>
+            <Label htmlFor="contact-email">Пошта</Label>
             <Input id="contact-email" placeholder="email@example.com" {...register("email")} />
-            {errors.email && <p className="text-destructive text-sm">{errors.email.message}</p>}
+            {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
+              Скасувати
             </Button>
-            <Button type="submit">Add Contact</Button>
+            <Button type="submit">Додати контакт</Button>
           </DialogFooter>
         </form>
       </DialogContent>

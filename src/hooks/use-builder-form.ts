@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 
-import type { Preset } from "@/hooks/use-presets";
+import type { Preset } from "@/types";
 
 const VOICE_OPTIONS = ["Жіночий", "Чоловічий"] as const;
 type VoiceOption = (typeof VOICE_OPTIONS)[number];

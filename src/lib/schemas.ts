@@ -1,30 +1,30 @@
 import { z } from "zod";
 
 export const signInSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  email: z.email("Введіть коректну електронну адресу"),
+  password: z.string().min(8, "Пароль має містити щонайменше 8 символів"),
 });
 
 export type SignInFormData = z.infer<typeof signInSchema>;
 
 export const signUpSchema = z
   .object({
-    name: z.string().min(2, "Name must be at least 2 characters"),
-    email: z.string().email("Please enter a valid email address"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
+    name: z.string().min(2, "Ім'я має містити щонайменше 2 символи"),
+    email: z.email("Введіть коректну електронну адресу"),
+    password: z.string().min(8, "Пароль має містити щонайменше 8 символів"),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
+    message: "Паролі не збігаються",
     path: ["confirmPassword"],
   });
 
 export type SignUpFormData = z.infer<typeof signUpSchema>;
 
 export const contactSchema = z.object({
-  name: z.string().min(2, "Name is required"),
-  phone: z.string().min(7, "Please enter a valid phone number"),
-  email: z.string().email("Please enter a valid email").or(z.literal("")),
+  name: z.string().min(2, "Ім'я обов'язкове"),
+  phone: z.string().min(7, "Введіть коректний номер телефону"),
+  email: z.email("Введіть коректну електронну адресу").or(z.literal("")),
 });
 
 export type ContactFormData = z.infer<typeof contactSchema>;

@@ -72,7 +72,7 @@ export function Sidebar() {
           size="sm"
           className="w-full justify-center"
           onClick={() => setCollapsed(!collapsed)}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-label={collapsed ? "Розгорнути бічну панель" : "Згорнути бічну панель"}
         >
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </Button>

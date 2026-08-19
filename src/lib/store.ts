@@ -1,6 +1,5 @@
 import { create } from "zustand";
 
-// --- Agent Wizard Store ---
 interface WizardState {
   step: number;
   name: string;

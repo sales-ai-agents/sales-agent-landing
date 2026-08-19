@@ -4,7 +4,7 @@ import { useState } from "react";
 import { PhoneOff } from "lucide-react";
 
 import { useLiveKitRoom } from "@/hooks/use-livekit-room";
-import type { WebAgentSession } from "@/hooks/use-web-agent";
+import type { WebAgentSession } from "@/types";
 import { LeadFormModal } from "@/components/marketing/lead-form-card";
 import { cn } from "@/lib/utils";
 

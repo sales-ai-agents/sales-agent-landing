@@ -17,36 +17,28 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CallLogDetailDrawer } from "@/components/dashboard/call-log-detail-drawer";
 import { useCallLogs } from "@/hooks/use-call-logs";
+import { getOutcomeConfig, getOutcomeEntries, formatDuration } from "@/lib/call-utils";
 import { cn } from "@/lib/utils";
-import type { CallLog, CallStatus } from "@/types";
-
-const STATUS_CONFIG: Record<
-  CallStatus,
-  { label: string; variant: "success" | "warning" | "secondary" | "destructive" }
-> = {
-  completed: { label: "Completed", variant: "success" },
-  missed: { label: "Missed", variant: "warning" },
-  transferred: { label: "Transferred", variant: "secondary" },
-  failed: { label: "Failed", variant: "destructive" },
-};
+import type { CallLog } from "@/types";
 
 const PAGE_SIZE = 8;
 const columnHelper = createColumnHelper<CallLog>();
 
 export default function CallLogsPage() {
-  const { data: callLogs = [] } = useCallLogs();
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const { data } = useCallLogs();
+  const callLogs = useMemo(() => data?.calls ?? [], [data?.calls]);
+  const [outcomeFilter, setOutcomeFilter] = useState<string>("all");
   const [selectedLog, setSelectedLog] = useState<CallLog | null>(null);
 
   const filteredData = useMemo((): CallLog[] => {
-    if (statusFilter === "all") return callLogs;
-    return callLogs.filter((log: CallLog) => log.status === statusFilter);
-  }, [statusFilter, callLogs]);
+    if (outcomeFilter === "all") return callLogs;
+    return callLogs.filter((log: CallLog) => log.outcome === outcomeFilter);
+  }, [outcomeFilter, callLogs]);
 
   const columns = useMemo(
     () => [
-      columnHelper.accessor("customerName", {
-        header: "Customer",
+      columnHelper.accessor("company_name", {
+        header: "Компанія",
         cell: (info) => (
           <div>
             <div className="font-medium">{info.getValue()}</div>
@@ -54,46 +46,50 @@ export default function CallLogsPage() {
           </div>
         ),
       }),
-      columnHelper.accessor("status", {
-        header: "Status",
+      columnHelper.accessor("outcome", {
+        header: "Результат",
         cell: (info) => {
-          const config = STATUS_CONFIG[info.getValue()];
+          const config = getOutcomeConfig(info.getValue());
           return <Badge variant={config.variant}>{config.label}</Badge>;
         },
       }),
-      columnHelper.accessor("summary", {
-        header: "AI Summary",
+      columnHelper.accessor("analysis_text", {
+        header: "AI Підсумок",
         cell: (info) => (
           <p className="text-muted-foreground line-clamp-1 max-w-xs">{info.getValue()}</p>
         ),
         meta: { className: "hidden lg:table-cell" },
       }),
-      columnHelper.accessor("agentName", {
-        header: "Agent",
+      columnHelper.accessor("niche", {
+        header: "Ніша",
         cell: (info) => <span className="text-muted-foreground text-xs">{info.getValue()}</span>,
         meta: { className: "hidden md:table-cell" },
       }),
-      columnHelper.accessor("duration", {
-        header: "Audio",
+      columnHelper.accessor("duration_sec", {
+        header: "Тривалість",
         cell: (info) => {
           const value = info.getValue();
-          if (value === "—") return <span className="text-muted-foreground text-xs">—</span>;
+          const formatted = formatDuration(value);
+          if (formatted === "—") return <span className="text-muted-foreground text-xs">—</span>;
           return (
             <button className="text-primary hover:text-primary/80 inline-flex cursor-pointer items-center gap-1">
               <Play className="h-3 w-3" />
-              <span className="text-xs">{value}</span>
+              <span className="text-xs">{formatted}</span>
             </button>
           );
         },
       }),
-      columnHelper.accessor("date", {
-        header: "Date",
-        cell: (info) => (
-          <div className="text-muted-foreground text-xs">
-            <div>{info.getValue()}</div>
-            <div>{info.row.original.time}</div>
-          </div>
-        ),
+      columnHelper.accessor("created_at", {
+        header: "Дата",
+        cell: (info) => {
+          const dt = new Date(info.getValue());
+          return (
+            <div className="text-muted-foreground text-xs">
+              <div>{dt.toLocaleDateString("uk-UA")}</div>
+              <div>{dt.toLocaleTimeString("uk-UA", { hour: "2-digit", minute: "2-digit" })}</div>
+            </div>
+          );
+        },
         meta: { className: "hidden sm:table-cell" },
       }),
     ],
@@ -113,26 +109,26 @@ export default function CallLogsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-bold">Call Logs</h1>
-        <p className="text-muted-foreground">{callLogs.length} total calls</p>
+        <h1 className="font-display text-2xl font-bold">Журнал дзвінків</h1>
+        <p className="text-muted-foreground">{callLogs.length} всього дзвінків</p>
       </div>
 
       <div className="flex flex-wrap gap-2">
         <Button
-          variant={statusFilter === "all" ? "default" : "outline"}
+          variant={outcomeFilter === "all" ? "default" : "outline"}
           size="sm"
-          onClick={() => setStatusFilter("all")}
+          onClick={() => setOutcomeFilter("all")}
         >
-          All ({callLogs.length})
+          Усі ({callLogs.length})
         </Button>
-        {Object.entries(STATUS_CONFIG).map(([key, config]) => (
+        {getOutcomeEntries().map(([key, config]) => (
           <Button
             key={key}
-            variant={statusFilter === key ? "default" : "outline"}
+            variant={outcomeFilter === key ? "default" : "outline"}
             size="sm"
-            onClick={() => setStatusFilter(key)}
+            onClick={() => setOutcomeFilter(key)}
           >
-            {config.label} ({callLogs.filter((log: CallLog) => log.status === key).length})
+            {config.label} ({callLogs.filter((log: CallLog) => log.outcome === key).length})
           </Button>
         ))}
       </div>
@@ -184,7 +180,7 @@ export default function CallLogsPage() {
 
           <div className="flex items-center justify-between border-t p-3">
             <p className="text-muted-foreground text-sm">
-              Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+              Сторінка {table.getState().pagination.pageIndex + 1} з {table.getPageCount()}
             </p>
             <div className="flex gap-1">
               <Button
@@ -193,7 +189,7 @@ export default function CallLogsPage() {
                 className="h-8 w-8"
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
-                aria-label="Previous page"
+                aria-label="Попередня сторінка"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
@@ -203,7 +199,7 @@ export default function CallLogsPage() {
                 className="h-8 w-8"
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
-                aria-label="Next page"
+                aria-label="Наступна сторінка"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>

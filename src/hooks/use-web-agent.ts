@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 
 import { API_ENDPOINTS } from "@/lib/api-config";
+import type { WebAgentSession, StartWebAgentParams } from "@/types";
 
 const NETWORK_ERROR_MESSAGE =
   "Не вдалося з'єднатися з сервером. Перевірте інтернет і спробуйте ще раз.";
@@ -14,21 +15,7 @@ const WEB_AGENT_ERROR_MESSAGES: Record<string, string> = {
   instruction_expand_failed: "Не вдалося згенерувати сценарій. Спробуйте ще раз.",
   dispatch_failed: "Сервіс дзвінків тимчасово недоступний. Спробуйте пізніше.",
   livekit_not_configured: "Сервіс голосового зв'язку тимчасово недоступний.",
-} as const;
-
-export interface WebAgentSession {
-  room: string;
-  token: string;
-  url: string;
-  identity: string;
-}
-
-export interface StartWebAgentParams {
-  instruction: string;
-  voice: string;
-  agent_name: string;
-  preset?: string;
-}
+};
 
 async function startWebAgent(params: StartWebAgentParams): Promise<WebAgentSession> {
   let response: Response;

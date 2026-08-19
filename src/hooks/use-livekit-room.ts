@@ -3,18 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Room, RoomEvent, Track, type RemoteTrack } from "livekit-client";
 
-export type RoomStatus = "idle" | "connecting" | "connected" | "disconnected" | "error";
-
-export interface UseLiveKitRoomOptions {
-  wsUrl: string | null;
-  token: string | null;
-}
-
-export interface UseLiveKitRoomResult {
-  status: RoomStatus;
-  errorMessage: string | null;
-  disconnect: () => void;
-}
+import type { RoomStatus, UseLiveKitRoomOptions, UseLiveKitRoomResult } from "@/types";
 
 export function useLiveKitRoom({ wsUrl, token }: UseLiveKitRoomOptions): UseLiveKitRoomResult {
   const roomRef = useRef<Room | null>(null);

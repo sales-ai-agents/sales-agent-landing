@@ -53,48 +53,59 @@ export default function ContactsPage() {
             className="flex cursor-pointer items-center gap-1 font-medium"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Name
+            Ім&apos;я
             <ArrowUpDown className="h-3 w-3" />
           </button>
         ),
         cell: (info) => <span className="font-medium">{info.getValue()}</span>,
       }),
       columnHelper.accessor("phone", {
-        header: "Phone",
+        header: "Телефон",
         cell: (info) => <span className="text-muted-foreground">{info.getValue()}</span>,
       }),
       columnHelper.accessor("email", {
-        header: "Email",
+        header: "Пошта",
         cell: (info) => <span className="text-muted-foreground">{info.getValue()}</span>,
         meta: { className: "hidden md:table-cell" },
       }),
-      columnHelper.accessor("dateAdded", {
+      columnHelper.accessor("note", {
+        header: "Нотатка",
+        cell: (info) => (
+          <span className="text-muted-foreground line-clamp-1 max-w-xs">{info.getValue()}</span>
+        ),
+        meta: { className: "hidden lg:table-cell" },
+      }),
+      columnHelper.accessor("created_at", {
         header: ({ column }) => (
           <button
             className="flex cursor-pointer items-center gap-1 font-medium"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Added
+            Додано
             <ArrowUpDown className="h-3 w-3" />
           </button>
         ),
-        cell: (info) => <span className="text-muted-foreground">{info.getValue()}</span>,
+        cell: (info) => (
+          <span className="text-muted-foreground">
+            {new Date(info.getValue()).toLocaleDateString("uk-UA")}
+          </span>
+        ),
         meta: { className: "hidden sm:table-cell" },
       }),
       columnHelper.display({
         id: "actions",
-        header: () => <span className="sr-only">Actions</span>,
+        header: () => <span className="sr-only">Дії</span>,
         cell: ({ row }) => (
           <div className="flex justify-end gap-1">
-            <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Edit contact">
+            <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Редагувати контакт">
               <Edit className="h-3 w-3" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              className="text-destructive h-8 w-8"
+              className="h-8 w-8 text-red-600"
               onClick={() => deleteContact.mutate(row.original.id)}
-              aria-label="Delete contact"
+              aria-label="Видалити контакт"
             >
               <Trash2 className="h-3 w-3" />
             </Button>
@@ -127,17 +138,17 @@ export default function ContactsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-2xl font-bold">Contacts</h1>
-          <p className="text-muted-foreground">{contacts.length} total contacts</p>
+          <h1 className="font-display text-2xl font-bold">Контакти</h1>
+          <p className="text-muted-foreground">{contacts.length} всього контактів</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setShowUploadDialog(true)}>
             <Upload className="mr-2 h-4 w-4" />
-            Upload CSV
+            Завантажити CSV
           </Button>
           <Button onClick={() => setShowAddDialog(true)}>
             <Plus className="mr-2 h-4 w-4" />
-            Add Contact
+            Додати контакт
           </Button>
         </div>
       </div>
@@ -145,7 +156,7 @@ export default function ContactsPage() {
       <div className="relative max-w-sm">
         <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
         <Input
-          placeholder="Search by name or phone..."
+          placeholder="Пошук за ім'ям або телефоном..."
           value={globalFilter}
           onChange={(event) => setGlobalFilter(event.target.value)}
           className="pl-9"
@@ -195,7 +206,7 @@ export default function ContactsPage() {
 
           <div className="flex items-center justify-between border-t p-3">
             <p className="text-muted-foreground text-sm">
-              Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+              Сторінка {table.getState().pagination.pageIndex + 1} з {table.getPageCount()}
             </p>
             <div className="flex gap-1">
               <Button
@@ -204,7 +215,7 @@ export default function ContactsPage() {
                 className="h-8 w-8"
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
-                aria-label="Previous page"
+                aria-label="Попередня сторінка"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
@@ -214,7 +225,7 @@ export default function ContactsPage() {
                 className="h-8 w-8"
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
-                aria-label="Next page"
+                aria-label="Наступна сторінка"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>

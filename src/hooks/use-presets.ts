@@ -1,22 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { API_ENDPOINTS } from "@/lib/api-config";
+import type { Preset, PresetsResponse } from "@/types";
 
 const NETWORK_ERROR_MESSAGE =
   "Не вдалося з'єднатися з сервером. Перевірте інтернет і спробуйте ще раз.";
 const FALLBACK_ERROR_MESSAGE = "Не вдалося завантажити пресети. Спробуйте ще раз.";
-
-export interface Preset {
-  id: string;
-  label: string;
-  description: string;
-  prompt: string;
-}
-
-interface PresetsResponse {
-  ok: boolean;
-  presets: Preset[];
-}
 
 async function fetchPresets(): Promise<Preset[]> {
   let response: Response;

@@ -7,6 +7,8 @@
 @theme inline {
   --color-primary: #005bff;
   --color-primary-foreground: #fff;
+  --color-destructive: var(--color-red-600);
+  --color-destructive-foreground: #fff;
   --color-card-glass: rgba(207, 207, 207, 0.28);
   --color-border: #e0e0e0;
   --color-background: #fff;

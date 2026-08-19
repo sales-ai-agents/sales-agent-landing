@@ -6,7 +6,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// Formats up to 9 raw UA subscriber digits into the display pattern: __ ___ __ __
 export function formatUaPhoneDigits(digits: string): string {
   const cleaned = digits.replace(/\D/g, "").slice(0, 9);
 
@@ -18,12 +17,10 @@ export function formatUaPhoneDigits(digits: string): string {
   return `${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5, 7)} ${cleaned.slice(7)}`;
 }
 
-// ROI Calculator Helpers
 export function calcHoursPerDay(inputs: CalculatorInputs): number {
   return Number(((inputs.callsPerDay * inputs.avgDuration) / 60).toFixed(1));
 }
 
-// FAQ Schema Builder
 export function buildFaqPageSchema(faqs: readonly FaqEntry[]): object {
   return {
     "@context": "https://schema.org",
@@ -39,7 +36,6 @@ export function buildFaqPageSchema(faqs: readonly FaqEntry[]): object {
   };
 }
 
-// Organization Schema Builder (GEO + SEO)
 export function buildOrganizationSchema(): object {
   return {
     "@context": "https://schema.org",
@@ -61,7 +57,6 @@ export function buildOrganizationSchema(): object {
   };
 }
 
-// HowTo Schema Builder (GEO — step-by-step for AI extraction)
 export function buildHowToSchema(steps: readonly OnboardingStep[]): object {
   return {
     "@context": "https://schema.org",

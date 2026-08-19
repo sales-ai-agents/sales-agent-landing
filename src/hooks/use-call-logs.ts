@@ -1,16 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { mockCallLogs } from "@/lib/mock-data";
-import type { CallLog } from "@/types";
+import { apiGet } from "@/lib/api-client";
+import { API_ENDPOINTS } from "@/lib/api-config";
+import type { CallsResponse } from "@/types";
 
-async function fetchCallLogs(): Promise<CallLog[]> {
-  await new Promise((resolve) => setTimeout(resolve, 400));
-  return mockCallLogs;
-}
+export function useCallLogs(limit?: number, offset?: number) {
+  const params = new URLSearchParams();
+  if (limit !== undefined) params.set("limit", String(limit));
+  if (offset !== undefined) params.set("offset", String(offset));
 
-export function useCallLogs() {
-  return useQuery<CallLog[]>({
-    queryKey: ["call-logs"],
-    queryFn: fetchCallLogs,
+  const url = params.toString()
+    ? `${API_ENDPOINTS.APP_CALLS}?${params.toString()}`
+    : API_ENDPOINTS.APP_CALLS;
+
+  return useQuery<CallsResponse>({
+    queryKey: ["call-logs", limit, offset],
+    queryFn: () => apiGet<CallsResponse>(url),
   });
 }

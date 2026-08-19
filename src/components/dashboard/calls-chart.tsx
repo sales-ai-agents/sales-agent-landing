@@ -10,25 +10,35 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-import { chartData } from "@/lib/mock-data";
+import type { DayStats } from "@/types";
 
-export function CallsChart() {
+interface CallsChartProps {
+  data?: DayStats[];
+}
+
+function formatDate(dateStr: string): string {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("uk-UA", { day: "2-digit", month: "2-digit" });
+}
+
+export function CallsChart({ data }: CallsChartProps) {
+  const chartData = (data ?? []).map((item) => ({
+    ...item,
+    label: formatDate(item.date),
+  }));
+
   return (
-    <div className="h-[250px] w-full">
+    <div className="h-60 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={[...chartData]} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+        <AreaChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
           <defs>
             <linearGradient id="colorCalls" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#005bff" stopOpacity={0.3} />
               <stop offset="95%" stopColor="#005bff" stopOpacity={0} />
             </linearGradient>
-            <linearGradient id="colorSuccess" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="hsl(142, 71%, 45%)" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="hsl(142, 71%, 45%)" stopOpacity={0} />
-            </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-          <XAxis dataKey="day" className="text-xs" tick={{ fontSize: 12 }} />
+          <XAxis dataKey="label" className="text-xs" tick={{ fontSize: 12 }} />
           <YAxis className="text-xs" tick={{ fontSize: 12 }} />
           <Tooltip
             contentStyle={{
@@ -44,15 +54,7 @@ export function CallsChart() {
             stroke="#005bff"
             fillOpacity={1}
             fill="url(#colorCalls)"
-            name="Total Calls"
-          />
-          <Area
-            type="monotone"
-            dataKey="successful"
-            stroke="hsl(142, 71%, 45%)"
-            fillOpacity={1}
-            fill="url(#colorSuccess)"
-            name="Successful"
+            name="Дзвінки"
           />
         </AreaChart>
       </ResponsiveContainer>
