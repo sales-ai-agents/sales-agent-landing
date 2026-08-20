@@ -12,6 +12,7 @@ function handleGlobal401(error: Error): void {
   if (isRedirecting) return;
   if (error instanceof ApiError && error.status === 401 && !AUTH_FLOW_CODES.has(error.code)) {
     isRedirecting = true;
+    document.cookie = "cs_session=; path=/; max-age=0";
     toast.error("Сесія закінчилася. Увійдіть знову.");
     window.location.href = "/sign-in";
   }

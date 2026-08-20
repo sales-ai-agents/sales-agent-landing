@@ -9,8 +9,7 @@ import { useMe } from "@/lib/hooks/use-auth";
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const { data: account, isLoading } = useMe();
 
-  if (isLoading) return <PageLoading />;
-  if (!account) return <PageLoading />;
+  if (isLoading || !account) return <PageLoading />;
 
   return (
     <div className="flex h-screen overflow-hidden">
