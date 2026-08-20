@@ -222,7 +222,7 @@ function EditAgentForm({ agent }: EditAgentFormProps) {
       </div>
 
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <DialogContent>
+        <DialogContent className="bg-background">
           <DialogHeader>
             <DialogTitle>Видалити агента?</DialogTitle>
             <DialogDescription>

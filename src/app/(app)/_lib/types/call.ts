@@ -7,14 +7,23 @@ export interface CallLog {
   phone: string;
   company_name: string;
   niche: string;
-  outcome: CallOutcome;
-  analysis_text: string;
-  meeting_scheduled: number;
+  outcome: CallOutcome | null;
+  analysis_text: string | null;
+  meeting_scheduled: boolean;
   created_at: string;
-  ended_at: string;
-  agent_id: number;
+  ended_at: string | null;
+  agent_id: number | null;
   turn_count: number;
-  duration_sec: number;
+  duration_sec: number | null;
+}
+
+export interface TranscriptMessage {
+  role: "assistant" | "user";
+  content: string;
+}
+
+export interface CallDetail extends CallLog {
+  transcript: TranscriptMessage[];
 }
 
 export interface CallsResponse {
@@ -23,6 +32,11 @@ export interface CallsResponse {
   total: number;
   limit: number;
   offset: number;
+}
+
+export interface CallDetailResponse {
+  ok: boolean;
+  call: CallDetail;
 }
 
 export interface DayStats {

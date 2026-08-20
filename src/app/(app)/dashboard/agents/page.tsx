@@ -114,7 +114,7 @@ export default function AgentsPage() {
       )}
 
       <Dialog open={!!testDialog} onOpenChange={() => setTestDialog(null)}>
-        <DialogContent>
+        <DialogContent className="bg-background">
           <DialogHeader>
             <DialogTitle>Тестовий дзвінок — {testDialog?.agentName}</DialogTitle>
           </DialogHeader>

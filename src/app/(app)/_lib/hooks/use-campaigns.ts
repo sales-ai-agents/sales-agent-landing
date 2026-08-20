@@ -6,6 +6,7 @@ import type {
   Campaign,
   CampaignsResponse,
   CreateCampaignParams,
+  CreateCampaignResponse,
   ControlCampaignParams,
 } from "@dashboard/types";
 
@@ -23,8 +24,8 @@ export function useCreateCampaign() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: CreateCampaignParams): Promise<Campaign> => {
-      return apiPost<Campaign>(API_ENDPOINTS.APP_CAMPAIGNS, data);
+    mutationFn: async (data: CreateCampaignParams): Promise<CreateCampaignResponse> => {
+      return apiPost<CreateCampaignResponse>(API_ENDPOINTS.APP_CAMPAIGNS, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["campaigns"] });

@@ -12,6 +12,7 @@ export const API_ENDPOINTS = {
   APP_CALLS: `${API_BASE}/app/calls`,
   APP_AGENTS: `${API_BASE}/app/agents`,
   APP_CONTACTS: `${API_BASE}/app/contacts`,
+  APP_CONTACTS_UPLOAD: `${API_BASE}/app/contacts/upload`,
   APP_TEST_CALL: `${API_BASE}/app/agents/test-call`,
   APP_CAMPAIGNS: `${API_BASE}/app/campaigns`,
   APP_CAMPAIGNS_CONTROL: `${API_BASE}/app/campaigns/control`,
@@ -29,6 +30,7 @@ export const apiUrl = {
   agentDelete: (id: number | string) => `${API_ENDPOINTS.APP_AGENTS}/${id}/delete`,
   contact: (id: number | string) => `${API_ENDPOINTS.APP_CONTACTS}/${id}`,
   contactDelete: (id: number | string) => `${API_ENDPOINTS.APP_CONTACTS}/${id}/delete`,
+  call: (id: string) => `${API_ENDPOINTS.APP_CALLS}/${id}`,
   calls: (params?: { limit?: number; offset?: number }) => {
     const url = API_ENDPOINTS.APP_CALLS;
 

@@ -15,7 +15,8 @@ const OUTCOME_CONFIG: Record<string, OutcomeConfig> = {
 
 const DEFAULT_OUTCOME_CONFIG: OutcomeConfig = { label: "", variant: "secondary" };
 
-export function getOutcomeConfig(outcome: CallOutcome): OutcomeConfig {
+export function getOutcomeConfig(outcome: CallOutcome | null): OutcomeConfig {
+  if (!outcome) return DEFAULT_OUTCOME_CONFIG;
   return OUTCOME_CONFIG[outcome] ?? { ...DEFAULT_OUTCOME_CONFIG, label: outcome };
 }
 

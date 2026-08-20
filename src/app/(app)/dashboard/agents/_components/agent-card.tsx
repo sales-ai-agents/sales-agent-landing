@@ -13,7 +13,7 @@ export interface AgentCardProps {
 }
 
 export function AgentCard({ agent, onToggle, onTest }: AgentCardProps) {
-  const isActive = !!agent.is_active;
+  const isActive = agent.is_active;
 
   return (
     <Card className="border-border shadow-primary/30 rounded-2xl shadow-lg transition-shadow hover:shadow-md">

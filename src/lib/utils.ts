@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatDuration(sec: number): string {
+export function formatDuration(sec: number | null): string {
   if (!sec || sec <= 0) return "—";
   const min = Math.floor(sec / 60);
   const s = sec % 60;

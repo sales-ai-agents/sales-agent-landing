@@ -30,7 +30,7 @@ export default function CallLogsPage() {
   const { data, isLoading, error, refetch } = useCallLogs();
   const callLogs = useMemo(() => data?.calls ?? [], [data?.calls]);
   const [outcomeFilter, setOutcomeFilter] = useState<string>("all");
-  const [selectedLog, setSelectedLog] = useState<CallLog | null>(null);
+  const [selectedLog, setSelectedLog] = useState<string | null>(null);
 
   const filteredData = useMemo((): CallLog[] => {
     if (outcomeFilter === "all") return callLogs;
@@ -176,11 +176,11 @@ export default function CallLogsPage() {
                     key={row.id}
                     className="hover:bg-muted/20 focus-visible:ring-ring cursor-pointer border-b last:border-0 focus-visible:ring-2 focus-visible:outline-none"
                     tabIndex={0}
-                    onClick={() => setSelectedLog(row.original)}
+                    onClick={() => setSelectedLog(row.original.id)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
-                        setSelectedLog(row.original);
+                        setSelectedLog(row.original.id);
                       }
                     }}
                   >
@@ -229,7 +229,7 @@ export default function CallLogsPage() {
       </Card>
 
       {selectedLog && (
-        <CallLogDetailDrawer callLog={selectedLog} onClose={() => setSelectedLog(null)} />
+        <CallLogDetailDrawer callId={selectedLog} onClose={() => setSelectedLog(null)} />
       )}
     </div>
   );

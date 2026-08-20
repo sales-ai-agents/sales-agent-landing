@@ -4,7 +4,7 @@ export interface Agent {
   name: string;
   voice: string;
   instructions: string;
-  is_active: number;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
 }

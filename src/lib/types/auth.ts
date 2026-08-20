@@ -8,7 +8,6 @@ export interface Account {
 
 export interface AuthResponse {
   ok: boolean;
-  token: string;
   account: Account;
 }
 

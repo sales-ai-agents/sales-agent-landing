@@ -1,28 +1,37 @@
-export type CampaignStatus = "active" | "paused" | "stopped" | "completed";
+export type CampaignStatus = "running" | "paused" | "stopped";
 
 export type CampaignAction = "pause" | "resume" | "stop";
 
 export interface Campaign {
-  id: string;
+  id: number;
+  account_id: number;
+  agent_id: number;
   name: string;
-  agent_id: string;
   status: CampaignStatus;
   total: number;
   done: number;
-  createdAt: string;
+  created_at: string;
+  finished_at: string | null;
 }
 
 export interface CampaignsResponse {
+  ok: boolean;
   campaigns: Campaign[];
 }
 
 export interface CreateCampaignParams {
-  agent_id: string;
+  agent_id: number;
   name?: string;
-  contact_ids?: string[];
+  contact_ids?: number[];
+}
+
+export interface CreateCampaignResponse {
+  ok: boolean;
+  id: number;
+  targets: number;
 }
 
 export interface ControlCampaignParams {
-  campaign_id: string;
+  campaign_id: number;
   action: CampaignAction;
 }

@@ -57,7 +57,7 @@ export function useToggleAgentStatus() {
 
       queryClient.setQueryData<Agent[]>(["agents"], (old) =>
         old?.map((agent) =>
-          agent.id === id ? { ...agent, is_active: status === "active" ? 1 : 0 } : agent
+          agent.id === id ? { ...agent, is_active: status === "active" } : agent
         )
       );
 
