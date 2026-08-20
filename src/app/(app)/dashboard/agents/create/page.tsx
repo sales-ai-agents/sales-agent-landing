@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,8 +14,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardDescription } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { createAgentSchema, type CreateAgentFormData } from "@/lib/schemas";
-import { VOICE_OPTIONS } from "@/lib/constants";
 import { useCreateAgent, useTestCall } from "@dashboard/hooks/use-agents";
+import { useVoices } from "@dashboard/hooks/use-voices";
 import { ApiError } from "@/lib/api-client";
 import { resolveErrorMessage, AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
 
@@ -25,8 +25,8 @@ export default function CreateAgentPage() {
   const router = useRouter();
   const createAgent = useCreateAgent();
   const testCall = useTestCall();
+  const { data: voices = [] } = useVoices();
   const [step, setStep] = useState(0);
-  const createdAgentIdRef = useRef<number | null>(null);
 
   const {
     register,
@@ -69,12 +69,6 @@ export default function CreateAgentPage() {
     const valid = await trigger(["name", "voice", "instructions"]);
     if (!valid) return;
 
-    if (createdAgentIdRef.current) {
-      toast.success("Агента створено");
-      router.push("/dashboard/agents");
-      return;
-    }
-
     const { name, voice, instructions } = getValues();
     try {
       await createAgent.mutateAsync({ name, voice, instructions });
@@ -94,13 +88,7 @@ export default function CreateAgentPage() {
     if (!testPhone) return;
 
     try {
-      let agentId = createdAgentIdRef.current;
-      if (!agentId) {
-        const agent = await createAgent.mutateAsync({ name, voice, instructions });
-        agentId = agent.id;
-        createdAgentIdRef.current = agentId;
-      }
-      await testCall.mutateAsync({ agent_id: agentId, phone: testPhone });
+      await testCall.mutateAsync({ phone: testPhone, name, voice, instructions });
       toast.success("Дзвінок ініційовано — очікуйте виклик");
     } catch (error) {
       if (error instanceof ApiError) {
@@ -180,22 +168,22 @@ export default function CreateAgentPage() {
                 role="radiogroup"
                 aria-label="Оберіть голос"
               >
-                {VOICE_OPTIONS.map((voiceOption) => (
+                {voices.map((voiceOption) => (
                   <div
-                    key={voiceOption.id}
+                    key={voiceOption.key}
                     role="radio"
-                    aria-checked={voice === voiceOption.id}
+                    aria-checked={voice === voiceOption.key}
                     tabIndex={0}
-                    onClick={() => setValue("voice", voiceOption.id, { shouldValidate: true })}
+                    onClick={() => setValue("voice", voiceOption.key, { shouldValidate: true })}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
-                        setValue("voice", voiceOption.id, { shouldValidate: true });
+                        setValue("voice", voiceOption.key, { shouldValidate: true });
                       }
                     }}
                     className={cn(
                       "focus-visible:ring-ring cursor-pointer rounded-lg border p-4 transition-colors focus-visible:ring-2 focus-visible:outline-none",
-                      voice === voiceOption.id
+                      voice === voiceOption.key
                         ? "border-primary bg-primary/5"
                         : "hover:border-primary/50"
                     )}
@@ -203,7 +191,7 @@ export default function CreateAgentPage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">{voiceOption.name}</p>
-                        <p className="text-muted-foreground text-sm">{voiceOption.type}</p>
+                        <p className="text-muted-foreground text-sm">{voiceOption.label}</p>
                       </div>
                       <Button
                         variant="ghost"
@@ -297,7 +285,7 @@ export default function CreateAgentPage() {
                     </p>
                     <p>
                       <span className="text-muted-foreground">Голос:</span>{" "}
-                      {VOICE_OPTIONS.find((v) => v.id === voice)?.name || "—"}
+                      {voices.find((v) => v.key === voice)?.name || "—"}
                     </p>
                     <p>
                       <span className="text-muted-foreground">Інструкції:</span>{" "}

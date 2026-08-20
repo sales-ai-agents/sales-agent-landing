@@ -11,12 +11,21 @@ export interface Contact {
 export interface ContactsResponse {
   ok: boolean;
   contacts: Contact[];
-  total: number;
 }
 
 export interface CreateContactParams {
   phone: string;
   name?: string;
   email?: string;
-  note?: string;
+}
+
+export interface CreateContactResponse {
+  ok: boolean;
+  id: number | null;
+}
+
+export interface UploadContactsResponse {
+  ok: boolean;
+  added: number;
+  duplicates: number;
 }

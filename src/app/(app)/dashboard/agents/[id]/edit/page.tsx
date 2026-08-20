@@ -26,9 +26,9 @@ import {
 } from "@/components/ui/dialog";
 import { PageLoading } from "@/components/dashboard/page-states";
 import { useAgent, useUpdateAgent, useDeleteAgent, useTestCall } from "@dashboard/hooks/use-agents";
+import { useVoices } from "@dashboard/hooks/use-voices";
 import { ApiError } from "@/lib/api-client";
 import { resolveErrorMessage, AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
-import { VOICE_OPTIONS } from "@/lib/constants";
 import type { Agent } from "@dashboard/types";
 
 interface AgentFormData {
@@ -68,6 +68,7 @@ function EditAgentForm({ agent }: EditAgentFormProps) {
   const updateAgent = useUpdateAgent();
   const deleteAgent = useDeleteAgent();
   const testCall = useTestCall();
+  const { data: voices = [] } = useVoices();
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [testPhone, setTestPhone] = useState("");
@@ -162,12 +163,14 @@ function EditAgentForm({ agent }: EditAgentFormProps) {
               onValueChange={(value) => setFormData({ ...formData, voice: value ?? "" })}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Оберіть голос" />
+                <SelectValue placeholder="Оберіть голос">
+                  {voices.find((v) => v.key === formData.voice)?.label ?? formData.voice}
+                </SelectValue>
               </SelectTrigger>
-              <SelectContent>
-                {VOICE_OPTIONS.map((v) => (
-                  <SelectItem key={v.id} value={v.id}>
-                    {v.name} — {v.type}
+              <SelectContent alignItemWithTrigger={false}>
+                {voices.map((v) => (
+                  <SelectItem key={v.key} value={v.key}>
+                    {v.label}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -32,12 +32,12 @@ export default function AgentsPage() {
   const [testPhone, setTestPhone] = useState("");
 
   function handleToggle(agent: Agent): void {
-    const newStatus = agent.is_active ? "paused" : "active";
+    const newActive = !agent.is_active;
     toggleStatus.mutate(
-      { id: agent.id, status: newStatus },
+      { id: agent.id, is_active: newActive },
       {
         onSuccess: (_data, variables) => {
-          const label = variables.status === "active" ? "активовано" : "призупинено";
+          const label = variables.is_active ? "активовано" : "призупинено";
           toast.success(`Агента ${label}`);
         },
         onError: (error) => {
@@ -118,7 +118,7 @@ export default function AgentsPage() {
           <DialogHeader>
             <DialogTitle>Тестовий дзвінок — {testDialog?.agentName}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-3">
+          <div className="my-3">
             <Input
               aria-label="Номер телефону для тестового дзвінка"
               placeholder="+380 XX XXX XXXX"

@@ -9,6 +9,7 @@ export interface Account {
 export interface AuthResponse {
   ok: boolean;
   account: Account;
+  token?: string;
 }
 
 export interface LoginParams {
@@ -26,4 +27,32 @@ export interface RegisterParams {
 export interface MeResponse {
   ok: boolean;
   account: Account;
+}
+
+export interface AuthProvidersResponse {
+  ok: boolean;
+  password: boolean;
+  google: boolean;
+  apple: boolean;
+}
+
+export interface UpdateProfileParams {
+  name?: string;
+  company?: string;
+  email?: string;
+}
+
+export interface UpdateProfileResponse {
+  ok: boolean;
+  account: Account;
+}
+
+export interface ChangePasswordParams {
+  current_password: string;
+  new_password: string;
+}
+
+export interface ChangePasswordResponse {
+  ok: boolean;
+  sessions_closed: number;
 }

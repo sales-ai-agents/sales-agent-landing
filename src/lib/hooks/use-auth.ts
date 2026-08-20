@@ -1,10 +1,29 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { apiPost, apiGet, ApiError } from "@/lib/api-client";
+import { apiPost, apiGet, apiPatch, ApiError } from "@/lib/api-client";
 import { API_ENDPOINTS } from "@/lib/api-config";
-import type { Account, AuthResponse, LoginParams, RegisterParams, MeResponse } from "@/lib/types";
+import type {
+  Account,
+  AuthResponse,
+  LoginParams,
+  RegisterParams,
+  MeResponse,
+  AuthProvidersResponse,
+  UpdateProfileParams,
+  UpdateProfileResponse,
+  ChangePasswordParams,
+  ChangePasswordResponse,
+} from "@/lib/types";
 
 const AUTH_QUERY_KEY = ["auth", "me"] as const;
+
+export function useAuthProviders() {
+  return useQuery<AuthProvidersResponse>({
+    queryKey: ["auth", "providers"],
+    queryFn: () => apiGet<AuthProvidersResponse>(API_ENDPOINTS.AUTH_PROVIDERS),
+    staleTime: 10 * 60 * 1000,
+  });
+}
 
 export function useLogin() {
   const queryClient = useQueryClient();
@@ -57,5 +76,22 @@ export function useMe() {
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: true,
     retry: false,
+  });
+}
+
+export function useUpdateProfile() {
+  const queryClient = useQueryClient();
+
+  return useMutation<UpdateProfileResponse, ApiError, UpdateProfileParams>({
+    mutationFn: (params) => apiPatch<UpdateProfileResponse>(API_ENDPOINTS.AUTH_ME, params),
+    onSuccess: (data) => {
+      queryClient.setQueryData<Account>(AUTH_QUERY_KEY, data.account);
+    },
+  });
+}
+
+export function useChangePassword() {
+  return useMutation<ChangePasswordResponse, ApiError, ChangePasswordParams>({
+    mutationFn: (params) => apiPost<ChangePasswordResponse>(API_ENDPOINTS.AUTH_PASSWORD, params),
   });
 }

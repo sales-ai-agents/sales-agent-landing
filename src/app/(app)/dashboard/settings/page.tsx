@@ -11,7 +11,9 @@ import { Card, CardContent, CardHeader, CardDescription } from "@/components/ui/
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { useMe } from "@/lib/hooks/use-auth";
+import { useMe, useUpdateProfile, useChangePassword } from "@/lib/hooks/use-auth";
+import { ApiError } from "@/lib/api-client";
+import { resolveErrorMessage, AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
 import { PageLoading } from "@/components/dashboard/page-states";
 
 export default function SettingsPage() {
@@ -59,9 +61,27 @@ function ProfileSection({
 }) {
   const [name, setName] = useState(initialName);
   const [email, setEmail] = useState(initialEmail);
+  const updateProfile = useUpdateProfile();
+
+  const hasChanges = name !== initialName || email !== initialEmail;
 
   function handleSaveProfile(): void {
-    toast.info("Збереження профілю ще не підключено");
+    const params: Record<string, string> = {};
+    if (name !== initialName) params.name = name;
+    if (email !== initialEmail) params.email = email;
+
+    updateProfile.mutate(params, {
+      onSuccess: () => {
+        toast.success("Профіль оновлено");
+      },
+      onError: (error) => {
+        if (error instanceof ApiError) {
+          toast.error(resolveErrorMessage(error.code, AUTH_ERROR_MESSAGES));
+        } else {
+          toast.error("Щось пішло не так.");
+        }
+      },
+    });
   }
 
   return (
@@ -84,9 +104,9 @@ function ProfileSection({
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
-        <Button onClick={handleSaveProfile}>
+        <Button onClick={handleSaveProfile} disabled={!hasChanges || updateProfile.isPending}>
           <Save className="mr-2 h-4 w-4" />
-          Зберегти зміни
+          {updateProfile.isPending ? "Збереження..." : "Зберегти зміни"}
         </Button>
       </CardContent>
     </Card>
@@ -97,17 +117,30 @@ function PasswordSection() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const changePassword = useChangePassword();
+
+  const canSubmit =
+    currentPassword.length > 0 && newPassword.length >= 8 && newPassword === confirmPassword;
 
   function handleChangePassword(): void {
-    if (newPassword !== confirmPassword) {
-      toast.error("Паролі не збігаються");
-      return;
-    }
-    if (newPassword.length < 8) {
-      toast.error("Пароль має містити щонайменше 8 символів");
-      return;
-    }
-    toast.info("Зміна пароля ще не підключена");
+    changePassword.mutate(
+      { current_password: currentPassword, new_password: newPassword },
+      {
+        onSuccess: () => {
+          toast.success("Пароль змінено");
+          setCurrentPassword("");
+          setNewPassword("");
+          setConfirmPassword("");
+        },
+        onError: (error) => {
+          if (error instanceof ApiError) {
+            toast.error(resolveErrorMessage(error.code, AUTH_ERROR_MESSAGES));
+          } else {
+            toast.error("Щось пішло не так.");
+          }
+        },
+      }
+    );
   }
 
   return (
@@ -146,7 +179,9 @@ function PasswordSection() {
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
         </div>
-        <Button onClick={handleChangePassword}>Оновити пароль</Button>
+        <Button onClick={handleChangePassword} disabled={!canSubmit || changePassword.isPending}>
+          {changePassword.isPending ? "Оновлення..." : "Оновити пароль"}
+        </Button>
       </CardContent>
     </Card>
   );

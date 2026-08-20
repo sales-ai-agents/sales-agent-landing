@@ -1,12 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { apiGet, apiPost } from "@/lib/api-client";
+import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api-client";
 import { API_ENDPOINTS, apiUrl } from "@/lib/api-config";
 import type {
   Agent,
   AgentsResponse,
   CreateAgentParams,
+  CreateAgentResponse,
   UpdateAgentParams,
+  UpdateAgentResponse,
   TestCallParams,
 } from "@dashboard/types";
 
@@ -35,8 +37,8 @@ export function useCreateAgent() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: CreateAgentParams): Promise<Agent> => {
-      return apiPost<Agent>(API_ENDPOINTS.APP_AGENTS, data);
+    mutationFn: async (data: CreateAgentParams): Promise<CreateAgentResponse> => {
+      return apiPost<CreateAgentResponse>(API_ENDPOINTS.APP_AGENTS, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["agents"] });
@@ -48,17 +50,15 @@ export function useToggleAgentStatus() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, status }: { id: number; status: "active" | "paused" }) => {
-      return apiPost(apiUrl.agentStatus(id), { status });
+    mutationFn: async ({ id, is_active }: { id: number; is_active: boolean }) => {
+      return apiPatch<UpdateAgentResponse>(apiUrl.agent(id), { is_active });
     },
-    onMutate: async ({ id, status }) => {
+    onMutate: async ({ id, is_active }) => {
       await queryClient.cancelQueries({ queryKey: ["agents"] });
       const previousAgents = queryClient.getQueryData<Agent[]>(["agents"]);
 
       queryClient.setQueryData<Agent[]>(["agents"], (old) =>
-        old?.map((agent) =>
-          agent.id === id ? { ...agent, is_active: status === "active" } : agent
-        )
+        old?.map((agent) => (agent.id === id ? { ...agent, is_active } : agent))
       );
 
       return { previousAgents };
@@ -79,7 +79,7 @@ export function useDeleteAgent() {
 
   return useMutation({
     mutationFn: async (id: number | string) => {
-      return apiPost(apiUrl.agentDelete(id), {});
+      return apiDelete(apiUrl.agent(id));
     },
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: ["agents"] });
@@ -107,7 +107,7 @@ export function useUpdateAgent() {
 
   return useMutation({
     mutationFn: async ({ id, ...data }: UpdateAgentParams & { id: number | string }) => {
-      return apiPost<Agent>(apiUrl.agent(id), data);
+      return apiPatch<UpdateAgentResponse>(apiUrl.agent(id), data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["agents"] });

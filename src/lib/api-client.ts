@@ -1,5 +1,11 @@
 export type AuthFlowCode =
-  "bad_credentials" | "invalid_email" | "weak_password" | "email_taken" | "too_many_requests";
+  | "bad_credentials"
+  | "invalid_email"
+  | "weak_password"
+  | "email_taken"
+  | "too_many_requests"
+  | "bad_current_password"
+  | "no_password_login";
 
 export const AUTH_FLOW_CODES: ReadonlySet<string> = new Set<AuthFlowCode>([
   "bad_credentials",
@@ -7,6 +13,8 @@ export const AUTH_FLOW_CODES: ReadonlySet<string> = new Set<AuthFlowCode>([
   "weak_password",
   "email_taken",
   "too_many_requests",
+  "bad_current_password",
+  "no_password_login",
 ]);
 
 export class ApiError extends Error {

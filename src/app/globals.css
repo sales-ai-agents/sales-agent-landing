@@ -16,6 +16,8 @@
   --color-muted-foreground: rgba(0, 0, 0, 0.6);
   --color-input-border: #afafaf;
   --color-slider-track: #d9d9d9;
+  --color-popover: #fff;
+  --color-popover-foreground: #000;
   --font-body: var(--font-inter), sans-serif;
   --font-display: var(--font-actay-wide), sans-serif;
   --font-gilroy: var(--font-gilroy-face), sans-serif;

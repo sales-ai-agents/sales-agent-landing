@@ -1,8 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { apiGet, apiPost } from "@/lib/api-client";
+import { apiGet, apiPost, apiDelete } from "@/lib/api-client";
 import { API_ENDPOINTS, apiUrl } from "@/lib/api-config";
-import type { Contact, ContactsResponse, CreateContactParams } from "@dashboard/types";
+import type {
+  Contact,
+  ContactsResponse,
+  CreateContactParams,
+  CreateContactResponse,
+} from "@dashboard/types";
 
 export function useContacts(search?: string) {
   return useQuery<Contact[]>({
@@ -18,8 +23,8 @@ export function useCreateContact() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: CreateContactParams): Promise<Contact> => {
-      return apiPost<Contact>(API_ENDPOINTS.APP_CONTACTS, data);
+    mutationFn: async (data: CreateContactParams): Promise<CreateContactResponse> => {
+      return apiPost<CreateContactResponse>(API_ENDPOINTS.APP_CONTACTS, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
@@ -32,7 +37,7 @@ export function useDeleteContact() {
 
   return useMutation({
     mutationFn: async (id: number) => {
-      return apiPost(apiUrl.contactDelete(id), {});
+      return apiDelete(apiUrl.contact(id));
     },
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: ["contacts"] });

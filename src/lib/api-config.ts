@@ -2,15 +2,18 @@ const API_BASE = "/api";
 
 export const API_ENDPOINTS = {
   // Auth
+  AUTH_PROVIDERS: `${API_BASE}/auth/providers`,
   AUTH_REGISTER: `${API_BASE}/auth/register`,
   AUTH_LOGIN: `${API_BASE}/auth/login`,
   AUTH_ME: `${API_BASE}/auth/me`,
+  AUTH_PASSWORD: `${API_BASE}/auth/password`,
   AUTH_LOGOUT: `${API_BASE}/auth/logout`,
 
   // App (authenticated)
   APP_STATS: `${API_BASE}/app/stats`,
   APP_CALLS: `${API_BASE}/app/calls`,
   APP_AGENTS: `${API_BASE}/app/agents`,
+  APP_VOICES: `${API_BASE}/app/voices`,
   APP_CONTACTS: `${API_BASE}/app/contacts`,
   APP_CONTACTS_UPLOAD: `${API_BASE}/app/contacts/upload`,
   APP_TEST_CALL: `${API_BASE}/app/agents/test-call`,
@@ -26,10 +29,7 @@ export const API_ENDPOINTS = {
 
 export const apiUrl = {
   agent: (id: number | string) => `${API_ENDPOINTS.APP_AGENTS}/${id}`,
-  agentStatus: (id: number | string) => `${API_ENDPOINTS.APP_AGENTS}/${id}/status`,
-  agentDelete: (id: number | string) => `${API_ENDPOINTS.APP_AGENTS}/${id}/delete`,
   contact: (id: number | string) => `${API_ENDPOINTS.APP_CONTACTS}/${id}`,
-  contactDelete: (id: number | string) => `${API_ENDPOINTS.APP_CONTACTS}/${id}/delete`,
   call: (id: string) => `${API_ENDPOINTS.APP_CALLS}/${id}`,
   calls: (params?: { limit?: number; offset?: number }) => {
     const url = API_ENDPOINTS.APP_CALLS;

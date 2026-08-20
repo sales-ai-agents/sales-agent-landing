@@ -17,6 +17,9 @@ export const AUTH_ERROR_MESSAGES: ErrorMessageMap = {
   weak_password: "Пароль має містити мінімум 8 символів.",
   email_taken: "Цей email вже зареєстрований.",
   too_many_requests: "Забагато спроб. Спробуйте через хвилину.",
+  bad_current_password: "Невірний поточний пароль.",
+  no_password_login: "Цей акаунт використовує вхід через Google/Apple. Пароля немає.",
+  nothing_to_update: "Нічого не змінено.",
 };
 
 export const AGENT_ERROR_MESSAGES: ErrorMessageMap = {
