@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { PageLoading } from "@/components/dashboard/page-states";
@@ -8,6 +8,12 @@ import { useMe } from "@/lib/hooks/use-auth";
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const { data: account, isLoading } = useMe();
+
+  useEffect(() => {
+    if (!isLoading && !account) {
+      window.location.replace("/sign-in");
+    }
+  }, [isLoading, account]);
 
   if (isLoading || !account) return <PageLoading />;
 

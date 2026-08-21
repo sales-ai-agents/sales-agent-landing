@@ -12,7 +12,6 @@ function handleGlobal401(error: Error): void {
   if (isRedirecting) return;
   if (error instanceof ApiError && error.status === 401 && !AUTH_FLOW_CODES.has(error.code)) {
     isRedirecting = true;
-    document.cookie = "cs_session=; path=/; max-age=0";
     toast.error("Сесія закінчилася. Увійдіть знову.");
     window.location.href = "/sign-in";
   }
@@ -24,7 +23,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       new QueryClient({
         queryCache: new QueryCache({
           onError: (error, query) => {
-            if (query.queryKey[0] === "auth") return;
+            if (query.queryKey[0] === "auth" && query.queryKey[1] === "me") return;
             handleGlobal401(error);
           },
         }),
