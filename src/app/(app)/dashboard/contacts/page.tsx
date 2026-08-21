@@ -15,7 +15,6 @@ import {
   Plus,
   Search,
   Upload,
-  Edit,
   Trash2,
   ArrowUpDown,
   ChevronLeft,
@@ -137,9 +136,6 @@ export default function ContactsPage() {
         header: () => <span className="sr-only">Дії</span>,
         cell: ({ row }) => (
           <div className="flex justify-end gap-1">
-            <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Редагувати контакт">
-              <Edit className="h-3 w-3" />
-            </Button>
             <Button
               variant="ghost"
               size="icon"

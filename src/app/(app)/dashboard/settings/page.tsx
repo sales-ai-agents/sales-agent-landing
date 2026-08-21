@@ -15,6 +15,8 @@ import { useMe, useUpdateProfile, useChangePassword } from "@/lib/hooks/use-auth
 import { ApiError } from "@/lib/api-client";
 import { resolveErrorMessage, AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
 import { PageLoading } from "@/components/dashboard/page-states";
+import { ChangePlanDialog } from "@/components/dashboard/change-plan-dialog";
+import type { PlanId } from "@/lib/plans";
 
 export default function SettingsPage() {
   const { data: account, isLoading } = useMe();
@@ -251,7 +253,12 @@ function IntegrationsSection() {
 }
 
 function BillingSection({ plan }: { plan?: string }) {
-  const currentPlan = plan ?? "starter";
+  const [showChangePlan, setShowChangePlan] = useState(false);
+  const currentPlan = (plan ?? "starter") as PlanId;
+
+  function handlePlanChange(planId: PlanId) {
+    console.log("Plan change requested:", planId);
+  }
 
   return (
     <>
@@ -272,9 +279,19 @@ function BillingSection({ plan }: { plan?: string }) {
             </div>
             <Badge variant="success">Активний</Badge>
           </div>
-          <Button variant="outline">Змінити план</Button>
+          <Button variant="outline" onClick={() => setShowChangePlan(true)}>
+            Змінити план
+          </Button>
         </CardContent>
       </Card>
+
+      {showChangePlan && (
+        <ChangePlanDialog
+          currentPlan={currentPlan}
+          onClose={() => setShowChangePlan(false)}
+          onConfirm={handlePlanChange}
+        />
+      )}
 
       <Card className="border-border shadow-primary/30 rounded-2xl shadow-lg">
         <CardHeader>
