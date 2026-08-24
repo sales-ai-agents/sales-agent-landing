@@ -1,4 +1,4 @@
-import { LayoutDashboard, Bot, Users, PhoneCall, Settings } from "lucide-react";
+import { LayoutDashboard, Bot, Users, PhoneCall, Settings, CreditCard } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export interface NavItem {
@@ -8,9 +8,10 @@ export interface NavItem {
 }
 
 export const DASHBOARD_NAV_ITEMS = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Дашборд" },
+  { href: "/dashboard", icon: LayoutDashboard, label: "Огляд" },
   { href: "/dashboard/agents", icon: Bot, label: "Агенти" },
   { href: "/dashboard/contacts", icon: Users, label: "Контакти" },
-  { href: "/dashboard/call-logs", icon: PhoneCall, label: "Журнал дзвінків" },
+  { href: "/dashboard/call-logs", icon: PhoneCall, label: "Дзвінки" },
+  { href: "/dashboard/settings", icon: CreditCard, label: "Тарифи і Оплата" },
   { href: "/dashboard/settings", icon: Settings, label: "Налаштування" },
 ] as const satisfies readonly NavItem[];

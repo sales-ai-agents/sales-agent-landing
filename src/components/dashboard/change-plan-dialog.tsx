@@ -229,7 +229,7 @@ function PaymentStep({ plan, isProcessing, onBack, onPay }: PaymentStepProps) {
           <button
             type="button"
             onClick={onBack}
-            className="hover:bg-primary/10 rounded-lg p-1 transition-colors"
+            className="hover:bg-primary/5 rounded-lg p-1 transition-colors"
             aria-label="Назад до вибору плану"
           >
             <ArrowLeft className="size-5" />

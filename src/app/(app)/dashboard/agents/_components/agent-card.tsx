@@ -16,11 +16,11 @@ export function AgentCard({ agent, onToggle, onTest }: AgentCardProps) {
   const isActive = agent.is_active;
 
   return (
-    <Card className="border-border shadow-primary/30 rounded-2xl shadow-lg transition-shadow hover:shadow-md">
+    <Card className="border-border rounded-2xl">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="bg-primary/10 rounded-lg p-2">
+            <div className="bg-primary/5 rounded-lg p-2">
               <Bot className="text-primary h-4 w-4" />
             </div>
             <CardTitle className="text-base">{agent.name}</CardTitle>
@@ -44,11 +44,11 @@ export function AgentCard({ agent, onToggle, onTest }: AgentCardProps) {
             className={buttonVariants({ variant: "outline", size: "sm" })}
           >
             <Edit className="mr-1 h-3 w-3" />
-            Змінити
+            Редагування
           </Link>
           <Button variant="outline" size="sm" onClick={onTest}>
             <PhoneCall className="mr-1 h-3 w-3" />
-            Тест
+            Тестувати
           </Button>
           <Button variant="outline" size="sm" onClick={onToggle}>
             {isActive ? (

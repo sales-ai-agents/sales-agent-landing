@@ -35,7 +35,7 @@ export function DashboardHeader() {
   const displayEmail = account?.email ?? "";
 
   return (
-    <header className="bg-background flex h-16 items-center justify-between border-b px-4">
+    <header className="bg-background flex h-16 items-center justify-between px-4">
       <Sheet>
         <SheetTrigger asChild className="md:hidden">
           <Button variant="ghost" size="icon" aria-label="Відкрити меню">
@@ -71,7 +71,7 @@ export function DashboardHeader() {
                   href={item.href}
                   className={cn(
                     "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium",
-                    active ? "bg-primary/10 text-primary" : "text-muted-foreground"
+                    active ? "bg-primary/5 text-primary" : "text-muted-foreground"
                   )}
                 >
                   <Icon className="h-5 w-5" />
@@ -90,7 +90,7 @@ export function DashboardHeader() {
           <p className="text-sm font-medium">{displayName}</p>
           <p className="text-muted-foreground text-xs">{displayEmail}</p>
         </div>
-        <div className="bg-primary/10 flex h-9 w-9 items-center justify-center rounded-full">
+        <div className="bg-primary/5 flex h-9 w-9 items-center justify-center rounded-full">
           <User className="text-primary h-4 w-4" />
         </div>
         <Button

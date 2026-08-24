@@ -41,32 +41,37 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div id="onboarding-dashboard-header" className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-2xl font-bold">Дашборд</h1>
-          <p className="text-muted-foreground">Огляд продуктивності ваших AI голосових агентів</p>
+          <h1 className="font-display text-2xl font-bold">Огляд</h1>
+          <p className="text-muted-foreground">Статистика роботи ваших ШІ-агентів</p>
         </div>
-        <Link href="/dashboard/agents/create" className={buttonVariants()}>
+        <Link
+          id="onboarding-create-agent-btn"
+          href="/dashboard/agents/create"
+          className={buttonVariants()}
+        >
           <Plus className="mr-2 h-4 w-4" />
           Новий агент
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div
+        id="onboarding-stats-cards"
+        className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+      >
         {STATS_CARDS.map((stat) => {
           const Icon = stat.icon;
+
           return (
-            <Card
-              key={stat.title}
-              className="border-border shadow-primary/30 rounded-2xl shadow-lg"
-            >
+            <Card key={stat.title} className="border-primary rounded-2xl border">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-muted-foreground text-sm">{stat.title}</p>
                     <p className="mt-1 text-2xl font-bold">{stat.value}</p>
                   </div>
-                  <div className="bg-primary/10 rounded-full p-3">
+                  <div className="bg-primary/5 rounded-full p-3">
                     <Icon className="text-primary h-5 w-5" />
                   </div>
                 </div>
@@ -78,7 +83,7 @@ export default function DashboardPage() {
 
       <Card>
         <CardHeader>
-          <h2 className="font-display text-lg font-semibold">Дзвінки цього тижня</h2>
+          <h2 className="font-display text-lg font-semibold">Активність дзвінків</h2>
         </CardHeader>
         <CardContent>
           <CallsChart data={stats?.by_day} />
@@ -98,7 +103,7 @@ export default function DashboardPage() {
                   className="flex items-center justify-between border-b py-2 last:border-0"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="bg-primary/10 rounded-lg p-2">
+                    <div className="bg-primary/5 rounded-lg p-2">
                       <Bot className="text-primary h-4 w-4" />
                     </div>
                     <div>

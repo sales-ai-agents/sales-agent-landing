@@ -50,6 +50,9 @@ dependencies:
   '@radix-ui/react-tooltip':
     specifier: ^1.2.11
     version: 1.2.11(@types/react-dom@19.0.0)(@types/react@19.0.0)(react-dom@19.2.4)(react@19.2.4)
+  '@shadcn/react':
+    specifier: ^0.3.0
+    version: 0.3.0(@types/react@19.0.0)(react@19.2.4)
   '@tanstack/react-query':
     specifier: ^5.101.2
     version: 5.101.2(react@19.2.4)
@@ -80,6 +83,9 @@ dependencies:
   next:
     specifier: 16.2.10
     version: 16.2.10(@babel/core@7.29.7)(react-dom@19.2.4)(react@19.2.4)
+  onborda:
+    specifier: ^1.2.5
+    version: 1.2.5(@radix-ui/react-portal@1.1.13)(framer-motion@12.42.2)(next@16.2.10)(react-dom@19.2.4)(react@19.2.4)
   react:
     specifier: 19.2.4
     version: 19.2.4
@@ -1954,6 +1960,21 @@ packages:
 
   /@sec-ant/readable-stream@0.4.1:
     resolution: {integrity: sha512-831qok9r2t8AlxLko40y2ebgSDhenenCatLVeW/uBtnHPyhHOvG0C7TvfgecV+wHzIm5KUICgzmVpWS+IMEAeg==}
+    dev: false
+
+  /@shadcn/react@0.3.0(@types/react@19.0.0)(react@19.2.4):
+    resolution: {integrity: sha512-iKN0NuYe850VDHlxEfvppFrpa7CMV3zArTHusXlaSmeFeQhohGbIqclv6WwPTs/44I8EkXQpcuRt6sXEVKkWqQ==}
+    peerDependencies:
+      '@types/react': '>=19'
+      react: '>=19'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      react:
+        optional: true
+    dependencies:
+      '@types/react': 19.0.0
+      react: 19.2.4
     dev: false
 
   /@sindresorhus/merge-streams@4.0.0:
@@ -5322,6 +5343,22 @@ packages:
     engines: {node: '>= 0.8'}
     dependencies:
       ee-first: 1.1.1
+    dev: false
+
+  /onborda@1.2.5(@radix-ui/react-portal@1.1.13)(framer-motion@12.42.2)(next@16.2.10)(react-dom@19.2.4)(react@19.2.4):
+    resolution: {integrity: sha512-S9EtQpKr8oYz7j0Bmr0w7BdG4Q4ud6QuNxBsSShzcf9khhuLEEjkbhYYMmdMlVa56QK/rXW/9pc8JJvBXUhOeA==}
+    peerDependencies:
+      '@radix-ui/react-portal': '>=1.1.1'
+      framer-motion: '>=11'
+      next: '>=13'
+      react: '>=18'
+      react-dom: '>=18'
+    dependencies:
+      '@radix-ui/react-portal': 1.1.13(@types/react-dom@19.0.0)(@types/react@19.0.0)(react-dom@19.2.4)(react@19.2.4)
+      framer-motion: 12.42.2(react-dom@19.2.4)(react@19.2.4)
+      next: 16.2.10(@babel/core@7.29.7)(react-dom@19.2.4)(react@19.2.4)
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
     dev: false
 
   /once@1.4.0:

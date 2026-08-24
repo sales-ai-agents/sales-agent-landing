@@ -87,7 +87,7 @@ function ProfileSection({
   }
 
   return (
-    <Card className="border-border shadow-primary/30 rounded-2xl shadow-lg">
+    <Card className="border-border rounded-2xl">
       <CardHeader>
         <h2 className="font-display text-2xl font-semibold">Інформація профілю</h2>
         <CardDescription>Оновіть дані вашого акаунту</CardDescription>
@@ -146,7 +146,7 @@ function PasswordSection() {
   }
 
   return (
-    <Card className="border-border shadow-primary/30 rounded-2xl shadow-lg">
+    <Card className="border-border rounded-2xl">
       <CardHeader>
         <h2 className="font-display text-2xl font-semibold">Змінити пароль</h2>
       </CardHeader>
@@ -192,7 +192,7 @@ function PasswordSection() {
 function IntegrationsSection() {
   return (
     <>
-      <Card className="border-border shadow-primary/30 rounded-2xl shadow-lg">
+      <Card className="border-border rounded-2xl">
         <CardHeader>
           <h2 className="font-display flex items-center gap-2 text-2xl font-semibold">
             <Webhook className="h-5 w-5" />
@@ -213,7 +213,7 @@ function IntegrationsSection() {
         </CardContent>
       </Card>
 
-      <Card className="border-border shadow-primary/30 rounded-2xl shadow-lg">
+      <Card className="border-border rounded-2xl">
         <CardHeader>
           <h2 className="font-display flex items-center gap-2 text-2xl font-semibold">
             <Link2 className="h-5 w-5" />
@@ -231,7 +231,7 @@ function IntegrationsSection() {
         </CardContent>
       </Card>
 
-      <Card className="border-border shadow-primary/30 rounded-2xl shadow-lg">
+      <Card className="border-border rounded-2xl">
         <CardHeader>
           <h2 className="font-display flex items-center gap-2 text-2xl font-semibold">
             <FileSpreadsheet className="h-5 w-5" />
@@ -262,7 +262,7 @@ function BillingSection({ plan }: { plan?: string }) {
 
   return (
     <>
-      <Card className="border-border shadow-primary/30 rounded-2xl shadow-lg">
+      <Card className="border-border rounded-2xl">
         <CardHeader>
           <h2 className="font-display text-2xl font-semibold">Поточний план</h2>
         </CardHeader>
@@ -293,7 +293,7 @@ function BillingSection({ plan }: { plan?: string }) {
         />
       )}
 
-      <Card className="border-border shadow-primary/30 rounded-2xl shadow-lg">
+      <Card className="border-border rounded-2xl">
         <CardHeader>
           <h2 className="font-display text-2xl font-semibold">Використання за місяць</h2>
         </CardHeader>
@@ -310,7 +310,7 @@ function BillingSection({ plan }: { plan?: string }) {
         </CardContent>
       </Card>
 
-      <Card className="border-border shadow-primary/30 rounded-2xl shadow-lg">
+      <Card className="border-border rounded-2xl">
         <CardHeader>
           <h2 className="font-display text-2xl font-semibold">Тарифи</h2>
         </CardHeader>

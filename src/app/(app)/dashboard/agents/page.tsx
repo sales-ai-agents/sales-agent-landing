@@ -80,7 +80,7 @@ export default function AgentsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-display text-2xl font-bold">Агенти</h1>
-          <p className="text-muted-foreground">Керуйте своїми AI голосовими агентами</p>
+          <p className="text-muted-foreground">Керуйте вашими голосовими ШІ-агентами</p>
         </div>
         <Link href="/dashboard/agents/create" className={buttonVariants()}>
           <Plus className="mr-2 h-4 w-4" />
@@ -89,7 +89,7 @@ export default function AgentsPage() {
       </div>
 
       {agents.length === 0 ? (
-        <Card className="border-border shadow-primary/30 rounded-2xl p-12 text-center shadow-lg">
+        <Card className="border-border rounded-2xl p-12 text-center">
           <Bot className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
           <h2 className="text-lg font-semibold">Агентів ще немає</h2>
           <p className="text-muted-foreground mt-1">

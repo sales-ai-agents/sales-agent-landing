@@ -119,7 +119,7 @@ export function CallLogDetailDrawer({ callId, onClose }: CallLogDetailDrawerProp
                       )}
                     >
                       {msg.role === "assistant" && (
-                        <div className="bg-primary/10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
+                        <div className="bg-primary/5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
                           <Bot className="text-primary h-3 w-3" />
                         </div>
                       )}
