@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { PageLoading } from "@/components/dashboard/page-states";
@@ -9,13 +10,16 @@ import { OnboardingWrapper } from "@/components/dashboard/onboarding/onboarding-
 import { useMe } from "@/lib/hooks/use-auth";
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const redirecting = useRef(false);
   const { data: account, isLoading } = useMe();
 
   useEffect(() => {
-    if (!isLoading && !account) {
-      window.location.replace("/sign-in");
+    if (!isLoading && !account && !redirecting.current) {
+      redirecting.current = true;
+      router.replace("/sign-in");
     }
-  }, [isLoading, account]);
+  }, [isLoading, account, router]);
 
   if (isLoading || !account) return <PageLoading />;
 

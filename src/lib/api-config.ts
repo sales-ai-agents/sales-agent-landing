@@ -8,6 +8,7 @@ export const API_ENDPOINTS = {
   AUTH_ME: `${API_BASE}/auth/me`,
   AUTH_PASSWORD: `${API_BASE}/auth/password`,
   AUTH_LOGOUT: `${API_BASE}/auth/logout`,
+  AUTH_SOCIAL: `${API_BASE}/auth/social`,
 
   // App (authenticated)
   APP_STATS: `${API_BASE}/app/stats`,
@@ -19,6 +20,12 @@ export const API_ENDPOINTS = {
   APP_TEST_CALL: `${API_BASE}/app/agents/test-call`,
   APP_CAMPAIGNS: `${API_BASE}/app/campaigns`,
   APP_CAMPAIGNS_CONTROL: `${API_BASE}/app/campaigns/control`,
+
+  // Billing
+  APP_BILLING_PLANS: `${API_BASE}/app/billing/plans`,
+  APP_BILLING_CHECKOUT: `${API_BASE}/app/billing/checkout`,
+  APP_BILLING_STATUS: `${API_BASE}/app/billing/status`,
+  APP_BILLING_HISTORY: `${API_BASE}/app/billing/history`,
 
   // Landing page (public)
   DEMO_CALL: `${API_BASE}/demo-call`,
@@ -50,4 +57,6 @@ export const apiUrl = {
 
     return `${API_ENDPOINTS.APP_CONTACTS}?search=${encodeURIComponent(search)}`;
   },
+  billingStatus: (invoiceId: string) =>
+    `${API_ENDPOINTS.APP_BILLING_STATUS}?invoice_id=${encodeURIComponent(invoiceId)}`,
 } as const;

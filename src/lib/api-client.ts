@@ -1,3 +1,5 @@
+import { getAuthToken, clearAuthToken } from "@/lib/auth-token";
+
 export type AuthFlowCode =
   | "bad_credentials"
   | "invalid_email"
@@ -56,6 +58,11 @@ async function request<T>(url: string, method: HttpMethod, options?: RequestOpti
     headers["Content-Type"] = "application/json";
   }
 
+  const token = getAuthToken();
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   try {
     response = await fetch(url, {
       method,
@@ -83,6 +90,7 @@ async function request<T>(url: string, method: HttpMethod, options?: RequestOpti
     }
 
     if (response.status === 401 && !AUTH_FLOW_CODES.has(code)) {
+      clearAuthToken();
       throw new ApiError(401, "session_expired", "Сесія закінчилася. Увійдіть знову.");
     }
 

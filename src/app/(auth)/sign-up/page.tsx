@@ -13,6 +13,7 @@ import { signUpSchema, type SignUpFormData } from "@/lib/schemas";
 import { useRegister } from "@/lib/hooks/use-auth";
 import { ApiError } from "@/lib/api-client";
 import { resolveErrorMessage, AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
+import { SocialLoginButtons } from "@/components/auth/social-login-buttons";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -42,7 +43,7 @@ export default function SignUpPage() {
       {
         onSuccess: () => {
           toast.success("Акаунт створено");
-          router.push("/dashboard");
+          router.replace("/dashboard");
         },
         onError: (error) => {
           if (error instanceof ApiError) {
@@ -135,9 +136,13 @@ export default function SignUpPage() {
               className="bg-primary hover:bg-primary/90 h-10 w-full rounded-lg text-base text-white"
               disabled={registerMutation.isPending}
             >
-              {registerMutation.isPending ? "Створення акаунту..." : "Зареєструватися"}
+              {registerMutation.isPending ? "Створення акаунту..." : "Створити акаунт"}
             </Button>
           </form>
+
+          <div className="mt-6">
+            <SocialLoginButtons />
+          </div>
 
           <p className="font-body text-muted-foreground mt-4 text-center text-sm">
             Вже є акаунт?{" "}

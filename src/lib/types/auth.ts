@@ -34,6 +34,16 @@ export interface AuthProvidersResponse {
   password: boolean;
   google: boolean;
   apple: boolean;
+  github: boolean;
+}
+
+export type SocialProvider = "google" | "apple" | "github";
+
+export interface SocialLoginParams {
+  provider: SocialProvider;
+  id_token?: string;
+  code?: string;
+  name?: string;
 }
 
 export interface UpdateProfileParams {

@@ -10,13 +10,10 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { useMe, useUpdateProfile, useChangePassword } from "@/lib/hooks/use-auth";
 import { ApiError } from "@/lib/api-client";
 import { resolveErrorMessage, AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
 import { PageLoading } from "@/components/dashboard/page-states";
-import { ChangePlanDialog } from "@/components/dashboard/change-plan-dialog";
-import type { PlanId } from "@/lib/plans";
 
 export default function SettingsPage() {
   const { data: account, isLoading } = useMe();
@@ -34,7 +31,6 @@ export default function SettingsPage() {
         <TabsList>
           <TabsTrigger value="profile">Профіль</TabsTrigger>
           <TabsTrigger value="integrations">Інтеграції</TabsTrigger>
-          <TabsTrigger value="billing">Тарифи</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="space-y-4">
@@ -44,10 +40,6 @@ export default function SettingsPage() {
 
         <TabsContent value="integrations" className="space-y-4">
           <IntegrationsSection />
-        </TabsContent>
-
-        <TabsContent value="billing" className="space-y-4">
-          <BillingSection plan={account?.plan} />
         </TabsContent>
       </Tabs>
     </div>
@@ -246,105 +238,6 @@ function IntegrationsSection() {
           <Button variant="outline" size="sm">
             Експорт контактів
           </Button>
-        </CardContent>
-      </Card>
-    </>
-  );
-}
-
-function BillingSection({ plan }: { plan?: string }) {
-  const [showChangePlan, setShowChangePlan] = useState(false);
-  const currentPlan = (plan ?? "starter") as PlanId;
-
-  function handlePlanChange(planId: PlanId) {
-    console.log("Plan change requested:", planId);
-  }
-
-  return (
-    <>
-      <Card className="border-border rounded-2xl">
-        <CardHeader>
-          <h2 className="font-display text-2xl font-semibold">Поточний план</h2>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xl font-bold capitalize">{currentPlan}</p>
-              <p className="text-muted-foreground text-sm">
-                {currentPlan === "starter" && "$19/місяць • До 500 дзвінків"}
-                {currentPlan === "pro" && "$49/місяць • До 2 000 дзвінків"}
-                {currentPlan === "business" && "$99/місяць • До 5 000 дзвінків"}
-                {currentPlan === "enterprise" && "Індивідуальна ціна"}
-              </p>
-            </div>
-            <Badge variant="success">Активний</Badge>
-          </div>
-          <Button variant="outline" onClick={() => setShowChangePlan(true)}>
-            Змінити план
-          </Button>
-        </CardContent>
-      </Card>
-
-      {showChangePlan && (
-        <ChangePlanDialog
-          currentPlan={currentPlan}
-          onClose={() => setShowChangePlan(false)}
-          onConfirm={handlePlanChange}
-        />
-      )}
-
-      <Card className="border-border rounded-2xl">
-        <CardHeader>
-          <h2 className="font-display text-2xl font-semibold">Використання за місяць</h2>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <div className="mb-2 flex justify-between text-sm">
-              <span>Використано хвилин</span>
-              <span className="text-muted-foreground">
-                Дані з&apos;являться після першого дзвінка
-              </span>
-            </div>
-            <Progress value={0} className="h-3" />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="border-border rounded-2xl">
-        <CardHeader>
-          <h2 className="font-display text-2xl font-semibold">Тарифи</h2>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2 text-sm">
-            <div
-              className={`flex justify-between border-b py-2 ${currentPlan === "starter" ? "bg-primary/5 -mx-2 rounded px-2" : ""}`}
-            >
-              <span className={currentPlan === "starter" ? "font-medium" : ""}>
-                Starter {currentPlan === "starter" && "(Поточний)"}
-              </span>
-              <span className="font-medium">$19/міс — 500 дзвінків</span>
-            </div>
-            <div
-              className={`flex justify-between border-b py-2 ${currentPlan === "pro" ? "bg-primary/5 -mx-2 rounded px-2" : ""}`}
-            >
-              <span className={currentPlan === "pro" ? "font-medium" : ""}>
-                Pro {currentPlan === "pro" && "(Поточний)"}
-              </span>
-              <span className="font-medium">$49/міс — 2 000 дзвінків</span>
-            </div>
-            <div
-              className={`flex justify-between border-b py-2 ${currentPlan === "business" ? "bg-primary/5 -mx-2 rounded px-2" : ""}`}
-            >
-              <span className={currentPlan === "business" ? "font-medium" : ""}>
-                Business {currentPlan === "business" && "(Поточний)"}
-              </span>
-              <span className="font-medium">$99/міс — 5 000 дзвінків</span>
-            </div>
-            <div className="flex justify-between py-2">
-              <span>Enterprise</span>
-              <span className="font-medium">Індивідуальна ціна</span>
-            </div>
-          </div>
         </CardContent>
       </Card>
     </>

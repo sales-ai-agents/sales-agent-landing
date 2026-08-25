@@ -20,6 +20,10 @@ export const AUTH_ERROR_MESSAGES: ErrorMessageMap = {
   bad_current_password: "Невірний поточний пароль.",
   no_password_login: "Цей акаунт використовує вхід через Google/Apple. Пароля немає.",
   nothing_to_update: "Нічого не змінено.",
+  invalid_token: "Токен авторизації недійсний. Спробуйте ще раз.",
+  email_not_verified: "Email не підтверджений у провайдера.",
+  unknown_provider: "Невідомий спосіб входу.",
+  provider_not_configured: "Цей спосіб входу тимчасово недоступний.",
 };
 
 export const AGENT_ERROR_MESSAGES: ErrorMessageMap = {

@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { apiPost, apiGet, apiPatch, ApiError } from "@/lib/api-client";
 import { API_ENDPOINTS } from "@/lib/api-config";
+import { setAuthToken, clearAuthToken } from "@/lib/auth-token";
 import type {
   Account,
   AuthResponse,
@@ -9,6 +10,7 @@ import type {
   RegisterParams,
   MeResponse,
   AuthProvidersResponse,
+  SocialLoginParams,
   UpdateProfileParams,
   UpdateProfileResponse,
   ChangePasswordParams,
@@ -31,6 +33,7 @@ export function useLogin() {
   return useMutation<AuthResponse, ApiError, LoginParams>({
     mutationFn: (params) => apiPost<AuthResponse>(API_ENDPOINTS.AUTH_LOGIN, params),
     onSuccess: (data) => {
+      if (data.token) setAuthToken(data.token);
       queryClient.setQueryData<Account>(AUTH_QUERY_KEY, data.account);
     },
   });
@@ -42,6 +45,7 @@ export function useRegister() {
   return useMutation<AuthResponse, ApiError, RegisterParams>({
     mutationFn: (params) => apiPost<AuthResponse>(API_ENDPOINTS.AUTH_REGISTER, params),
     onSuccess: (data) => {
+      if (data.token) setAuthToken(data.token);
       queryClient.setQueryData<Account>(AUTH_QUERY_KEY, data.account);
     },
   });
@@ -53,8 +57,21 @@ export function useLogout() {
   return useMutation<void, ApiError, void>({
     mutationFn: () => apiPost(API_ENDPOINTS.AUTH_LOGOUT),
     onSettled: () => {
+      clearAuthToken();
       queryClient.setQueryData(AUTH_QUERY_KEY, null);
       queryClient.clear();
+    },
+  });
+}
+
+export function useSocialLogin() {
+  const queryClient = useQueryClient();
+
+  return useMutation<AuthResponse, ApiError, SocialLoginParams>({
+    mutationFn: (params) => apiPost<AuthResponse>(API_ENDPOINTS.AUTH_SOCIAL, params),
+    onSuccess: (data) => {
+      if (data.token) setAuthToken(data.token);
+      queryClient.setQueryData<Account>(AUTH_QUERY_KEY, data.account);
     },
   });
 }
@@ -73,7 +90,7 @@ export function useMe() {
         throw error;
       }
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 2 * 60 * 1000,
     refetchOnWindowFocus: true,
     retry: false,
   });

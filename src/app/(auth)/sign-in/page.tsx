@@ -13,6 +13,7 @@ import { signInSchema, type SignInFormData } from "@/lib/schemas";
 import { useLogin } from "@/lib/hooks/use-auth";
 import { ApiError } from "@/lib/api-client";
 import { resolveErrorMessage, AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
+import { SocialLoginButtons } from "@/components/auth/social-login-buttons";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -34,7 +35,7 @@ export default function SignInPage() {
     login.mutate(data, {
       onSuccess: () => {
         toast.success("Вхід виконано успішно");
-        router.push("/dashboard");
+        router.replace("/dashboard");
       },
       onError: (error) => {
         if (error instanceof ApiError) {
@@ -106,6 +107,10 @@ export default function SignInPage() {
               {login.isPending ? "Вхід..." : "Увійти"}
             </Button>
           </form>
+
+          <div className="mt-6">
+            <SocialLoginButtons />
+          </div>
 
           <p className="font-body text-muted-foreground mt-4 text-center text-sm">
             Немає акаунту?{" "}
