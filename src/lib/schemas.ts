@@ -7,17 +7,15 @@ export const signInSchema = z.object({
 
 export type SignInFormData = z.infer<typeof signInSchema>;
 
-export const signUpSchema = z
-  .object({
-    name: z.string().min(2, "Ім'я має містити щонайменше 2 символи"),
-    email: z.email("Введіть коректну електронну адресу"),
-    password: z.string().min(8, "Пароль має містити щонайменше 8 символів"),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Паролі не збігаються",
-    path: ["confirmPassword"],
-  });
+export const signUpSchema = z.object({
+  name: z.string().min(2, "Ім'я має містити щонайменше 2 символи"),
+  email: z.email("Введіть коректну електронну адресу"),
+  password: z
+    .string()
+    .min(8, "Пароль має містити щонайменше 8 символів")
+    .regex(/[0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/, "Має містити цифру або спецсимвол")
+    .regex(/[A-ZА-ЯІЇЄҐ]/, "Має містити велику літеру"),
+});
 
 export type SignUpFormData = z.infer<typeof signUpSchema>;
 

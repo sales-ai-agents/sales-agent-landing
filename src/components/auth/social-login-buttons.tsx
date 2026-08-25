@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
 import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import { useSocialLogin, useAuthProviders } from "@/lib/hooks/use-auth";
 import { ApiError } from "@/lib/api-client";
@@ -76,10 +77,10 @@ export function SocialLoginButtons() {
   if (!showGoogle && !showGitHub) return null;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center gap-3">
         <div className="bg-border h-px flex-1" />
-        <span className="text-muted-foreground text-sm">або продовжити через</span>
+        <span className="text-muted-foreground text-xs">або продовжити через</span>
         <div className="bg-border h-px flex-1" />
       </div>
 
@@ -94,7 +95,7 @@ export function SocialLoginButtons() {
           <Button
             type="button"
             variant="outline"
-            className="h-10 rounded-sm"
+            className="hover:bg-primary/5 hover:border-primary/20 h-10 rounded-sm"
             disabled={socialLogin.isPending}
             onClick={initiateGitHubLogin}
           >
