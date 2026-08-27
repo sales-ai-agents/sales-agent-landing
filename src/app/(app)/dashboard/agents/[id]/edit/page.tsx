@@ -167,7 +167,7 @@ function EditAgentForm({ agent }: EditAgentFormProps) {
                   {voices.find((v) => v.key === formData.voice)?.label ?? formData.voice}
                 </SelectValue>
               </SelectTrigger>
-              <SelectContent alignItemWithTrigger={false}>
+              <SelectContent>
                 {voices.map((v) => (
                   <SelectItem key={v.key} value={v.key}>
                     {v.label}

@@ -13,6 +13,7 @@
   --color-border: #e0e0e0;
   --color-background: #fff;
   --color-foreground: #000;
+  --color-muted: rgba(0, 0, 0, 0.05);
   --color-muted-foreground: rgba(0, 0, 0, 0.6);
   --color-input-border: #afafaf;
   --color-slider-track: #d9d9d9;

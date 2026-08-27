@@ -1,10 +1,14 @@
-import Link from "next/link";
-import { Bot, Play, Pause, Edit, PhoneCall } from "lucide-react";
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
+import { Bot, Play, Pause } from "lucide-react";
+
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { Agent } from "@dashboard/types";
+import { Progress } from "@/components/ui/progress";
+import React from "react";
+import { cn } from "@/lib/utils";
 
 export interface AgentCardProps {
   agent: Agent;
@@ -16,53 +20,97 @@ export function AgentCard({ agent, onToggle, onTest }: AgentCardProps) {
   const isActive = agent.is_active;
 
   return (
-    <Card className="border-border rounded-2xl">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="bg-primary/5 rounded-lg p-2">
-              <Bot className="text-primary h-4 w-4" />
-            </div>
-            <CardTitle className="text-base">{agent.name}</CardTitle>
+    <div className="border-border bg-background rounded-2xl border p-5">
+      <div className="flex items-start justify-between">
+        <div className="flex items-center gap-3">
+          <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-lg">
+            <Bot className="text-primary h-5 w-5" />
           </div>
-          <Badge variant={isActive ? "success" : "warning"}>
-            {isActive ? "Активний" : "Призупинено"}
-          </Badge>
+          <div>
+            <p className="text-sm font-semibold">{agent.name}</p>
+            <p className="text-muted-foreground text-xs">
+              agent_{String(agent.id).padStart(2, "0")}
+            </p>
+          </div>
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="mb-4">
-          <p className="text-muted-foreground text-xs">Голос</p>
-          <p className="text-sm font-medium">{agent.voice}</p>
+        <Badge
+          variant="outline"
+          className={cn(
+            "shrink-0",
+            isActive ? "bg-green-100 text-green-500" : "bg-red-100 text-red-500"
+          )}
+        >
+          <span className={cn("mr-1", isActive ? "text-green-500" : "text-red-500")}>●</span>
+          {isActive ? "Активний" : "Неактивний"}
+        </Badge>
+      </div>
+
+      {/* TODO: real stats will come from agent analytics API */}
+      <div className="mt-4 grid grid-cols-3 gap-2">
+        <StatItem label="Усього дзвінків" value="0" />
+        <StatItem label="Підтверджено записів" value="0%" highlight />
+        <StatItem label="Заощаджено часу" value="0 хв" />
+      </div>
+
+      {/* TODO: real usage data from agent analytics API */}
+      <div className="mt-4">
+        <p className="text-muted-foreground text-xs">Використано хвилин</p>
+        <div className="mt-1 flex items-center gap-3">
+          <span className="shrink-0 text-sm font-semibold">0 хв</span>
+          <Progress value={0} className="w-full" />
+          <span className="text-muted-foreground shrink-0 text-xs">0%</span>
         </div>
-        <p className="text-muted-foreground mb-4 text-xs">
-          Створено: {new Date(agent.created_at).toLocaleDateString("uk-UA")}
-        </p>
-        <div className="flex flex-wrap gap-2">
+      </div>
+
+      {/* TODO: integrations list from integrations API */}
+      <div className="mt-4">
+        <p className="text-muted-foreground text-xs">Інтеграції</p>
+        <p className="text-muted-foreground mt-1 text-sm">—</p>
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        <div className="border-border rounded-md border">
           <Link
             href={`/dashboard/agents/${agent.id}/edit`}
             className={buttonVariants({ variant: "outline", size: "sm" })}
           >
-            <Edit className="mr-1 h-3 w-3" />
-            Редагування
+            Редагувати
           </Link>
-          <Button variant="outline" size="sm" onClick={onTest}>
-            <PhoneCall className="mr-1 h-3 w-3" />
-            Тестувати
-          </Button>
-          <Button variant="outline" size="sm" onClick={onToggle}>
-            {isActive ? (
-              <>
-                <Pause className="mr-1 h-3 w-3" /> Пауза
-              </>
-            ) : (
-              <>
-                <Play className="mr-1 h-3 w-3" /> Запуск
-              </>
-            )}
-          </Button>
         </div>
-      </CardContent>
-    </Card>
+        <Button variant="outline" size="sm" onClick={onTest}>
+          Тестувати
+        </Button>
+        <Button variant="ghost" size="sm" onClick={onToggle}>
+          {isActive ? (
+            <>
+              <Pause className="mr-1 h-3 w-3" />
+              Пауза
+            </>
+          ) : (
+            <>
+              <Play className="mr-1 h-3 w-3" />
+              Активувати
+            </>
+          )}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function StatItem({
+  label,
+  value,
+  highlight = false,
+}: {
+  label: string;
+  value: string;
+  highlight?: boolean;
+}) {
+  return (
+    <div>
+      <p className="text-muted-foreground text-xs">{label}</p>
+      <p className={`text-lg font-semibold ${highlight ? "text-primary" : ""}`}>{value}</p>
+    </div>
   );
 }

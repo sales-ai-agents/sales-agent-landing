@@ -5,8 +5,7 @@ import Link from "next/link";
 import { Bot, Plus, PhoneCall } from "lucide-react";
 import { toast } from "sonner";
 
-import { Card } from "@/components/ui/card";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
@@ -15,8 +14,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { PageError } from "@/components/dashboard/page-states";
-import { CardGridSkeleton } from "@/components/dashboard/skeletons";
+import { PageError, PageLoading } from "@/components/dashboard/page-states";
 import { useAgents, useToggleAgentStatus, useTestCall } from "@dashboard/hooks/use-agents";
 import { ApiError } from "@/lib/api-client";
 import { resolveErrorMessage, AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
@@ -28,7 +26,10 @@ export default function AgentsPage() {
   const toggleStatus = useToggleAgentStatus();
   const testCall = useTestCall();
 
-  const [testDialog, setTestDialog] = useState<{ agentId: number; agentName: string } | null>(null);
+  const [testDialog, setTestDialog] = useState<{
+    agentId: number;
+    agentName: string;
+  } | null>(null);
   const [testPhone, setTestPhone] = useState("");
 
   function handleToggle(agent: Agent): void {
@@ -40,9 +41,9 @@ export default function AgentsPage() {
           const label = variables.is_active ? "активовано" : "призупинено";
           toast.success(`Агента ${label}`);
         },
-        onError: (error) => {
-          if (error instanceof ApiError) {
-            toast.error(resolveErrorMessage(error.code, AGENT_ERROR_MESSAGES));
+        onError: (err) => {
+          if (err instanceof ApiError) {
+            toast.error(resolveErrorMessage(err.code, AGENT_ERROR_MESSAGES));
           } else {
             toast.error("Щось пішло не так.");
           }
@@ -61,9 +62,9 @@ export default function AgentsPage() {
           setTestDialog(null);
           setTestPhone("");
         },
-        onError: (error) => {
-          if (error instanceof ApiError) {
-            toast.error(resolveErrorMessage(error.code, AGENT_ERROR_MESSAGES));
+        onError: (err) => {
+          if (err instanceof ApiError) {
+            toast.error(resolveErrorMessage(err.code, AGENT_ERROR_MESSAGES));
           } else {
             toast.error("Щось пішло не так.");
           }
@@ -72,36 +73,20 @@ export default function AgentsPage() {
     );
   }
 
-  if (isLoading) return <CardGridSkeleton />;
+  if (isLoading) return <PageLoading />;
   if (error) return <PageError message={error.message} onRetry={refetch} />;
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold">Агенти</h1>
-          <p className="text-muted-foreground">Керуйте вашими голосовими ШІ-агентами</p>
-        </div>
-        <Link href="/dashboard/agents/create" className={buttonVariants()}>
-          <Plus className="mr-2 h-4 w-4" />
-          Створити агента
-        </Link>
+      <div>
+        <h1 className="text-2xl font-bold">Агенти</h1>
+        <p className="text-muted-foreground text-sm">Керуйте вашими голосовими ШІ-агентами</p>
       </div>
 
       {agents.length === 0 ? (
-        <Card className="border-border rounded-2xl p-12 text-center">
-          <Bot className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
-          <h2 className="text-lg font-semibold">Агентів ще немає</h2>
-          <p className="text-muted-foreground mt-1">
-            Створіть свого першого AI голосового агента, щоб почати.
-          </p>
-          <Link href="/dashboard/agents/create" className={buttonVariants({ className: "mt-4" })}>
-            <Plus className="mr-2 h-4 w-4" />
-            Створити агента
-          </Link>
-        </Card>
+        <EmptyState />
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {agents.map((agent: Agent) => (
             <AgentCard
               key={agent.id}
@@ -110,6 +95,7 @@ export default function AgentsPage() {
               onTest={() => setTestDialog({ agentId: agent.id, agentName: agent.name })}
             />
           ))}
+          <AddAgentCard />
         </div>
       )}
 
@@ -118,6 +104,9 @@ export default function AgentsPage() {
           <DialogHeader>
             <DialogTitle>Тестовий дзвінок — {testDialog?.agentName}</DialogTitle>
           </DialogHeader>
+          <p className="text-muted-foreground text-sm">
+            Дзвінок надійде на ваш номер — клієнтам ми не телефонуватимемо
+          </p>
           <div className="my-3">
             <Input
               aria-label="Номер телефону для тестового дзвінка"
@@ -137,6 +126,46 @@ export default function AgentsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div className="border-border bg-background rounded-2xl border p-12 text-center">
+      <div className="border-primary/30 bg-primary/5 mx-auto flex h-14 w-14 items-center justify-center rounded-xl border">
+        <Bot className="text-primary h-7 w-7" />
+      </div>
+      <h2 className="mt-4 text-lg font-bold">Агентів ще немає</h2>
+      <p className="text-muted-foreground mt-1 text-sm">
+        Створіть свого першого AI голосового агента, щоб почати
+      </p>
+      <Link href="/dashboard/agents/create">
+        <Button className="mt-4">
+          <Plus className="mr-2 h-4 w-4" />
+          Створити агента
+        </Button>
+      </Link>
+    </div>
+  );
+}
+
+function AddAgentCard() {
+  return (
+    <div className="border-border bg-background flex flex-col items-center justify-center rounded-2xl border p-8 text-center">
+      <div className="bg-muted bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
+        <Plus className="text-primary h-6 w-6" />
+      </div>
+      <h3 className="mt-3 text-sm font-semibold">Додати нового агента</h3>
+      <p className="text-muted-foreground mt-1 text-xs">
+        Створіть нового ШІ-агента та налаштуйте його за кілька хвилин
+      </p>
+      <Link href="/dashboard/agents/create">
+        <Button className="mt-4" size="sm">
+          <Plus className="mr-1.5 h-4 w-4" />
+          Створити агента
+        </Button>
+      </Link>
     </div>
   );
 }

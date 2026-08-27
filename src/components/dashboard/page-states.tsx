@@ -48,13 +48,11 @@ interface PageEmptyProps {
 
 export function PageEmpty({ icon: Icon, title, description, action }: PageEmptyProps) {
   return (
-    <div className="flex h-full min-h-[50vh] flex-col items-center justify-center gap-4">
-      <div className="bg-primary/5 rounded-full p-3">
-        <Icon className="text-primary h-6 w-6" />
-      </div>
+    <div className="flex h-full flex-col items-center justify-center gap-4">
+      <Icon className="text-primary h-10 w-10" />
       <div className="text-center">
-        <h3 className="text-sm font-medium">{title}</h3>
-        {description && <p className="text-muted-foreground mt-1 text-sm">{description}</p>}
+        <h3 className="text-2xl font-medium">{title}</h3>
+        {description && <p className="text-muted-foreground mt-1 text-lg">{description}</p>}
       </div>
       {action}
     </div>

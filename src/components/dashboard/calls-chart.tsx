@@ -1,8 +1,8 @@
 "use client";
 
 import {
-  AreaChart,
-  Area,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -16,55 +16,88 @@ interface CallsChartProps {
   data?: DayStats[];
 }
 
-function formatDate(dateStr: string): string {
+const DAY_LABELS = ["Нд", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+
+function formatDayLabel(dateStr: string): string {
   const d = new Date(dateStr);
-  return d.toLocaleDateString("uk-UA", { day: "2-digit", month: "2-digit" });
+  return DAY_LABELS[d.getUTCDay()];
 }
 
 export function CallsChart({ data }: CallsChartProps) {
   const chartData = (data ?? []).map((item) => ({
     ...item,
-    label: formatDate(item.date),
+    label: formatDayLabel(item.date),
   }));
 
   if (chartData.length === 0) {
     return (
-      <div className="flex h-60 w-full items-center justify-center">
+      <div className="flex h-56 w-full items-center justify-center">
         <p className="text-muted-foreground text-sm">Дані з&apos;являться після першого дзвінка</p>
       </div>
     );
   }
 
   return (
-    <div className="h-60 w-full">
+    <div className="h-56 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-          <defs>
-            <linearGradient id="colorCalls" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#005bff" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="#005bff" stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-          <XAxis dataKey="label" className="text-xs" tick={{ fontSize: 12 }} />
-          <YAxis className="text-xs" tick={{ fontSize: 12 }} />
+        <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" vertical={true} className="stroke-border" />
+          <XAxis
+            dataKey="label"
+            className="text-xs"
+            tick={{ fontSize: 12, fill: "#868686" }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <YAxis
+            yAxisId="left"
+            className="text-xs"
+            tick={{ fontSize: 12, fill: "#868686" }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <YAxis
+            yAxisId="right"
+            orientation="right"
+            className="text-xs"
+            tick={{ fontSize: 12, fill: "#868686" }}
+            axisLine={false}
+            tickLine={false}
+          />
           <Tooltip
             contentStyle={{
               backgroundColor: "white",
-              border: "1px solid var(--color-border)",
-              borderRadius: "8px",
+              border: "1px solid #c0c0c0",
+              borderRadius: "6px",
               fontSize: "12px",
             }}
+            formatter={(value, name) => {
+              const labels: Record<string, string> = {
+                calls: "дзвінків",
+                meetings: "досягнуто",
+              };
+              return [String(value), labels[String(name)] ?? String(name)];
+            }}
           />
-          <Area
+          <Line
+            yAxisId="left"
             type="monotone"
             dataKey="calls"
             stroke="#005bff"
-            fillOpacity={1}
-            fill="url(#colorCalls)"
-            name="Дзвінки"
+            strokeWidth={2}
+            dot={false}
+            name="calls"
           />
-        </AreaChart>
+          <Line
+            yAxisId="left"
+            type="monotone"
+            dataKey="meetings"
+            stroke="#2cb151"
+            strokeWidth={2}
+            dot={false}
+            name="meetings"
+          />
+        </LineChart>
       </ResponsiveContainer>
     </div>
   );

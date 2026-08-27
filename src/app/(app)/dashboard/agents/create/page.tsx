@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardDescription } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { createAgentSchema, type CreateAgentFormData } from "@/lib/schemas";
 import { useCreateAgent, useTestCall } from "@dashboard/hooks/use-agents";
@@ -19,7 +18,7 @@ import { useVoices } from "@dashboard/hooks/use-voices";
 import { ApiError } from "@/lib/api-client";
 import { resolveErrorMessage, AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
 
-const STEPS = ["Назва", "Голос", "Інструкції", "Тест"] as const;
+const TOTAL_STEPS = 4;
 
 export default function CreateAgentPage() {
   const router = useRouter();
@@ -54,14 +53,20 @@ export default function CreateAgentPage() {
 
   async function handleNext(): Promise<void> {
     const valid = await trigger(STEP_FIELDS[step]);
-    if (valid && step < STEPS.length - 1) {
+    if (!valid) return;
+
+    if (step < TOTAL_STEPS - 1) {
       setStep(step + 1);
+    } else {
+      await handleCreate();
     }
   }
 
   function handleBack(): void {
     if (step > 0) {
       setStep(step - 1);
+    } else {
+      router.back();
     }
   }
 
@@ -69,9 +74,13 @@ export default function CreateAgentPage() {
     const valid = await trigger(["name", "voice", "instructions"]);
     if (!valid) return;
 
-    const { name, voice, instructions } = getValues();
+    const data = getValues();
     try {
-      await createAgent.mutateAsync({ name, voice, instructions });
+      await createAgent.mutateAsync({
+        name: data.name,
+        voice: data.voice,
+        instructions: data.instructions,
+      });
       toast.success("Агента створено");
       router.push("/dashboard/agents");
     } catch (error) {
@@ -84,11 +93,16 @@ export default function CreateAgentPage() {
   }
 
   async function handleTestCall(): Promise<void> {
-    const { name, voice, instructions, testPhone } = getValues();
-    if (!testPhone) return;
+    const data = getValues();
+    if (!data.testPhone) return;
 
     try {
-      await testCall.mutateAsync({ phone: testPhone, name, voice, instructions });
+      await testCall.mutateAsync({
+        phone: data.testPhone,
+        name: data.name,
+        voice: data.voice,
+        instructions: data.instructions,
+      });
       toast.success("Дзвінок ініційовано — очікуйте виклик");
     } catch (error) {
       if (error instanceof ApiError) {
@@ -106,219 +120,249 @@ export default function CreateAgentPage() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <h1 className="font-display text-2xl font-bold">Створити нового агента</h1>
-          <p className="text-muted-foreground">
-            Крок {step + 1} з {STEPS.length}
+          <h1 className="text-2xl font-bold">Створити нового агента</h1>
+          <p className="text-muted-foreground text-sm">
+            Крок {step + 1} з {TOTAL_STEPS}
           </p>
         </div>
       </div>
 
-      <div className="flex items-center justify-center gap-2">
-        {STEPS.map((label, index) => (
-          <div key={label} className="flex items-center gap-2">
-            <div
-              className={cn(
-                "flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium",
-                index <= step
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground"
-              )}
-            >
-              {index < step ? <Check className="h-4 w-4" /> : index + 1}
-            </div>
-            {index < STEPS.length - 1 && (
-              <div className={cn("h-0.5 w-8", index < step ? "bg-primary" : "bg-muted")} />
-            )}
-          </div>
-        ))}
+      <Stepper currentStep={step} totalSteps={TOTAL_STEPS} />
+
+      <div className="border-border bg-background rounded-2xl border p-6">
+        {step === 0 && <StepName register={register} errors={errors} />}
+        {step === 1 && (
+          <StepVoice
+            voices={voices}
+            selectedVoice={voice}
+            onSelect={(key) => setValue("voice", key, { shouldValidate: true })}
+            error={errors.voice?.message}
+          />
+        )}
+        {step === 2 && <StepInstructions register={register} errors={errors} />}
+        {step === 3 && (
+          <StepTest
+            register={register}
+            name={name}
+            voice={voices.find((v) => v.key === voice)?.name ?? "—"}
+            instructions={instructions}
+            onTestCall={handleTestCall}
+            isTestPending={testCall.isPending}
+          />
+        )}
       </div>
 
-      <Card className="border-border shadow-primary/30 rounded-2xl shadow-lg">
-        <CardContent className="p-6">
-          {step === 0 && (
-            <div className="space-y-4">
-              <CardHeader className="p-0 pb-4">
-                <h2 className="font-display text-2xl font-semibold">Назвіть свого агента</h2>
-                <CardDescription>
-                  Оберіть описову назву для вашого AI голосового агента.
-                </CardDescription>
-              </CardHeader>
-              <div className="space-y-2">
-                <Label htmlFor="agent-name">Назва агента</Label>
-                <Input
-                  id="agent-name"
-                  placeholder="напр., Бот нагадування про зустрічі"
-                  {...register("name")}
-                />
-                {errors.name && <p className="text-sm text-red-600">{errors.name.message}</p>}
-              </div>
-            </div>
-          )}
-
-          {step === 1 && (
-            <div className="space-y-4">
-              <CardHeader className="p-0 pb-4">
-                <h2 className="font-display text-2xl font-semibold">Оберіть голос</h2>
-                <CardDescription>
-                  Оберіть голос, який ваш агент використовуватиме під час дзвінків.
-                </CardDescription>
-              </CardHeader>
-              <div
-                className="grid grid-cols-1 gap-3 sm:grid-cols-2"
-                role="radiogroup"
-                aria-label="Оберіть голос"
-              >
-                {voices.map((voiceOption) => (
-                  <div
-                    key={voiceOption.key}
-                    role="radio"
-                    aria-checked={voice === voiceOption.key}
-                    tabIndex={0}
-                    onClick={() => setValue("voice", voiceOption.key, { shouldValidate: true })}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        setValue("voice", voiceOption.key, { shouldValidate: true });
-                      }
-                    }}
-                    className={cn(
-                      "focus-visible:ring-ring cursor-pointer rounded-lg border p-4 transition-colors focus-visible:ring-2 focus-visible:outline-none",
-                      voice === voiceOption.key
-                        ? "border-primary bg-primary/5"
-                        : "hover:border-primary/50"
-                    )}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">{voiceOption.name}</p>
-                        <p className="text-muted-foreground text-sm">{voiceOption.label}</p>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        aria-label={`Прослухати голос ${voiceOption.name}`}
-                      >
-                        <Play className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {errors.voice && <p className="text-sm text-red-600">{errors.voice.message}</p>}
-            </div>
-          )}
-
-          {step === 2 && (
-            <div className="space-y-4">
-              <CardHeader className="p-0 pb-4">
-                <h2 className="font-display text-2xl font-semibold">Напишіть інструкції</h2>
-                <CardDescription>
-                  Розкажіть агенту, що робити, звичайною мовою. Код не потрібен.
-                </CardDescription>
-              </CardHeader>
-              <div className="space-y-2">
-                <Label htmlFor="instructions">Інструкції</Label>
-                <Textarea
-                  id="instructions"
-                  rows={6}
-                  placeholder="Зателефонуйте клієнту, щоб нагадати про зустріч завтра. Якщо підтвердить — скажіть 'Чудово, чекаємо на вас!' Якщо хоче перенести — запитайте бажану дату і час. Завжди будьте ввічливі та професійні."
-                  {...register("instructions")}
-                />
-                {errors.instructions && (
-                  <p className="text-sm text-red-600">{errors.instructions.message}</p>
-                )}
-                <p className="text-muted-foreground text-xs">
-                  Пишіть так, ніби пояснюєте реальній людині, що говорити під час дзвінка.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {step === 3 && (
-            <div className="space-y-4">
-              <CardHeader className="p-0 pb-4">
-                <h2 className="font-display text-2xl font-semibold">Протестуйте агента</h2>
-                <CardDescription>
-                  Введіть свій номер телефону і ми зателефонуємо вам, щоб ви могли почути агента в
-                  дії.
-                </CardDescription>
-              </CardHeader>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="test-phone">Ваш номер телефону</Label>
-                  <Input
-                    id="test-phone"
-                    placeholder="+380 XX XXX XXXX"
-                    {...register("testPhone")}
-                  />
-                </div>
-
-                <Button
-                  className="w-full"
-                  onClick={handleTestCall}
-                  disabled={testCall.isPending || createAgent.isPending}
-                >
-                  {testCall.isPending ? (
-                    <>
-                      <Phone className="mr-2 h-4 w-4 animate-pulse" />
-                      Дзвінок...
-                    </>
-                  ) : (
-                    <>
-                      <Phone className="mr-2 h-4 w-4" />
-                      Тестовий дзвінок
-                    </>
-                  )}
-                </Button>
-                {testCall.isSuccess && (
-                  <p className="text-center text-sm text-green-600">
-                    Дзвінок ініційовано! Ваш телефон має зазвонити найближчим часом.
-                  </p>
-                )}
-
-                <div className="bg-muted mt-6 space-y-2 rounded-lg p-4">
-                  <h3 className="text-sm font-medium">Підсумок агента</h3>
-                  <div className="space-y-1 text-sm">
-                    <p>
-                      <span className="text-muted-foreground">Назва:</span> {name || "—"}
-                    </p>
-                    <p>
-                      <span className="text-muted-foreground">Голос:</span>{" "}
-                      {voices.find((v) => v.key === voice)?.name || "—"}
-                    </p>
-                    <p>
-                      <span className="text-muted-foreground">Інструкції:</span>{" "}
-                      {instructions
-                        ? instructions.length > 60
-                          ? instructions.slice(0, 60) + "..."
-                          : instructions
-                        : "—"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
       <div className="flex justify-between">
-        <Button variant="outline" onClick={handleBack} disabled={step === 0}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
+        <Button variant="outline" size="sm" onClick={handleBack}>
+          <ArrowLeft className="mr-1.5 h-4 w-4" />
           Назад
         </Button>
-        {step < STEPS.length - 1 ? (
-          <Button onClick={handleNext}>
-            Далі
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        ) : (
-          <Button onClick={handleCreate} disabled={createAgent.isPending}>
-            <Check className="mr-2 h-4 w-4" />
-            {createAgent.isPending ? "Створення..." : "Створити агента"}
-          </Button>
+        <Button size="sm" onClick={handleNext} disabled={createAgent.isPending}>
+          {createAgent.isPending ? "Створення..." : "Далі"}
+          <ArrowRight className="ml-1.5 h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function Stepper({ currentStep, totalSteps }: { currentStep: number; totalSteps: number }) {
+  return (
+    <div className="flex items-center justify-center gap-0">
+      {Array.from({ length: totalSteps }).map((_, index) => {
+        const isCompleted = index < currentStep;
+        const isCurrent = index === currentStep;
+
+        return (
+          <div key={index} className="flex items-center">
+            <div
+              className={cn(
+                "flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-colors",
+                isCompleted && "bg-primary text-primary-foreground",
+                isCurrent && "bg-primary text-primary-foreground",
+                !isCompleted && !isCurrent && "bg-muted text-muted-foreground"
+              )}
+            >
+              {isCompleted ? <Check className="h-4 w-4" /> : index + 1}
+            </div>
+            {index < totalSteps - 1 && (
+              <div
+                className={cn("mx-1 h-0.5 w-10", index < currentStep ? "bg-primary" : "bg-muted")}
+              />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function StepName({
+  register,
+  errors,
+}: {
+  register: ReturnType<typeof useForm<CreateAgentFormData>>["register"];
+  errors: ReturnType<typeof useForm<CreateAgentFormData>>["formState"]["errors"];
+}) {
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-xl font-bold">Назвіть свого агента</h2>
+        <p className="text-muted-foreground mt-1 text-sm">
+          Оберіть описову назву для вашого AI голосового агента
+        </p>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="agent-name">Назва агента</Label>
+        <Input
+          id="agent-name"
+          placeholder="напр., Бот нагадування про зустріч"
+          {...register("name")}
+        />
+        {errors.name && <p className="text-sm text-red-600">{errors.name.message}</p>}
+      </div>
+    </div>
+  );
+}
+
+interface StepVoiceProps {
+  voices: { key: string; name: string; label: string }[];
+  selectedVoice: string;
+  onSelect: (key: string) => void;
+  error?: string;
+}
+
+function StepVoice({ voices, selectedVoice, onSelect, error }: StepVoiceProps) {
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-xl font-bold">Оберіть голос</h2>
+        <p className="text-muted-foreground mt-1 text-sm">
+          Оберіть голос, який ваш агент використовуватиме під час дзвінків.
+        </p>
+      </div>
+      <div
+        className="grid grid-cols-1 gap-3 sm:grid-cols-2"
+        role="radiogroup"
+        aria-label="Оберіть голос"
+      >
+        {voices.map((voiceOption) => (
+          <button
+            key={voiceOption.key}
+            type="button"
+            role="radio"
+            aria-checked={selectedVoice === voiceOption.key}
+            onClick={() => onSelect(voiceOption.key)}
+            className={cn(
+              "flex items-center justify-between rounded-xl border p-4 text-left transition-colors",
+              selectedVoice === voiceOption.key
+                ? "border-primary bg-primary/5"
+                : "border-border hover:border-primary/50"
+            )}
+          >
+            <div>
+              <p className="text-sm font-medium">{voiceOption.name}</p>
+              <p className="text-muted-foreground text-xs">{voiceOption.label}</p>
+            </div>
+            <div className="bg-muted flex h-8 w-8 items-center justify-center rounded-full">
+              <Play className="text-muted-foreground h-3 w-3" />
+            </div>
+          </button>
+        ))}
+      </div>
+      {error && <p className="text-sm text-red-600">{error}</p>}
+    </div>
+  );
+}
+
+function StepInstructions({
+  register,
+  errors,
+}: {
+  register: ReturnType<typeof useForm<CreateAgentFormData>>["register"];
+  errors: ReturnType<typeof useForm<CreateAgentFormData>>["formState"]["errors"];
+}) {
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-xl font-bold">Напишіть інструкції</h2>
+        <p className="text-muted-foreground mt-1 text-sm">
+          Розкажіть агенту, що робити, звичайною мовою. Код не потрібен
+        </p>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="instructions">Інструкції</Label>
+        <Textarea
+          id="instructions"
+          rows={5}
+          placeholder="Зателефонуйте клієнту, щоб нагадати про зустріч завтра. Якщо підтвердить — скажіть: «Чудово, чекаємо на вас!». Якщо хоче перенести — запитайте бажану дату і час. Завжди будьте ввічливі та професійні."
+          {...register("instructions")}
+        />
+        {errors.instructions && (
+          <p className="text-sm text-red-600">{errors.instructions.message}</p>
         )}
+        <p className="text-muted-foreground text-xs">
+          Пишіть так, ніби пояснюєте реальній людині, що говорити під час дзвінка.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+interface StepTestProps {
+  register: ReturnType<typeof useForm<CreateAgentFormData>>["register"];
+  name: string;
+  voice: string;
+  instructions: string;
+  onTestCall: () => void;
+  isTestPending: boolean;
+}
+
+function StepTest({
+  register,
+  name,
+  voice,
+  instructions,
+  onTestCall,
+  isTestPending,
+}: StepTestProps) {
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-xl font-bold">Протестуйте агента</h2>
+        <p className="text-muted-foreground mt-1 text-sm">
+          Введіть номер телефону - ми зателефонуємо вам, щоб ви могли почути агента в дії
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="test-phone">Ваш номер телефону</Label>
+        <Input id="test-phone" placeholder="+380 XX XXX XXXX" {...register("testPhone")} />
+      </div>
+
+      <Button className="w-full" onClick={onTestCall} disabled={isTestPending}>
+        <Phone className="mr-2 h-4 w-4" />
+        {isTestPending ? "Дзвінок..." : "Тестовий дзвінок"}
+      </Button>
+
+      <div className="border-border space-y-2 rounded-lg border p-4">
+        <h3 className="text-sm font-semibold">Підсумок агента</h3>
+        <div className="space-y-1 text-sm">
+          <p>
+            <span className="text-muted-foreground">Назва:</span> {name || "—"}
+          </p>
+          <p>
+            <span className="text-muted-foreground">Голос:</span> {voice}
+          </p>
+          <p>
+            <span className="text-muted-foreground">Інструкція:</span>{" "}
+            {instructions
+              ? instructions.length > 50
+                ? instructions.slice(0, 50) + "..."
+                : instructions
+              : "—"}
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -7,7 +7,7 @@ settings:
 dependencies:
   '@base-ui/react':
     specifier: ^1.6.0
-    version: 1.6.0(@types/react@19.0.0)(react-dom@19.2.4)(react@19.2.4)
+    version: 1.6.0(@types/react@19.0.0)(date-fns@4.4.0)(react-dom@19.2.4)(react@19.2.4)
   '@hookform/resolvers':
     specifier: ^5.4.0
     version: 5.4.0(react-hook-form@7.81.0)
@@ -68,6 +68,9 @@ dependencies:
   clsx:
     specifier: ^2.1.1
     version: 2.1.1
+  date-fns:
+    specifier: ^4.4.0
+    version: 4.4.0
   embla-carousel-react:
     specifier: ^8.6.0
     version: 8.6.0(react@19.2.4)
@@ -92,6 +95,9 @@ dependencies:
   react:
     specifier: 19.2.4
     version: 19.2.4
+  react-day-picker:
+    specifier: ^10.0.1
+    version: 10.0.1(@types/react@19.0.0)(react@19.2.4)
   react-dom:
     specifier: 19.2.4
     version: 19.2.4(react@19.2.4)
@@ -444,7 +450,7 @@ packages:
       '@babel/helper-string-parser': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
 
-  /@base-ui/react@1.6.0(@types/react@19.0.0)(react-dom@19.2.4)(react@19.2.4):
+  /@base-ui/react@1.6.0(@types/react@19.0.0)(date-fns@4.4.0)(react-dom@19.2.4)(react@19.2.4):
     resolution: {integrity: sha512-/jzjTWJYXhRFO45Bev9lc3cHbmjzCMpUqbMZ2AgKy/z25mY9B6shGSNcXcjQar9n5doM0KYW1W8fcFv2jZBuMw==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
@@ -466,6 +472,7 @@ packages:
       '@floating-ui/react-dom': 2.1.8(react-dom@19.2.4)(react@19.2.4)
       '@floating-ui/utils': 0.2.11
       '@types/react': 19.0.0
+      date-fns: 4.4.0
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
       use-sync-external-store: 1.6.0(react@19.2.4)
@@ -492,6 +499,10 @@ packages:
 
   /@bufbuild/protobuf@1.10.1:
     resolution: {integrity: sha512-wJ8ReQbHxsAfXhrf9ixl0aYbZorRuOWpBNzm8pL8ftmSxQx/wnJD5Eg861NwJU/czy2VXFIebCeZnZrI9rktIQ==}
+    dev: false
+
+  /@date-fns/tz@1.5.0:
+    resolution: {integrity: sha512-lwYN/vDPeNRULcepoE/LO2Pgx+7/RV+S9ARfbc9lr2DtGkOD7pAiruHvbR1RX3Qyf6ja47EWJDMsNK5vK08DJg==}
     dev: false
 
   /@dotenvx/dotenvx@1.75.1:
@@ -3221,6 +3232,10 @@ packages:
       is-data-view: 1.0.2
     dev: true
 
+  /date-fns@4.4.0:
+    resolution: {integrity: sha512-+1UMbeh68lH1SegH83CGWwpb6OHHbpSgr3+s5Eww5M4CAgswBpoWS0AjTOfEJ33HiYKz1hdj/KTFprzXHmq/6w==}
+    dev: false
+
   /debounce-fn@4.0.0:
     resolution: {integrity: sha512-8pYCQiL9Xdcg0UPSD3d+0KMlOjp+KGU5EPwYddgzQ7DATsg4fuUDjQtsYLmWjnk2obnNHgV3vE2Y4jejSOJVBQ==}
     engines: {node: '>=10'}
@@ -5727,6 +5742,22 @@ packages:
       http-errors: 2.0.1
       iconv-lite: 0.7.3
       unpipe: 1.0.0
+    dev: false
+
+  /react-day-picker@10.0.1(@types/react@19.0.0)(react@19.2.4):
+    resolution: {integrity: sha512-eNh6BlwcYInWaJtRv18mXQ06Ys/H6rdTZAnTaSdOYJuTpwP1JMCHNd1FDRadA+gbeinq+psdULN5Xnowy9mV8w==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@types/react': '>=16.8.0'
+      react: '>=16.8.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+    dependencies:
+      '@date-fns/tz': 1.5.0
+      '@types/react': 19.0.0
+      date-fns: 4.4.0
+      react: 19.2.4
     dev: false
 
   /react-dom@19.2.4(react@19.2.4):

@@ -1,15 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Save, Link2, FileSpreadsheet, Webhook } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardDescription } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useMe, useUpdateProfile, useChangePassword } from "@/lib/hooks/use-auth";
 import { ApiError } from "@/lib/api-client";
 import { resolveErrorMessage, AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
@@ -23,26 +26,119 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-bold">Налаштування</h1>
-        <p className="text-muted-foreground">Керуйте акаунтом та інтеграціями</p>
+        <h1 className="text-2xl font-bold">Профіль / Налаштування</h1>
+        <p className="text-muted-foreground text-sm">Керування вашим акаунтом та налаштування</p>
       </div>
 
-      <Tabs defaultValue="profile" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="profile">Профіль</TabsTrigger>
-          <TabsTrigger value="integrations">Інтеграції</TabsTrigger>
-        </TabsList>
+      <section className="border-border bg-background rounded-2xl border p-5">
+        <h2 className="text-base font-semibold">Таймзона</h2>
+        <p className="text-muted-foreground mt-1 text-xs">
+          Оберіть часовий пояс для коректного відображення часу в системі та звітах
+        </p>
+        <div className="mt-3 max-w-sm">
+          <Label htmlFor="timezone" className="text-xs">
+            Часовий час
+          </Label>
+          <Select defaultValue="europe_kyiv">
+            <SelectTrigger className="mt-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="europe_kyiv">(UTC+02:00) Київ, Європа</SelectItem>
+              <SelectItem value="europe_london">(UTC+00:00) Лондон, Європа</SelectItem>
+              <SelectItem value="us_eastern">(UTC-05:00) Нью-Йорк, США</SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-muted-foreground mt-2 text-xs">
+            Час у системі буде відображатися відповідно до обраного часового поясу
+          </p>
+        </div>
+      </section>
 
-        <TabsContent value="profile" className="space-y-4">
-          <ProfileSection initialName={account?.name ?? ""} initialEmail={account?.email ?? ""} />
-          <PasswordSection />
-        </TabsContent>
+      <BusinessSection initialCompany={account?.company ?? ""} />
 
-        <TabsContent value="integrations" className="space-y-4">
-          <IntegrationsSection />
-        </TabsContent>
-      </Tabs>
+      <ProfileSection initialName={account?.name ?? ""} initialEmail={account?.email ?? ""} />
+
+      <PasswordSection />
     </div>
+  );
+}
+
+function BusinessSection({ initialCompany }: { initialCompany: string }) {
+  const [company, setCompany] = useState(initialCompany);
+  const [shortName, setShortName] = useState("");
+  const updateProfile = useUpdateProfile();
+
+  function handleSave(): void {
+    updateProfile.mutate(
+      { company },
+      {
+        onSuccess: () => toast.success("Дані бізнесу оновлено"),
+        onError: (error) => {
+          if (error instanceof ApiError) {
+            toast.error(resolveErrorMessage(error.code, AUTH_ERROR_MESSAGES));
+          } else {
+            toast.error("Щось пішло не так.");
+          }
+        },
+      }
+    );
+  }
+
+  return (
+    <section className="border-border bg-background rounded-2xl border p-5">
+      <h2 className="text-base font-semibold">Дані бізнесу</h2>
+      <p className="text-muted-foreground mt-1 text-xs">
+        Інформація про ваш бізнес, яку агент використовує під час дзвінків
+      </p>
+      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="space-y-1">
+          <Label htmlFor="company-name" className="text-xs">
+            Назва компанії (вимовляється агентом)
+          </Label>
+          <Input
+            id="company-name"
+            value={company}
+            onChange={(e) => setCompany(e.target.value)}
+            placeholder="Calls4U"
+          />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="short-name" className="text-xs">
+            Коротка назва для відображення
+          </Label>
+          <Input
+            id="short-name"
+            value={shortName}
+            onChange={(e) => setShortName(e.target.value)}
+            placeholder="Calls4U"
+          />
+        </div>
+      </div>
+      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="space-y-1">
+          <Label htmlFor="website" className="text-xs">
+            Сайт компанії (необов&apos;язково)
+          </Label>
+          <Input id="website" placeholder="https://..." />
+        </div>
+        <div className="space-y-1">
+          <Label className="text-xs">Мова спілкування агентів за замовчуванням</Label>
+          <Select defaultValue="uk">
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="uk">Українська</SelectItem>
+              <SelectItem value="en">English</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <Button size="sm" className="mt-4" onClick={handleSave} disabled={updateProfile.isPending}>
+        {updateProfile.isPending ? "Збереження..." : "Зберегти зміни"}
+      </Button>
+    </section>
   );
 }
 
@@ -59,15 +155,13 @@ function ProfileSection({
 
   const hasChanges = name !== initialName || email !== initialEmail;
 
-  function handleSaveProfile(): void {
+  function handleSave(): void {
     const params: Record<string, string> = {};
     if (name !== initialName) params.name = name;
     if (email !== initialEmail) params.email = email;
 
     updateProfile.mutate(params, {
-      onSuccess: () => {
-        toast.success("Профіль оновлено");
-      },
+      onSuccess: () => toast.success("Профіль оновлено"),
       onError: (error) => {
         if (error instanceof ApiError) {
           toast.error(resolveErrorMessage(error.code, AUTH_ERROR_MESSAGES));
@@ -79,18 +173,20 @@ function ProfileSection({
   }
 
   return (
-    <Card className="border-border rounded-2xl">
-      <CardHeader>
-        <h2 className="font-display text-2xl font-semibold">Інформація профілю</h2>
-        <CardDescription>Оновіть дані вашого акаунту</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="profile-name">Повне ім&apos;я</Label>
+    <section className="border-border bg-background rounded-2xl border p-5">
+      <h2 className="text-base font-semibold">Інформація профілю</h2>
+      <p className="text-muted-foreground mt-1 text-xs">Оновіть дані вашого акаунту</p>
+      <div className="mt-4 space-y-4">
+        <div className="space-y-1">
+          <Label htmlFor="profile-name" className="text-xs">
+            Повне ім&apos;я
+          </Label>
           <Input id="profile-name" value={name} onChange={(e) => setName(e.target.value)} />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="profile-email">Електронна пошта</Label>
+        <div className="space-y-1">
+          <Label htmlFor="profile-email" className="text-xs">
+            Електронна пошта
+          </Label>
           <Input
             id="profile-email"
             type="email"
@@ -98,12 +194,16 @@ function ProfileSection({
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
-        <Button onClick={handleSaveProfile} disabled={!hasChanges || updateProfile.isPending}>
-          <Save className="mr-2 h-4 w-4" />
-          {updateProfile.isPending ? "Збереження..." : "Зберегти зміни"}
-        </Button>
-      </CardContent>
-    </Card>
+      </div>
+      <Button
+        size="sm"
+        className="mt-4"
+        onClick={handleSave}
+        disabled={!hasChanges || updateProfile.isPending}
+      >
+        {updateProfile.isPending ? "Збереження..." : "Зберегти зміни"}
+      </Button>
+    </section>
   );
 }
 
@@ -116,7 +216,7 @@ function PasswordSection() {
   const canSubmit =
     currentPassword.length > 0 && newPassword.length >= 8 && newPassword === confirmPassword;
 
-  function handleChangePassword(): void {
+  function handleChange(): void {
     changePassword.mutate(
       { current_password: currentPassword, new_password: newPassword },
       {
@@ -138,13 +238,13 @@ function PasswordSection() {
   }
 
   return (
-    <Card className="border-border rounded-2xl">
-      <CardHeader>
-        <h2 className="font-display text-2xl font-semibold">Змінити пароль</h2>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="current-password">Поточний пароль</Label>
+    <section className="border-border bg-background rounded-2xl border p-5">
+      <h2 className="text-base font-semibold">Змінити пароль</h2>
+      <div className="mt-4 space-y-4">
+        <div className="space-y-1">
+          <Label htmlFor="current-password" className="text-xs">
+            Поточний пароль
+          </Label>
           <Input
             id="current-password"
             type="password"
@@ -153,8 +253,10 @@ function PasswordSection() {
             onChange={(e) => setCurrentPassword(e.target.value)}
           />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="new-password">Новий пароль</Label>
+        <div className="space-y-1">
+          <Label htmlFor="new-password" className="text-xs">
+            Новий пароль
+          </Label>
           <Input
             id="new-password"
             type="password"
@@ -163,8 +265,10 @@ function PasswordSection() {
             onChange={(e) => setNewPassword(e.target.value)}
           />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="confirm-password">Підтвердити новий пароль</Label>
+        <div className="space-y-1">
+          <Label htmlFor="confirm-password" className="text-xs">
+            Підтвердити новий пароль
+          </Label>
           <Input
             id="confirm-password"
             type="password"
@@ -173,73 +277,15 @@ function PasswordSection() {
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
         </div>
-        <Button onClick={handleChangePassword} disabled={!canSubmit || changePassword.isPending}>
-          {changePassword.isPending ? "Оновлення..." : "Оновити пароль"}
-        </Button>
-      </CardContent>
-    </Card>
-  );
-}
-
-function IntegrationsSection() {
-  return (
-    <>
-      <Card className="border-border rounded-2xl">
-        <CardHeader>
-          <h2 className="font-display flex items-center gap-2 text-2xl font-semibold">
-            <Webhook className="h-5 w-5" />
-            Webhook URL
-          </h2>
-          <CardDescription>
-            Отримуйте сповіщення в реальному часі після завершення дзвінків
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <Label htmlFor="webhook-url" className="sr-only">
-            Webhook URL
-          </Label>
-          <Input id="webhook-url" placeholder="https://your-app.com/webhooks/voiceagent" />
-          <Button variant="outline" size="sm">
-            Зберегти Webhook
-          </Button>
-        </CardContent>
-      </Card>
-
-      <Card className="border-border rounded-2xl">
-        <CardHeader>
-          <h2 className="font-display flex items-center gap-2 text-2xl font-semibold">
-            <Link2 className="h-5 w-5" />
-            Google Sheets
-          </h2>
-          <CardDescription>
-            Автоматично записуйте результати дзвінків у Google Sheet
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex items-center justify-between">
-          <Badge variant="success">Підключено</Badge>
-          <Button variant="outline" size="sm">
-            Відключити
-          </Button>
-        </CardContent>
-      </Card>
-
-      <Card className="border-border rounded-2xl">
-        <CardHeader>
-          <h2 className="font-display flex items-center gap-2 text-2xl font-semibold">
-            <FileSpreadsheet className="h-5 w-5" />
-            Експорт CSV
-          </h2>
-          <CardDescription>Завантажте журнал дзвінків та контакти у форматі CSV</CardDescription>
-        </CardHeader>
-        <CardContent className="flex gap-2">
-          <Button variant="outline" size="sm">
-            Експорт дзвінків
-          </Button>
-          <Button variant="outline" size="sm">
-            Експорт контактів
-          </Button>
-        </CardContent>
-      </Card>
-    </>
+      </div>
+      <Button
+        size="sm"
+        className="mt-4"
+        onClick={handleChange}
+        disabled={!canSubmit || changePassword.isPending}
+      >
+        {changePassword.isPending ? "Оновлення..." : "Оновити пароль"}
+      </Button>
+    </section>
   );
 }

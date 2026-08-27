@@ -38,7 +38,15 @@ export const apiUrl = {
   agent: (id: number | string) => `${API_ENDPOINTS.APP_AGENTS}/${id}`,
   contact: (id: number | string) => `${API_ENDPOINTS.APP_CONTACTS}/${id}`,
   call: (id: string) => `${API_ENDPOINTS.APP_CALLS}/${id}`,
-  calls: (params?: { limit?: number; offset?: number }) => {
+  calls: (params?: {
+    limit?: number;
+    offset?: number;
+    date_from?: string;
+    date_to?: string;
+    status?: string;
+    agent_id?: number;
+    phone?: string;
+  }) => {
     const url = API_ENDPOINTS.APP_CALLS;
 
     if (!params) return url;
@@ -47,6 +55,11 @@ export const apiUrl = {
 
     if (params.limit !== undefined) sp.set("limit", String(params.limit));
     if (params.offset !== undefined) sp.set("offset", String(params.offset));
+    if (params.date_from) sp.set("date_from", params.date_from);
+    if (params.date_to) sp.set("date_to", params.date_to);
+    if (params.status) sp.set("status", params.status);
+    if (params.agent_id !== undefined) sp.set("agent_id", String(params.agent_id));
+    if (params.phone) sp.set("phone", params.phone);
 
     const qs = sp.toString();
 

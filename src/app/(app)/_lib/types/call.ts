@@ -1,4 +1,3 @@
-/** Known call outcomes. The API may return additional values. */
 export type CallOutcome =
   "meeting" | "не_відповів" | "не_цікаво" | "відмова" | "передзвонити" | (string & {});
 
@@ -24,6 +23,20 @@ export interface TranscriptMessage {
 
 export interface CallDetail extends CallLog {
   transcript: TranscriptMessage[];
+  manager_note: string | null;
+  manager_note_at: string | null;
+}
+
+export type CallStatusFilter = "success" | "failed" | "attention";
+
+export interface CallsFilter {
+  limit?: number;
+  offset?: number;
+  date_from?: string;
+  date_to?: string;
+  status?: CallStatusFilter;
+  agent_id?: number;
+  phone?: string;
 }
 
 export interface CallsResponse {
@@ -42,12 +55,34 @@ export interface CallDetailResponse {
 export interface DayStats {
   date: string;
   calls: number;
+  meetings: number;
+}
+
+export interface PeriodStats {
+  total_calls: number;
+  successful_calls: number;
+  missed_calls: number;
+}
+
+export interface DeltaPct {
+  total_calls: number | null;
+  successful_calls: number | null;
+  missed_calls: number | null;
 }
 
 export interface StatsResponse {
   ok: boolean;
+  minutes_used: number;
+  minutes_limit: number;
+  minutes_left: number;
+  plan: string;
+  plan_expires_at: string | null;
   total_calls: number;
   successful_calls: number;
   missed_calls: number;
+  period_days: number;
+  period: PeriodStats;
+  previous: PeriodStats;
+  delta_pct: DeltaPct;
   by_day: DayStats[];
 }
