@@ -23,7 +23,7 @@ const EMPTY_STATS: ContactsStats = {
   conversion_pct: null,
 };
 
-export function useContacts(search?: string) {
+export const useContacts = (search?: string) => {
   return useQuery<ContactsData>({
     queryKey: ["contacts", search ?? ""],
     queryFn: async () => {
@@ -34,9 +34,9 @@ export function useContacts(search?: string) {
       };
     },
   });
-}
+};
 
-export function useCreateContact() {
+export const useCreateContact = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -47,9 +47,9 @@ export function useCreateContact() {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
     },
   });
-}
+};
 
-export function useUpdateContact() {
+export const useUpdateContact = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -60,9 +60,9 @@ export function useUpdateContact() {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
     },
   });
-}
+};
 
-export function useDeleteContact() {
+export const useDeleteContact = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -73,4 +73,4 @@ export function useDeleteContact() {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
     },
   });
-}
+};

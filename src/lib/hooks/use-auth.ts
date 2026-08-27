@@ -19,15 +19,15 @@ import type {
 
 const AUTH_QUERY_KEY = ["auth", "me"] as const;
 
-export function useAuthProviders() {
+export const useAuthProviders = () => {
   return useQuery<AuthProvidersResponse>({
     queryKey: ["auth", "providers"],
     queryFn: () => apiGet<AuthProvidersResponse>(API_ENDPOINTS.AUTH_PROVIDERS),
     staleTime: 10 * 60 * 1000,
   });
-}
+};
 
-export function useLogin() {
+export const useLogin = () => {
   const queryClient = useQueryClient();
 
   return useMutation<AuthResponse, ApiError, LoginParams>({
@@ -37,9 +37,9 @@ export function useLogin() {
       queryClient.setQueryData<Account>(AUTH_QUERY_KEY, data.account);
     },
   });
-}
+};
 
-export function useRegister() {
+export const useRegister = () => {
   const queryClient = useQueryClient();
 
   return useMutation<AuthResponse, ApiError, RegisterParams>({
@@ -49,9 +49,9 @@ export function useRegister() {
       queryClient.setQueryData<Account>(AUTH_QUERY_KEY, data.account);
     },
   });
-}
+};
 
-export function useLogout() {
+export const useLogout = () => {
   const queryClient = useQueryClient();
 
   return useMutation<void, ApiError, void>({
@@ -62,9 +62,9 @@ export function useLogout() {
       queryClient.clear();
     },
   });
-}
+};
 
-export function useSocialLogin() {
+export const useSocialLogin = () => {
   const queryClient = useQueryClient();
 
   return useMutation<AuthResponse, ApiError, SocialLoginParams>({
@@ -74,9 +74,9 @@ export function useSocialLogin() {
       queryClient.setQueryData<Account>(AUTH_QUERY_KEY, data.account);
     },
   });
-}
+};
 
-export function useMe() {
+export const useMe = () => {
   return useQuery<Account | null>({
     queryKey: AUTH_QUERY_KEY,
     queryFn: async () => {
@@ -94,9 +94,9 @@ export function useMe() {
     refetchOnWindowFocus: true,
     retry: false,
   });
-}
+};
 
-export function useUpdateProfile() {
+export const useUpdateProfile = () => {
   const queryClient = useQueryClient();
 
   return useMutation<UpdateProfileResponse, ApiError, UpdateProfileParams>({
@@ -105,10 +105,10 @@ export function useUpdateProfile() {
       queryClient.setQueryData<Account>(AUTH_QUERY_KEY, data.account);
     },
   });
-}
+};
 
-export function useChangePassword() {
+export const useChangePassword = () => {
   return useMutation<ChangePasswordResponse, ApiError, ChangePasswordParams>({
     mutationFn: (params) => apiPost<ChangePasswordResponse>(API_ENDPOINTS.AUTH_PASSWORD, params),
   });
-}
+};

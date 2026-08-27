@@ -13,7 +13,7 @@ interface DateRangePickerProps {
   onChange: (range: DateRange | undefined) => void;
 }
 
-export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
+export const DateRangePicker = ({ value, onChange }: DateRangePickerProps) => {
   const [draft, setDraft] = useState<DateRange | undefined>(value);
 
   const displayRange = draft ?? value;
@@ -24,19 +24,19 @@ export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
       : format(displayRange.from, "dd.MM.yyyy")
     : "Оберіть період";
 
-  function handleSelect(range: DateRange | undefined) {
+  const handleSelect = (range: DateRange | undefined) => {
     setDraft(range);
 
     if (range?.from && range?.to) {
       onChange(range);
     }
-  }
+  };
 
-  function handleOpenChange(open: boolean) {
+  const handleOpenChange = (open: boolean) => {
     if (open) {
       setDraft(value);
     }
-  }
+  };
 
   return (
     <Popover onOpenChange={handleOpenChange}>
@@ -65,4 +65,4 @@ export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
       </PopoverContent>
     </Popover>
   );
-}
+};

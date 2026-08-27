@@ -9,20 +9,20 @@ import type {
   PaymentHistoryResponse,
 } from "@dashboard/types";
 
-export function useBillingPlans() {
+export const useBillingPlans = () => {
   return useQuery<BillingPlansResponse>({
     queryKey: ["billing", "plans"],
     queryFn: () => apiGet<BillingPlansResponse>(API_ENDPOINTS.APP_BILLING_PLANS),
   });
-}
+};
 
-export function useCheckout() {
+export const useCheckout = () => {
   return useMutation<CheckoutResponse, Error, { plan: string }>({
     mutationFn: (params) => apiPost<CheckoutResponse>(API_ENDPOINTS.APP_BILLING_CHECKOUT, params),
   });
-}
+};
 
-export function usePaymentStatus(invoiceId: string | null) {
+export const usePaymentStatus = (invoiceId: string | null) => {
   return useQuery<PaymentStatusResponse>({
     queryKey: ["billing", "status", invoiceId],
     queryFn: () => apiGet<PaymentStatusResponse>(apiUrl.billingStatus(invoiceId!)),
@@ -34,11 +34,11 @@ export function usePaymentStatus(invoiceId: string | null) {
       return 3000;
     },
   });
-}
+};
 
-export function useBillingHistory() {
+export const useBillingHistory = () => {
   return useQuery<PaymentHistoryResponse>({
     queryKey: ["billing", "history"],
     queryFn: () => apiGet<PaymentHistoryResponse>(API_ENDPOINTS.APP_BILLING_HISTORY),
   });
-}
+};

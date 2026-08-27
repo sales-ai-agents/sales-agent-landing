@@ -7,7 +7,7 @@ import { Button } from "@/components/ui";
 import { SupportBotChat } from "@/components/dashboard";
 import Image from "next/image";
 
-export function SupportBotButton() {
+export const SupportBotButton = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -49,4 +49,4 @@ export function SupportBotButton() {
       </Button>
     </div>
   );
-}
+};

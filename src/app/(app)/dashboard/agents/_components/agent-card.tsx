@@ -28,7 +28,7 @@ const StatItem = ({ label, value, highlight = false }: StatItemProps) => {
   );
 };
 
-const AgentCard = ({ agent, onToggle, onTest }: AgentCardProps) => {
+export const AgentCard = ({ agent, onToggle, onTest }: AgentCardProps) => {
   const isActive = agent.is_active;
   const stats = agent.stats;
 
@@ -120,5 +120,3 @@ const AgentCard = ({ agent, onToggle, onTest }: AgentCardProps) => {
     </div>
   );
 };
-
-export default AgentCard;

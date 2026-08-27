@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft, Save, Trash2, Phone } from "lucide-react";
 import { toast } from "sonner";
+
 import {
   Button,
   Input,
@@ -26,8 +27,8 @@ import {
 } from "@/components/ui";
 import { PageLoading } from "@/components/dashboard";
 import { useAgent, useUpdateAgent, useDeleteAgent, useTestCall, useVoices } from "@dashboard/hooks";
-import { ApiError } from "@/lib/api-client";
-import { resolveErrorMessage, AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
+import { handleMutationError } from "@/lib/mutation-error";
+import { AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
 import type { Agent } from "@dashboard/types";
 import AgentNotFound from "@/app/(app)/dashboard/agents/[id]/not-found";
 
@@ -63,7 +64,7 @@ const EditAgentForm = ({ agent }: { agent: Agent }) => {
     instructions: agent.instructions,
   });
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     updateAgent.mutate(
       { id: agent.id, ...formData },
       {
@@ -71,34 +72,22 @@ const EditAgentForm = ({ agent }: { agent: Agent }) => {
           toast.success("Зміни збережено");
           router.push("/dashboard/agents");
         },
-        onError: (error) => {
-          if (error instanceof ApiError) {
-            toast.error(resolveErrorMessage(error.code, AGENT_ERROR_MESSAGES));
-          } else {
-            toast.error("Щось пішло не так.");
-          }
-        },
+        onError: (err) => handleMutationError(err, AGENT_ERROR_MESSAGES),
       }
     );
-  };
+  }, [updateAgent, agent.id, formData, router]);
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     deleteAgent.mutate(agent.id, {
       onSuccess: () => {
         toast.success("Агента видалено");
         router.push("/dashboard/agents");
       },
-      onError: (error) => {
-        if (error instanceof ApiError) {
-          toast.error(resolveErrorMessage(error.code, AGENT_ERROR_MESSAGES));
-        } else {
-          toast.error("Щось пішло не так.");
-        }
-      },
+      onError: (err) => handleMutationError(err, AGENT_ERROR_MESSAGES),
     });
-  };
+  }, [deleteAgent, agent.id, router]);
 
-  const handleTestCall = () => {
+  const handleTestCall = useCallback(() => {
     if (!testPhone) return;
 
     testCall.mutate(
@@ -107,16 +96,10 @@ const EditAgentForm = ({ agent }: { agent: Agent }) => {
         onSuccess: () => {
           toast.success("Дзвінок ініційовано — очікуйте виклик");
         },
-        onError: (error) => {
-          if (error instanceof ApiError) {
-            toast.error(resolveErrorMessage(error.code, AGENT_ERROR_MESSAGES));
-          } else {
-            toast.error("Щось пішло не так.");
-          }
-        },
+        onError: (err) => handleMutationError(err, AGENT_ERROR_MESSAGES),
       }
     );
-  };
+  }, [testCall, agent.id, testPhone]);
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">

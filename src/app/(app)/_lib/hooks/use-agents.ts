@@ -17,7 +17,7 @@ interface UseAgentsOptions {
   days?: number;
 }
 
-export function useAgents(options?: UseAgentsOptions) {
+export const useAgents = (options?: UseAgentsOptions) => {
   const withStats = options?.stats ?? false;
   const days = options?.days;
 
@@ -29,9 +29,9 @@ export function useAgents(options?: UseAgentsOptions) {
       return data.agents;
     },
   });
-}
+};
 
-export function useAgent(id: string) {
+export const useAgent = (id: string) => {
   return useQuery<Agent | null>({
     queryKey: ["agents", id],
     queryFn: async () => {
@@ -40,9 +40,9 @@ export function useAgent(id: string) {
     },
     enabled: !!id,
   });
-}
+};
 
-export function useCreateAgent() {
+export const useCreateAgent = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -53,9 +53,9 @@ export function useCreateAgent() {
       queryClient.invalidateQueries({ queryKey: ["agents"] });
     },
   });
-}
+};
 
-export function useToggleAgentStatus() {
+export const useToggleAgentStatus = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -81,9 +81,9 @@ export function useToggleAgentStatus() {
       queryClient.invalidateQueries({ queryKey: ["agents"] });
     },
   });
-}
+};
 
-export function useDeleteAgent() {
+export const useDeleteAgent = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -109,9 +109,9 @@ export function useDeleteAgent() {
       queryClient.invalidateQueries({ queryKey: ["agents"] });
     },
   });
-}
+};
 
-export function useUpdateAgent() {
+export const useUpdateAgent = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -122,12 +122,12 @@ export function useUpdateAgent() {
       queryClient.invalidateQueries({ queryKey: ["agents"] });
     },
   });
-}
+};
 
-export function useTestCall() {
+export const useTestCall = () => {
   return useMutation({
     mutationFn: async (params: TestCallParams) => {
       return apiPost(API_ENDPOINTS.APP_TEST_CALL, params);
     },
   });
-}
+};

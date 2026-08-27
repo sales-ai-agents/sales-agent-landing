@@ -30,6 +30,6 @@ export const AGENT_ERROR_MESSAGES: ErrorMessageMap = {
   too_soon: "Лише один тестовий дзвінок на хвилину. Спробуйте пізніше.",
 };
 
-export function resolveErrorMessage(code: string, domainMap?: ErrorMessageMap): string {
+export const resolveErrorMessage = (code: string, domainMap?: ErrorMessageMap): string => {
   return domainMap?.[code] ?? "Щось пішло не так.";
-}
+};

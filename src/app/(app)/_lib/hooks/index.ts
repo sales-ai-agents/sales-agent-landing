@@ -8,7 +8,7 @@ export {
   useTestCall,
 } from "./use-agents";
 export { useBillingPlans, useCheckout, usePaymentStatus, useBillingHistory } from "./use-billing";
-export { useCallDetail } from "./use-call-detail";
+export { useCallDetail, useSaveNote } from "./use-call-detail";
 export { useCallLogs } from "./use-call-logs";
 export { useCampaigns, useCreateCampaign, useControlCampaign } from "./use-campaigns";
 export { useContacts, useCreateContact, useUpdateContact, useDeleteContact } from "./use-contacts";

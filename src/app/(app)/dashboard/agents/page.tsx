@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Bot, PhoneCall, Plus } from "lucide-react";
 import { toast } from "sonner";
 
@@ -16,8 +16,8 @@ import {
 import { PageEmpty, PageError, PageLoading } from "@/components/dashboard";
 import { useAgents, useToggleAgentStatus, useTestCall } from "@dashboard/hooks";
 import { AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
-import { handleMutationError } from "@/lib/handle-mutation-error";
-import AgentCard from "./_components/agent-card";
+import { handleMutationError } from "@/lib/mutation-error";
+import { AgentCard } from "./_components/agent-card";
 import type { Agent } from "@dashboard/types";
 import Link from "next/link";
 
@@ -32,6 +32,38 @@ const AgentsPage = () => {
     agentId: number;
     agentName: string;
   } | null>(null);
+
+  const handleToggle = useCallback(
+    (agent: Agent) => {
+      toggleStatus.mutate(
+        { id: agent.id, is_active: !agent.is_active },
+        {
+          onSuccess: (_data, variables) => {
+            const label = variables.is_active ? "активовано" : "призупинено";
+            toast.success(`Агента ${label}`);
+          },
+          onError: (err) => handleMutationError(err, AGENT_ERROR_MESSAGES),
+        }
+      );
+    },
+    [toggleStatus]
+  );
+
+  const handleTestCall = useCallback(() => {
+    if (!testDialog || !testPhone) return;
+
+    testCall.mutate(
+      { agent_id: testDialog.agentId, phone: testPhone },
+      {
+        onSuccess: () => {
+          toast.success("Дзвінок ініційовано — очікуйте виклик");
+          setTestDialog(null);
+          setTestPhone("");
+        },
+        onError: (err) => handleMutationError(err, AGENT_ERROR_MESSAGES),
+      }
+    );
+  }, [testDialog, testPhone, testCall]);
 
   if (isLoading) return <PageLoading />;
   if (error) return <PageError message={error.message} onRetry={refetch} />;
@@ -55,35 +87,6 @@ const AgentsPage = () => {
         }
       />
     );
-
-  function handleToggle(agent: Agent) {
-    toggleStatus.mutate(
-      { id: agent.id, is_active: !agent.is_active },
-      {
-        onSuccess: (_data, variables) => {
-          const label = variables.is_active ? "активовано" : "призупинено";
-          toast.success(`Агента ${label}`);
-        },
-        onError: (err) => handleMutationError(err, AGENT_ERROR_MESSAGES),
-      }
-    );
-  }
-
-  function handleTestCall() {
-    if (!testDialog || !testPhone) return;
-
-    testCall.mutate(
-      { agent_id: testDialog.agentId, phone: testPhone },
-      {
-        onSuccess: () => {
-          toast.success("Дзвінок ініційовано — очікуйте виклик");
-          setTestDialog(null);
-          setTestPhone("");
-        },
-        onError: (err) => handleMutationError(err, AGENT_ERROR_MESSAGES),
-      }
-    );
-  }
 
   return (
     <div className="space-y-6">

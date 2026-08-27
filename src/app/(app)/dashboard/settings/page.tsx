@@ -10,9 +10,9 @@ import {
 } from "@/components/ui";
 import { useMe } from "@/lib/hooks";
 import { PageError, PageLoading } from "@/components/dashboard";
-import Business from "./_components/business";
-import Profile from "./_components/profile";
-import Password from "./_components/password";
+import { Business } from "./_components/business";
+import { Profile } from "./_components/profile";
+import { Password } from "./_components/password";
 
 const SettingsPage = () => {
   const { data: account, isLoading, error, refetch } = useMe();

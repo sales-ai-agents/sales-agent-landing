@@ -4,7 +4,7 @@ import { apiPostFormData } from "@/lib/api-client";
 import { API_ENDPOINTS } from "@/lib/api-config";
 import type { UploadContactsResponse } from "@dashboard/types";
 
-export function useUploadContacts() {
+export const useUploadContacts = () => {
   const queryClient = useQueryClient();
 
   return useMutation<UploadContactsResponse, Error, File>({
@@ -18,4 +18,4 @@ export function useUploadContacts() {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
     },
   });
-}
+};

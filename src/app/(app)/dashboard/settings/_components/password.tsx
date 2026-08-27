@@ -6,9 +6,9 @@ import { toast } from "sonner";
 import { Button, Input, Label } from "@/components/ui";
 import { useChangePassword } from "@/lib/hooks";
 import { AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
-import { handleMutationError } from "@/lib/handle-mutation-error";
+import { handleMutationError } from "@/lib/mutation-error";
 
-const Password = () => {
+export const Password = () => {
   const [newPassword, setNewPassword] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -85,5 +85,3 @@ const Password = () => {
     </section>
   );
 };
-
-export default Password;

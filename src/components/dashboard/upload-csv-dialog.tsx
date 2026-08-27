@@ -18,7 +18,7 @@ interface UploadCsvDialogProps {
   onClose: () => void;
 }
 
-export function UploadCsvDialog({ onClose }: UploadCsvDialogProps) {
+export const UploadCsvDialog = ({ onClose }: UploadCsvDialogProps) => {
   const [file, setFile] = useState<File | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { mutate: upload, isPending } = useUploadContacts();
@@ -119,4 +119,4 @@ export function UploadCsvDialog({ onClose }: UploadCsvDialogProps) {
       </DialogContent>
     </Dialog>
   );
-}
+};

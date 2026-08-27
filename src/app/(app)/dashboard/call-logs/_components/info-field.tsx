@@ -6,7 +6,7 @@ interface InfoFieldProps {
   icon?: React.ReactNode;
 }
 
-export function InfoField({ label, value, icon }: InfoFieldProps) {
+export const InfoField = ({ label, value, icon }: InfoFieldProps) => {
   return (
     <div>
       <p className="text-muted-foreground text-xs">{label}</p>
@@ -16,4 +16,4 @@ export function InfoField({ label, value, icon }: InfoFieldProps) {
       </div>
     </div>
   );
-}
+};

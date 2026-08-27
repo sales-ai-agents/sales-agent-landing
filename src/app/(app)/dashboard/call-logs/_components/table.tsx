@@ -11,7 +11,7 @@ import {
 import { Play, ExternalLink } from "lucide-react";
 
 import { Badge } from "@/components/ui";
-import { getOutcomeConfig } from "@/app/(app)/_lib/call-outcome-display";
+import { getOutcomeConfig } from "@/app/(app)/_lib/call-outcome";
 import { formatDuration, cn } from "@/lib/utils";
 import type { CallLog, Agent } from "@dashboard/types";
 import { resolveAgentName } from "../_lib/utils";
@@ -24,7 +24,7 @@ interface TableProps {
   pageCount: number;
 }
 
-export function Table({ data, agents, pageCount }: TableProps) {
+export const Table = ({ data, agents, pageCount }: TableProps) => {
   const columns = useMemo(
     () => [
       columnHelper.accessor("created_at", {
@@ -161,4 +161,4 @@ export function Table({ data, agents, pageCount }: TableProps) {
       </table>
     </div>
   );
-}
+};

@@ -6,14 +6,14 @@ import { toast } from "sonner";
 import { Button, Input, Label } from "@/components/ui";
 import { useUpdateProfile } from "@/lib/hooks";
 import { AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
-import { handleMutationError } from "@/lib/handle-mutation-error";
+import { handleMutationError } from "@/lib/mutation-error";
 
 interface ProfileSectionProps {
   initialName: string;
   initialEmail: string;
 }
 
-const Profile = ({ initialName, initialEmail }: ProfileSectionProps) => {
+export const Profile = ({ initialName, initialEmail }: ProfileSectionProps) => {
   const [name, setName] = useState(initialName);
   const [email, setEmail] = useState(initialEmail);
 
@@ -67,5 +67,3 @@ const Profile = ({ initialName, initialEmail }: ProfileSectionProps) => {
     </section>
   );
 };
-
-export default Profile;

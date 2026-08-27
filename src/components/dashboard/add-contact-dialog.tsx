@@ -20,7 +20,7 @@ interface AddContactDialogProps {
   onClose: () => void;
 }
 
-export function AddContactDialog({ onSubmit, onClose }: AddContactDialogProps) {
+export const AddContactDialog = ({ onSubmit, onClose }: AddContactDialogProps) => {
   const {
     register,
     handleSubmit,
@@ -66,4 +66,4 @@ export function AddContactDialog({ onSubmit, onClose }: AddContactDialogProps) {
       </DialogContent>
     </Dialog>
   );
-}
+};

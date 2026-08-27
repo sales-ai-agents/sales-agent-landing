@@ -9,21 +9,21 @@ interface PageLoadingProps {
   message?: string;
 }
 
-export function PageLoading({ message }: PageLoadingProps) {
+export const PageLoading = ({ message }: PageLoadingProps) => {
   return (
     <div className="flex h-full min-h-[50vh] flex-col items-center justify-center gap-3">
       <Loader2 className="text-primary h-8 w-8 animate-spin" />
       {message && <p className="text-muted-foreground text-sm">{message}</p>}
     </div>
   );
-}
+};
 
 interface PageErrorProps {
   message?: string;
   onRetry?: () => void;
 }
 
-export function PageError({ message, onRetry }: PageErrorProps) {
+export const PageError = ({ message, onRetry }: PageErrorProps) => {
   return (
     <div className="flex h-full min-h-[50vh] flex-col items-center justify-center gap-4">
       <div className="bg-destructive/10 rounded-full p-3">
@@ -37,7 +37,7 @@ export function PageError({ message, onRetry }: PageErrorProps) {
       )}
     </div>
   );
-}
+};
 
 interface PageEmptyProps {
   icon: React.ComponentType<{ className?: string }>;
@@ -46,7 +46,7 @@ interface PageEmptyProps {
   action?: React.ReactNode;
 }
 
-export function PageEmpty({ icon: Icon, title, description, action }: PageEmptyProps) {
+export const PageEmpty = ({ icon: Icon, title, description, action }: PageEmptyProps) => {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-4">
       <Icon className="text-primary h-10 w-10" />
@@ -57,4 +57,4 @@ export function PageEmpty({ icon: Icon, title, description, action }: PageEmptyP
       {action}
     </div>
   );
-}
+};

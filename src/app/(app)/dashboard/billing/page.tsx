@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import { CreditCard, Receipt, AlertTriangle } from "lucide-react";
 
@@ -19,8 +19,14 @@ const BillingPage = () => {
 
   const [selectedPlanKey, setSelectedPlanKey] = useState<string | null>(null);
 
+  const openUpgradeDialog = useCallback(() => {
+    if (!billing) return;
+    setSelectedPlanKey(getDefaultUpgradePlan(billing.plans, billing.current));
+  }, [billing]);
+
   if (isLoading) return <PageLoading />;
-  if (isError || !billing) return <PageError onRetry={() => refetch()} />;
+  if (isError || !billing)
+    return <PageError message="Не вдалося завантажити тарифи" onRetry={() => refetch()} />;
 
   const currentPlanData = billing.plans.find((p) => p.key === billing.current);
   const payments = historyData?.payments ?? [];
@@ -29,11 +35,6 @@ const BillingPage = () => {
   const minutesUsed = stats?.minutes_used ?? 0;
   const minutesLimit = stats?.minutes_limit ?? billing.minutes;
   const usagePercent = minutesLimit > 0 ? (minutesUsed / minutesLimit) * 100 : 0;
-
-  const openUpgradeDialog = () => {
-    if (!billing) return;
-    setSelectedPlanKey(getDefaultUpgradePlan(billing.plans, billing.current));
-  };
 
   return (
     <div className="space-y-6">

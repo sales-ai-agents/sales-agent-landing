@@ -5,7 +5,6 @@ import type { DateRange } from "react-day-picker";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui";
 import type { Agent, CallStatusFilter } from "@dashboard/types";
 import { DateRangePicker } from "./date-range-picker";
-import React from "react";
 import { FilterField } from "./filter-field";
 
 const STATUS_OPTIONS: { value: CallStatusFilter; label: string }[] = [
@@ -27,7 +26,7 @@ interface FiltersProps {
   onPhoneSubmit: () => void;
 }
 
-export function Filters({
+export const Filters = ({
   dateRange,
   onDateRangeChange,
   status,
@@ -38,7 +37,7 @@ export function Filters({
   phoneInput,
   onPhoneInputChange,
   onPhoneSubmit,
-}: FiltersProps) {
+}: FiltersProps) => {
   return (
     <div className="flex flex-wrap items-end gap-3">
       <FilterField label="Діапазон дат">
@@ -105,4 +104,4 @@ export function Filters({
       </FilterField>
     </div>
   );
-}
+};

@@ -14,14 +14,14 @@ interface PaginationProps {
   className?: string;
 }
 
-export function Pagination({
+export const Pagination = ({
   total,
   pageSize,
   currentPage,
   onPageChange,
   itemLabel = "записів",
   className,
-}: PaginationProps) {
+}: PaginationProps) => {
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
   const startRow = total > 0 ? currentPage * pageSize + 1 : 0;
   const endRow = Math.min((currentPage + 1) * pageSize, total);
@@ -87,4 +87,4 @@ export function Pagination({
       </div>
     </div>
   );
-}
+};

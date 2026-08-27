@@ -4,7 +4,7 @@ import { apiGet } from "@/lib/api-client";
 import { API_ENDPOINTS } from "@/lib/api-config";
 import type { Voice, VoicesResponse } from "@dashboard/types";
 
-export function useVoices() {
+export const useVoices = () => {
   return useQuery<Voice[]>({
     queryKey: ["voices"],
     queryFn: async () => {
@@ -13,4 +13,4 @@ export function useVoices() {
     },
     staleTime: 10 * 60 * 1000,
   });
-}
+};

@@ -12,7 +12,7 @@ export interface AgentEfficiencyRowProps {
   index: number;
 }
 
-export function AgentEfficiencyRow({ agent, index }: AgentEfficiencyRowProps) {
+export const AgentEfficiencyRow = ({ agent, index }: AgentEfficiencyRowProps) => {
   const efficiency = agent.stats?.efficiency_pct ?? null;
   const subtitle =
     efficiency !== null
@@ -45,4 +45,4 @@ export function AgentEfficiencyRow({ agent, index }: AgentEfficiencyRowProps) {
       </div>
     </div>
   );
-}
+};

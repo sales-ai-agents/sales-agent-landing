@@ -10,7 +10,7 @@ interface PlanCardProps {
   onSelect: () => void;
 }
 
-function getPlanFeatures(plan: BillingPlan): string[] {
+const getPlanFeatures = (plan: BillingPlan): string[] => {
   if (plan.minutes >= 3000) {
     return [
       `${formatNumber(plan.minutes)} хв розмов`,
@@ -37,9 +37,9 @@ function getPlanFeatures(plan: BillingPlan): string[] {
     "Перегляд результатів розмов",
     "Базове налаштування сценарію",
   ];
-}
+};
 
-export function PlanCard({ plan, isCurrent, onSelect }: PlanCardProps) {
+export const PlanCard = ({ plan, isCurrent, onSelect }: PlanCardProps) => {
   const features = getPlanFeatures(plan);
   const isPro = plan.minutes >= 3000;
 
@@ -80,4 +80,4 @@ export function PlanCard({ plan, isCurrent, onSelect }: PlanCardProps) {
       </div>
     </div>
   );
-}
+};

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
 import type { CallLog, Agent } from "@dashboard/types";
-import { getOutcomeDisplay } from "@/app/(app)/_lib/call-outcome-display";
+import { getOutcomeDisplay } from "@/app/(app)/_lib/call-outcome";
 import { formatDuration, formatTime, maskPhone } from "@/lib/utils";
 
 export interface RecentCallRowProps {
@@ -10,7 +10,7 @@ export interface RecentCallRowProps {
   agents: Agent[];
 }
 
-export function RecentCallRow({ call, agents }: RecentCallRowProps) {
+export const RecentCallRow = ({ call, agents }: RecentCallRowProps) => {
   const agentName = agents.find((a) => a.id === call.agent_id)?.name ?? "—";
   const duration = call.duration_sec ? formatDuration(call.duration_sec) : "—";
   const time = formatTime(call.created_at);
@@ -37,4 +37,4 @@ export function RecentCallRow({ call, agents }: RecentCallRowProps) {
       </td>
     </tr>
   );
-}
+};

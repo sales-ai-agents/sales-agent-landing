@@ -11,7 +11,7 @@ export interface KpiCardProps {
   periodLabel: string;
 }
 
-export function KpiCard({
+export const KpiCard = ({
   icon,
   iconBg,
   title,
@@ -19,7 +19,7 @@ export function KpiCard({
   subtitle,
   delta,
   periodLabel,
-}: KpiCardProps) {
+}: KpiCardProps) => {
   return (
     <div className="border-primary/35 rounded-xl border bg-white p-5">
       <div className="flex items-center gap-2">
@@ -38,9 +38,9 @@ export function KpiCard({
       )}
     </div>
   );
-}
+};
 
-function DeltaBadge({ value }: { value: number | null }) {
+const DeltaBadge = ({ value }: { value: number | null }) => {
   if (value === null) {
     return <span className="text-muted-foreground text-sm">—</span>;
   }
@@ -57,4 +57,4 @@ function DeltaBadge({ value }: { value: number | null }) {
       {Math.abs(value)}%
     </span>
   );
-}
+};

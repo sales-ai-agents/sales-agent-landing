@@ -9,14 +9,14 @@ import { cn } from "@/lib/utils";
 import { DASHBOARD_NAV_ITEMS, DASHBOARD_SETTINGS_ITEM } from "@/lib/constants";
 import { useStats } from "@dashboard/hooks";
 
-export function Sidebar() {
+export const Sidebar = () => {
   const pathname = usePathname();
   const { data: stats } = useStats();
 
-  function isNavActive(href: string): boolean {
+  const isNavActive = (href: string): boolean => {
     if (href === "/dashboard") return pathname === "/dashboard";
     return pathname === href || pathname.startsWith(href + "/");
-  }
+  };
 
   const planLabel = stats?.plan ?? "trial";
   const isTrialPlan = planLabel === "trial";
@@ -109,4 +109,4 @@ export function Sidebar() {
       </div>
     </aside>
   );
-}
+};

@@ -20,22 +20,22 @@ import { cn, getInitials } from "@/lib/utils";
 import { DASHBOARD_NAV_ITEMS } from "@/lib/constants";
 import { useLogout, useMe } from "@/lib/hooks";
 
-export function DashboardHeader() {
+export const DashboardHeader = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { data: account } = useMe();
   const logout = useLogout();
 
-  function isNavActive(href: string): boolean {
+  const isNavActive = (href: string): boolean => {
     if (href === "/dashboard") return pathname === "/dashboard";
     return pathname === href || pathname.startsWith(href + "/");
-  }
+  };
 
-  function handleLogout(): void {
+  const handleLogout = (): void => {
     logout.mutate(undefined, {
       onSettled: () => router.push("/sign-in"),
     });
-  }
+  };
 
   const displayName = account?.name ?? "Користувач";
   const displayEmail = account?.email ?? "";
@@ -147,4 +147,4 @@ export function DashboardHeader() {
       </div>
     </header>
   );
-}
+};

@@ -16,18 +16,18 @@ interface ChangePlanDialogProps {
   onClose: () => void;
 }
 
-export function ChangePlanDialog({
+export const ChangePlanDialog = ({
   plans,
   currentPlanKey,
   selectedPlanKey,
   onClose,
-}: ChangePlanDialogProps) {
+}: ChangePlanDialogProps) => {
   const checkout = useCheckout();
 
   const currentPlan = plans.find((p) => p.key === currentPlanKey);
   const selectedPlan = plans.find((p) => p.key === selectedPlanKey);
 
-  function handlePay(): void {
+  const handlePay = () => {
     if (!selectedPlan) return;
 
     checkout.mutate(
@@ -53,7 +53,7 @@ export function ChangePlanDialog({
         },
       }
     );
-  }
+  };
 
   if (!selectedPlan) return null;
 
@@ -75,7 +75,7 @@ export function ChangePlanDialog({
       </DialogContent>
     </Dialog>
   );
-}
+};
 
 interface ConfirmStepProps {
   currentPlan: BillingPlan | undefined;
@@ -85,7 +85,7 @@ interface ConfirmStepProps {
   onPay: () => void;
 }
 
-function ConfirmStep({ currentPlan, newPlan, isProcessing, onCancel, onPay }: ConfirmStepProps) {
+const ConfirmStep = ({ currentPlan, newPlan, isProcessing, onCancel, onPay }: ConfirmStepProps) => {
   const priceDiff = Math.round(newPlan.price_uah / 41);
 
   return (
@@ -205,4 +205,4 @@ function ConfirmStep({ currentPlan, newPlan, isProcessing, onCancel, onPay }: Co
       </div>
     </div>
   );
-}
+};

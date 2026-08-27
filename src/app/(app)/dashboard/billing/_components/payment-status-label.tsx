@@ -1,4 +1,4 @@
-export function PaymentStatusLabel({ status }: { status: string }) {
+export const PaymentStatusLabel = ({ status }: { status: string }) => {
   switch (status) {
     case "success":
       return <span className="text-xs font-medium text-green-600">Оплачено</span>;
@@ -9,4 +9,4 @@ export function PaymentStatusLabel({ status }: { status: string }) {
     default:
       return <span className="text-xs font-medium text-red-600">Невдалий</span>;
   }
-}
+};

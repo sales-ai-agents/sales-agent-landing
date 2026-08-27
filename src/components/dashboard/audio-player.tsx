@@ -11,7 +11,7 @@ interface AudioPlayerProps {
   src: string;
 }
 
-export function AudioPlayer({ src }: AudioPlayerProps) {
+export const AudioPlayer = ({ src }: AudioPlayerProps) => {
   const howlRef = useRef<Howl | null>(null);
   const rafRef = useRef<number>(0);
 
@@ -63,7 +63,7 @@ export function AudioPlayer({ src }: AudioPlayerProps) {
     };
   }, [src]);
 
-  function togglePlay(): void {
+  const togglePlay = () => {
     const howl = howlRef.current;
     if (!howl) return;
 
@@ -72,18 +72,18 @@ export function AudioPlayer({ src }: AudioPlayerProps) {
     } else {
       howl.play();
     }
-  }
+  };
 
-  function toggleMute(): void {
+  const toggleMute = () => {
     const howl = howlRef.current;
     if (!howl) return;
 
     const next = !isMuted;
     howl.mute(next);
     setIsMuted(next);
-  }
+  };
 
-  function handleSeek(e: React.MouseEvent<HTMLDivElement>): void {
+  const handleSeek = (e: React.MouseEvent<HTMLDivElement>): void => {
     const howl = howlRef.current;
     if (!howl || !duration) return;
 
@@ -93,7 +93,7 @@ export function AudioPlayer({ src }: AudioPlayerProps) {
 
     howl.seek(seekTo);
     setCurrentTime(seekTo);
-  }
+  };
 
   if (error) {
     return (
@@ -155,4 +155,4 @@ export function AudioPlayer({ src }: AudioPlayerProps) {
       </div>
     </div>
   );
-}
+};

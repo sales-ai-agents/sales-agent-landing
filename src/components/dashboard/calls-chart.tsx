@@ -18,12 +18,12 @@ interface CallsChartProps {
 
 const DAY_LABELS = ["Нд", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
 
-function formatDayLabel(dateStr: string): string {
+const formatDayLabel = (dateStr: string): string => {
   const d = new Date(dateStr);
   return DAY_LABELS[d.getUTCDay()];
-}
+};
 
-export function CallsChart({ data }: CallsChartProps) {
+export const CallsChart = ({ data }: CallsChartProps) => {
   const chartData = (data ?? []).map((item) => ({
     ...item,
     label: formatDayLabel(item.date),
@@ -101,4 +101,4 @@ export function CallsChart({ data }: CallsChartProps) {
       </ResponsiveContainer>
     </div>
   );
-}
+};

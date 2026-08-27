@@ -15,13 +15,13 @@ import {
 } from "@/components/ui";
 import { useUpdateProfile } from "@/lib/hooks";
 import { AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
-import { handleMutationError } from "@/lib/handle-mutation-error";
+import { handleMutationError } from "@/lib/mutation-error";
 
 interface BusinessProps {
   initialCompany: string;
 }
 
-const Business = ({ initialCompany }: BusinessProps) => {
+export const Business = ({ initialCompany }: BusinessProps) => {
   const [company, setCompany] = useState(initialCompany);
   const [shortName, setShortName] = useState("");
 
@@ -93,5 +93,3 @@ const Business = ({ initialCompany }: BusinessProps) => {
     </section>
   );
 };
-
-export default Business;

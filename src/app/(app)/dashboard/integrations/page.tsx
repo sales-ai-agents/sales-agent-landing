@@ -110,7 +110,7 @@ const IntegrationsPage = () => {
   );
 };
 
-function CrmCard({ name, description }: { name: string; description: string }) {
+const CrmCard = ({ name, description }: { name: string; description: string }) => {
   return (
     <div className="border-border bg-background flex flex-col rounded-2xl border p-5">
       <div className="flex items-center gap-3">
@@ -128,6 +128,6 @@ function CrmCard({ name, description }: { name: string; description: string }) {
       </Button>
     </div>
   );
-}
+};
 
 export default IntegrationsPage;

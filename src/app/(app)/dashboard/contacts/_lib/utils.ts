@@ -20,11 +20,11 @@ const TAG_COLORS: Record<string, TagColor> = {
 
 const DEFAULT_TAG_COLOR: TagColor = { bg: "bg-gray-100", text: "text-gray-700" };
 
-export function getTagColor(tag: string): TagColor {
+export const getTagColor = (tag: string): TagColor => {
   return TAG_COLORS[tag] ?? DEFAULT_TAG_COLOR;
-}
+};
 
-export function formatConsentLabel(consent: ConsentStatus): ConsentDisplay {
+export const formatConsentLabel = (consent: ConsentStatus): ConsentDisplay => {
   switch (consent) {
     case "granted":
       return { label: "Згода отримана", color: "text-green-600", dot: "bg-green-500" };
@@ -33,9 +33,9 @@ export function formatConsentLabel(consent: ConsentStatus): ConsentDisplay {
     default:
       return { label: "—", color: "text-muted-foreground", dot: "bg-gray-300" };
   }
-}
+};
 
-export function formatLastCallResult(result: string | null): string {
+export const formatLastCallResult = (result: string | null): string => {
   if (!result) return "";
   switch (result) {
     case "meeting":
@@ -50,4 +50,4 @@ export function formatLastCallResult(result: string | null): string {
     default:
       return result;
   }
-}
+};

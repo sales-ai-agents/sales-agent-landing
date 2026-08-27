@@ -28,7 +28,7 @@ interface SupportBotChatProps {
 
 const SUPPORT_CHAT_URL = "/api/app/support-chat";
 
-export function SupportBotChat({ onClose }: SupportBotChatProps) {
+export const SupportBotChat = ({ onClose }: SupportBotChatProps) => {
   const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -51,7 +51,7 @@ export function SupportBotChat({ onClose }: SupportBotChatProps) {
     textareaRef.current?.focus();
   }, []);
 
-  async function sendMessage(text: string): Promise<void> {
+  const sendMessage = async (text: string): Promise<void> => {
     if (!text.trim() || isLoading) return;
 
     const userMessage: ChatMessage = {
@@ -118,9 +118,9 @@ export function SupportBotChat({ onClose }: SupportBotChatProps) {
       setIsLoading(false);
       abortRef.current = null;
     }
-  }
+  };
 
-  function handleLinkClick(event: React.MouseEvent<HTMLDivElement>): void {
+  const handleLinkClick = (event: React.MouseEvent<HTMLDivElement>): void => {
     const target = event.target as HTMLElement;
     const anchor = target.closest("a");
     if (!anchor) return;
@@ -131,19 +131,19 @@ export function SupportBotChat({ onClose }: SupportBotChatProps) {
     event.preventDefault();
     router.push(href);
     onClose();
-  }
+  };
 
-  function handleSubmit(event: React.FormEvent): void {
+  const handleSubmit = (event: React.FormEvent): void => {
     event.preventDefault();
     sendMessage(input);
-  }
+  };
 
-  function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>): void {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>): void => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       sendMessage(input);
     }
-  }
+  };
 
   return (
     <div className="bg-background fixed right-6 bottom-32 z-50 flex h-130 w-95 flex-col overflow-hidden rounded-2xl border shadow-2xl">
@@ -230,9 +230,9 @@ export function SupportBotChat({ onClose }: SupportBotChatProps) {
       </form>
     </div>
   );
-}
+};
 
-function WelcomeMessage() {
+const WelcomeMessage = () => {
   return (
     <Message align="start">
       <MessageAvatar>
@@ -249,14 +249,14 @@ function WelcomeMessage() {
       </MessageContent>
     </Message>
   );
-}
+};
 
 interface ChatBubbleProps {
   role: "user" | "assistant";
   content: string;
 }
 
-function ChatBubble({ role, content }: ChatBubbleProps) {
+const ChatBubble = ({ role, content }: ChatBubbleProps) => {
   const isUser = role === "user";
 
   if (!content) return null;
@@ -289,9 +289,9 @@ function ChatBubble({ role, content }: ChatBubbleProps) {
       </MessageContent>
     </Message>
   );
-}
+};
 
-function formatMarkdown(text: string): string {
+const formatMarkdown = (text: string): string => {
   return text
     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
     .replace(/\*(.*?)\*/g, "<em>$1</em>")
@@ -299,4 +299,4 @@ function formatMarkdown(text: string): string {
     .replace(/^- (.+)$/gm, "<li>$1</li>")
     .replace(/((?:<li>[^]*?<\/li>\s*)+)/g, "<ul>$1</ul>")
     .replace(/\n/g, "<br>");
-}
+};

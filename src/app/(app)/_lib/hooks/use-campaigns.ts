@@ -10,7 +10,7 @@ import type {
   ControlCampaignParams,
 } from "@dashboard/types";
 
-export function useCampaigns() {
+export const useCampaigns = () => {
   return useQuery<Campaign[]>({
     queryKey: ["campaigns"],
     queryFn: async () => {
@@ -18,9 +18,9 @@ export function useCampaigns() {
       return data.campaigns;
     },
   });
-}
+};
 
-export function useCreateCampaign() {
+export const useCreateCampaign = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -31,9 +31,9 @@ export function useCreateCampaign() {
       queryClient.invalidateQueries({ queryKey: ["campaigns"] });
     },
   });
-}
+};
 
-export function useControlCampaign() {
+export const useControlCampaign = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -44,4 +44,4 @@ export function useControlCampaign() {
       queryClient.invalidateQueries({ queryKey: ["campaigns"] });
     },
   });
-}
+};

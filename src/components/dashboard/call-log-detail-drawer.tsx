@@ -3,7 +3,7 @@
 import { Play, Bot, User } from "lucide-react";
 
 import { Button, Badge, Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui";
-import { getOutcomeConfig } from "@/app/(app)/_lib/call-outcome-display";
+import { getOutcomeConfig } from "@/app/(app)/_lib/call-outcome";
 import { formatDuration, cn } from "@/lib/utils";
 import { useCallDetail } from "@dashboard/hooks";
 
@@ -12,7 +12,7 @@ interface CallLogDetailDrawerProps {
   onClose: () => void;
 }
 
-export function CallLogDetailDrawer({ callId, onClose }: CallLogDetailDrawerProps) {
+export const CallLogDetailDrawer = ({ callId, onClose }: CallLogDetailDrawerProps) => {
   const { data: call, isLoading } = useCallDetail(callId);
 
   const outcomeConfig = getOutcomeConfig(call?.outcome ?? null);
@@ -148,13 +148,13 @@ export function CallLogDetailDrawer({ callId, onClose }: CallLogDetailDrawerProp
       </SheetContent>
     </Sheet>
   );
-}
+};
 
-function DetailField({ label, children }: { label: string; children: React.ReactNode }) {
+const DetailField = ({ label, children }: { label: string; children: React.ReactNode }) => {
   return (
     <div className="space-y-1">
       <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">{label}</p>
       {children}
     </div>
   );
-}
+};

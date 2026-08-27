@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Download, Bot } from "lucide-react";
@@ -8,11 +8,10 @@ import { toast } from "sonner";
 
 import { Button, Textarea, Badge } from "@/components/ui";
 import { PageLoading, PageError, AudioPlayer } from "@/components/dashboard";
-import { useCallDetail, useAgents } from "@dashboard/hooks";
-import { getOutcomeConfig } from "@/app/(app)/_lib/call-outcome-display";
+import { useCallDetail, useSaveNote, useAgents } from "@dashboard/hooks";
+import { handleMutationError } from "@/lib/mutation-error";
+import { getOutcomeConfig } from "@/app/(app)/_lib/call-outcome";
 import { formatDuration, cn } from "@/lib/utils";
-import { apiPut } from "@/lib/api-client";
-import { apiUrl } from "@/lib/api-config";
 import { formatTranscriptTime } from "@/app/(app)/dashboard/call-logs/_lib/utils";
 import { InfoField } from "@/app/(app)/dashboard/call-logs/_components/info-field";
 
@@ -20,20 +19,27 @@ const CallDetailPage = () => {
   const params = useParams();
   const callId = params.id as string;
 
-  const { data: call, isLoading, error } = useCallDetail(callId);
+  const { data: call, isLoading, error, refetch } = useCallDetail(callId);
   const { data: agents = [] } = useAgents();
+  const saveNote = useSaveNote(callId);
 
   const [note, setNote] = useState("");
   const [noteLoaded, setNoteLoaded] = useState(false);
-  const [savingNote, setSavingNote] = useState(false);
 
   if (call && !noteLoaded) {
     setNote(call.manager_note ?? "");
     setNoteLoaded(true);
   }
 
+  const handleSaveNote = useCallback(() => {
+    saveNote.mutate(note, {
+      onSuccess: () => toast.success("Примітку збережено"),
+      onError: (err) => handleMutationError(err),
+    });
+  }, [saveNote, note]);
+
   if (isLoading) return <PageLoading />;
-  if (error) return <PageError message={error.message} />;
+  if (error) return <PageError message={error.message} onRetry={refetch} />;
   if (!call) return <PageError message="Дзвінок не знайдено" />;
 
   const outcomeConfig = getOutcomeConfig(call.outcome);
@@ -41,19 +47,6 @@ const CallDetailPage = () => {
   const createdAt = new Date(call.created_at);
   const agentName = agents.find((a) => a.id === call.agent_id)?.name ?? "—";
   const minutesUsed = call.duration_sec ? (call.duration_sec / 60).toFixed(1) : "0";
-
-  const handleSaveNote = async () => {
-    setSavingNote(true);
-
-    try {
-      await apiPut(apiUrl.call(callId) + "/note", { note });
-      toast.success("Примітку збережено");
-    } catch {
-      toast.error("Не вдалось зберегти примітку");
-    } finally {
-      setSavingNote(false);
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -166,8 +159,13 @@ const CallDetailPage = () => {
               value={note}
               onChange={(e) => setNote(e.target.value)}
             />
-            <Button size="sm" className="mt-3" onClick={handleSaveNote} disabled={savingNote}>
-              {savingNote ? "Збереження..." : "Зберегти примітку"}
+            <Button
+              size="sm"
+              className="mt-3"
+              onClick={handleSaveNote}
+              disabled={saveNote.isPending}
+            >
+              {saveNote.isPending ? "Збереження..." : "Зберегти примітку"}
             </Button>
           </div>
         </div>

@@ -1,10 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 
-import { apiGet } from "@/lib/api-client";
+import { apiGet, apiPut } from "@/lib/api-client";
 import { apiUrl } from "@/lib/api-config";
 import type { CallDetail, CallDetailResponse } from "@dashboard/types";
 
-export function useCallDetail(callId: string | undefined) {
+export const useCallDetail = (callId: string | undefined) => {
   return useQuery<CallDetail | null>({
     queryKey: ["call-detail", callId],
     queryFn: async () => {
@@ -14,4 +14,12 @@ export function useCallDetail(callId: string | undefined) {
     },
     enabled: !!callId,
   });
-}
+};
+
+export const useSaveNote = (callId: string) => {
+  return useMutation({
+    mutationFn: async (note: string) => {
+      return apiPut(apiUrl.call(callId) + "/note", { note });
+    },
+  });
+};

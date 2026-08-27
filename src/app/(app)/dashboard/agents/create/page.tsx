@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,10 +11,17 @@ import { Button, Input, Label, Textarea } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { createAgentSchema, type CreateAgentFormData } from "@/lib/schemas";
 import { useCreateAgent, useTestCall, useVoices } from "@dashboard/hooks";
-import { ApiError } from "@/lib/api-client";
-import { resolveErrorMessage, AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
+import { handleMutationError } from "@/lib/mutation-error";
+import { AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
 
 const TOTAL_STEPS = 4;
+
+const STEP_FIELDS: (keyof CreateAgentFormData)[][] = [
+  ["name"],
+  ["voice"],
+  ["instructions"],
+  ["testPhone"],
+];
 
 const CreateAgentPage = () => {
   const router = useRouter();
@@ -43,27 +50,7 @@ const CreateAgentPage = () => {
   const voice = watch("voice");
   const instructions = watch("instructions");
 
-  const STEP_FIELDS: (keyof CreateAgentFormData)[][] = [
-    ["name"],
-    ["voice"],
-    ["instructions"],
-    ["testPhone"],
-  ];
-
-  const handleNext = async () => {
-    const valid = await trigger(STEP_FIELDS[step]);
-    if (!valid) return;
-
-    if (step < TOTAL_STEPS - 1) setStep(step + 1);
-    else await handleCreate();
-  };
-
-  const handleBack = () => {
-    if (step > 0) setStep(step - 1);
-    else router.back();
-  };
-
-  const handleCreate = async () => {
+  const handleCreate = useCallback(async () => {
     const valid = await trigger(["name", "voice", "instructions"]);
     if (!valid) return;
 
@@ -80,18 +67,25 @@ const CreateAgentPage = () => {
           toast.success("Агента створено");
           router.push("/dashboard/agents");
         },
-        onError: (error) => {
-          if (error instanceof ApiError) {
-            toast.error(resolveErrorMessage(error.code, AGENT_ERROR_MESSAGES));
-          } else {
-            toast.error("Щось пішло не так.");
-          }
-        },
+        onError: (err) => handleMutationError(err, AGENT_ERROR_MESSAGES),
       }
     );
-  };
+  }, [trigger, getValues, createAgent, router]);
 
-  const handleTestCall = async () => {
+  const handleNext = useCallback(async () => {
+    const valid = await trigger(STEP_FIELDS[step]);
+    if (!valid) return;
+
+    if (step < TOTAL_STEPS - 1) setStep(step + 1);
+    else await handleCreate();
+  }, [trigger, step, handleCreate]);
+
+  const handleBack = useCallback(() => {
+    if (step > 0) setStep(step - 1);
+    else router.back();
+  }, [step, router]);
+
+  const handleTestCall = useCallback(async () => {
     const data = getValues();
     if (!data.testPhone) return;
 
@@ -106,16 +100,10 @@ const CreateAgentPage = () => {
         onSuccess: () => {
           toast.success("Дзвінок ініційовано — очікуйте виклик");
         },
-        onError: (error) => {
-          if (error instanceof ApiError) {
-            toast.error(resolveErrorMessage(error.code, AGENT_ERROR_MESSAGES));
-          } else {
-            toast.error("Щось пішло не так.");
-          }
-        },
+        onError: (err) => handleMutationError(err, AGENT_ERROR_MESSAGES),
       }
     );
-  };
+  }, [getValues, testCall]);
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">

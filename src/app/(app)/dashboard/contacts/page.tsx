@@ -1,15 +1,7 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
-import {
-  useReactTable,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  flexRender,
-  type SortingState,
-} from "@tanstack/react-table";
+import { useState, useCallback } from "react";
+import type { SortingState } from "@tanstack/react-table";
 import { Search, Users, Phone, BarChart3, Upload, Plus } from "lucide-react";
 import { toast } from "sonner";
 
@@ -17,7 +9,6 @@ import { Button, Input } from "@/components/ui";
 import {
   PageError,
   PageLoading,
-  Pagination,
   AddContactDialog,
   UploadCsvDialog,
   PageEmpty,
@@ -28,13 +19,11 @@ import {
   useDeleteContact,
   useUpdateContact,
 } from "@dashboard/hooks";
-import { handleMutationError } from "@/lib/handle-mutation-error";
-import { cn, formatNumber } from "@/lib/utils";
+import { handleMutationError } from "@/lib/mutation-error";
+import { formatNumber } from "@/lib/utils";
 import type { ContactFormData } from "@/lib/schemas";
-import { buildColumns } from "./_lib/table";
+import { Table } from "./_components/table";
 import { KpiCard } from "./_components/kpi-card";
-
-const PAGE_SIZE = 12;
 
 const ContactsPage = () => {
   const { data, isLoading, error, refetch } = useContacts();
@@ -51,15 +40,18 @@ const ContactsPage = () => {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
 
-  const handleAddContact = (formData: ContactFormData) => {
-    createContact.mutate(formData, {
-      onSuccess: () => {
-        toast.success("Контакт додано");
-        setShowAddDialog(false);
-      },
-      onError: (err) => handleMutationError(err),
-    });
-  };
+  const handleAddContact = useCallback(
+    (formData: ContactFormData) => {
+      createContact.mutate(formData, {
+        onSuccess: () => {
+          toast.success("Контакт додано");
+          setShowAddDialog(false);
+        },
+        onError: (err) => handleMutationError(err),
+      });
+    },
+    [createContact]
+  );
 
   const handleDeleteContact = useCallback(
     (id: number) => {
@@ -80,24 +72,6 @@ const ContactsPage = () => {
     },
     [updateContact]
   );
-
-  const columns = useMemo(
-    () => buildColumns(handleDeleteContact, handleToggleDoNotCall),
-    [handleDeleteContact, handleToggleDoNotCall]
-  );
-
-  const table = useReactTable({
-    data: contacts,
-    columns,
-    state: { globalFilter, sorting },
-    onGlobalFilterChange: setGlobalFilter,
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    initialState: { pagination: { pageSize: PAGE_SIZE } },
-  });
 
   if (isLoading) return <PageLoading />;
   if (error) return <PageError message={error.message} onRetry={refetch} />;
@@ -135,7 +109,6 @@ const ContactsPage = () => {
   const totalContacts = contactStats?.total_contacts ?? contacts.length;
   const processedThisMonth = contactStats?.processed_this_month ?? 0;
   const conversionPct = contactStats?.conversion_pct;
-  const currentPage = table.getState().pagination.pageIndex;
 
   const processedSubtitle =
     totalContacts > 0
@@ -204,52 +177,16 @@ const ContactsPage = () => {
       </div>
 
       <div className="border-border bg-background overflow-hidden rounded-xl border">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id} className="bg-muted/50 border-b">
-                  {headerGroup.headers.map((header) => {
-                    const meta = header.column.columnDef.meta as { className?: string } | undefined;
-                    return (
-                      <th
-                        key={header.id}
-                        className={cn("px-4 py-3 text-left font-medium", meta?.className)}
-                      >
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(header.column.columnDef.header, header.getContext())}
-                      </th>
-                    );
-                  })}
-                </tr>
-              ))}
-            </thead>
-            <tbody>
-              {table.getRowModel().rows.map((row) => (
-                <tr key={row.id} className="hover:bg-muted/20 border-b last:border-0">
-                  {row.getVisibleCells().map((cell) => {
-                    const meta = cell.column.columnDef.meta as { className?: string } | undefined;
-                    return (
-                      <td key={cell.id} className={cn("px-4 py-3", meta?.className)}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table
+          data={contacts}
+          globalFilter={globalFilter}
+          onGlobalFilterChange={setGlobalFilter}
+          sorting={sorting}
+          onSortingChange={setSorting}
+          onDelete={handleDeleteContact}
+          onToggleDoNotCall={handleToggleDoNotCall}
+        />
       </div>
-
-      <Pagination
-        total={contacts.length}
-        pageSize={PAGE_SIZE}
-        currentPage={currentPage}
-        onPageChange={(page) => table.setPageIndex(page)}
-        itemLabel="контактів"
-      />
 
       {showAddDialog && (
         <AddContactDialog onSubmit={handleAddContact} onClose={() => setShowAddDialog(false)} />

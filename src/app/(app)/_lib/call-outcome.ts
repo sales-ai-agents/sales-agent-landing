@@ -21,12 +21,12 @@ const OUTCOME_MAP: Record<string, OutcomeConfig> = {
 
 const DEFAULT_CONFIG: OutcomeConfig = { label: "", variant: "secondary" };
 
-export function getOutcomeConfig(outcome: CallOutcome | null): OutcomeConfig {
+export const getOutcomeConfig = (outcome: CallOutcome | null): OutcomeConfig => {
   if (!outcome) return DEFAULT_CONFIG;
   return OUTCOME_MAP[outcome] ?? { ...DEFAULT_CONFIG, label: outcome };
-}
+};
 
-export function getOutcomeDisplay(call: CallLog): OutcomeDisplay {
+export const getOutcomeDisplay = (call: CallLog): OutcomeDisplay => {
   if (call.meeting_scheduled) {
     return { label: "Ціль досягнута", badgeClass: "bg-green-100/80 text-green-900", icon: "✓" };
   }
@@ -46,4 +46,4 @@ export function getOutcomeDisplay(call: CallLog): OutcomeDisplay {
         icon: "–",
       };
   }
-}
+};
