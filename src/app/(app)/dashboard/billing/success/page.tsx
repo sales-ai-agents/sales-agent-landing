@@ -5,9 +5,9 @@ import Link from "next/link";
 import { XCircle, ArrowLeft } from "lucide-react";
 
 import { Button, Card, CardContent } from "@/components/ui";
-import { PaymentStatusChecker } from "./_components/payment-status-checker";
+import PaymentStatusChecker from "./_components/payment-status-checker";
 
-export default function BillingSuccessPage() {
+const BillingSuccessPage = () => {
   const searchParams = useSearchParams();
   const invoiceId = searchParams.get("invoice_id");
 
@@ -32,4 +32,6 @@ export default function BillingSuccessPage() {
   }
 
   return <PaymentStatusChecker invoiceId={invoiceId} />;
-}
+};
+
+export default BillingSuccessPage;

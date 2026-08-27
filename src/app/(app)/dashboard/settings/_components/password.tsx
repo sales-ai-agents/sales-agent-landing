@@ -8,16 +8,17 @@ import { useChangePassword } from "@/lib/hooks";
 import { AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/handle-mutation-error";
 
-export function PasswordSection() {
-  const [currentPassword, setCurrentPassword] = useState("");
+const Password = () => {
   const [newPassword, setNewPassword] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
   const changePassword = useChangePassword();
 
   const canSubmit =
     currentPassword.length > 0 && newPassword.length >= 8 && newPassword === confirmPassword;
 
-  function handleChange(): void {
+  const handleChange = () => {
     changePassword.mutate(
       { current_password: currentPassword, new_password: newPassword },
       {
@@ -30,7 +31,7 @@ export function PasswordSection() {
         onError: (err) => handleMutationError(err, AUTH_ERROR_MESSAGES),
       }
     );
-  }
+  };
 
   return (
     <section className="border-border bg-background rounded-2xl border p-5">
@@ -83,4 +84,6 @@ export function PasswordSection() {
       </Button>
     </section>
   );
-}
+};
+
+export default Password;

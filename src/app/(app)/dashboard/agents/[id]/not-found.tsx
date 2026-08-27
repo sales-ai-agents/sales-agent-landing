@@ -2,9 +2,9 @@ import Link from "next/link";
 import { Bot } from "lucide-react";
 import { buttonVariants } from "@/components/ui";
 
-export default function AgentNotFound() {
+const AgentNotFound = () => {
   return (
-    <div className="flex h-full min-h-[50vh] flex-col items-center justify-center gap-4">
+    <div className="flex h-full flex-col items-center justify-center gap-4">
       <div className="bg-primary/5 rounded-full p-3">
         <Bot className="text-primary h-6 w-6" />
       </div>
@@ -19,4 +19,6 @@ export default function AgentNotFound() {
       </Link>
     </div>
   );
-}
+};
+
+export default AgentNotFound;

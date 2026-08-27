@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import type { Agent, CallStatusFilter } from "@dashboard/types";
 import { DateRangePicker } from "./date-range-picker";
 import React from "react";
+import { FilterField } from "./filter-field";
 
 const STATUS_OPTIONS: { value: CallStatusFilter; label: string }[] = [
   { value: "success", label: "Успішні" },
@@ -13,7 +14,7 @@ const STATUS_OPTIONS: { value: CallStatusFilter; label: string }[] = [
   { value: "attention", label: "Потребує уваги" },
 ];
 
-interface CallLogsFiltersProps {
+interface FiltersProps {
   dateRange: DateRange | undefined;
   onDateRangeChange: (range: DateRange | undefined) => void;
   status: CallStatusFilter | undefined;
@@ -26,7 +27,7 @@ interface CallLogsFiltersProps {
   onPhoneSubmit: () => void;
 }
 
-export function CallLogsFilters({
+export function Filters({
   dateRange,
   onDateRangeChange,
   status,
@@ -37,7 +38,7 @@ export function CallLogsFilters({
   phoneInput,
   onPhoneInputChange,
   onPhoneSubmit,
-}: CallLogsFiltersProps) {
+}: FiltersProps) {
   return (
     <div className="flex flex-wrap items-end gap-3">
       <FilterField label="Діапазон дат">
@@ -102,15 +103,6 @@ export function CallLogsFilters({
           aria-label="Пошук за номером телефону"
         />
       </FilterField>
-    </div>
-  );
-}
-
-function FilterField({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="border-border flex min-w-60 flex-col gap-1 rounded-lg border bg-white p-3">
-      <span className="text-muted-foreground text-xs font-medium">{label}</span>
-      {children}
     </div>
   );
 }

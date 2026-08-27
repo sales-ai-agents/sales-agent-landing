@@ -42,7 +42,7 @@ export function PageError({ message, onRetry }: PageErrorProps) {
 interface PageEmptyProps {
   icon: React.ComponentType<{ className?: string }>;
   title: string;
-  description?: string;
+  description?: React.ReactNode;
   action?: React.ReactNode;
 }
 
@@ -52,7 +52,7 @@ export function PageEmpty({ icon: Icon, title, description, action }: PageEmptyP
       <Icon className="text-primary h-10 w-10" />
       <div className="text-center">
         <h3 className="text-2xl font-medium">{title}</h3>
-        {description && <p className="text-muted-foreground mt-1 text-lg">{description}</p>}
+        {description && description}
       </div>
       {action}
     </div>

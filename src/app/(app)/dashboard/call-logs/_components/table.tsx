@@ -14,16 +14,17 @@ import { Badge } from "@/components/ui";
 import { getOutcomeConfig } from "@/app/(app)/_lib/call-outcome-display";
 import { formatDuration, cn } from "@/lib/utils";
 import type { CallLog, Agent } from "@dashboard/types";
+import { resolveAgentName } from "../_lib/utils";
 
 const columnHelper = createColumnHelper<CallLog>();
 
-interface CallLogsTableProps {
+interface TableProps {
   data: CallLog[];
   agents: Agent[];
   pageCount: number;
 }
 
-export function CallLogsTable({ data, agents, pageCount }: CallLogsTableProps) {
+export function Table({ data, agents, pageCount }: TableProps) {
   const columns = useMemo(
     () => [
       columnHelper.accessor("created_at", {
@@ -160,9 +161,4 @@ export function CallLogsTable({ data, agents, pageCount }: CallLogsTableProps) {
       </table>
     </div>
   );
-}
-
-function resolveAgentName(agentId: number | null, agents: Agent[]): string {
-  if (!agentId) return "—";
-  return agents.find((a) => a.id === agentId)?.name ?? "—";
 }

@@ -6,9 +6,10 @@ import { Sidebar, DashboardHeader, PageLoading, SupportBotButton } from "@/compo
 import { OnboardingWrapper } from "@/components/dashboard/onboarding";
 import { useMe } from "@/lib/hooks";
 
-export function DashboardShell({ children }: { children: React.ReactNode }) {
+const DashboardShell = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const redirecting = useRef(false);
+
   const { data: account, isLoading } = useMe();
 
   useEffect(() => {
@@ -34,4 +35,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       </div>
     </OnboardingWrapper>
   );
-}
+};
+
+export default DashboardShell;

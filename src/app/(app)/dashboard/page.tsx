@@ -27,7 +27,7 @@ const PERIOD_OPTIONS = [
   { label: "90 днів", value: 90 },
 ] as const;
 
-export default function DashboardPage() {
+const DashboardPage = () => {
   const [days, setDays] = useState(7);
 
   const { data: stats, isLoading: statsLoading, error, refetch } = useStats(days);
@@ -216,4 +216,6 @@ export default function DashboardPage() {
       </div>
     </div>
   );
-}
+};
+
+export default DashboardPage;

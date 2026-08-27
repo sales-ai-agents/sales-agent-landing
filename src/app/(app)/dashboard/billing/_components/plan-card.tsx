@@ -10,6 +10,35 @@ interface PlanCardProps {
   onSelect: () => void;
 }
 
+function getPlanFeatures(plan: BillingPlan): string[] {
+  if (plan.minutes >= 3000) {
+    return [
+      `${formatNumber(plan.minutes)} хв розмов`,
+      "Усі доступні інтеграції",
+      "Усе з тарифу Business",
+      "Пріоритетна підтримка",
+      "Підключення до бізнес-процесів",
+    ];
+  }
+  if (plan.minutes >= 1000) {
+    return [
+      `${formatNumber(plan.minutes)} хв розмов`,
+      `До ${plan.agents} ШІ-агентів`,
+      "Усе з тарифу Start",
+      "CSV-кампанії",
+      "Webhooks",
+      "Кілька сценаріїв дзвінків",
+    ];
+  }
+  return [
+    `${plan.minutes} хв розмов`,
+    `${plan.agents} ШІ-агент`,
+    "Журнал дзвінків",
+    "Перегляд результатів розмов",
+    "Базове налаштування сценарію",
+  ];
+}
+
 export function PlanCard({ plan, isCurrent, onSelect }: PlanCardProps) {
   const features = getPlanFeatures(plan);
   const isPro = plan.minutes >= 3000;
@@ -51,33 +80,4 @@ export function PlanCard({ plan, isCurrent, onSelect }: PlanCardProps) {
       </div>
     </div>
   );
-}
-
-function getPlanFeatures(plan: BillingPlan): string[] {
-  if (plan.minutes >= 3000) {
-    return [
-      `${formatNumber(plan.minutes)} хв розмов`,
-      "Усі доступні інтеграції",
-      "Усе з тарифу Business",
-      "Пріоритетна підтримка",
-      "Підключення до бізнес-процесів",
-    ];
-  }
-  if (plan.minutes >= 1000) {
-    return [
-      `${formatNumber(plan.minutes)} хв розмов`,
-      `До ${plan.agents} ШІ-агентів`,
-      "Усе з тарифу Start",
-      "CSV-кампанії",
-      "Webhooks",
-      "Кілька сценаріїв дзвінків",
-    ];
-  }
-  return [
-    `${plan.minutes} хв розмов`,
-    `${plan.agents} ШІ-агент`,
-    "Журнал дзвінків",
-    "Перегляд результатів розмов",
-    "Базове налаштування сценарію",
-  ];
 }

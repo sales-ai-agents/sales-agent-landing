@@ -1,5 +1,8 @@
-import { DashboardShell } from "./dashboard-shell";
+import React from "react";
+import DashboardShell from "./dashboard-shell";
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+const AppLayout = ({ children }: { children: React.ReactNode }) => {
   return <DashboardShell>{children}</DashboardShell>;
-}
+};
+
+export default AppLayout;

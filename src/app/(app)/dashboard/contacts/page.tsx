@@ -10,16 +10,17 @@ import {
   flexRender,
   type SortingState,
 } from "@tanstack/react-table";
-import { Search, Users, Phone, BarChart3 } from "lucide-react";
+import { Search, Users, Phone, BarChart3, Upload, Plus } from "lucide-react";
 import { toast } from "sonner";
 
-import { Input } from "@/components/ui";
+import { Button, Input } from "@/components/ui";
 import {
   PageError,
   PageLoading,
   Pagination,
   AddContactDialog,
   UploadCsvDialog,
+  PageEmpty,
 } from "@/components/dashboard";
 import {
   useContacts,
@@ -30,15 +31,14 @@ import {
 import { handleMutationError } from "@/lib/handle-mutation-error";
 import { cn, formatNumber } from "@/lib/utils";
 import type { ContactFormData } from "@/lib/schemas";
-import { buildColumns } from "./_lib/columns";
-import { ContactsPageHeader } from "./_components/contacts-page-header";
-import { ContactsEmptyState } from "./_components/contacts-empty-state";
-import { ContactsKpiCard } from "./_components/contacts-kpi-card";
+import { buildColumns } from "./_lib/table";
+import { KpiCard } from "./_components/kpi-card";
 
 const PAGE_SIZE = 12;
 
-export default function ContactsPage() {
+const ContactsPage = () => {
   const { data, isLoading, error, refetch } = useContacts();
+
   const createContact = useCreateContact();
   const deleteContact = useDeleteContact();
   const updateContact = useUpdateContact();
@@ -51,7 +51,7 @@ export default function ContactsPage() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
 
-  const handleAddContact = (formData: ContactFormData): void => {
+  const handleAddContact = (formData: ContactFormData) => {
     createContact.mutate(formData, {
       onSuccess: () => {
         toast.success("Контакт додано");
@@ -101,19 +101,34 @@ export default function ContactsPage() {
 
   if (isLoading) return <PageLoading />;
   if (error) return <PageError message={error.message} onRetry={refetch} />;
-
   if (!contacts.length) {
     return (
-      <div className="flex h-full">
-        <ContactsEmptyState
-          onImport={() => setShowUploadDialog(true)}
-          onAdd={() => setShowAddDialog(true)}
-        />
-        {showAddDialog && (
-          <AddContactDialog onSubmit={handleAddContact} onClose={() => setShowAddDialog(false)} />
-        )}
-        {showUploadDialog && <UploadCsvDialog onClose={() => setShowUploadDialog(false)} />}
-      </div>
+      <PageEmpty
+        icon={Phone}
+        title="Контактів ще немає"
+        description={
+          <>
+            <p className="text-muted-foreground mt-1 text-lg">Додайте перший контакт, щоб почати</p>
+            <div className="mt-4 flex justify-center gap-3">
+              <Button variant="outline" onClick={() => setShowUploadDialog(true)}>
+                <Upload className="mr-2 h-4 w-4" />
+                Імпорт CSV
+              </Button>
+              <Button onClick={() => setShowAddDialog(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Додати контакт
+              </Button>
+            </div>
+            {showAddDialog && (
+              <AddContactDialog
+                onSubmit={handleAddContact}
+                onClose={() => setShowAddDialog(false)}
+              />
+            )}
+            {showUploadDialog && <UploadCsvDialog onClose={() => setShowUploadDialog(false)} />}
+          </>
+        }
+      />
     );
   }
 
@@ -134,27 +149,41 @@ export default function ContactsPage() {
 
   return (
     <div className="space-y-6">
-      <ContactsPageHeader
-        onImport={() => setShowUploadDialog(true)}
-        onAdd={() => setShowAddDialog(true)}
-      />
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Контакти</h1>
+          <p className="text-muted-foreground text-sm">
+            Керуйте базою контактів для дзвінків ШІ-агента
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" className="px-6" onClick={() => setShowUploadDialog(true)}>
+            <Upload className="mr-2 h-4 w-4" />
+            Імпорт CSV
+          </Button>
+          <Button onClick={() => setShowAddDialog(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Додати контакт
+          </Button>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <ContactsKpiCard
+        <KpiCard
           icon={<Users className="text-primary h-6 w-6" />}
           iconBg="bg-primary/10"
           title="Усього контактів"
           value={formatNumber(totalContacts)}
           subtitle="Вся ваша база контактів"
         />
-        <ContactsKpiCard
+        <KpiCard
           icon={<Phone className="h-6 w-6 text-green-600" />}
           iconBg="bg-green-100"
           title="Оброблено цього місяця"
           value={`${formatNumber(processedThisMonth)} / ${formatNumber(totalContacts)}`}
           subtitle={processedSubtitle}
         />
-        <ContactsKpiCard
+        <KpiCard
           icon={<BarChart3 className="text-primary h-6 w-6" />}
           iconBg="bg-primary/10"
           title="Конверсія в цільову дію"
@@ -228,4 +257,6 @@ export default function ContactsPage() {
       {showUploadDialog && <UploadCsvDialog onClose={() => setShowUploadDialog(false)} />}
     </div>
   );
-}
+};
+
+export default ContactsPage;

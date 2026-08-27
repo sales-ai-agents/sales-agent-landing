@@ -5,6 +5,12 @@ interface TagColor {
   text: string;
 }
 
+interface ConsentDisplay {
+  label: string;
+  color: string;
+  dot: string;
+}
+
 const TAG_COLORS: Record<string, TagColor> = {
   VIP: { bg: "bg-orange-100", text: "text-orange-600" },
   Новий: { bg: "bg-green-100", text: "text-green-700" },
@@ -16,12 +22,6 @@ const DEFAULT_TAG_COLOR: TagColor = { bg: "bg-gray-100", text: "text-gray-700" }
 
 export function getTagColor(tag: string): TagColor {
   return TAG_COLORS[tag] ?? DEFAULT_TAG_COLOR;
-}
-
-interface ConsentDisplay {
-  label: string;
-  color: string;
-  dot: string;
 }
 
 export function formatConsentLabel(consent: ConsentStatus): ConsentDisplay {

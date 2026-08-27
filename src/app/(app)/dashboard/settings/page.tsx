@@ -10,11 +10,11 @@ import {
 } from "@/components/ui";
 import { useMe } from "@/lib/hooks";
 import { PageError, PageLoading } from "@/components/dashboard";
-import { BusinessSection } from "./_sections/business-section";
-import { ProfileSection } from "./_sections/profile-section";
-import { PasswordSection } from "./_sections/password-section";
+import Business from "./_components/business";
+import Profile from "./_components/profile";
+import Password from "./_components/password";
 
-export default function SettingsPage() {
+const SettingsPage = () => {
   const { data: account, isLoading, error, refetch } = useMe();
 
   if (isLoading) return <PageLoading />;
@@ -52,9 +52,11 @@ export default function SettingsPage() {
         </div>
       </section>
 
-      <BusinessSection initialCompany={account?.company ?? ""} />
-      <ProfileSection initialName={account?.name ?? ""} initialEmail={account?.email ?? ""} />
-      <PasswordSection />
+      <Business initialCompany={account?.company ?? ""} />
+      <Profile initialName={account?.name ?? ""} initialEmail={account?.email ?? ""} />
+      <Password />
     </div>
   );
-}
+};
+
+export default SettingsPage;

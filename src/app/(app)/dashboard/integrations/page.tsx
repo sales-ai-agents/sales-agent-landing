@@ -7,7 +7,7 @@ import { FileSpreadsheet, Webhook, Key } from "lucide-react";
 
 import { Button } from "@/components/ui";
 
-export default function IntegrationsPage() {
+const IntegrationsPage = () => {
   return (
     <div className="space-y-8">
       <div>
@@ -108,7 +108,7 @@ export default function IntegrationsPage() {
       </div>
     </div>
   );
-}
+};
 
 function CrmCard({ name, description }: { name: string; description: string }) {
   return (
@@ -129,3 +129,5 @@ function CrmCard({ name, description }: { name: string; description: string }) {
     </div>
   );
 }
+
+export default IntegrationsPage;

@@ -17,16 +17,17 @@ import { useUpdateProfile } from "@/lib/hooks";
 import { AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/handle-mutation-error";
 
-interface BusinessSectionProps {
+interface BusinessProps {
   initialCompany: string;
 }
 
-export function BusinessSection({ initialCompany }: BusinessSectionProps) {
+const Business = ({ initialCompany }: BusinessProps) => {
   const [company, setCompany] = useState(initialCompany);
   const [shortName, setShortName] = useState("");
+
   const updateProfile = useUpdateProfile();
 
-  function handleSave(): void {
+  const handleSave = () => {
     updateProfile.mutate(
       { company },
       {
@@ -34,7 +35,7 @@ export function BusinessSection({ initialCompany }: BusinessSectionProps) {
         onError: (err) => handleMutationError(err, AUTH_ERROR_MESSAGES),
       }
     );
-  }
+  };
 
   return (
     <section className="border-border bg-background rounded-2xl border p-5">
@@ -91,4 +92,6 @@ export function BusinessSection({ initialCompany }: BusinessSectionProps) {
       </Button>
     </section>
   );
-}
+};
+
+export default Business;

@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { CheckCircle, XCircle, Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
@@ -11,7 +12,30 @@ interface PaymentStatusCheckerProps {
   invoiceId: string;
 }
 
-export function PaymentStatusChecker({ invoiceId }: PaymentStatusCheckerProps) {
+const StatusLayout = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <div className="flex min-h-[60vh] items-center justify-center">
+      <Card className="border-border w-full max-w-md rounded-2xl">
+        <CardContent className="flex flex-col items-center gap-4 pt-8 text-center">
+          {children}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+const BackButton = ({ label = "Назад до тарифів" }: { label?: string }) => {
+  return (
+    <Link href="/dashboard/billing">
+      <Button variant="outline" className="mt-2 gap-2">
+        <ArrowLeft className="h-4 w-4" />
+        {label}
+      </Button>
+    </Link>
+  );
+};
+
+const PaymentStatusChecker = ({ invoiceId }: PaymentStatusCheckerProps) => {
   const { data, isLoading, isError } = usePaymentStatus(invoiceId);
 
   if (isLoading || (!data && !isError)) {
@@ -76,27 +100,6 @@ export function PaymentStatusChecker({ invoiceId }: PaymentStatusCheckerProps) {
       </p>
     </StatusLayout>
   );
-}
+};
 
-function StatusLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex min-h-[60vh] items-center justify-center">
-      <Card className="border-border w-full max-w-md rounded-2xl">
-        <CardContent className="flex flex-col items-center gap-4 pt-8 text-center">
-          {children}
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-function BackButton({ label = "Назад до тарифів" }: { label?: string }) {
-  return (
-    <Link href="/dashboard/billing">
-      <Button variant="outline" className="mt-2 gap-2">
-        <ArrowLeft className="h-4 w-4" />
-        {label}
-      </Button>
-    </Link>
-  );
-}
+export default PaymentStatusChecker;

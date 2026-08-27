@@ -13,12 +13,16 @@ import { getOutcomeConfig } from "@/app/(app)/_lib/call-outcome-display";
 import { formatDuration, cn } from "@/lib/utils";
 import { apiPut } from "@/lib/api-client";
 import { apiUrl } from "@/lib/api-config";
+import { formatTranscriptTime } from "@/app/(app)/dashboard/call-logs/_lib/utils";
+import { InfoField } from "@/app/(app)/dashboard/call-logs/_components/info-field";
 
-export default function CallDetailPage() {
+const CallDetailPage = () => {
   const params = useParams();
   const callId = params.id as string;
+
   const { data: call, isLoading, error } = useCallDetail(callId);
   const { data: agents = [] } = useAgents();
+
   const [note, setNote] = useState("");
   const [noteLoaded, setNoteLoaded] = useState(false);
   const [savingNote, setSavingNote] = useState(false);
@@ -38,8 +42,9 @@ export default function CallDetailPage() {
   const agentName = agents.find((a) => a.id === call.agent_id)?.name ?? "—";
   const minutesUsed = call.duration_sec ? (call.duration_sec / 60).toFixed(1) : "0";
 
-  async function handleSaveNote(): Promise<void> {
+  const handleSaveNote = async () => {
     setSavingNote(true);
+
     try {
       await apiPut(apiUrl.call(callId) + "/note", { note });
       toast.success("Примітку збережено");
@@ -48,7 +53,7 @@ export default function CallDetailPage() {
     } finally {
       setSavingNote(false);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -169,32 +174,6 @@ export default function CallDetailPage() {
       </div>
     </div>
   );
-}
+};
 
-function InfoField({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: string;
-  icon?: React.ReactNode;
-}) {
-  return (
-    <div>
-      <p className="text-muted-foreground text-xs">{label}</p>
-      <div className="mt-1 flex items-center gap-1.5">
-        {icon}
-        <p className="text-sm font-medium">{value}</p>
-      </div>
-    </div>
-  );
-}
-
-function formatTranscriptTime(index: number, totalSec: number | null): string {
-  if (!totalSec) return "00:00";
-  const approxSec = Math.round((index / 10) * 30);
-  const m = Math.floor(approxSec / 60);
-  const s = approxSec % 60;
-  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-}
+export default CallDetailPage;

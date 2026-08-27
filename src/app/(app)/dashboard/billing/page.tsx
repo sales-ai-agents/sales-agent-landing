@@ -12,10 +12,11 @@ import { PlanCard } from "./_components/plan-card";
 import { PaymentStatusLabel } from "./_components/payment-status-label";
 import { getDefaultUpgradePlan } from "./_lib/utils";
 
-export default function BillingPage() {
-  const { data: billing, isLoading, isError, refetch } = useBillingPlans();
-  const { data: historyData } = useBillingHistory();
+const BillingPage = () => {
   const { data: stats } = useStats();
+  const { data: historyData } = useBillingHistory();
+  const { data: billing, isLoading, isError, refetch } = useBillingPlans();
+
   const [selectedPlanKey, setSelectedPlanKey] = useState<string | null>(null);
 
   if (isLoading) return <PageLoading />;
@@ -29,10 +30,10 @@ export default function BillingPage() {
   const minutesLimit = stats?.minutes_limit ?? billing.minutes;
   const usagePercent = minutesLimit > 0 ? (minutesUsed / minutesLimit) * 100 : 0;
 
-  function openUpgradeDialog(): void {
+  const openUpgradeDialog = () => {
     if (!billing) return;
     setSelectedPlanKey(getDefaultUpgradePlan(billing.plans, billing.current));
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -226,4 +227,6 @@ export default function BillingPage() {
       )}
     </div>
   );
-}
+};
+
+export default BillingPage;

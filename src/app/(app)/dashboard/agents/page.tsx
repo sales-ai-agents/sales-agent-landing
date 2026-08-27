@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PhoneCall } from "lucide-react";
+import { Bot, PhoneCall, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -13,30 +13,52 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui";
-import { PageError, PageLoading } from "@/components/dashboard";
+import { PageEmpty, PageError, PageLoading } from "@/components/dashboard";
 import { useAgents, useToggleAgentStatus, useTestCall } from "@dashboard/hooks";
 import { AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/handle-mutation-error";
-import { AgentCard } from "./_components/agent-card";
-import { AgentsEmptyState } from "./_components/agents-empty-state";
-import { AddAgentCard } from "./_components/add-agent-card";
+import AgentCard from "./_components/agent-card";
 import type { Agent } from "@dashboard/types";
+import Link from "next/link";
 
-export default function AgentsPage() {
+const AgentsPage = () => {
   const { data: agents = [], isLoading, error, refetch } = useAgents({ stats: true });
+
   const toggleStatus = useToggleAgentStatus();
   const testCall = useTestCall();
 
+  const [testPhone, setTestPhone] = useState("");
   const [testDialog, setTestDialog] = useState<{
     agentId: number;
     agentName: string;
   } | null>(null);
-  const [testPhone, setTestPhone] = useState("");
 
-  function handleToggle(agent: Agent): void {
-    const newActive = !agent.is_active;
+  if (isLoading) return <PageLoading />;
+  if (error) return <PageError message={error.message} onRetry={refetch} />;
+  if (agents.length === 0)
+    return (
+      <PageEmpty
+        icon={Bot}
+        title="Агентів ще немає"
+        description={
+          <>
+            <p className="text-muted-foreground mt-1 text-lg">
+              Створіть свого першого AI голосового агента, щоб почати
+            </p>
+            <Link href="/dashboard/agents/create">
+              <Button className="mt-4">
+                <Plus className="mr-2 h-4 w-4" />
+                Створити агента
+              </Button>
+            </Link>
+          </>
+        }
+      />
+    );
+
+  function handleToggle(agent: Agent) {
     toggleStatus.mutate(
-      { id: agent.id, is_active: newActive },
+      { id: agent.id, is_active: !agent.is_active },
       {
         onSuccess: (_data, variables) => {
           const label = variables.is_active ? "активовано" : "призупинено";
@@ -47,8 +69,9 @@ export default function AgentsPage() {
     );
   }
 
-  function handleTestCall(): void {
+  function handleTestCall() {
     if (!testDialog || !testPhone) return;
+
     testCall.mutate(
       { agent_id: testDialog.agentId, phone: testPhone },
       {
@@ -62,9 +85,6 @@ export default function AgentsPage() {
     );
   }
 
-  if (isLoading) return <PageLoading />;
-  if (error) return <PageError message={error.message} onRetry={refetch} />;
-
   return (
     <div className="space-y-6">
       <div>
@@ -72,21 +92,32 @@ export default function AgentsPage() {
         <p className="text-muted-foreground text-sm">Керуйте вашими голосовими ШІ-агентами</p>
       </div>
 
-      {agents.length === 0 ? (
-        <AgentsEmptyState />
-      ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {agents.map((agent: Agent) => (
-            <AgentCard
-              key={agent.id}
-              agent={agent}
-              onToggle={() => handleToggle(agent)}
-              onTest={() => setTestDialog({ agentId: agent.id, agentName: agent.name })}
-            />
-          ))}
-          <AddAgentCard />
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {agents.map((agent: Agent) => (
+          <AgentCard
+            key={agent.id}
+            agent={agent}
+            onToggle={() => handleToggle(agent)}
+            onTest={() => setTestDialog({ agentId: agent.id, agentName: agent.name })}
+          />
+        ))}
+
+        <div className="border-border bg-background flex flex-col items-center justify-center rounded-2xl border p-8 text-center">
+          <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
+            <Plus className="text-primary h-6 w-6" />
+          </div>
+          <h3 className="mt-3 text-sm font-semibold">Додати нового агента</h3>
+          <p className="text-muted-foreground mt-1 text-xs">
+            Створіть нового ШІ-агента та налаштуйте його за кілька хвилин
+          </p>
+          <Link href="/dashboard/agents/create">
+            <Button className="mt-4" size="sm">
+              <Plus className="mr-1.5 h-4 w-4" />
+              Створити агента
+            </Button>
+          </Link>
         </div>
-      )}
+      </div>
 
       <Dialog open={!!testDialog} onOpenChange={() => setTestDialog(null)}>
         <DialogContent className="bg-background">
@@ -117,4 +148,6 @@ export default function AgentsPage() {
       </Dialog>
     </div>
   );
-}
+};
+
+export default AgentsPage;

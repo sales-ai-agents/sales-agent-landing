@@ -29,6 +29,7 @@ import { useAgent, useUpdateAgent, useDeleteAgent, useTestCall, useVoices } from
 import { ApiError } from "@/lib/api-client";
 import { resolveErrorMessage, AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
 import type { Agent } from "@dashboard/types";
+import AgentNotFound from "@/app/(app)/dashboard/agents/[id]/not-found";
 
 interface AgentFormData {
   name: string;
@@ -36,38 +37,23 @@ interface AgentFormData {
   instructions: string;
 }
 
-export default function EditAgentPage() {
+const EditAgentPage = () => {
   const { data: agent, isLoading } = useAgent(useParams().id as string);
 
   if (isLoading) return <PageLoading />;
   if (!agent) return <AgentNotFound />;
 
   return <EditAgentForm key={agent.id} agent={agent} />;
-}
+};
 
-function AgentNotFound() {
+const EditAgentForm = ({ agent }: { agent: Agent }) => {
   const router = useRouter();
 
-  return (
-    <div className="text-center">
-      <p className="text-muted-foreground">Агента не знайдено</p>
-      <Button variant="outline" className="mt-4" onClick={() => router.push("/dashboard/agents")}>
-        Повернутися до агентів
-      </Button>
-    </div>
-  );
-}
+  const { data: voices = [] } = useVoices();
 
-interface EditAgentFormProps {
-  agent: Agent;
-}
-
-function EditAgentForm({ agent }: EditAgentFormProps) {
-  const router = useRouter();
   const updateAgent = useUpdateAgent();
   const deleteAgent = useDeleteAgent();
   const testCall = useTestCall();
-  const { data: voices = [] } = useVoices();
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [testPhone, setTestPhone] = useState("");
@@ -77,7 +63,7 @@ function EditAgentForm({ agent }: EditAgentFormProps) {
     instructions: agent.instructions,
   });
 
-  async function handleSave(): Promise<void> {
+  const handleSave = () => {
     updateAgent.mutate(
       { id: agent.id, ...formData },
       {
@@ -94,24 +80,27 @@ function EditAgentForm({ agent }: EditAgentFormProps) {
         },
       }
     );
-  }
+  };
 
-  async function handleDelete(): Promise<void> {
-    try {
-      await deleteAgent.mutateAsync(agent.id);
-      toast.success("Агента видалено");
-      router.push("/dashboard/agents");
-    } catch (error) {
-      if (error instanceof ApiError) {
-        toast.error(resolveErrorMessage(error.code, AGENT_ERROR_MESSAGES));
-      } else {
-        toast.error("Щось пішло не так.");
-      }
-    }
-  }
+  const handleDelete = () => {
+    deleteAgent.mutate(agent.id, {
+      onSuccess: () => {
+        toast.success("Агента видалено");
+        router.push("/dashboard/agents");
+      },
+      onError: (error) => {
+        if (error instanceof ApiError) {
+          toast.error(resolveErrorMessage(error.code, AGENT_ERROR_MESSAGES));
+        } else {
+          toast.error("Щось пішло не так.");
+        }
+      },
+    });
+  };
 
-  function handleTestCall(): void {
+  const handleTestCall = () => {
     if (!testPhone) return;
+
     testCall.mutate(
       { agent_id: agent.id, phone: testPhone },
       {
@@ -127,7 +116,7 @@ function EditAgentForm({ agent }: EditAgentFormProps) {
         },
       }
     );
-  }
+  };
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -141,7 +130,7 @@ function EditAgentForm({ agent }: EditAgentFormProps) {
         </div>
       </div>
 
-      <Card className="border-border shadow-primary/30 rounded-2xl shadow-lg">
+      <Card className="border-border rounded-2xl">
         <CardHeader>
           <h2 className="font-display text-2xl font-semibold">Конфігурація агента</h2>
         </CardHeader>
@@ -188,7 +177,7 @@ function EditAgentForm({ agent }: EditAgentFormProps) {
         </CardContent>
       </Card>
 
-      <Card className="border-border shadow-primary/30 rounded-2xl shadow-lg">
+      <Card className="border-border rounded-2xl">
         <CardHeader>
           <h2 className="font-display text-lg font-semibold">Тестовий дзвінок</h2>
         </CardHeader>
@@ -244,4 +233,6 @@ function EditAgentForm({ agent }: EditAgentFormProps) {
       </Dialog>
     </div>
   );
-}
+};
+
+export default EditAgentPage;

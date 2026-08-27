@@ -8,7 +8,7 @@ interface ContactsKpiCardProps {
   subtitle: string;
 }
 
-export function ContactsKpiCard({ icon, iconBg, title, value, subtitle }: ContactsKpiCardProps) {
+export function KpiCard({ icon, iconBg, title, value, subtitle }: ContactsKpiCardProps) {
   return (
     <div className="border-border bg-background flex items-center gap-4 rounded-2xl border p-5">
       <div className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full ${iconBg}`}>

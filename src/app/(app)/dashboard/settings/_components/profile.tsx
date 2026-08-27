@@ -13,15 +13,17 @@ interface ProfileSectionProps {
   initialEmail: string;
 }
 
-export function ProfileSection({ initialName, initialEmail }: ProfileSectionProps) {
+const Profile = ({ initialName, initialEmail }: ProfileSectionProps) => {
   const [name, setName] = useState(initialName);
   const [email, setEmail] = useState(initialEmail);
+
   const updateProfile = useUpdateProfile();
 
   const hasChanges = name !== initialName || email !== initialEmail;
 
-  function handleSave(): void {
+  const handleSave = () => {
     const params: Record<string, string> = {};
+
     if (name !== initialName) params.name = name;
     if (email !== initialEmail) params.email = email;
 
@@ -29,7 +31,7 @@ export function ProfileSection({ initialName, initialEmail }: ProfileSectionProp
       onSuccess: () => toast.success("Профіль оновлено"),
       onError: (err) => handleMutationError(err, AUTH_ERROR_MESSAGES),
     });
-  }
+  };
 
   return (
     <section className="border-border bg-background rounded-2xl border p-5">
@@ -64,4 +66,6 @@ export function ProfileSection({ initialName, initialEmail }: ProfileSectionProp
       </Button>
     </section>
   );
-}
+};
+
+export default Profile;

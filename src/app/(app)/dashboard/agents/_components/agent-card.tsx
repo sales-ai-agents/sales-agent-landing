@@ -13,7 +13,22 @@ export interface AgentCardProps {
   onTest: () => void;
 }
 
-export function AgentCard({ agent, onToggle, onTest }: AgentCardProps) {
+interface StatItemProps {
+  label: string;
+  value: string;
+  highlight?: boolean;
+}
+
+const StatItem = ({ label, value, highlight = false }: StatItemProps) => {
+  return (
+    <div>
+      <p className="text-muted-foreground text-xs">{label}</p>
+      <p className={`text-lg font-semibold ${highlight ? "text-primary" : ""}`}>{value}</p>
+    </div>
+  );
+};
+
+const AgentCard = ({ agent, onToggle, onTest }: AgentCardProps) => {
   const isActive = agent.is_active;
   const stats = agent.stats;
 
@@ -104,21 +119,6 @@ export function AgentCard({ agent, onToggle, onTest }: AgentCardProps) {
       </div>
     </div>
   );
-}
+};
 
-function StatItem({
-  label,
-  value,
-  highlight = false,
-}: {
-  label: string;
-  value: string;
-  highlight?: boolean;
-}) {
-  return (
-    <div>
-      <p className="text-muted-foreground text-xs">{label}</p>
-      <p className={`text-lg font-semibold ${highlight ? "text-primary" : ""}`}>{value}</p>
-    </div>
-  );
-}
+export default AgentCard;

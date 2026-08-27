@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import { format } from "date-fns";
 import { Phone } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 
@@ -10,9 +9,10 @@ import { useCallLogs, useAgents } from "@dashboard/hooks";
 import { cn } from "@/lib/utils";
 import type { CallStatusFilter, CallsFilter } from "@dashboard/types";
 
-import { CallLogsFilters } from "./_components/call-logs-filters";
-import { CallLogsTable } from "./_components/call-logs-table";
+import { Filters } from "./_components/filters";
+import { Table } from "./_components/table";
 import { Pagination } from "@/components/dashboard";
+import { toDateString } from "@/app/(app)/dashboard/call-logs/_lib/utils";
 
 const PAGE_SIZE = 11;
 
@@ -25,11 +25,7 @@ const STATUS_TABS: { key: StatusTab; label: string }[] = [
   { key: "attention", label: "Потребує уваги" },
 ];
 
-function toDateString(date: Date): string {
-  return format(date, "yyyy-MM-dd");
-}
-
-export default function CallLogsPage() {
+const CallLogsPage = () => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [statusTab, setStatusTab] = useState<StatusTab>("all");
   const [agentId, setAgentId] = useState<number | undefined>();
@@ -107,7 +103,11 @@ export default function CallLogsPage() {
       <PageEmpty
         icon={Phone}
         title="Дзвінків ще немає"
-        description="Тут з'являться ваші дзвінки після першого виклику"
+        description={
+          <p className="text-muted-foreground mt-1 text-lg">
+            Тут з&#39;являться ваші дзвінки після першого виклику
+          </p>
+        }
       />
     );
   }
@@ -119,7 +119,7 @@ export default function CallLogsPage() {
         <p className="text-muted-foreground text-sm">Журнал всіх дзвінків ваших ШІ-агентів</p>
       </header>
 
-      <CallLogsFilters
+      <Filters
         dateRange={dateRange}
         onDateRangeChange={handleDateRangeChange}
         status={status}
@@ -153,7 +153,7 @@ export default function CallLogsPage() {
       </nav>
 
       <div className="border-border bg-background overflow-hidden rounded-xl border">
-        <CallLogsTable data={callLogs} agents={agents} pageCount={pageCount} />
+        <Table data={callLogs} agents={agents} pageCount={pageCount} />
         <Pagination
           total={total}
           pageSize={PAGE_SIZE}
@@ -165,4 +165,6 @@ export default function CallLogsPage() {
       </div>
     </div>
   );
-}
+};
+
+export default CallLogsPage;
