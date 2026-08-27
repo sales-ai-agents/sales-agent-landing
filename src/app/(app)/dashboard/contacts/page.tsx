@@ -10,12 +10,12 @@ import {
   flexRender,
   type SortingState,
 } from "@tanstack/react-table";
-import { Search, ChevronLeft, ChevronRight, Users, Phone, BarChart3 } from "lucide-react";
+import { Search, Users, Phone, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PageError, PageLoading } from "@/components/dashboard/page-states";
+import { Pagination } from "@/components/dashboard/pagination";
 import { AddContactDialog } from "@/components/dashboard/add-contact-dialog";
 import { UploadCsvDialog } from "@/components/dashboard/upload-csv-dialog";
 import {
@@ -25,7 +25,7 @@ import {
   useUpdateContact,
 } from "@dashboard/hooks/use-contacts";
 import { handleMutationError } from "@/lib/handle-mutation-error";
-import { cn, formatNumber, getPageIndex } from "@/lib/utils";
+import { cn, formatNumber } from "@/lib/utils";
 import type { ContactFormData } from "@/lib/schemas";
 import { buildColumns } from "./_lib/columns";
 import { ContactsPageHeader } from "./_components/contacts-page-header";
@@ -118,9 +118,6 @@ export default function ContactsPage() {
   const processedThisMonth = contactStats?.processed_this_month ?? 0;
   const conversionPct = contactStats?.conversion_pct;
   const currentPage = table.getState().pagination.pageIndex;
-  const pageCount = table.getPageCount();
-  const startRow = currentPage * PAGE_SIZE + 1;
-  const endRow = Math.min((currentPage + 1) * PAGE_SIZE, contacts.length);
 
   const processedSubtitle =
     totalContacts > 0
@@ -214,60 +211,13 @@ export default function ContactsPage() {
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <p className="text-muted-foreground text-sm">
-          Показано {startRow}-{endRow} з {formatNumber(contacts.length)} контактів
-        </p>
-        <div className="flex items-center gap-1">
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            aria-label="Попередня сторінка"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          {Array.from({ length: Math.min(pageCount, 5) }).map((_, i) => {
-            const pageIndex = getPageIndex(currentPage, pageCount, i);
-            return (
-              <Button
-                key={pageIndex}
-                variant={pageIndex === currentPage ? "default" : "outline"}
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => table.setPageIndex(pageIndex)}
-              >
-                {pageIndex + 1}
-              </Button>
-            );
-          })}
-          {pageCount > 5 && (
-            <>
-              <span className="text-muted-foreground px-1 text-sm">…</span>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => table.setPageIndex(pageCount - 1)}
-              >
-                {pageCount}
-              </Button>
-            </>
-          )}
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            aria-label="Наступна сторінка"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+      <Pagination
+        total={contacts.length}
+        pageSize={PAGE_SIZE}
+        currentPage={currentPage}
+        onPageChange={(page) => table.setPageIndex(page)}
+        itemLabel="контактів"
+      />
 
       {showAddDialog && (
         <AddContactDialog onSubmit={handleAddContact} onClose={() => setShowAddDialog(false)} />

@@ -127,7 +127,7 @@ export function BuilderSection() {
                           reset();
                         }}
                         className={cn(
-                          "flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border py-2 text-base",
+                          "flex flex-1 items-center justify-center gap-2 rounded-lg border py-2 text-base",
                           form.voice === option
                             ? "border-input-border shadow-primary/30 bg-white shadow-md"
                             : "border-input-border bg-white"
@@ -204,7 +204,7 @@ export function BuilderSection() {
                               }}
                               title={preset.description}
                               className={cn(
-                                "focus-visible:ring-primary flex-1 cursor-pointer rounded-lg border px-3 py-2 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+                                "focus-visible:ring-primary flex-1 rounded-lg border px-3 py-2 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
                                 isActive
                                   ? "border-primary bg-primary text-white"
                                   : "border-primary text-foreground bg-white"

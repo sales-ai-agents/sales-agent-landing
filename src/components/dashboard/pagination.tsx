@@ -3,25 +3,34 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { formatNumber, getPageIndex } from "@/lib/utils";
+import { cn, formatNumber, getPageIndex } from "@/lib/utils";
 
 interface PaginationProps {
   total: number;
   pageSize: number;
   currentPage: number;
   onPageChange: (page: number) => void;
+  itemLabel?: string;
+  className?: string;
 }
 
-export function Pagination({ total, pageSize, currentPage, onPageChange }: PaginationProps) {
+export function Pagination({
+  total,
+  pageSize,
+  currentPage,
+  onPageChange,
+  itemLabel = "записів",
+  className,
+}: PaginationProps) {
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
   const startRow = total > 0 ? currentPage * pageSize + 1 : 0;
   const endRow = Math.min((currentPage + 1) * pageSize, total);
 
   return (
-    <div className="flex items-center justify-between border-t px-4 py-3">
+    <div className={cn("flex items-center justify-between", className)}>
       <p className="text-muted-foreground text-sm">
         {total > 0
-          ? `Показано ${startRow}-${endRow} з ${formatNumber(total)} дзвінків`
+          ? `Показано ${startRow}-${endRow} з ${formatNumber(total)} ${itemLabel}`
           : "Немає результатів"}
       </p>
       <div className="flex items-center gap-1">
@@ -51,7 +60,7 @@ export function Pagination({ total, pageSize, currentPage, onPageChange }: Pagin
           );
         })}
 
-        {pageCount > 5 && (
+        {pageCount > 5 && getPageIndex(currentPage, pageCount, 4) < pageCount - 1 && (
           <>
             <span className="text-muted-foreground px-1 text-sm">…</span>
             <Button

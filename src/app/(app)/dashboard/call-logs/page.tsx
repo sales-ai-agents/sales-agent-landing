@@ -13,7 +13,7 @@ import type { CallStatusFilter, CallsFilter } from "@dashboard/types";
 
 import { CallLogsFilters } from "./_components/call-logs-filters";
 import { CallLogsTable } from "./_components/call-logs-table";
-import { Pagination } from "./_components/pagination";
+import { Pagination } from "@/components/dashboard/pagination";
 
 const PAGE_SIZE = 11;
 
@@ -142,7 +142,7 @@ export default function CallLogsPage() {
             key={tab.key}
             onClick={() => handleStatusTabChange(tab.key)}
             className={cn(
-              "cursor-pointer px-4 py-2 text-sm font-medium transition-colors",
+              "px-4 py-2 text-sm font-medium transition-colors",
               statusTab === tab.key
                 ? "border-primary text-foreground border-b-2"
                 : "text-muted-foreground hover:text-foreground"
@@ -160,6 +160,8 @@ export default function CallLogsPage() {
           pageSize={PAGE_SIZE}
           currentPage={currentPage}
           onPageChange={setCurrentPage}
+          itemLabel="дзвінків"
+          className="border-t px-4 py-3"
         />
       </div>
     </div>

@@ -152,16 +152,17 @@ export default function SignUpPage() {
         <SocialLoginButtons />
       </div>
 
-      <p className="text-muted-foreground mt-8 text-center text-xs leading-relaxed">
-        Реєструючись, ви погоджуєтесь з нашими <br />
-        <Link href="/terms" className="text-primary hover:underline">
-          Умовами використання
-        </Link>{" "}
-        та{" "}
-        <Link href="/privacy" className="text-primary hover:underline">
-          Політикою конфіденційності
-        </Link>
-      </p>
+      {/*NO PAGES YES*/}
+      {/*<p className="text-muted-foreground mt-8 text-center text-xs leading-relaxed">*/}
+      {/*  Реєструючись, ви погоджуєтесь з нашими <br />*/}
+      {/*  <Link href="/terms" className="text-primary hover:underline">*/}
+      {/*    Умовами використання*/}
+      {/*  </Link>{" "}*/}
+      {/*  та{" "}*/}
+      {/*  <Link href="/privacy" className="text-primary hover:underline">*/}
+      {/*    Політикою конфіденційності*/}
+      {/*  </Link>*/}
+      {/*</p>*/}
     </div>
   );
 }

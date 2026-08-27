@@ -87,7 +87,10 @@ export default function DashboardPage() {
         </Select>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div
+        id="onboarding-stats-cards"
+        className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
+      >
         <div className="border-primary/35 col-span-1 rounded-xl border bg-white p-5 sm:col-span-2 lg:col-span-1">
           <p className="text-xs font-medium tracking-wide uppercase">Використання хвилин</p>
           <div className="mt-3 flex items-baseline gap-1">

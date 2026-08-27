@@ -258,7 +258,7 @@ function CarouselDots({ className, ...props }: React.ComponentProps<"div">) {
           key={index}
           onClick={() => api?.scrollTo(index)}
           aria-label={`Slide ${index + 1}`}
-          className="focus-visible:ring-ring flex size-5 cursor-pointer items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+          className="focus-visible:ring-ring flex size-5 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
         >
           <span
             className={cn(

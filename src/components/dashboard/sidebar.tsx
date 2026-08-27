@@ -40,7 +40,7 @@ export function Sidebar() {
         />
       </div>
 
-      <nav className="mt-10 flex flex-1 flex-col">
+      <nav id="onboarding-sidebar-nav" className="mt-10 flex flex-1 flex-col">
         <div className="space-y-1">
           {DASHBOARD_NAV_ITEMS.map((item) => {
             const Icon = item.icon;
@@ -48,6 +48,7 @@ export function Sidebar() {
 
             return (
               <Link
+                id="onboarding-dashboard-header"
                 key={item.href}
                 href={item.href}
                 className={cn(

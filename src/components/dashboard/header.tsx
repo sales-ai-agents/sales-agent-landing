@@ -91,7 +91,7 @@ export function DashboardHeader() {
       <div className="hidden flex-1 md:block" />
 
       <div className="ml-auto flex items-center gap-6">
-        <Link href="/dashboard/agents/create">
+        <Link id="onboarding-create-agent-btn" href="/dashboard/agents/create">
           <Button className="rounded-xl">
             <Plus className="mr-2 h-4 w-4" />
             Новий агент

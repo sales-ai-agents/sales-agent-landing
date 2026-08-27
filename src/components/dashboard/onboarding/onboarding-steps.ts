@@ -9,7 +9,7 @@ export const dashboardWelcomeSteps: Step[] = [
     content:
       "Це ваш дашборд — тут ви бачите загальну статистику дзвінків та продуктивність ваших AI-агентів. Давайте проведемо короткий тур.",
     selector: "#onboarding-dashboard-header",
-    side: "bottom",
+    side: "bottom-left",
     showControls: true,
     pointerPadding: 12,
     pointerRadius: 16,

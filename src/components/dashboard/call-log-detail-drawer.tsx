@@ -94,7 +94,7 @@ export function CallLogDetailDrawer({ callId, onClose }: CallLogDetailDrawerProp
                   <Button
                     variant="outline"
                     size="icon"
-                    className="h-8 w-8 cursor-pointer rounded-full"
+                    className="h-8 w-8 rounded-full"
                     aria-label="Відтворити запис"
                   >
                     <Play className="h-3 w-3" />

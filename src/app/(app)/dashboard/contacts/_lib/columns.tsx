@@ -17,7 +17,7 @@ export function buildColumns(
     columnHelper.accessor("name", {
       header: ({ column }) => (
         <button
-          className="flex cursor-pointer items-center gap-1 font-medium"
+          className="flex items-center gap-1 font-medium"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Ім&apos;я
