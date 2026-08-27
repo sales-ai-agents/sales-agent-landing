@@ -1,20 +1,37 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { apiGet, apiPost, apiDelete } from "@/lib/api-client";
+import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api-client";
 import { API_ENDPOINTS, apiUrl } from "@/lib/api-config";
 import type {
   Contact,
   ContactsResponse,
+  ContactsStats,
   CreateContactParams,
   CreateContactResponse,
+  UpdateContactParams,
 } from "@dashboard/types";
 
+interface ContactsData {
+  contacts: Contact[];
+  stats: ContactsStats;
+}
+
+const EMPTY_STATS: ContactsStats = {
+  total_contacts: 0,
+  processed_this_month: 0,
+  converted_this_month: 0,
+  conversion_pct: null,
+};
+
 export function useContacts(search?: string) {
-  return useQuery<Contact[]>({
+  return useQuery<ContactsData>({
     queryKey: ["contacts", search ?? ""],
     queryFn: async () => {
       const data = await apiGet<ContactsResponse>(apiUrl.contacts(search));
-      return data.contacts;
+      return {
+        contacts: data.contacts,
+        stats: data.stats ?? EMPTY_STATS,
+      };
     },
   });
 }
@@ -32,27 +49,25 @@ export function useCreateContact() {
   });
 }
 
+export function useUpdateContact() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, ...data }: UpdateContactParams & { id: number }) => {
+      return apiPatch(apiUrl.contact(id), data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["contacts"] });
+    },
+  });
+}
+
 export function useDeleteContact() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (id: number) => {
       return apiDelete(apiUrl.contact(id));
-    },
-    onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: ["contacts"] });
-      const previousContacts = queryClient.getQueryData<Contact[]>(["contacts", ""]);
-
-      queryClient.setQueryData<Contact[]>(["contacts", ""], (old) =>
-        old?.filter((contact) => contact.id !== id)
-      );
-
-      return { previousContacts };
-    },
-    onError: (_err, _vars, context) => {
-      if (context?.previousContacts) {
-        queryClient.setQueryData(["contacts", ""], context.previousContacts);
-      }
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });

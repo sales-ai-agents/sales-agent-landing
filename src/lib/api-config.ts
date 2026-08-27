@@ -36,6 +36,16 @@ export const API_ENDPOINTS = {
 
 export const apiUrl = {
   agent: (id: number | string) => `${API_ENDPOINTS.APP_AGENTS}/${id}`,
+  agents: (params?: { stats?: boolean; days?: number }) => {
+    const url = API_ENDPOINTS.APP_AGENTS;
+    if (!params?.stats) return url;
+
+    const sp = new URLSearchParams();
+    sp.set("stats", "1");
+    if (params.days !== undefined) sp.set("days", String(params.days));
+
+    return `${url}?${sp.toString()}`;
+  },
   contact: (id: number | string) => `${API_ENDPOINTS.APP_CONTACTS}/${id}`,
   call: (id: string) => `${API_ENDPOINTS.APP_CALLS}/${id}`,
   calls: (params?: {

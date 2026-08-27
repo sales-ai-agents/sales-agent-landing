@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import { Providers } from "@/app/providers";
 import { Toaster } from "@/components/ui/sonner";
-import { GoogleAnalytics } from "@/lib/google-analytics";
+import { GoogleAnalytics } from "@/components/google-analytics";
 import "./globals.css";
 
 const inter = Inter({

@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { Bot, Plus, PhoneCall } from "lucide-react";
+import { PhoneCall } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -16,13 +15,15 @@ import {
 } from "@/components/ui/dialog";
 import { PageError, PageLoading } from "@/components/dashboard/page-states";
 import { useAgents, useToggleAgentStatus, useTestCall } from "@dashboard/hooks/use-agents";
-import { ApiError } from "@/lib/api-client";
-import { resolveErrorMessage, AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
+import { AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
+import { handleMutationError } from "@/lib/handle-mutation-error";
 import { AgentCard } from "./_components/agent-card";
+import { AgentsEmptyState } from "./_components/agents-empty-state";
+import { AddAgentCard } from "./_components/add-agent-card";
 import type { Agent } from "@dashboard/types";
 
 export default function AgentsPage() {
-  const { data: agents = [], isLoading, error, refetch } = useAgents();
+  const { data: agents = [], isLoading, error, refetch } = useAgents({ stats: true });
   const toggleStatus = useToggleAgentStatus();
   const testCall = useTestCall();
 
@@ -41,13 +42,7 @@ export default function AgentsPage() {
           const label = variables.is_active ? "активовано" : "призупинено";
           toast.success(`Агента ${label}`);
         },
-        onError: (err) => {
-          if (err instanceof ApiError) {
-            toast.error(resolveErrorMessage(err.code, AGENT_ERROR_MESSAGES));
-          } else {
-            toast.error("Щось пішло не так.");
-          }
-        },
+        onError: (err) => handleMutationError(err, AGENT_ERROR_MESSAGES),
       }
     );
   }
@@ -62,13 +57,7 @@ export default function AgentsPage() {
           setTestDialog(null);
           setTestPhone("");
         },
-        onError: (err) => {
-          if (err instanceof ApiError) {
-            toast.error(resolveErrorMessage(err.code, AGENT_ERROR_MESSAGES));
-          } else {
-            toast.error("Щось пішло не так.");
-          }
-        },
+        onError: (err) => handleMutationError(err, AGENT_ERROR_MESSAGES),
       }
     );
   }
@@ -84,7 +73,7 @@ export default function AgentsPage() {
       </div>
 
       {agents.length === 0 ? (
-        <EmptyState />
+        <AgentsEmptyState />
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {agents.map((agent: Agent) => (
@@ -126,46 +115,6 @@ export default function AgentsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
-  );
-}
-
-function EmptyState() {
-  return (
-    <div className="border-border bg-background rounded-2xl border p-12 text-center">
-      <div className="border-primary/30 bg-primary/5 mx-auto flex h-14 w-14 items-center justify-center rounded-xl border">
-        <Bot className="text-primary h-7 w-7" />
-      </div>
-      <h2 className="mt-4 text-lg font-bold">Агентів ще немає</h2>
-      <p className="text-muted-foreground mt-1 text-sm">
-        Створіть свого першого AI голосового агента, щоб почати
-      </p>
-      <Link href="/dashboard/agents/create">
-        <Button className="mt-4">
-          <Plus className="mr-2 h-4 w-4" />
-          Створити агента
-        </Button>
-      </Link>
-    </div>
-  );
-}
-
-function AddAgentCard() {
-  return (
-    <div className="border-border bg-background flex flex-col items-center justify-center rounded-2xl border p-8 text-center">
-      <div className="bg-muted bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
-        <Plus className="text-primary h-6 w-6" />
-      </div>
-      <h3 className="mt-3 text-sm font-semibold">Додати нового агента</h3>
-      <p className="text-muted-foreground mt-1 text-xs">
-        Створіть нового ШІ-агента та налаштуйте його за кілька хвилин
-      </p>
-      <Link href="/dashboard/agents/create">
-        <Button className="mt-4" size="sm">
-          <Plus className="mr-1.5 h-4 w-4" />
-          Створити агента
-        </Button>
-      </Link>
     </div>
   );
 }

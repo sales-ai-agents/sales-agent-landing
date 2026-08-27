@@ -5,10 +5,9 @@ import { Bot, Play, Pause } from "lucide-react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import type { Agent } from "@dashboard/types";
 import { Progress } from "@/components/ui/progress";
-import React from "react";
-import { cn } from "@/lib/utils";
+import type { Agent } from "@dashboard/types";
+import { cn, formatNumber, formatTimeSaved, formatMinutesUsed } from "@/lib/utils";
 
 export interface AgentCardProps {
   agent: Agent;
@@ -18,6 +17,20 @@ export interface AgentCardProps {
 
 export function AgentCard({ agent, onToggle, onTest }: AgentCardProps) {
   const isActive = agent.is_active;
+  const stats = agent.stats;
+
+  const totalCalls = stats?.total_calls ?? 0;
+  const efficiencyPct = stats?.efficiency_pct;
+  const minutesUsed = stats?.minutes_used ?? 0;
+  const minutesSharePct = stats?.minutes_share_pct;
+  const talkMinutesSaved = stats?.talk_minutes_saved ?? 0;
+
+  const efficiencyLabel =
+    efficiencyPct !== null && efficiencyPct !== undefined ? `${Math.round(efficiencyPct)}%` : "—";
+  const minutesShareLabel =
+    minutesSharePct !== null && minutesSharePct !== undefined
+      ? `${Math.round(minutesSharePct)}%`
+      : "0%";
 
   return (
     <div className="border-border bg-background rounded-2xl border p-5">
@@ -45,24 +58,21 @@ export function AgentCard({ agent, onToggle, onTest }: AgentCardProps) {
         </Badge>
       </div>
 
-      {/* TODO: real stats will come from agent analytics API */}
       <div className="mt-4 grid grid-cols-3 gap-2">
-        <StatItem label="Усього дзвінків" value="0" />
-        <StatItem label="Підтверджено записів" value="0%" highlight />
-        <StatItem label="Заощаджено часу" value="0 хв" />
+        <StatItem label="Усього дзвінків" value={formatNumber(totalCalls)} />
+        <StatItem label="Ефективність" value={efficiencyLabel} highlight />
+        <StatItem label="Заощаджено часу" value={formatTimeSaved(talkMinutesSaved)} />
       </div>
 
-      {/* TODO: real usage data from agent analytics API */}
       <div className="mt-4">
         <p className="text-muted-foreground text-xs">Використано хвилин</p>
         <div className="mt-1 flex items-center gap-3">
-          <span className="shrink-0 text-sm font-semibold">0 хв</span>
-          <Progress value={0} className="w-full" />
-          <span className="text-muted-foreground shrink-0 text-xs">0%</span>
+          <span className="shrink-0 text-sm font-semibold">{formatMinutesUsed(minutesUsed)}</span>
+          <Progress value={minutesSharePct ?? 0} className="w-full" />
+          <span className="text-muted-foreground shrink-0 text-xs">{minutesShareLabel}</span>
         </div>
       </div>
 
-      {/* TODO: integrations list from integrations API */}
       <div className="mt-4">
         <p className="text-muted-foreground text-xs">Інтеграції</p>
         <p className="text-muted-foreground mt-1 text-sm">—</p>

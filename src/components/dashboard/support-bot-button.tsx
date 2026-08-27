@@ -27,7 +27,7 @@ export function SupportBotButton() {
 
       <Button
         onClick={() => setIsOpen((prev) => !prev)}
-        className="h-30 w-30"
+        className="h-30 w-30 hover:bg-transparent"
         size="icon"
         variant="ghost"
         aria-label={isOpen ? "Закрити чат підтримки" : "Відкрити чат підтримки"}

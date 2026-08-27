@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { Phone, Clock, Target, Download, ArrowUp, ArrowDown, ChevronRight } from "lucide-react";
+import { Phone, Clock, Target, Download, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -14,12 +14,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CallsChart } from "@/components/dashboard/calls-chart";
+import { PageLoading } from "@/components/dashboard/page-states";
 import { useStats } from "@dashboard/hooks/use-stats";
 import { useAgents } from "@dashboard/hooks/use-agents";
 import { useCallLogs } from "@dashboard/hooks/use-call-logs";
-import type { Agent, CallLog } from "@dashboard/types";
-import { PageLoading } from "@/components/dashboard/page-states";
-import { formatNumber, formatTimeSaved, formatDuration, formatTime, maskPhone } from "@/lib/utils";
+import { formatNumber, formatTimeSaved } from "@/lib/utils";
+import { KpiCard } from "./_components/kpi-card";
+import { ChartLegend } from "./_components/chart-legend";
+import { AgentEfficiencyRow } from "./_components/agent-efficiency-row";
+import { RecentCallRow } from "./_components/recent-call-row";
 
 const PERIOD_OPTIONS = [
   { label: "7 днів", value: 7 },
@@ -31,7 +34,7 @@ export default function DashboardPage() {
   const [days, setDays] = useState(7);
 
   const { data: stats, isLoading: statsLoading } = useStats(days);
-  const { data: agents = [] } = useAgents();
+  const { data: agents = [] } = useAgents({ stats: true });
   const { data: callsData } = useCallLogs({ limit: 4 });
 
   if (statsLoading) return <PageLoading />;
@@ -45,6 +48,8 @@ export default function DashboardPage() {
   const successfulCalls = stats?.period?.successful_calls ?? 0;
   const deltaTotalCalls = stats?.delta_pct?.total_calls ?? null;
   const deltaSuccessfulCalls = stats?.delta_pct?.successful_calls ?? null;
+  const talkMinutesSaved = stats?.period?.talk_minutes_saved ?? 0;
+  const deltaTalkMinutesSaved = stats?.delta_pct?.talk_minutes_saved ?? null;
 
   const daysEstimate =
     minutesUsed > 0 && stats?.period_days
@@ -118,10 +123,10 @@ export default function DashboardPage() {
           icon={<Clock className="text-primary h-4 w-4" />}
           iconBg="bg-primary/10"
           title="Заощаджено часу"
-          value={formatTimeSaved(totalCalls)}
+          value={formatTimeSaved(talkMinutesSaved)}
           subtitle={`За останні ${days} днів`}
-          delta={null}
-          periodLabel=""
+          delta={deltaTalkMinutesSaved}
+          periodLabel={deltaTalkMinutesSaved !== null ? `проти попередніх ${days} днів` : ""}
         />
 
         <KpiCard
@@ -210,190 +215,4 @@ export default function DashboardPage() {
       </div>
     </div>
   );
-}
-
-interface KpiCardProps {
-  icon: React.ReactNode;
-  iconBg: string;
-  title: string;
-  value: string;
-  subtitle: string;
-  delta: number | null;
-  periodLabel: string;
-}
-
-function KpiCard({ icon, iconBg, title, value, subtitle, delta, periodLabel }: KpiCardProps) {
-  return (
-    <div className="border-primary/35 rounded-xl border bg-white p-5">
-      <div className="flex items-center gap-2">
-        <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${iconBg}`}>
-          {icon}
-        </div>
-        <p className="text-xs font-medium tracking-wide uppercase">{title}</p>
-      </div>
-      <p className="mt-4 text-4xl font-semibold">{value}</p>
-      <p className="text-muted-foreground mt-2 text-xs">{subtitle}</p>
-      {periodLabel && (
-        <div className="mt-2">
-          <DeltaDisplay value={delta} />
-          <p className="text-muted-foreground text-xs">{periodLabel}</p>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function DeltaDisplay({ value }: { value: number | null }) {
-  if (value === null) {
-    return <span className="text-muted-foreground text-sm">—</span>;
-  }
-
-  const isPositive = value >= 0;
-
-  return (
-    <span
-      className={`inline-flex items-center gap-0.5 text-sm font-medium ${
-        isPositive ? "text-green-600" : "text-red-500"
-      }`}
-    >
-      {isPositive ? <ArrowUp className="h-3.5 w-3.5" /> : <ArrowDown className="h-3.5 w-3.5" />}
-      {Math.abs(value)}%
-    </span>
-  );
-}
-
-function ChartLegend() {
-  return (
-    <div className="hidden items-center gap-4 md:flex">
-      <div className="flex items-center gap-1.5">
-        <span className="bg-primary h-2.5 w-2.5 rounded-full" />
-        <span className="text-muted-foreground text-xs">Усі дзвінки</span>
-      </div>
-      <div className="flex items-center gap-1.5">
-        <span className="h-2.5 w-2.5 rounded-full bg-green-500" />
-        <span className="text-muted-foreground text-xs">Досягнуто цілі</span>
-      </div>
-      <div className="flex items-center gap-1.5">
-        <span className="h-2.5 w-2.5 rounded-full bg-orange-400" />
-        <span className="text-muted-foreground text-xs">Заощаджений час</span>
-      </div>
-    </div>
-  );
-}
-
-function AgentEfficiencyRow({ agent, index }: { agent: Agent; index: number }) {
-  const efficiency = 25;
-
-  const colors = [
-    { bg: "bg-primary/10", bar: "bg-primary", text: "text-primary" },
-    { bg: "bg-green-100", bar: "bg-green-500", text: "text-green-500" },
-    { bg: "bg-orange-100", bar: "bg-orange-500", text: "text-orange-500" },
-  ];
-  const color = colors[index % 3];
-
-  return (
-    <div className="flex items-start gap-3">
-      <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${color.bg}`}>
-        <span className={`text-xs font-bold ${color.text}`}>
-          {agent.name.charAt(0).toUpperCase()}
-        </span>
-      </div>
-      <div className="flex-1">
-        <p className="text-sm font-medium">{agent.name}</p>
-        <div className="flex items-center justify-between">
-          <p className="text-muted-foreground text-xs">
-            {agent.is_active ? "Активний" : "Призупинено"}
-          </p>
-          <p className={`text-xs font-normal ${color.text}`}>{efficiency}%</p>
-        </div>
-        <div className="bg-muted mt-1.5 h-1.5 w-full overflow-hidden rounded-full">
-          <div className={`h-full rounded-full ${color.bar}`} style={{ width: `${efficiency}%` }} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-interface RecentCallRowProps {
-  call: CallLog;
-  agents: Agent[];
-}
-
-function RecentCallRow({ call, agents }: RecentCallRowProps) {
-  const agentName = agents.find((a) => a.id === call.agent_id)?.name ?? "—";
-  const duration = call.duration_sec ? formatDuration(call.duration_sec) : "—";
-  const time = formatTime(call.created_at);
-
-  const { label, badgeClass, icon } = getOutcomeDisplay(call);
-
-  return (
-    <tr className="hover:bg-muted/30 border-b last:border-0">
-      <td className="text-muted-foreground px-4 py-2.5 text-sm">{maskPhone(call.phone)}</td>
-      <td className="text-muted-foreground px-4 py-2.5 text-sm">{agentName}</td>
-      <td className="text-muted-foreground px-4 py-2.5 text-sm">{duration}</td>
-      <td className="px-4 py-2.5">
-        <span
-          className={`inline-flex items-center gap-1 rounded-full px-3 py-0.5 text-sm ${badgeClass}`}
-        >
-          <span>{icon}</span>
-          {label}
-        </span>
-      </td>
-      <td className="text-muted-foreground px-4 py-2.5 text-sm">{time}</td>
-      <td className="px-2 py-2.5">
-        <Link href={`/dashboard/call-logs/${call.id}`}>
-          <ChevronRight className="text-muted-foreground h-4 w-4" />
-        </Link>
-      </td>
-    </tr>
-  );
-}
-
-function getOutcomeDisplay(call: CallLog): {
-  label: string;
-  badgeClass: string;
-  icon: string;
-} {
-  if (call.meeting_scheduled) {
-    return {
-      label: "Ціль досягнута",
-      badgeClass: "bg-green-100/80 text-green-900",
-      icon: "✓",
-    };
-  }
-
-  switch (call.outcome) {
-    case "не_відповів":
-      return {
-        label: "Без відповіді",
-        badgeClass: "bg-gray-100 text-gray-700",
-        icon: "–",
-      };
-    case "передзвонити":
-      return {
-        label: "Передано",
-        badgeClass: "bg-amber-100/80 text-amber-900",
-        icon: "↗",
-      };
-    case "відмова":
-    case "не_цікаво":
-      return {
-        label: "Помилка",
-        badgeClass: "bg-red-100/80 text-red-900",
-        icon: "!",
-      };
-    default:
-      if (call.outcome) {
-        return {
-          label: call.outcome,
-          badgeClass: "bg-gray-100 text-gray-700",
-          icon: "–",
-        };
-      }
-      return {
-        label: "В процесі",
-        badgeClass: "bg-gray-100 text-gray-700",
-        icon: "–",
-      };
-  }
 }

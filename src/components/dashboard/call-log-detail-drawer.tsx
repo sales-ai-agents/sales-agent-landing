@@ -5,7 +5,7 @@ import { Play, Bot, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { getOutcomeConfig } from "@/app/(app)/dashboard/call-logs/_lib/utils";
+import { getOutcomeConfig } from "@/app/(app)/_lib/call-outcome-display";
 import { formatDuration, cn } from "@/lib/utils";
 import { useCallDetail } from "@dashboard/hooks/use-call-detail";
 

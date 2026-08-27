@@ -11,7 +11,7 @@ import {
 import { Play, ExternalLink } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { getOutcomeConfig } from "../_lib/utils";
+import { getOutcomeConfig } from "@/app/(app)/_lib/call-outcome-display";
 import { formatDuration, cn } from "@/lib/utils";
 import type { CallLog, Agent } from "@dashboard/types";
 

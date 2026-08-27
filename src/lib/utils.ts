@@ -27,12 +27,15 @@ export function formatNumber(n: number): string {
   return n.toLocaleString("uk-UA");
 }
 
-export function formatTimeSaved(totalCalls: number): string {
-  const minutesSaved = totalCalls * 2;
-  const hours = Math.floor(minutesSaved / 60);
-  const mins = minutesSaved % 60;
+export function formatTimeSaved(minutes: number): string {
+  const hours = Math.floor(minutes / 60);
+  const mins = Math.round(minutes % 60);
   if (hours > 0) return `${hours} год ${mins} хв`;
   return `${mins} хв`;
+}
+
+export function formatMinutesUsed(minutes: number): string {
+  return `${Math.round(minutes)} хв`;
 }
 
 export function formatTime(dateStr: string): string {

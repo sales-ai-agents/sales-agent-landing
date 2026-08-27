@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Check, CreditCard, Receipt, AlertTriangle } from "lucide-react";
+import { CreditCard, Receipt, AlertTriangle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +12,9 @@ import { ChangePlanDialog } from "@/components/dashboard/change-plan-dialog";
 import { useBillingPlans, useBillingHistory } from "@dashboard/hooks/use-billing";
 import { useStats } from "@dashboard/hooks/use-stats";
 import { formatNumber, formatDateLong, formatDateShort } from "@/lib/utils";
-import type { BillingPlan } from "@dashboard/types";
+import { PlanCard } from "./_components/plan-card";
+import { PaymentStatusLabel } from "./_components/payment-status-label";
+import { getDefaultUpgradePlan } from "./_lib/utils";
 
 export default function BillingPage() {
   const { data: billing, isLoading, isError, refetch } = useBillingPlans();
@@ -31,6 +33,11 @@ export default function BillingPage() {
   const minutesLimit = stats?.minutes_limit ?? billing.minutes;
   const usagePercent = minutesLimit > 0 ? (minutesUsed / minutesLimit) * 100 : 0;
 
+  function openUpgradeDialog(): void {
+    if (!billing) return;
+    setSelectedPlanKey(getDefaultUpgradePlan(billing.plans, billing.current));
+  }
+
   return (
     <div className="space-y-6">
       {isTrial && (
@@ -41,13 +48,7 @@ export default function BillingPage() {
               Додайте спосіб оплати, щоб не втратити доступ після завершення Trial
             </p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              setSelectedPlanKey(getDefaultUpgradePlan(billing.plans, billing.current))
-            }
-          >
+          <Button variant="outline" size="sm" onClick={openUpgradeDialog}>
             Додати спосіб оплати
           </Button>
         </div>
@@ -67,12 +68,7 @@ export default function BillingPage() {
                 ? "Безкоштовний період"
                 : `${currentPlanData?.minutes ?? billing.minutes} хвилин на місяць`}
             </p>
-            <button
-              onClick={() =>
-                setSelectedPlanKey(getDefaultUpgradePlan(billing.plans, billing.current))
-              }
-              className="text-primary mt-2 text-sm font-medium"
-            >
+            <button onClick={openUpgradeDialog} className="text-primary mt-2 text-sm font-medium">
               Змінити тариф
             </button>
           </div>
@@ -160,13 +156,7 @@ export default function BillingPage() {
               </p>
             </div>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              setSelectedPlanKey(getDefaultUpgradePlan(billing.plans, billing.current))
-            }
-          >
+          <Button variant="outline" size="sm" onClick={openUpgradeDialog}>
             {payments.length > 0 ? "Змінити картку" : "Додати карту"}
           </Button>
         </div>
@@ -240,102 +230,4 @@ export default function BillingPage() {
       )}
     </div>
   );
-}
-
-function PlanCard({
-  plan,
-  isCurrent,
-  onSelect,
-}: {
-  plan: BillingPlan;
-  isCurrent: boolean;
-  onSelect: () => void;
-}) {
-  const features = getPlanFeatures(plan);
-  const isPro = plan.minutes >= 3000;
-
-  return (
-    <div
-      className={`flex flex-col rounded-2xl border p-6 ${
-        isCurrent ? "border-primary" : "border-border"
-      }`}
-    >
-      <h3 className="text-xl font-bold uppercase">{plan.title}</h3>
-      <div className="mt-2">
-        <span className="text-3xl font-bold">${Math.round(plan.price_uah / 45)}</span>
-        <span className="text-muted-foreground text-sm"> / місяць</span>
-      </div>
-      <ul className="mt-4 flex-1 space-y-2 text-sm">
-        {features.map((feature, i) => (
-          <li key={i} className="flex items-center gap-2">
-            <Check className="text-primary h-4 w-4 shrink-0" />
-            {feature}
-          </li>
-        ))}
-      </ul>
-      <div className="mt-6">
-        {isCurrent ? (
-          <div className="flex items-center justify-center gap-2 text-sm text-green-600">
-            <Check className="h-4 w-4" />
-            Поточний тариф
-          </div>
-        ) : isPro ? (
-          <Button className="w-full" onClick={onSelect}>
-            Перейти на PRO
-          </Button>
-        ) : (
-          <Button variant="outline" className="w-full" onClick={onSelect}>
-            Обрати
-          </Button>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function getPlanFeatures(plan: BillingPlan): string[] {
-  if (plan.minutes >= 3000) {
-    return [
-      `${formatNumber(plan.minutes)} хв розмов`,
-      "Усі доступні інтеграції",
-      "Усе з тарифу Business",
-      "Пріоритетна підтримка",
-      "Підключення до бізнес-процесів",
-    ];
-  }
-  if (plan.minutes >= 1000) {
-    return [
-      `${formatNumber(plan.minutes)} хв розмов`,
-      `До ${plan.agents} ШІ-агентів`,
-      "Усе з тарифу Start",
-      "CSV-кампанії",
-      "Webhooks",
-      "Кілька сценаріїв дзвінків",
-    ];
-  }
-  return [
-    `${plan.minutes} хв розмов`,
-    `${plan.agents} ШІ-агент`,
-    "Журнал дзвінків",
-    "Перегляд результатів розмов",
-    "Базове налаштування сценарію",
-  ];
-}
-
-function PaymentStatusLabel({ status }: { status: string }) {
-  switch (status) {
-    case "success":
-      return <span className="text-xs font-medium text-green-600">Оплачено</span>;
-    case "processing":
-    case "hold":
-    case "created":
-      return <span className="text-xs font-medium text-amber-600">В процесі</span>;
-    default:
-      return <span className="text-xs font-medium text-red-600">Невдалий</span>;
-  }
-}
-
-function getDefaultUpgradePlan(plans: BillingPlan[], currentKey: string): string {
-  const nonCurrent = plans.filter((p) => p.key !== currentKey);
-  return nonCurrent[0]?.key ?? plans[0]?.key ?? "";
 }

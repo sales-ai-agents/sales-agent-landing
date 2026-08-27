@@ -13,7 +13,7 @@ import { PageLoading, PageError } from "@/components/dashboard/page-states";
 import { AudioPlayer } from "@/components/dashboard/audio-player";
 import { useCallDetail } from "@dashboard/hooks/use-call-detail";
 import { useAgents } from "@dashboard/hooks/use-agents";
-import { getOutcomeConfig } from "../_lib/utils";
+import { getOutcomeConfig } from "@/app/(app)/_lib/call-outcome-display";
 import { formatDuration, cn } from "@/lib/utils";
 import { apiPut } from "@/lib/api-client";
 import { apiUrl } from "@/lib/api-config";

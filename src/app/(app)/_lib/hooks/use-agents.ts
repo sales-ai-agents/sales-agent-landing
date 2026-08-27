@@ -12,11 +12,20 @@ import type {
   TestCallParams,
 } from "@dashboard/types";
 
-export function useAgents() {
+interface UseAgentsOptions {
+  stats?: boolean;
+  days?: number;
+}
+
+export function useAgents(options?: UseAgentsOptions) {
+  const withStats = options?.stats ?? false;
+  const days = options?.days;
+
   return useQuery<Agent[]>({
-    queryKey: ["agents"],
+    queryKey: ["agents", { stats: withStats, days }],
     queryFn: async () => {
-      const data = await apiGet<AgentsResponse>(API_ENDPOINTS.APP_AGENTS);
+      const url = withStats ? apiUrl.agents({ stats: true, days }) : API_ENDPOINTS.APP_AGENTS;
+      const data = await apiGet<AgentsResponse>(url);
       return data.agents;
     },
   });

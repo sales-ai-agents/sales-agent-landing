@@ -62,12 +62,14 @@ export interface PeriodStats {
   total_calls: number;
   successful_calls: number;
   missed_calls: number;
+  talk_minutes_saved: number;
 }
 
 export interface DeltaPct {
   total_calls: number | null;
   successful_calls: number | null;
   missed_calls: number | null;
+  talk_minutes_saved: number | null;
 }
 
 export interface StatsResponse {
@@ -80,6 +82,7 @@ export interface StatsResponse {
   total_calls: number;
   successful_calls: number;
   missed_calls: number;
+  talk_minutes_saved: number;
   period_days: number;
   period: PeriodStats;
   previous: PeriodStats;
