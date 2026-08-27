@@ -4,20 +4,17 @@ import { useState } from "react";
 import Link from "next/link";
 import { Phone, Clock, Target, Download, ChevronRight } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import {
+  Button,
+  Progress,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { CallsChart } from "@/components/dashboard/calls-chart";
-import { PageLoading } from "@/components/dashboard/page-states";
-import { useStats } from "@dashboard/hooks/use-stats";
-import { useAgents } from "@dashboard/hooks/use-agents";
-import { useCallLogs } from "@dashboard/hooks/use-call-logs";
+} from "@/components/ui";
+import { CallsChart, PageError, PageLoading } from "@/components/dashboard";
+import { useStats, useAgents, useCallLogs } from "@dashboard/hooks";
 import { formatNumber, formatTimeSaved } from "@/lib/utils";
 import { KpiCard } from "./_components/kpi-card";
 import { ChartLegend } from "./_components/chart-legend";
@@ -33,11 +30,12 @@ const PERIOD_OPTIONS = [
 export default function DashboardPage() {
   const [days, setDays] = useState(7);
 
-  const { data: stats, isLoading: statsLoading } = useStats(days);
+  const { data: stats, isLoading: statsLoading, error, refetch } = useStats(days);
   const { data: agents = [] } = useAgents({ stats: true });
   const { data: callsData } = useCallLogs({ limit: 4 });
 
   if (statsLoading) return <PageLoading />;
+  if (error) return <PageError message={error.message} onRetry={refetch} />;
 
   const minutesUsed = stats?.minutes_used ?? 0;
   const minutesLimit = stats?.minutes_limit ?? 1000;

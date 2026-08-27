@@ -2,12 +2,9 @@
 
 import React, { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Sidebar } from "@/components/dashboard/sidebar";
-import { DashboardHeader } from "@/components/dashboard/header";
-import { PageLoading } from "@/components/dashboard/page-states";
-import { SupportBotButton } from "@/components/dashboard/support-bot-button";
-import { OnboardingWrapper } from "@/components/dashboard/onboarding/onboarding-wrapper";
-import { useMe } from "@/lib/hooks/use-auth";
+import { Sidebar, DashboardHeader, PageLoading, SupportBotButton } from "@/components/dashboard";
+import { OnboardingWrapper } from "@/components/dashboard/onboarding";
+import { useMe } from "@/lib/hooks";
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();

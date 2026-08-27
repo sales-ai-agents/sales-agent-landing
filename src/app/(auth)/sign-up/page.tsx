@@ -7,13 +7,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Check } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button, Input, Label } from "@/components/ui";
 import { PasswordInput } from "@/components/auth/password-input";
 import { SocialLoginButtons } from "@/components/auth/social-login-buttons";
 import { signUpSchema, type SignUpFormData } from "@/lib/schemas";
-import { useRegister } from "@/lib/hooks/use-auth";
+import { useRegister } from "@/lib/hooks";
 import { ApiError } from "@/lib/api-client";
 import { resolveErrorMessage, AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
 

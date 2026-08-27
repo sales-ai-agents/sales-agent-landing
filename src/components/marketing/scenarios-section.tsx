@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { ScrollReveal, StaggerReveal } from "@/components/marketing/scroll-reveal";
 import type { Scenario, ScenarioDetail } from "@marketing/types";

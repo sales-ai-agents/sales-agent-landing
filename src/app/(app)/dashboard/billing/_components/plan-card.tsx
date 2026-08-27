@@ -1,6 +1,6 @@
 import { Check } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui";
 import { formatNumber } from "@/lib/utils";
 import type { BillingPlan } from "@dashboard/types";
 

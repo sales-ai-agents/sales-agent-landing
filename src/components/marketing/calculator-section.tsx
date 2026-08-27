@@ -2,8 +2,7 @@
 
 import { useCallback, useState } from "react";
 
-import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
+import { Button, Slider } from "@/components/ui";
 import { ScrollReveal, ScaleReveal } from "@/components/marketing/scroll-reveal";
 import { trackEvent } from "@/lib/analytics";
 

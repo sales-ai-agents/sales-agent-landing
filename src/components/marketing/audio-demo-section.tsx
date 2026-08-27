@@ -12,8 +12,8 @@ import {
   CarouselItem,
   CarouselPrevious,
   CarouselNext,
-} from "@/components/ui/carousel";
-import { Button } from "@/components/ui/button";
+  Button,
+} from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
 import { ScrollReveal } from "@/components/marketing/scroll-reveal";

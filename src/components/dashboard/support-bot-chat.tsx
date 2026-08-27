@@ -4,10 +4,15 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { X, Send, Bot, Loader2 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Message, MessageAvatar, MessageContent } from "@/components/ui/message";
-import { Bubble, BubbleContent } from "@/components/ui/bubble";
+import {
+  Button,
+  Textarea,
+  Message,
+  MessageAvatar,
+  MessageContent,
+  Bubble,
+  BubbleContent,
+} from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { SUPPORT_BOT_WELCOME_MESSAGE, SUPPORT_BOT_SUGGESTIONS } from "@/lib/support-bot-config";
 

@@ -5,6 +5,12 @@ export interface OutcomeConfig {
   variant: "success" | "warning" | "secondary" | "destructive";
 }
 
+interface OutcomeDisplay {
+  label: string;
+  badgeClass: string;
+  icon: string;
+}
+
 const OUTCOME_MAP: Record<string, OutcomeConfig> = {
   meeting: { label: "Зустріч", variant: "success" },
   не_відповів: { label: "Не відповів", variant: "warning" },
@@ -18,16 +24,6 @@ const DEFAULT_CONFIG: OutcomeConfig = { label: "", variant: "secondary" };
 export function getOutcomeConfig(outcome: CallOutcome | null): OutcomeConfig {
   if (!outcome) return DEFAULT_CONFIG;
   return OUTCOME_MAP[outcome] ?? { ...DEFAULT_CONFIG, label: outcome };
-}
-
-export function getOutcomeEntries(): [string, OutcomeConfig][] {
-  return Object.entries(OUTCOME_MAP);
-}
-
-interface OutcomeDisplay {
-  label: string;
-  badgeClass: string;
-  icon: string;
 }
 
 export function getOutcomeDisplay(call: CallLog): OutcomeDisplay {

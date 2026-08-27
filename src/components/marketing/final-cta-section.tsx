@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
 import { LeadFormModal } from "@/components/marketing/lead-form-card";

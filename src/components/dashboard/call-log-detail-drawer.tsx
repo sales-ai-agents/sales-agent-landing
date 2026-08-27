@@ -2,12 +2,10 @@
 
 import { Play, Bot, User } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Button, Badge, Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui";
 import { getOutcomeConfig } from "@/app/(app)/_lib/call-outcome-display";
 import { formatDuration, cn } from "@/lib/utils";
-import { useCallDetail } from "@dashboard/hooks/use-call-detail";
+import { useCallDetail } from "@dashboard/hooks";
 
 interface CallLogDetailDrawerProps {
   callId: string;

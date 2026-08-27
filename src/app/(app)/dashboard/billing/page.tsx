@@ -4,13 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { CreditCard, Receipt, AlertTriangle } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { PageLoading, PageError } from "@/components/dashboard/page-states";
-import { ChangePlanDialog } from "@/components/dashboard/change-plan-dialog";
-import { useBillingPlans, useBillingHistory } from "@dashboard/hooks/use-billing";
-import { useStats } from "@dashboard/hooks/use-stats";
+import { Button, Badge, Progress } from "@/components/ui";
+import { PageError, PageLoading, ChangePlanDialog } from "@/components/dashboard";
+import { useBillingPlans, useBillingHistory, useStats } from "@dashboard/hooks";
 import { formatNumber, formatDateLong, formatDateShort } from "@/lib/utils";
 import { PlanCard } from "./_components/plan-card";
 import { PaymentStatusLabel } from "./_components/payment-status-label";

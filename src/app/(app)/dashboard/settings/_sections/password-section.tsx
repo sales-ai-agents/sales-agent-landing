@@ -3,10 +3,8 @@
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useChangePassword } from "@/lib/hooks/use-auth";
+import { Button, Input, Label } from "@/components/ui";
+import { useChangePassword } from "@/lib/hooks";
 import { AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/handle-mutation-error";
 

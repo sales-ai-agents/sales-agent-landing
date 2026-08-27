@@ -13,17 +13,20 @@ import {
 import { Search, Users, Phone, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 
-import { Input } from "@/components/ui/input";
-import { PageError, PageLoading } from "@/components/dashboard/page-states";
-import { Pagination } from "@/components/dashboard/pagination";
-import { AddContactDialog } from "@/components/dashboard/add-contact-dialog";
-import { UploadCsvDialog } from "@/components/dashboard/upload-csv-dialog";
+import { Input } from "@/components/ui";
+import {
+  PageError,
+  PageLoading,
+  Pagination,
+  AddContactDialog,
+  UploadCsvDialog,
+} from "@/components/dashboard";
 import {
   useContacts,
   useCreateContact,
   useDeleteContact,
   useUpdateContact,
-} from "@dashboard/hooks/use-contacts";
+} from "@dashboard/hooks";
 import { handleMutationError } from "@/lib/handle-mutation-error";
 import { cn, formatNumber } from "@/lib/utils";
 import type { ContactFormData } from "@/lib/schemas";

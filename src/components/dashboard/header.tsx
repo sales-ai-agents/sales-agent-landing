@@ -5,17 +5,20 @@ import Image from "next/image";
 import { Menu, Plus } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import {
+  Button,
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetTitle,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui";
 import { cn, getInitials } from "@/lib/utils";
 import { DASHBOARD_NAV_ITEMS } from "@/lib/constants";
-import { useLogout, useMe } from "@/lib/hooks/use-auth";
+import { useLogout, useMe } from "@/lib/hooks";
 
 export function DashboardHeader() {
   const pathname = usePathname();

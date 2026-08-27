@@ -4,7 +4,7 @@ import { Suspense, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
-import { useSocialLogin } from "@/lib/hooks/use-auth";
+import { useSocialLogin } from "@/lib/hooks";
 import { ApiError } from "@/lib/api-client";
 import { resolveErrorMessage, AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
 import { GITHUB_STATE_KEY } from "@/components/auth/social-login-buttons";

@@ -4,15 +4,15 @@ import React, { useState, useRef, useCallback } from "react";
 import { Upload, FileText } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { useUploadContacts } from "@dashboard/hooks/use-upload-contacts";
+} from "@/components/ui";
+import { useUploadContacts } from "@dashboard/hooks";
 
 interface UploadCsvDialogProps {
   onClose: () => void;

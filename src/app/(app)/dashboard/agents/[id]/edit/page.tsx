@@ -4,29 +4,28 @@ import { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft, Save, Trash2, Phone } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
+  Button,
+  Input,
+  Label,
+  Textarea,
+  Card,
+  CardContent,
+  CardHeader,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { PageLoading } from "@/components/dashboard/page-states";
-import { useAgent, useUpdateAgent, useDeleteAgent, useTestCall } from "@dashboard/hooks/use-agents";
-import { useVoices } from "@dashboard/hooks/use-voices";
+} from "@/components/ui";
+import { PageLoading } from "@/components/dashboard";
+import { useAgent, useUpdateAgent, useDeleteAgent, useTestCall, useVoices } from "@dashboard/hooks";
 import { ApiError } from "@/lib/api-client";
 import { resolveErrorMessage, AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
 import type { Agent } from "@dashboard/types";

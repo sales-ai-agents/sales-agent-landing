@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Howl } from "howler";
 import { Play, Pause, Volume2, VolumeX } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui";
 import { formatDuration } from "@/lib/utils";
 
 interface AudioPlayerProps {

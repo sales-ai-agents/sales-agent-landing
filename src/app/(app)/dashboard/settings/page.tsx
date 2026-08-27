@@ -1,23 +1,24 @@
 "use client";
 
-import { Label } from "@/components/ui/label";
 import {
+  Label,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useMe } from "@/lib/hooks/use-auth";
-import { PageLoading } from "@/components/dashboard/page-states";
+} from "@/components/ui";
+import { useMe } from "@/lib/hooks";
+import { PageError, PageLoading } from "@/components/dashboard";
 import { BusinessSection } from "./_sections/business-section";
 import { ProfileSection } from "./_sections/profile-section";
 import { PasswordSection } from "./_sections/password-section";
 
 export default function SettingsPage() {
-  const { data: account, isLoading } = useMe();
+  const { data: account, isLoading, error, refetch } = useMe();
 
   if (isLoading) return <PageLoading />;
+  if (error) return <PageError message={error.message} onRetry={refetch} />;
 
   return (
     <div className="space-y-6">

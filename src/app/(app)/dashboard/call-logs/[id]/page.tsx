@@ -6,13 +6,9 @@ import Link from "next/link";
 import { ArrowLeft, Download, Bot } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { PageLoading, PageError } from "@/components/dashboard/page-states";
-import { AudioPlayer } from "@/components/dashboard/audio-player";
-import { useCallDetail } from "@dashboard/hooks/use-call-detail";
-import { useAgents } from "@dashboard/hooks/use-agents";
+import { Button, Textarea, Badge } from "@/components/ui";
+import { PageLoading, PageError, AudioPlayer } from "@/components/dashboard";
+import { useCallDetail, useAgents } from "@dashboard/hooks";
 import { getOutcomeConfig } from "@/app/(app)/_lib/call-outcome-display";
 import { formatDuration, cn } from "@/lib/utils";
 import { apiPut } from "@/lib/api-client";

@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { useOnborda } from "onborda";
 import type { CardComponentProps } from "onborda";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { useOnboardingStore } from "@/lib/stores/onboarding-store";
 

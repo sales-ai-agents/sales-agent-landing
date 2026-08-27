@@ -6,9 +6,7 @@ import { uk } from "date-fns/locale";
 import { CalendarDays } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button, Calendar, Popover, PopoverContent, PopoverTrigger } from "@/components/ui";
 
 interface DateRangePickerProps {
   value: DateRange | undefined;

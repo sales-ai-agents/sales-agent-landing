@@ -10,7 +10,7 @@ import {
 } from "@tanstack/react-table";
 import { Play, ExternalLink } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui";
 import { getOutcomeConfig } from "@/app/(app)/_lib/call-outcome-display";
 import { formatDuration, cn } from "@/lib/utils";
 import type { CallLog, Agent } from "@dashboard/types";

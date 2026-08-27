@@ -3,17 +3,17 @@
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
+  Button,
+  Input,
+  Label,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useUpdateProfile } from "@/lib/hooks/use-auth";
+} from "@/components/ui";
+import { useUpdateProfile } from "@/lib/hooks";
 import { AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/handle-mutation-error";
 

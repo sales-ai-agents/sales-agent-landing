@@ -7,7 +7,7 @@ import { ArrowRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { DASHBOARD_NAV_ITEMS, DASHBOARD_SETTINGS_ITEM } from "@/lib/constants";
-import { useStats } from "@dashboard/hooks/use-stats";
+import { useStats } from "@dashboard/hooks";
 
 export function Sidebar() {
   const pathname = usePathname();

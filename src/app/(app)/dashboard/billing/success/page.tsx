@@ -4,8 +4,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { XCircle, ArrowLeft } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button, Card, CardContent } from "@/components/ui";
 import { PaymentStatusChecker } from "./_components/payment-status-checker";
 
 export default function BillingSuccessPage() {

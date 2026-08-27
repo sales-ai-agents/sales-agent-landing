@@ -6,13 +6,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button, Input, Label } from "@/components/ui";
 import { PasswordInput } from "@/components/auth/password-input";
 import { SocialLoginButtons } from "@/components/auth/social-login-buttons";
 import { signInSchema, type SignInFormData } from "@/lib/schemas";
-import { useLogin } from "@/lib/hooks/use-auth";
+import { useLogin } from "@/lib/hooks";
 import { ApiError } from "@/lib/api-client";
 import { resolveErrorMessage, AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
 

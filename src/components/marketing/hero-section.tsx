@@ -3,7 +3,7 @@ import type { LucideIcon } from "lucide-react";
 import { Play } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui";
 import { Navbar, MobileNavbar } from "@/components/marketing/navbar";
 import { DynamicDemoCallCard as DemoCallCard } from "@/components/marketing/dynamic-sections";
 import { ScrollReveal } from "@/components/marketing/scroll-reveal";

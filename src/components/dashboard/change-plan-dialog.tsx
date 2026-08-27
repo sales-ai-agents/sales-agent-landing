@@ -3,11 +3,9 @@
 import { Check, ArrowRight, Lock, Clock } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Button, Badge, Dialog, DialogContent } from "@/components/ui";
 import { formatNumber } from "@/lib/utils";
-import { useCheckout } from "@dashboard/hooks/use-billing";
+import { useCheckout } from "@dashboard/hooks";
 import { ApiError } from "@/lib/api-client";
 import type { BillingPlan } from "@dashboard/types";
 

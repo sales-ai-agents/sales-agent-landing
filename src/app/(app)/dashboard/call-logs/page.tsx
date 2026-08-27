@@ -5,15 +5,14 @@ import { format } from "date-fns";
 import { Phone } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 
-import { PageError, PageEmpty, PageLoading } from "@/components/dashboard/page-states";
-import { useCallLogs } from "@dashboard/hooks/use-call-logs";
-import { useAgents } from "@dashboard/hooks/use-agents";
+import { PageError, PageEmpty, PageLoading } from "@/components/dashboard";
+import { useCallLogs, useAgents } from "@dashboard/hooks";
 import { cn } from "@/lib/utils";
 import type { CallStatusFilter, CallsFilter } from "@dashboard/types";
 
 import { CallLogsFilters } from "./_components/call-logs-filters";
 import { CallLogsTable } from "./_components/call-logs-table";
-import { Pagination } from "@/components/dashboard/pagination";
+import { Pagination } from "@/components/dashboard";
 
 const PAGE_SIZE = 11;
 

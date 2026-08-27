@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
-import { useSocialLogin, useAuthProviders } from "@/lib/hooks/use-auth";
+import { Button } from "@/components/ui";
+import { useSocialLogin, useAuthProviders } from "@/lib/hooks";
 import { ApiError } from "@/lib/api-client";
 import { resolveErrorMessage, AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
 

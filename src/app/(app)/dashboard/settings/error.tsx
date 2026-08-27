@@ -2,7 +2,7 @@
 
 import { PageError } from "@/components/dashboard";
 
-export default function ContactsError({
+export default function SettingsError({
   error,
   reset,
 }: {

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { PhoneOff } from "lucide-react";
 
-import { useLiveKitRoom } from "@marketing/hooks/use-livekit-room";
+import { useLiveKitRoom } from "@marketing/hooks";
 import type { WebAgentSession } from "@marketing/types";
 import { LeadFormModal } from "@/components/marketing/lead-form-card";
 import { cn } from "@/lib/utils";

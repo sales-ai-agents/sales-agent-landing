@@ -3,9 +3,7 @@
 import Link from "next/link";
 import { Bot, Play, Pause } from "lucide-react";
 
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { Button, buttonVariants, Badge, Progress } from "@/components/ui";
 import type { Agent } from "@dashboard/types";
 import { cn, formatNumber, formatTimeSaved, formatMinutesUsed } from "@/lib/utils";
 

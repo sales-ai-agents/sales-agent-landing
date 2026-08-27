@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-import { Button } from "@/components/ui/button";
-import { SupportBotChat } from "@/components/dashboard/support-bot-chat";
+import { Button } from "@/components/ui";
+import { SupportBotChat } from "@/components/dashboard";
 import Image from "next/image";
 
 export function SupportBotButton() {

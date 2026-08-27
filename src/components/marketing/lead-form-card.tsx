@@ -4,10 +4,8 @@ import type { ChangeEvent, FormEvent } from "react";
 import { useState } from "react";
 import { Cog, BarChart3, FileText, MousePointer2 } from "lucide-react";
 
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useLeadForm } from "@marketing/hooks/use-lead-form";
+import { Dialog, DialogContent, DialogTitle, Button, buttonVariants, Input } from "@/components/ui";
+import { useLeadForm } from "@marketing/hooks";
 import { cn, formatUaPhoneDigits } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
 

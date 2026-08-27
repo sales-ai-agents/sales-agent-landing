@@ -6,7 +6,7 @@ import {
   CarouselPrevious,
   CarouselNext,
   CarouselDots,
-} from "@/components/ui/carousel";
+} from "@/components/ui";
 import { ScrollReveal } from "@/components/marketing/scroll-reveal";
 import type { IndustryCard } from "@marketing/types";
 import { INDUSTRIES } from "@marketing/data";

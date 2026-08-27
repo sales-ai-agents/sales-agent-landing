@@ -1,8 +1,7 @@
 import { createColumnHelper } from "@tanstack/react-table";
 import { ArrowUpDown, Trash2 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
+import { Button, Switch } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import type { Contact } from "@dashboard/types";
 import { getTagColor, formatConsentLabel, formatLastCallResult } from "./utils";

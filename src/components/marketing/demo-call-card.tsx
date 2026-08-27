@@ -4,9 +4,8 @@ import type { ChangeEvent, JSX } from "react";
 import { useState } from "react";
 import { Phone, Lock } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useDemoCall } from "@marketing/hooks/use-demo-call";
+import { Button, Input } from "@/components/ui";
+import { useDemoCall } from "@marketing/hooks";
 import { LeadFormModal } from "@/components/marketing/lead-form-card";
 import { cn, formatUaPhoneDigits } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";

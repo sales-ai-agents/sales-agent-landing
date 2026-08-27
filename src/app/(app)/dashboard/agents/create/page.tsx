@@ -7,14 +7,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, ArrowRight, Check, Play, Phone } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Button, Input, Label, Textarea } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { createAgentSchema, type CreateAgentFormData } from "@/lib/schemas";
-import { useCreateAgent, useTestCall } from "@dashboard/hooks/use-agents";
-import { useVoices } from "@dashboard/hooks/use-voices";
+import { useCreateAgent, useTestCall, useVoices } from "@dashboard/hooks";
 import { ApiError } from "@/lib/api-client";
 import { resolveErrorMessage, AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
 

@@ -5,7 +5,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui";
 import { LeadFormModal } from "@/components/marketing/lead-form-card";
 import { ScrollReveal } from "@/components/marketing/scroll-reveal";
 import { NAV_LINKS } from "@marketing/content";

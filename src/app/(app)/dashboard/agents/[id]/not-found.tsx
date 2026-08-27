@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Bot } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui";
 
 export default function AgentNotFound() {
   return (

@@ -3,9 +3,8 @@
 import { CheckCircle, XCircle, Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { usePaymentStatus } from "@dashboard/hooks/use-billing";
+import { Button, Card, CardContent } from "@/components/ui";
+import { usePaymentStatus } from "@dashboard/hooks";
 import { formatDateLong } from "@/lib/utils";
 
 interface PaymentStatusCheckerProps {

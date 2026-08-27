@@ -1,6 +1,6 @@
 import { Plus, Upload } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui";
 
 interface ContactsPageHeaderProps {
   onImport: () => void;

@@ -2,13 +2,7 @@
 
 import type { DateRange } from "react-day-picker";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui";
 import type { Agent, CallStatusFilter } from "@dashboard/types";
 import { DateRangePicker } from "./date-range-picker";
 import React from "react";

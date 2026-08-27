@@ -4,17 +4,17 @@ import { useState } from "react";
 import { PhoneCall } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
+  Button,
+  Input,
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { PageError, PageLoading } from "@/components/dashboard/page-states";
-import { useAgents, useToggleAgentStatus, useTestCall } from "@dashboard/hooks/use-agents";
+} from "@/components/ui";
+import { PageError, PageLoading } from "@/components/dashboard";
+import { useAgents, useToggleAgentStatus, useTestCall } from "@dashboard/hooks";
 import { AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/handle-mutation-error";
 import { AgentCard } from "./_components/agent-card";

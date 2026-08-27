@@ -1,6 +1,6 @@
 "use client";
 
-import { PageError } from "@/components/dashboard/page-states";
+import { PageError } from "@/components/dashboard";
 
 export default function DashboardError({
   error,

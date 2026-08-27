@@ -1,10 +1,5 @@
 import { X } from "lucide-react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui";
 import { ScrollReveal, StaggerReveal } from "@/components/marketing/scroll-reveal";
 import { FAQ_ENTRIES } from "@marketing/data";
 
