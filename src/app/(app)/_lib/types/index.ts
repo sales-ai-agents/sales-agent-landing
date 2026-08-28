@@ -1,5 +1,10 @@
 export type * from "./agent";
 export type * from "./contact";
 export type * from "./call";
-export type * from "./campaign";
 export type * from "./billing";
+export type * from "./webhook";
+export type * from "./api-key";
+export type * from "./integration";
+export type * from "./team";
+export type * from "./notification";
+export type * from "./audit";

@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import { Phone } from "lucide-react";
+import { Phone, Download } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 
+import { Button } from "@/components/ui";
 import { PageError, PageEmpty, PageLoading } from "@/components/dashboard";
 import { useCallLogs, useAgents } from "@dashboard/hooks";
 import { cn } from "@/lib/utils";
+import { apiUrl } from "@/lib/api-config";
 import type { CallStatusFilter, CallsFilter } from "@dashboard/types";
 
 import { Filters } from "./_components/filters";
@@ -58,6 +60,17 @@ const CallLogsPage = () => {
   const hasActiveFilters = !!(dateRange?.from || status || agentId || phoneSearch);
 
   const resetPage = useCallback(() => setCurrentPage(0), []);
+
+  const handleExport = useCallback(() => {
+    const exportUrl = apiUrl.callsExport({
+      ...(dateRange?.from && { date_from: toDateString(dateRange.from) }),
+      ...(dateRange?.to && { date_to: toDateString(dateRange.to) }),
+      ...(status && { status }),
+      ...(agentId && { agent_id: agentId }),
+      ...(phoneSearch && { phone: phoneSearch }),
+    });
+    window.open(exportUrl, "_blank");
+  }, [dateRange, status, agentId, phoneSearch]);
 
   const handleStatusTabChange = useCallback((tab: StatusTab) => {
     setStatusTab(tab);
@@ -114,9 +127,15 @@ const CallLogsPage = () => {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-bold">Дзвінки</h1>
-        <p className="text-muted-foreground text-sm">Журнал всіх дзвінків ваших ШІ-агентів</p>
+      <header className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Дзвінки</h1>
+          <p className="text-muted-foreground text-sm">Журнал всіх дзвінків ваших ШІ-агентів</p>
+        </div>
+        <Button variant="outline" className="px-6" onClick={handleExport}>
+          <Download className="mr-2 h-4 w-4" />
+          Експорт CSV
+        </Button>
       </header>
 
       <Filters
@@ -152,17 +171,14 @@ const CallLogsPage = () => {
         ))}
       </nav>
 
-      <div className="border-border bg-background overflow-hidden rounded-xl border">
-        <Table data={callLogs} agents={agents} pageCount={pageCount} />
-        <Pagination
-          total={total}
-          pageSize={PAGE_SIZE}
-          currentPage={currentPage}
-          onPageChange={setCurrentPage}
-          itemLabel="дзвінків"
-          className="border-t px-4 py-3"
-        />
-      </div>
+      <Table data={callLogs} agents={agents} pageCount={pageCount} />
+      <Pagination
+        total={total}
+        pageSize={PAGE_SIZE}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+        itemLabel="дзвінків"
+      />
     </div>
   );
 };

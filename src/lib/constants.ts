@@ -5,7 +5,7 @@ import {
   Settings,
   CreditCard,
   ActivitySquareIcon,
-  // Puzzle,
+  Puzzle,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -21,8 +21,7 @@ export const DASHBOARD_NAV_ITEMS = [
   { href: "/dashboard/contacts", icon: Users, label: "Контакти" },
   { href: "/dashboard/call-logs", icon: PhoneCall, label: "Дзвінки" },
   { href: "/dashboard/billing", icon: CreditCard, label: "Тарифи і Оплата" },
-  // TODO: enable when integrations API is ready
-  // { href: "/dashboard/integrations", icon: Puzzle, label: "Інтеграції" },
+  { href: "/dashboard/integrations", icon: Puzzle, label: "Інтеграції" },
 ] as const satisfies readonly NavItem[];
 
 export const DASHBOARD_SETTINGS_ITEM: NavItem = {

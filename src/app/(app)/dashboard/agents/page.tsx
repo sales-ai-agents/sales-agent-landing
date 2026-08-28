@@ -122,6 +122,10 @@ const AgentsPage = () => {
         </div>
       </div>
 
+      <p className="text-muted-foreground text-center text-sm">
+        Показано 1-{agents.length} з {agents.length} агентів
+      </p>
+
       <Dialog open={!!testDialog} onOpenChange={() => setTestDialog(null)}>
         <DialogContent className="bg-background">
           <DialogHeader>

@@ -1,5 +1,8 @@
 "use client";
 
+import { useState } from "react";
+import { toast } from "sonner";
+
 import {
   Label,
   Select,
@@ -8,14 +11,44 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui";
-import { useMe } from "@/lib/hooks";
+import { useMe, useUpdateProfile } from "@/lib/hooks";
 import { PageError, PageLoading } from "@/components/dashboard";
+import { handleMutationError } from "@/lib/mutation-error";
+import { AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
 import { Business } from "./_components/business";
 import { Profile } from "./_components/profile";
 import { Password } from "./_components/password";
+import { Notifications } from "./_components/notifications";
+import { Team } from "./_components/team";
+
+const TIMEZONE_OPTIONS = [
+  { value: "Europe/Kyiv", label: "(UTC+02:00) Київ, Європа" },
+  { value: "Europe/London", label: "(UTC+00:00) Лондон, Європа" },
+  { value: "America/New_York", label: "(UTC-05:00) Нью-Йорк, США" },
+  { value: "Europe/Berlin", label: "(UTC+01:00) Берлін, Європа" },
+  { value: "Asia/Tokyo", label: "(UTC+09:00) Токіо, Японія" },
+];
+
+const DEFAULT_TZ = "Europe/Kyiv";
 
 const SettingsPage = () => {
   const { data: account, isLoading, error, refetch } = useMe();
+  const updateProfile = useUpdateProfile();
+
+  const [timezone, setTimezone] = useState<string | null>(null);
+  const effectiveTimezone = timezone ?? account?.timezone ?? DEFAULT_TZ;
+
+  const handleTimezoneChange = (val: string | null) => {
+    if (!val) return;
+    setTimezone(val);
+    updateProfile.mutate(
+      { timezone: val },
+      {
+        onSuccess: () => toast.success("Таймзону оновлено"),
+        onError: (err) => handleMutationError(err, AUTH_ERROR_MESSAGES),
+      }
+    );
+  };
 
   if (isLoading) return <PageLoading />;
   if (error) return <PageError message={error.message} onRetry={refetch} />;
@@ -34,16 +67,18 @@ const SettingsPage = () => {
         </p>
         <div className="mt-3 max-w-sm">
           <Label htmlFor="timezone" className="text-xs">
-            Часовий час
+            Часовий пояс
           </Label>
-          <Select defaultValue="europe_kyiv">
-            <SelectTrigger className="mt-1">
+          <Select value={effectiveTimezone} onValueChange={handleTimezoneChange}>
+            <SelectTrigger className="mt-1" id="timezone">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="europe_kyiv">(UTC+02:00) Київ, Європа</SelectItem>
-              <SelectItem value="europe_london">(UTC+00:00) Лондон, Європа</SelectItem>
-              <SelectItem value="us_eastern">(UTC-05:00) Нью-Йорк, США</SelectItem>
+              {TIMEZONE_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <p className="text-muted-foreground mt-2 text-xs">
@@ -52,9 +87,20 @@ const SettingsPage = () => {
         </div>
       </section>
 
-      <Business initialCompany={account?.company ?? ""} />
+      <Business
+        initialCompany={account?.company ?? ""}
+        initialShortName={account?.short_name ?? ""}
+        initialWebsite={account?.website ?? ""}
+        initialLanguage={account?.agent_language ?? "uk"}
+      />
+
       <Profile initialName={account?.name ?? ""} initialEmail={account?.email ?? ""} />
+
       <Password />
+
+      <Notifications />
+
+      <Team />
     </div>
   );
 };

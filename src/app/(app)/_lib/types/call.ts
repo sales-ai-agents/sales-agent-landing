@@ -1,6 +1,8 @@
 export type CallOutcome =
   "meeting" | "не_відповів" | "не_цікаво" | "відмова" | "передзвонити" | (string & {});
 
+export type SlaState = "ok" | "breached" | "handled";
+
 export interface CallLog {
   id: string;
   phone: string;
@@ -14,6 +16,9 @@ export interface CallLog {
   agent_id: number | null;
   turn_count: number;
   duration_sec: number | null;
+  manager_note: string | null;
+  sla_state: SlaState | null;
+  sla_minutes_left: number | null;
 }
 
 export interface TranscriptMessage {
@@ -88,4 +93,20 @@ export interface StatsResponse {
   previous: PeriodStats;
   delta_pct: DeltaPct;
   by_day: DayStats[];
+}
+
+export type CrmSyncState = "not_configured" | "pending" | "synced" | "failed";
+
+export interface CrmStatus {
+  configured: boolean;
+  provider: string | null;
+  state: CrmSyncState;
+  synced_at: string | null;
+  error: string | null;
+  can_retry: boolean;
+}
+
+export interface CrmStatusResponse {
+  ok: boolean;
+  crm: CrmStatus;
 }

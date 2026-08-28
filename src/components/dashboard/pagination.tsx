@@ -3,7 +3,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui";
-import { cn, formatNumber, getPageIndex } from "@/lib/utils";
+import { formatNumber, getPageIndex } from "@/lib/utils";
 
 interface PaginationProps {
   total: number;
@@ -11,7 +11,6 @@ interface PaginationProps {
   currentPage: number;
   onPageChange: (page: number) => void;
   itemLabel?: string;
-  className?: string;
 }
 
 export const Pagination = ({
@@ -20,14 +19,13 @@ export const Pagination = ({
   currentPage,
   onPageChange,
   itemLabel = "записів",
-  className,
 }: PaginationProps) => {
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
   const startRow = total > 0 ? currentPage * pageSize + 1 : 0;
   const endRow = Math.min((currentPage + 1) * pageSize, total);
 
   return (
-    <div className={cn("flex items-center justify-between", className)}>
+    <div className="flex items-center justify-between">
       <p className="text-muted-foreground text-sm">
         {total > 0
           ? `Показано ${startRow}-${endRow} з ${formatNumber(total)} ${itemLabel}`

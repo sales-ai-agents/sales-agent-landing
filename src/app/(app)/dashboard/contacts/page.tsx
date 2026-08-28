@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import type { SortingState } from "@tanstack/react-table";
-import { Search, Users, Phone, BarChart3, Upload, Plus } from "lucide-react";
+import { Search, Users, Phone, BarChart3, Upload, Plus, Download } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button, Input } from "@/components/ui";
@@ -20,7 +20,8 @@ import {
   useUpdateContact,
 } from "@dashboard/hooks";
 import { handleMutationError } from "@/lib/mutation-error";
-import { formatNumber } from "@/lib/utils";
+import { formatNumber, cn } from "@/lib/utils";
+import { apiUrl } from "@/lib/api-config";
 import type { ContactFormData } from "@/lib/schemas";
 import { Table } from "./_components/table";
 import { KpiCard } from "./_components/kpi-card";
@@ -32,13 +33,39 @@ const ContactsPage = () => {
   const deleteContact = useDeleteContact();
   const updateContact = useUpdateContact();
 
-  const contacts = data?.contacts ?? [];
+  const contacts = useMemo(() => {
+    return data?.contacts ?? [];
+  }, [data?.contacts]);
+
   const contactStats = data?.stats;
 
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [activeTag, setActiveTag] = useState<string | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
+
+  const tagCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const contact of contacts) {
+      for (const tag of contact.tags ?? []) {
+        counts[tag] = (counts[tag] ?? 0) + 1;
+      }
+    }
+    return counts;
+  }, [contacts]);
+
+  const allTags = useMemo(() => Object.keys(tagCounts).sort(), [tagCounts]);
+
+  const filteredContacts = useMemo(() => {
+    if (!activeTag) return contacts;
+    return contacts.filter((c) => c.tags?.includes(activeTag));
+  }, [contacts, activeTag]);
+
+  const handleExport = useCallback(() => {
+    const exportUrl = apiUrl.contactsExport(globalFilter || undefined);
+    window.open(exportUrl, "_blank");
+  }, [globalFilter]);
 
   const handleAddContact = useCallback(
     (formData: ContactFormData) => {
@@ -130,6 +157,10 @@ const ContactsPage = () => {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" className="px-6" onClick={handleExport}>
+            <Download className="mr-2 h-4 w-4" />
+            Експорт CSV
+          </Button>
           <Button variant="outline" className="px-6" onClick={() => setShowUploadDialog(true)}>
             <Upload className="mr-2 h-4 w-4" />
             Імпорт CSV
@@ -176,9 +207,38 @@ const ContactsPage = () => {
         />
       </div>
 
+      <div className="flex flex-wrap gap-2">
+        <button
+          onClick={() => setActiveTag(null)}
+          className={cn(
+            "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+            !activeTag
+              ? "border-primary bg-primary/5 text-primary"
+              : "border-border text-muted-foreground hover:border-primary/50"
+          )}
+        >
+          Усі контакти <span className="font-semibold">{contacts.length}</span>
+        </button>
+        {allTags.map((tag) => (
+          <button
+            key={tag}
+            onClick={() => setActiveTag(activeTag === tag ? null : tag)}
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+              activeTag === tag
+                ? "border-primary bg-primary/5 text-primary"
+                : "border-border text-muted-foreground hover:border-primary/50"
+            )}
+          >
+            {tag} <span className="font-semibold">{tagCounts[tag]}</span>
+          </button>
+        ))}
+      </div>
+
       <div className="border-border bg-background overflow-hidden rounded-xl border">
         <Table
-          data={contacts}
+          data={filteredContacts}
+          pageSize={filteredContacts.length}
           globalFilter={globalFilter}
           onGlobalFilterChange={setGlobalFilter}
           sorting={sorting}

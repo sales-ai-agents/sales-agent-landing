@@ -49,6 +49,7 @@ const CreateAgentPage = () => {
   const name = watch("name");
   const voice = watch("voice");
   const instructions = watch("instructions");
+  const errorLength = Object.values(errors).length;
 
   const handleCreate = useCallback(async () => {
     const valid = await trigger(["name", "voice", "instructions"]);
@@ -146,8 +147,8 @@ const CreateAgentPage = () => {
 
       <div className="border-border bg-background rounded-2xl border p-6">
         {step === 0 && (
-          <div className="space-y-4">
-            <div>
+          <div>
+            <div className="mb-8">
               <h2 className="text-xl font-bold">Назвіть свого агента</h2>
               <p className="text-muted-foreground mt-1 text-sm">
                 Оберіть описову назву для вашого AI голосового агента
@@ -166,51 +167,53 @@ const CreateAgentPage = () => {
         )}
 
         {step === 1 && (
-          <div className="space-y-4">
-            <div>
+          <div>
+            <div className="mb-8">
               <h2 className="text-xl font-bold">Оберіть голос</h2>
               <p className="text-muted-foreground mt-1 text-sm">
                 Оберіть голос, який ваш агент використовуватиме під час дзвінків.
               </p>
             </div>
-            <div
-              className="grid grid-cols-1 gap-3 sm:grid-cols-2"
-              role="radiogroup"
-              aria-label="Оберіть голос"
-            >
-              {voices.map((voiceOption) => (
-                <button
-                  key={voiceOption.key}
-                  type="button"
-                  role="radio"
-                  aria-checked={voice === voiceOption.key}
-                  onClick={() => setValue("voice", voiceOption.key, { shouldValidate: true })}
-                  className={cn(
-                    "flex items-center justify-between rounded-xl border p-4 text-left transition-colors",
-                    voice === voiceOption.key
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:border-primary/50"
-                  )}
-                >
-                  <div>
-                    <p className="text-sm font-medium">{voiceOption.name}</p>
-                    <p className="text-muted-foreground text-xs">{voiceOption.label}</p>
-                  </div>
-                  <div className="bg-muted flex h-8 w-8 items-center justify-center rounded-full">
-                    <Play className="text-muted-foreground h-3 w-3" />
-                  </div>
-                </button>
-              ))}
+            <div className="space-y-2">
+              <div
+                className="grid grid-cols-1 gap-3 sm:grid-cols-2"
+                role="radiogroup"
+                aria-label="Оберіть голос"
+              >
+                {voices.map((voiceOption) => (
+                  <button
+                    key={voiceOption.key}
+                    type="button"
+                    role="radio"
+                    aria-checked={voice === voiceOption.key}
+                    onClick={() => setValue("voice", voiceOption.key, { shouldValidate: true })}
+                    className={cn(
+                      "flex items-center justify-between rounded-xl border p-4 text-left transition-colors",
+                      voice === voiceOption.key
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/50"
+                    )}
+                  >
+                    <div>
+                      <p className="text-sm font-medium">{voiceOption.name}</p>
+                      <p className="text-muted-foreground text-xs">{voiceOption.label}</p>
+                    </div>
+                    <div className="bg-muted flex h-8 w-8 items-center justify-center rounded-full">
+                      <Play className="text-muted-foreground h-3 w-3" />
+                    </div>
+                  </button>
+                ))}
+              </div>
+              {errors.voice?.message && (
+                <p className="text-sm text-red-600">{errors.voice?.message}</p>
+              )}
             </div>
-            {errors.voice?.message && (
-              <p className="text-sm text-red-600">{errors.voice?.message}</p>
-            )}
           </div>
         )}
 
         {step === 2 && (
-          <div className="space-y-4">
-            <div>
+          <div>
+            <div className="mb-8">
               <h2 className="text-xl font-bold">Напишіть інструкції</h2>
               <p className="text-muted-foreground mt-1 text-sm">
                 Розкажіть агенту, що робити, звичайною мовою. Код не потрібен
@@ -235,7 +238,7 @@ const CreateAgentPage = () => {
         )}
 
         {step === 3 && (
-          <div className="space-y-4">
+          <div className="space-y-8">
             <div>
               <h2 className="text-xl font-bold">Протестуйте агента</h2>
               <p className="text-muted-foreground mt-1 text-sm">
@@ -282,7 +285,7 @@ const CreateAgentPage = () => {
           <ArrowLeft className="mr-1.5 h-4 w-4" />
           Назад
         </Button>
-        <Button size="sm" onClick={handleNext} disabled={createAgent.isPending}>
+        <Button size="sm" onClick={handleNext} disabled={createAgent.isPending || errorLength > 0}>
           {createAgent.isPending ? "Створення..." : step === TOTAL_STEPS - 1 ? "Створити" : "Далі"}
           <ArrowRight className="ml-1.5 h-4 w-4" />
         </Button>

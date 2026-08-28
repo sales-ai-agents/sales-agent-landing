@@ -16,20 +16,31 @@ import {
 import { useUpdateProfile } from "@/lib/hooks";
 import { AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/mutation-error";
+import type { AgentLanguage } from "@/lib/types";
 
 interface BusinessProps {
   initialCompany: string;
+  initialShortName: string;
+  initialWebsite: string;
+  initialLanguage: AgentLanguage;
 }
 
-export const Business = ({ initialCompany }: BusinessProps) => {
+export const Business = ({
+  initialCompany,
+  initialShortName,
+  initialWebsite,
+  initialLanguage,
+}: BusinessProps) => {
   const [company, setCompany] = useState(initialCompany);
-  const [shortName, setShortName] = useState("");
+  const [shortName, setShortName] = useState(initialShortName);
+  const [website, setWebsite] = useState(initialWebsite);
+  const [language, setLanguage] = useState<AgentLanguage>(initialLanguage);
 
   const updateProfile = useUpdateProfile();
 
   const handleSave = () => {
     updateProfile.mutate(
-      { company },
+      { company, short_name: shortName, website, agent_language: language },
       {
         onSuccess: () => toast.success("Дані бізнесу оновлено"),
         onError: (err) => handleMutationError(err, AUTH_ERROR_MESSAGES),
@@ -72,16 +83,22 @@ export const Business = ({ initialCompany }: BusinessProps) => {
           <Label htmlFor="website" className="text-xs">
             Сайт компанії (необов&apos;язково)
           </Label>
-          <Input id="website" placeholder="https://..." />
+          <Input
+            id="website"
+            value={website}
+            onChange={(e) => setWebsite(e.target.value)}
+            placeholder="https://..."
+          />
         </div>
         <div className="space-y-1">
           <Label className="text-xs">Мова спілкування агентів за замовчуванням</Label>
-          <Select defaultValue="uk">
+          <Select value={language} onValueChange={(val) => setLanguage(val as AgentLanguage)}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="uk">Українська</SelectItem>
+              <SelectItem value="ru">Російська</SelectItem>
               <SelectItem value="en">English</SelectItem>
             </SelectContent>
           </Select>

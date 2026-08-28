@@ -1,9 +1,16 @@
+export type AgentLanguage = "uk" | "ru" | "en";
+
 export interface Account {
   id: number;
   email: string;
   name?: string;
   company?: string;
   plan?: string;
+  sla_minutes?: number;
+  timezone?: string;
+  short_name?: string;
+  website?: string;
+  agent_language?: AgentLanguage;
 }
 
 export interface AuthResponse {
@@ -50,6 +57,11 @@ export interface UpdateProfileParams {
   name?: string;
   company?: string;
   email?: string;
+  sla_minutes?: number;
+  timezone?: string;
+  short_name?: string;
+  website?: string;
+  agent_language?: AgentLanguage;
 }
 
 export interface UpdateProfileResponse {

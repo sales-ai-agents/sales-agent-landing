@@ -13,7 +13,7 @@ import { Play, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui";
 import { getOutcomeConfig } from "@/app/(app)/_lib/call-outcome";
 import { formatDuration, cn } from "@/lib/utils";
-import type { CallLog, Agent } from "@dashboard/types";
+import type { CallLog, Agent, SlaState } from "@dashboard/types";
 import { resolveAgentName } from "../_lib/utils";
 
 const columnHelper = createColumnHelper<CallLog>();
@@ -23,6 +23,31 @@ interface TableProps {
   agents: Agent[];
   pageCount: number;
 }
+
+const SlaIndicator = ({
+  state,
+  minutesLeft,
+}: {
+  state: SlaState | null;
+  minutesLeft: number | null;
+}) => {
+  if (!state) return null;
+
+  switch (state) {
+    case "breached": {
+      const overdue = minutesLeft !== null ? Math.abs(Math.round(minutesLeft)) : 0;
+      return <span className="text-xs font-medium text-red-500">⊘ Прострочено {overdue} хв</span>;
+    }
+    case "ok": {
+      const left = minutesLeft !== null ? Math.round(minutesLeft) : 0;
+      return <span className="text-xs font-medium text-orange-500">⊘ Залишилось {left} хв</span>;
+    }
+    case "handled":
+      return null;
+    default:
+      return null;
+  }
+};
 
 export const Table = ({ data, agents, pageCount }: TableProps) => {
   const columns = useMemo(
@@ -58,9 +83,17 @@ export const Table = ({ data, agents, pageCount }: TableProps) => {
       }),
       columnHelper.accessor("outcome", {
         header: "Статус / SLA",
-        cell: (info) => {
-          const config = getOutcomeConfig(info.getValue());
-          return <Badge variant={config.variant}>● {config.label}</Badge>;
+        cell: ({ row }) => {
+          const config = getOutcomeConfig(row.original.outcome);
+          return (
+            <div className="flex flex-col gap-0.5">
+              <Badge variant={config.variant}>● {config.label}</Badge>
+              <SlaIndicator
+                state={row.original.sla_state}
+                minutesLeft={row.original.sla_minutes_left}
+              />
+            </div>
+          );
         },
       }),
       columnHelper.accessor("duration_sec", {
@@ -83,14 +116,7 @@ export const Table = ({ data, agents, pageCount }: TableProps) => {
       columnHelper.display({
         id: "crm",
         header: "CRM",
-        cell: ({ row }) => {
-          const synced = !!row.original.analysis_text;
-          return synced ? (
-            <span className="text-sm font-medium text-green-600">Синхронізовано</span>
-          ) : (
-            <span className="text-sm font-medium text-orange-500">Не синхронізовано</span>
-          );
-        },
+        cell: () => <span className="text-muted-foreground text-sm">—</span>,
         meta: { className: "hidden xl:table-cell" },
       }),
       columnHelper.display({
@@ -115,7 +141,7 @@ export const Table = ({ data, agents, pageCount }: TableProps) => {
   });
 
   return (
-    <div className="overflow-x-auto">
+    <div className="border-border bg-background overflow-hidden overflow-x-auto rounded-xl border">
       <table className="w-full text-sm">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (

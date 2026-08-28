@@ -21,10 +21,9 @@ import { getTagColor, formatConsentLabel, formatLastCallResult } from "../_lib/u
 
 const columnHelper = createColumnHelper<Contact>();
 
-const PAGE_SIZE = 12;
-
 interface TableProps {
   data: Contact[];
+  pageSize: number;
   globalFilter: string;
   onGlobalFilterChange: (value: string) => void;
   sorting: SortingState;
@@ -35,6 +34,7 @@ interface TableProps {
 
 export const Table = ({
   data,
+  pageSize,
   globalFilter,
   onGlobalFilterChange,
   sorting,
@@ -127,6 +127,7 @@ export const Table = ({
             checked={info.getValue()}
             onCheckedChange={() => onToggleDoNotCall(info.row.original.id, info.getValue())}
             aria-label="Не дзвонити"
+            className="bg-gray-300"
           />
         ),
         enableSorting: false,
@@ -163,7 +164,7 @@ export const Table = ({
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    initialState: { pagination: { pageSize: PAGE_SIZE } },
+    initialState: { pagination: { pageSize } },
   });
 
   return (

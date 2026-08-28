@@ -3,17 +3,82 @@
 import { useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Download, Bot } from "lucide-react";
+import { ArrowLeft, Download, Bot, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button, Textarea, Badge } from "@/components/ui";
 import { PageLoading, PageError, AudioPlayer } from "@/components/dashboard";
-import { useCallDetail, useSaveNote, useAgents } from "@dashboard/hooks";
+import { useCallDetail, useSaveNote, useAgents, useCrmStatus, useCrmRetry } from "@dashboard/hooks";
 import { handleMutationError } from "@/lib/mutation-error";
 import { getOutcomeConfig } from "@/app/(app)/_lib/call-outcome";
 import { formatDuration, cn } from "@/lib/utils";
 import { formatTranscriptTime } from "@/app/(app)/dashboard/call-logs/_lib/utils";
 import { InfoField } from "@/app/(app)/dashboard/call-logs/_components/info-field";
+import type { CrmStatus, SlaState } from "@dashboard/types";
+
+const SlaDisplay = ({
+  state,
+  minutesLeft,
+}: {
+  state: SlaState | null;
+  minutesLeft: number | null;
+}) => {
+  if (!state) return <p className="mt-1 text-sm font-medium">—</p>;
+
+  switch (state) {
+    case "breached": {
+      const overdue = minutesLeft !== null ? Math.abs(Math.round(minutesLeft)) : 0;
+      return <p className="mt-1 text-sm font-medium text-red-500">⊘ Прострочено {overdue} хв</p>;
+    }
+    case "ok": {
+      const left = minutesLeft !== null ? Math.round(minutesLeft) : 0;
+      return <p className="mt-1 text-sm font-medium text-orange-500">Залишилось {left} хв</p>;
+    }
+    case "handled":
+      return <p className="mt-1 text-sm font-medium text-green-600">Оброблено</p>;
+    default:
+      return <p className="mt-1 text-sm font-medium">—</p>;
+  }
+};
+
+const CRM_STATE_MAP: Record<string, { label: string; color: string }> = {
+  synced: { label: "Синхронізовано", color: "text-green-600" },
+  pending: { label: "Очікується", color: "text-orange-500" },
+  failed: { label: "Не синхронізовано", color: "text-red-500" },
+  not_configured: { label: "CRM не підключено", color: "text-muted-foreground" },
+};
+
+const CrmPanel = ({ callId, crm }: { callId: string; crm: CrmStatus }) => {
+  const crmRetry = useCrmRetry();
+  const stateConfig = CRM_STATE_MAP[crm.state] ?? CRM_STATE_MAP.not_configured;
+
+  const handleRetry = useCallback(() => {
+    crmRetry.mutate(callId, {
+      onSuccess: () => toast.success("Синхронізацію поставлено в чергу"),
+      onError: (err) => handleMutationError(err),
+    });
+  }, [crmRetry, callId]);
+
+  return (
+    <div className="border-border bg-background rounded-2xl border p-5">
+      <h3 className="mb-3 text-sm font-semibold">CRM синхронізація</h3>
+      <p className={cn("text-sm font-medium", stateConfig.color)}>● {stateConfig.label}</p>
+      {crm.error && <p className="text-muted-foreground mt-2 text-xs">{crm.error}</p>}
+      {crm.can_retry && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="mt-3 w-full gap-1.5"
+          onClick={handleRetry}
+          disabled={crmRetry.isPending}
+        >
+          <RefreshCw className={cn("h-3.5 w-3.5", crmRetry.isPending && "animate-spin")} />
+          Повторити синхронізацію
+        </Button>
+      )}
+    </div>
+  );
+};
 
 const CallDetailPage = () => {
   const params = useParams();
@@ -21,6 +86,7 @@ const CallDetailPage = () => {
 
   const { data: call, isLoading, error, refetch } = useCallDetail(callId);
   const { data: agents = [] } = useAgents();
+  const { data: crm } = useCrmStatus(callId);
   const saveNote = useSaveNote(callId);
 
   const [note, setNote] = useState("");
@@ -78,7 +144,7 @@ const CallDetailPage = () => {
         </a>
       </div>
 
-      <div className="border-border bg-background grid grid-cols-2 gap-3 rounded-2xl border p-5 md:grid-cols-5">
+      <div className="border-border bg-background grid grid-cols-2 gap-3 rounded-2xl border p-5 md:grid-cols-4 lg:grid-cols-6">
         <InfoField label="Клієнт" value={call.phone} />
         <InfoField
           label="Агент"
@@ -92,6 +158,10 @@ const CallDetailPage = () => {
           </Badge>
         </div>
         <InfoField label="Тривалість дзвінка" value={duration} />
+        <div>
+          <p className="text-muted-foreground text-xs">Статус / SLA</p>
+          <SlaDisplay state={call.sla_state} minutesLeft={call.sla_minutes_left} />
+        </div>
         <div>
           <p className="text-muted-foreground text-xs">Витрачено хвилин</p>
           <p className="mt-1 text-sm font-medium">{minutesUsed} хв</p>
@@ -136,6 +206,8 @@ const CallDetailPage = () => {
         </div>
 
         <div className="space-y-4">
+          {crm && crm.configured && <CrmPanel callId={callId} crm={crm} />}
+
           <div className="border-border bg-background rounded-2xl border p-5">
             <h3 className="mb-3 text-sm font-semibold">Пов&apos;язаний контакт</h3>
             <div className="space-y-2 text-sm">
@@ -159,6 +231,11 @@ const CallDetailPage = () => {
               value={note}
               onChange={(e) => setNote(e.target.value)}
             />
+            {call.manager_note_at && (
+              <p className="text-muted-foreground mt-1 text-xs">
+                Останнє оновлення: {new Date(call.manager_note_at).toLocaleString("uk-UA")}
+              </p>
+            )}
             <Button
               size="sm"
               className="mt-3"
