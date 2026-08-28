@@ -181,7 +181,7 @@ export const Team = () => {
       </p>
 
       <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
-        <DialogContent className="bg-background">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Запросити користувача</DialogTitle>
           </DialogHeader>

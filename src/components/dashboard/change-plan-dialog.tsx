@@ -64,7 +64,7 @@ export const ChangePlanDialog = ({
         if (!open) onClose();
       }}
     >
-      <DialogContent className="bg-background sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl">
         <ConfirmStep
           currentPlan={currentPlan}
           newPlan={selectedPlan}

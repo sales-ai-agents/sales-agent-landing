@@ -61,7 +61,7 @@ export function LeadFormModal({ open, onClose, sourcePage }: LeadFormModalProps)
         if (!isOpen) onClose();
       }}
     >
-      <DialogContent className="border-border shadow-primary/30 rounded-none border bg-linear-to-br from-white p-6 shadow-lg backdrop-blur-2xl sm:max-w-270 sm:rounded-2xl sm:p-10 lg:p-14">
+      <DialogContent className="border-border shadow-primary/30 rounded-none border bg-linear-to-br from-white to-gray-300 p-6 shadow-lg backdrop-blur-2xl sm:max-w-270 sm:rounded-2xl sm:p-10 lg:p-14">
         <DialogTitle className="sr-only">Отримайте розрахунок ШІ-агента</DialogTitle>
 
         {isSuccess ? (

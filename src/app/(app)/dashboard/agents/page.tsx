@@ -127,7 +127,7 @@ const AgentsPage = () => {
       </p>
 
       <Dialog open={!!testDialog} onOpenChange={() => setTestDialog(null)}>
-        <DialogContent className="bg-background">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Тестовий дзвінок — {testDialog?.agentName}</DialogTitle>
           </DialogHeader>

@@ -36,7 +36,7 @@ export const AddContactDialog = ({ onSubmit, onClose }: AddContactDialogProps) =
         if (!open) onClose();
       }}
     >
-      <DialogContent className="bg-background">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Додати контакт</DialogTitle>
         </DialogHeader>

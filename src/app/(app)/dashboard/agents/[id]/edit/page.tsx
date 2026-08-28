@@ -196,7 +196,7 @@ const EditAgentForm = ({ agent }: { agent: Agent }) => {
       </div>
 
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <DialogContent className="bg-background">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Видалити агента?</DialogTitle>
             <DialogDescription>

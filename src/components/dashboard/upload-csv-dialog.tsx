@@ -62,7 +62,7 @@ export const UploadCsvDialog = ({ onClose }: UploadCsvDialogProps) => {
         if (!open) onClose();
       }}
     >
-      <DialogContent className="bg-background">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Завантажити CSV</DialogTitle>
         </DialogHeader>
