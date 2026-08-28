@@ -5,6 +5,30 @@ import { Room, RoomEvent, Track, type RemoteTrack } from "livekit-client";
 
 import type { RoomStatus, UseLiveKitRoomOptions, UseLiveKitRoomResult } from "@marketing/types";
 
+function getUserMediaErrorMessage(error: unknown) {
+  if (!(error instanceof Error)) {
+    return "Не вдалося підключитися до кімнати.";
+  }
+
+  const name = error.name;
+  const message = error.message.toLowerCase();
+
+  if (name === "NotAllowedError" || message.includes("permission denied")) {
+    return "Будь ласка, надайте доступ до мікрофона у налаштуваннях браузера.";
+  }
+  if (name === "NotFoundError" || message.includes("device not found")) {
+    return "Мікрофон не знайдено. Будь ласка, підключіть мікрофон і спробуйте ще раз.";
+  }
+  if (name === "NotReadableError" || message.includes("could not start")) {
+    return "Мікрофон вже використовується іншою програмою або вкладкою.";
+  }
+  if (message.includes("failed to connect") || message.includes("timeout")) {
+    return "Не вдалося встановити зв'язок. Перевірте інтернет-з'єднання.";
+  }
+
+  return "Помилка підключення до голосового чату. Спробуйте ще раз.";
+}
+
 export function useLiveKitRoom({ wsUrl, token }: UseLiveKitRoomOptions): UseLiveKitRoomResult {
   const roomRef = useRef<Room | null>(null);
   const [resolvedStatus, setResolvedStatus] = useState<
@@ -43,9 +67,7 @@ export function useLiveKitRoom({ wsUrl, token }: UseLiveKitRoomOptions): UseLive
       })
       .catch((error: unknown) => {
         if (cancelled) return;
-        const message =
-          error instanceof Error ? error.message : "Не вдалося підключитися до кімнати.";
-        setErrorMessage(message);
+        setErrorMessage(getUserMediaErrorMessage(error));
         setResolvedStatus("error");
       });
 
