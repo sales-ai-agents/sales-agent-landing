@@ -16,8 +16,8 @@ const KNOWN_CRMS: CrmEntry[] = [
     name: "Bitrix24",
     description: "Автоматична передача лідів, угод та активностей",
     logo: (
-      <div className="flex h-[47px] w-[47px] items-center justify-center rounded-full bg-[#1a73e8]">
-        <span className="text-xl font-bold text-white">24</span>
+      <div className="border-primary flex h-12 w-12 items-center justify-center rounded-full border">
+        <span className="text-primary text-xl font-bold">24</span>
       </div>
     ),
   },
@@ -26,9 +26,18 @@ const KNOWN_CRMS: CrmEntry[] = [
     name: "KeyCRM",
     description: "Передача заявок, контактів та історії дзвінків",
     logo: (
-      <div className="flex h-[47px] w-[47px] items-center justify-center rounded-full bg-[#005bff]">
-        <svg viewBox="0 0 24 24" className="h-6 w-6 fill-white">
-          <path d="M7 5v14l7-7-7-7zm8 7 2-2v4l-2-2z" />
+      <div className="bg-primary flex h-12 w-12 items-center justify-center rounded-full">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="12"
+          height="20"
+          viewBox="0 0 12 20"
+          fill="none"
+        >
+          <path
+            d="M6 0C9.31371 0 12 2.68629 12 6C12 8.26095 10.7485 10.2282 8.90137 11.251C8.96308 11.4907 9 11.741 9 12V17C9 18.6569 7.65685 20 6 20C4.34315 20 3 18.6569 3 17V12C3 11.7411 3.03598 11.4906 3.09766 11.251C1.25091 10.2281 0 8.26064 0 6C0 2.68629 2.68629 0 6 0Z"
+            fill="white"
+          />
         </svg>
       </div>
     ),
@@ -38,7 +47,7 @@ const KNOWN_CRMS: CrmEntry[] = [
     name: "Pipedrive",
     description: "Створення лідів та угод з історією взаємодії",
     logo: (
-      <div className="flex h-[47px] w-[47px] items-center justify-center rounded-full bg-black">
+      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black">
         <span className="text-xl font-bold text-white">P</span>
       </div>
     ),

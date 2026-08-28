@@ -25,6 +25,12 @@ interface BusinessProps {
   initialLanguage: AgentLanguage;
 }
 
+const LANGUAGE_OPTIONS = [
+  { value: "uk", label: "Українська" },
+  { value: "ru", label: "Російська" },
+  { value: "en", label: "English" },
+];
+
 export const Business = ({
   initialCompany,
   initialShortName,
@@ -37,6 +43,7 @@ export const Business = ({
   const [language, setLanguage] = useState<AgentLanguage>(initialLanguage);
 
   const updateProfile = useUpdateProfile();
+  const selectedLabel = LANGUAGE_OPTIONS.find((opt) => opt.value === language)?.label;
 
   const handleSave = () => {
     updateProfile.mutate(
@@ -93,13 +100,15 @@ export const Business = ({
         <div className="space-y-1">
           <Label className="text-xs">Мова спілкування агентів за замовчуванням</Label>
           <Select value={language} onValueChange={(val) => setLanguage(val as AgentLanguage)}>
-            <SelectTrigger>
-              <SelectValue />
+            <SelectTrigger className="h-10! w-full rounded-md">
+              <SelectValue>{selectedLabel}</SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="uk">Українська</SelectItem>
-              <SelectItem value="ru">Російська</SelectItem>
-              <SelectItem value="en">English</SelectItem>
+              {LANGUAGE_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

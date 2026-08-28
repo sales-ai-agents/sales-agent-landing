@@ -35,8 +35,14 @@ const ROLE_LABELS: Record<TeamRole, string> = {
   viewer: "Тільки перегляд",
 };
 
+const ROLE_OPTIONS = [
+  { value: "admin", label: "Адмін" },
+  { value: "viewer", label: "Тільки перегляд" },
+];
+
 export const Team = () => {
   const { data: members = [] } = useTeam();
+
   const inviteMember = useInviteTeamMember();
   const updateRole = useUpdateTeamMemberRole();
   const removeMember = useRemoveTeamMember();
@@ -45,6 +51,8 @@ export const Team = () => {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteName, setInviteName] = useState("");
   const [inviteRole, setInviteRole] = useState<"admin" | "viewer">("viewer");
+
+  const selectedLabel = ROLE_OPTIONS.find((opt) => opt.value === inviteRole)?.label;
 
   const handleInvite = useCallback(() => {
     inviteMember.mutate(
@@ -136,12 +144,15 @@ export const Team = () => {
                         handleRoleChange(member.id, val as "admin" | "viewer")
                       }
                     >
-                      <SelectTrigger className="h-8 w-auto text-sm">
+                      <SelectTrigger className="w-auto text-sm">
                         <SelectValue>{ROLE_LABELS[member.role]}</SelectValue>
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="admin">Адмін</SelectItem>
-                        <SelectItem value="viewer">Тільки перегляд</SelectItem>
+                        {ROLE_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   )}
@@ -189,7 +200,7 @@ export const Team = () => {
               <Input
                 value={inviteName}
                 onChange={(e) => setInviteName(e.target.value)}
-                placeholder="Ім'я Прізвище"
+                placeholder="Ім'я"
               />
             </div>
             <div className="space-y-1">
@@ -198,12 +209,15 @@ export const Team = () => {
                 value={inviteRole}
                 onValueChange={(val) => setInviteRole(val as "admin" | "viewer")}
               >
-                <SelectTrigger>
-                  <SelectValue />
+                <SelectTrigger className="h-10! w-full rounded-md">
+                  <SelectValue>{selectedLabel}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="admin">Адмін</SelectItem>
-                  <SelectItem value="viewer">Тільки перегляд</SelectItem>
+                  {ROLE_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

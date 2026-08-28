@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Key, Trash2, Copy, Check } from "lucide-react";
+import { KeyRound, Trash2, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -74,8 +74,8 @@ export const ApiKeysSection = () => {
       <div className="border-border bg-background rounded-xl border p-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="bg-primary/10 flex h-[70px] w-[70px] shrink-0 items-center justify-center rounded-full">
-              <Key className="text-primary h-7 w-7" />
+            <div className="bg-primary/10 flex h-17 w-17 shrink-0 items-center justify-center rounded-full">
+              <KeyRound className="text-primary h-7 w-7" />
             </div>
             <div>
               <p className="text-sm font-medium">API-ключі</p>

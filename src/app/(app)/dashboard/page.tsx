@@ -2,10 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Phone, Clock, Target, Download, ChevronRight } from "lucide-react";
+import { Phone, Clock, Target, ChevronRight } from "lucide-react";
 
 import {
-  Button,
   Progress,
   Select,
   SelectContent,
@@ -64,10 +63,6 @@ const DashboardPage = () => {
           <h1 className="text-2xl font-bold">Огляд</h1>
           <p className="text-muted-foreground text-sm">Статистика роботи ваших ШІ-агентів</p>
         </div>
-        <Button variant="outline" className="gap-3">
-          <Download className="h-4 w-4" />
-          Експорт
-        </Button>
       </div>
 
       <div>

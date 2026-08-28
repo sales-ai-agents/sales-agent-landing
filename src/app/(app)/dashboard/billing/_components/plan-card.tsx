@@ -47,12 +47,12 @@ export const PlanCard = ({ plan, isCurrent, onSelect }: PlanCardProps) => {
   return (
     <div
       className={cn(
-        "flex flex-col rounded-2xl border p-6",
-        isCurrent ? "bg-primary/5 border-primary/30" : "border-border bg-background"
+        "border-border flex flex-col rounded-2xl border p-6",
+        isCurrent ? "shadow-primary/30 -mt-4 bg-transparent shadow-sm" : "bg-background"
       )}
     >
-      <div className="flex items-center gap-2">
-        <h3 className="text-xl font-bold tracking-wide uppercase">{plan.title}</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-3xl font-bold tracking-wide uppercase">{plan.title}</h3>
         {isCurrent && (
           <span className="bg-primary rounded-full px-2.5 py-0.5 text-xs font-medium text-white">
             Поточний
@@ -60,15 +60,15 @@ export const PlanCard = ({ plan, isCurrent, onSelect }: PlanCardProps) => {
         )}
       </div>
 
-      <div className="mt-3">
-        <span className="text-[35px] leading-none font-bold">${priceUsd}</span>
+      <div className="mt-8">
+        <span className="text-3xl font-semibold">${priceUsd}</span>
         <span className="text-muted-foreground text-lg"> / місяць</span>
       </div>
 
       <ul className="mt-5 flex-1 space-y-1.5 text-sm">
         {features.map((feature, i) => (
-          <li key={i} className="flex items-start gap-2">
-            <Check className="text-primary mt-0.5 h-4 w-4 shrink-0" />
+          <li key={i} className="flex items-center gap-2">
+            <Check className="h-4 w-4 shrink-0" />
             <span>{feature}</span>
           </li>
         ))}
@@ -81,11 +81,11 @@ export const PlanCard = ({ plan, isCurrent, onSelect }: PlanCardProps) => {
             Поточний тариф
           </div>
         ) : isPro ? (
-          <Button className="w-full rounded-full" onClick={onSelect}>
+          <Button size="lg" className="w-full rounded-full" onClick={onSelect}>
             Перейти на PRO
           </Button>
         ) : (
-          <Button variant="outline" className="w-full rounded-full" onClick={onSelect}>
+          <Button size="lg" variant="outline" className="w-full rounded-full" onClick={onSelect}>
             Обрати
           </Button>
         )}

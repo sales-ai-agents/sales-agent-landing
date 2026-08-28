@@ -105,7 +105,7 @@ const ConfirmStep = ({ currentPlan, newPlan, isProcessing, onCancel, onPay }: Co
           <p className="text-muted-foreground mt-1 text-sm">
             ${currentPlan ? Math.round(currentPlan.price_uah / 41) : 0} / місяць
           </p>
-          <Badge variant="outline" className="mt-2">
+          <Badge variant="outline" className="bg-primary/10 text-primary mt-4 border-white px-5">
             Поточний
           </Badge>
         </div>
@@ -116,7 +116,7 @@ const ConfirmStep = ({ currentPlan, newPlan, isProcessing, onCancel, onPay }: Co
           <p className="text-muted-foreground text-xs">Новий тариф</p>
           <p className="text-primary mt-1 text-2xl font-bold uppercase">{newPlan.title}</p>
           <p className="text-muted-foreground mt-1 text-sm">${priceDiff} / місяць</p>
-          <Badge variant="success" className="mt-2">
+          <Badge variant="outline" className="bg-primary text-primary-foreground mt-4 px-5">
             Новий
           </Badge>
         </div>
@@ -178,14 +178,14 @@ const ConfirmStep = ({ currentPlan, newPlan, isProcessing, onCancel, onPay }: Co
         </div>
       </div>
 
-      <div className="border-border bg-muted/50 rounded-xl border p-4">
+      <div className="border-border bg-primary/5 rounded-xl border px-4 py-8">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-muted-foreground text-xs">До сплати сьогодні</p>
-            <p className="text-2xl font-bold">${priceDiff}</p>
+            <p className="mt-2 text-2xl font-semibold">${priceDiff}</p>
           </div>
           <p className="text-muted-foreground max-w-xs text-xs">
-            Платіж буде списано одразу. Скасувати тариф можна в будь-який час
+            Платіж буде списано одразу. <br /> Скасувати тариф можна в будь-який час
           </p>
         </div>
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { AlertTriangle, Download } from "lucide-react";
+import { AlertTriangle, Download, CreditCard, LucideHistory } from "lucide-react";
 
 import { Button, Progress } from "@/components/ui";
 import { PageError, PageLoading, ChangePlanDialog } from "@/components/dashboard";
@@ -55,14 +55,19 @@ const BillingPage = () => {
   return (
     <div className="space-y-6">
       {isTrial && (
-        <div className="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+        <div className="flex items-center justify-between rounded-xl border border-red-500 bg-red-500/5 px-4 py-3">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600" />
-            <p className="text-sm text-amber-800">
+            <AlertTriangle className="h-5 w-5 shrink-0 text-red-500" />
+            <p className="text-sm text-red-500">
               Додайте спосіб оплати, щоб не втратити доступ після завершення Trial
             </p>
           </div>
-          <Button variant="outline" size="sm" onClick={openUpgradeDialog}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-primary border-primary px-8"
+            onClick={openUpgradeDialog}
+          >
             Додати спосіб оплати
           </Button>
         </div>
@@ -214,50 +219,29 @@ const BillingPage = () => {
 
       <div className="border-border bg-background rounded-2xl border p-6">
         <p className="text-muted-foreground mb-4 text-sm font-medium">Спосіб оплати</p>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="border-border flex items-center justify-between rounded-lg border p-4">
+          <div className="flex items-center gap-4">
             {payments.length > 0 ? (
-              <div className="bg-primary/10 flex h-10 w-16 items-center justify-center rounded-md">
-                <svg viewBox="0 0 48 16" className="h-5 w-10" aria-label="Visa">
-                  <text
-                    x="0"
-                    y="13"
-                    fontFamily="Arial"
-                    fontSize="16"
-                    fontWeight="bold"
-                    fill="#1a1f71"
-                    letterSpacing="-0.5"
-                  >
-                    VISA
-                  </text>
-                </svg>
+              <div className="bg-primary/10 flex items-center justify-center rounded-lg px-6 py-2">
+                <CreditCard />
               </div>
             ) : (
-              <div className="border-border bg-muted flex h-10 w-14 items-center justify-center rounded-lg border">
-                <svg
-                  className="text-muted-foreground h-5 w-5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                >
-                  <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
-                  <line x1="1" y1="10" x2="23" y2="10" />
-                </svg>
+              <div className="bg-muted flex items-center justify-center rounded-lg px-6 py-2">
+                <CreditCard />
               </div>
             )}
             <div>
               <p className="text-sm font-medium">
                 {payments.length > 0 ? "Visa **** 4242" : "Спосіб оплати не додано"}
               </p>
-              <p className="text-muted-foreground text-xs">
+              <p className="text-muted-foreground mt-1 text-xs">
                 {payments.length > 0
                   ? "Дійсна до 12/27"
                   : "Додайте спосіб оплати для підписки на платний план"}
               </p>
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={openUpgradeDialog}>
+          <Button variant="outline" className="px-6" size="lg" onClick={openUpgradeDialog}>
             {payments.length > 0 ? "Змінити картку" : "Додати карту"}
           </Button>
         </div>
@@ -266,21 +250,9 @@ const BillingPage = () => {
       <div className="border-border bg-background rounded-2xl border p-6">
         <p className="text-muted-foreground mb-4 text-sm font-medium">Історія платежів</p>
         {payments.length === 0 ? (
-          <div className="py-8 text-center">
-            <svg
-              className="text-muted-foreground mx-auto h-10 w-10"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.5}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z"
-              />
-            </svg>
-            <p className="mt-2 text-sm font-semibold">Платежів ще немає</p>
+          <div className="flex flex-col items-center justify-center gap-2 py-8">
+            <LucideHistory className="h-10 w-10" />
+            <p className="text-sm font-semibold">Платежів ще немає</p>
             <p className="text-muted-foreground text-xs">
               Тут відображатиметься історія ваших платежів та інвойсів
             </p>
@@ -324,18 +296,7 @@ const BillingPage = () => {
                     <td className="px-3 py-2.5">
                       <div className="flex items-center gap-2">
                         <div className="bg-primary/10 flex h-5 w-8 items-center justify-center rounded">
-                          <svg viewBox="0 0 32 11" className="h-3 w-6" aria-label="Visa">
-                            <text
-                              x="0"
-                              y="9"
-                              fontFamily="Arial"
-                              fontSize="10"
-                              fontWeight="bold"
-                              fill="#1a1f71"
-                            >
-                              VISA
-                            </text>
-                          </svg>
+                          <CreditCard />
                         </div>
                         <span className="text-muted-foreground text-xs">**** 4242</span>
                       </div>

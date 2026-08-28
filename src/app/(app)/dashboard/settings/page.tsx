@@ -37,6 +37,7 @@ const SettingsPage = () => {
 
   const [timezone, setTimezone] = useState<string | null>(null);
   const effectiveTimezone = timezone ?? account?.timezone ?? DEFAULT_TZ;
+  const selectedLabel = TIMEZONE_OPTIONS.find((opt) => opt.value === effectiveTimezone)?.label;
 
   const handleTimezoneChange = (val: string | null) => {
     if (!val) return;
@@ -65,13 +66,13 @@ const SettingsPage = () => {
         <p className="text-muted-foreground mt-1 text-xs">
           Оберіть часовий пояс для коректного відображення часу в системі та звітах
         </p>
-        <div className="mt-3 max-w-sm">
+        <div className="mt-3">
           <Label htmlFor="timezone" className="text-xs">
             Часовий пояс
           </Label>
           <Select value={effectiveTimezone} onValueChange={handleTimezoneChange}>
-            <SelectTrigger className="mt-1" id="timezone">
-              <SelectValue />
+            <SelectTrigger className="mt-1 w-full" id="timezone">
+              <SelectValue>{selectedLabel}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               {TIMEZONE_OPTIONS.map((opt) => (
