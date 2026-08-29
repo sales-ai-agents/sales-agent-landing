@@ -47,7 +47,7 @@ const BillingPage = () => {
 
   const avgCallCost =
     stats?.total_calls && currentPlanData
-      ? (currentPlanData.price_uah / 41 / stats.total_calls).toFixed(2)
+      ? (currentPlanData.price_usd / 41 / stats.total_calls).toFixed(2)
       : null;
 
   const visiblePayments = showAllPayments ? payments : payments.slice(0, 3);
@@ -166,12 +166,12 @@ const BillingPage = () => {
             </div>
             {currentPlanData && (
               <>
-                <p className="mt-2 text-[25px] leading-none font-bold">
-                  ${Math.round(currentPlanData.price_uah / 45)}{" "}
+                <p className="mt-2 text-xl leading-none font-bold">
+                  ${currentPlanData.price_usd}{" "}
                   <span className="text-muted-foreground text-lg font-normal">/ місяць</span>
                 </p>
                 <p className="text-muted-foreground mt-1 text-xs">
-                  ${Math.round(currentPlanData.price_uah / 45)} щомісяця, без зобов&apos;язань
+                  ${currentPlanData.price_usd} <span>щомісяця, без зобов&apos;язань</span>
                 </p>
               </>
             )}
@@ -202,14 +202,13 @@ const BillingPage = () => {
             </div>
             {currentPlanData && (
               <>
-                <p className="mt-2 text-[25px] leading-none font-bold">
-                  ${Math.round((currentPlanData.price_uah / 45) * 12)}{" "}
+                <p className="mt-2 text-xl leading-none font-bold">
+                  ${currentPlanData.price_usd * 12}{" "}
                   <span className="text-muted-foreground text-lg font-normal">/ рік</span>
                 </p>
                 <p className="text-muted-foreground mt-1 text-xs">
-                  ${((currentPlanData.price_uah / 45) * (1 - ANNUAL_DISCOUNT)).toFixed(1)} / місяць
-                  при річній оплаті (${Math.round((currentPlanData.price_uah / 45) * 10)} раз на
-                  рік)
+                  ${(currentPlanData.price_usd * (1 - ANNUAL_DISCOUNT)).toFixed(1)} / місяць при
+                  річній оплаті (${currentPlanData.price_usd * 10} раз на рік)
                 </p>
               </>
             )}

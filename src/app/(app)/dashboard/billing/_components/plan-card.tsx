@@ -41,14 +41,13 @@ const getPlanFeatures = (plan: BillingPlan): string[] => {
 
 export const PlanCard = ({ plan, isCurrent, onSelect }: PlanCardProps) => {
   const features = getPlanFeatures(plan);
-  const isPro = plan.minutes >= 3000;
-  const priceUsd = Math.round(plan.price_uah / 44);
+  const isPro = plan.key === "pro";
 
   return (
     <div
       className={cn(
         "border-border flex flex-col rounded-2xl border p-6",
-        isCurrent ? "shadow-primary/30 -mt-4 bg-transparent shadow-sm" : "bg-background"
+        isCurrent ? "shadow-primary/30 bg-transparent shadow-sm" : "bg-background"
       )}
     >
       <div className="flex items-center justify-between">
@@ -61,7 +60,7 @@ export const PlanCard = ({ plan, isCurrent, onSelect }: PlanCardProps) => {
       </div>
 
       <div className="mt-8">
-        <span className="text-3xl font-semibold">${priceUsd}</span>
+        <span className="text-3xl font-semibold">${plan.price_usd}</span>
         <span className="text-muted-foreground text-lg"> / місяць</span>
       </div>
 
@@ -76,8 +75,8 @@ export const PlanCard = ({ plan, isCurrent, onSelect }: PlanCardProps) => {
 
       <div className="mt-6">
         {isCurrent ? (
-          <div className="flex items-center justify-center gap-1.5 text-sm font-medium text-green-600">
-            <Check className="h-4 w-4" />
+          <div className="flex items-center justify-center gap-1.5 text-sm font-medium">
+            <Check className="h-4 w-4 text-green-600" />
             Поточний тариф
           </div>
         ) : isPro ? (

@@ -1,10 +1,12 @@
 export interface BillingPlan {
-  key: string;
+  key: "start" | "business" | "pro";
   title: string;
   price_uah: number;
-  currency: "UAH";
+  price_usd: number;
+  currency: "UAH" | "USD";
   minutes: number;
   agents: number;
+  usd_rate: number;
 }
 
 export interface BillingPlansResponse {

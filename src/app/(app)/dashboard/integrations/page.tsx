@@ -2,9 +2,6 @@
 
 import { useIntegrations } from "@dashboard/hooks";
 import { GoogleSheetsCard } from "./_components/google-sheets-card";
-import { WebhookCard } from "./_components/webhook-card";
-import { CrmConnectors } from "./_components/crm-connectors";
-import { ApiKeysSection } from "./_components/api-keys-section";
 
 const IntegrationsPage = () => {
   const { data: integrations } = useIntegrations();
@@ -23,12 +20,13 @@ const IntegrationsPage = () => {
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <GoogleSheetsCard connected={sheetsConnected} email={undefined} />
-        <WebhookCard />
+        {/*NOT READY YET*/}
+        {/*<WebhookCard />*/}
       </div>
 
-      <CrmConnectors />
-
-      <ApiKeysSection />
+      {/*NOT READY YET*/}
+      {/*<CrmConnectors />*/}
+      {/*<ApiKeysSection />*/}
     </div>
   );
 };

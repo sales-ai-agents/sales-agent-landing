@@ -40,8 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# ai governance
-.ai-governance/
-
 # kiro
 .kiro

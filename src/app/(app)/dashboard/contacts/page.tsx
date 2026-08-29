@@ -207,31 +207,33 @@ const ContactsPage = () => {
         />
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <button
+      <div className="border-border flex flex-wrap gap-2 rounded-lg border bg-white px-4 py-2">
+        <Button
           onClick={() => setActiveTag(null)}
+          variant="outline"
           className={cn(
-            "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+            "items-center gap-1.5 border px-3 py-1.5 text-xs",
             !activeTag
               ? "border-primary bg-primary/5 text-primary"
-              : "border-border text-muted-foreground hover:border-primary/50"
+              : "border-border text-muted-foreground"
           )}
         >
           Усі контакти <span className="font-semibold">{contacts.length}</span>
-        </button>
+        </Button>
         {allTags.map((tag) => (
-          <button
+          <Button
             key={tag}
+            variant="outline"
             onClick={() => setActiveTag(activeTag === tag ? null : tag)}
             className={cn(
-              "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+              "items-center gap-1.5 text-xs",
               activeTag === tag
                 ? "border-primary bg-primary/5 text-primary"
-                : "border-border text-muted-foreground hover:border-primary/50"
+                : "border-border text-muted-foreground"
             )}
           >
             {tag} <span className="font-semibold">{tagCounts[tag]}</span>
-          </button>
+          </Button>
         ))}
       </div>
 

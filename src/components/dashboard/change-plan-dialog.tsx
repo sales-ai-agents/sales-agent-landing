@@ -86,8 +86,6 @@ interface ConfirmStepProps {
 }
 
 const ConfirmStep = ({ currentPlan, newPlan, isProcessing, onCancel, onPay }: ConfirmStepProps) => {
-  const priceDiff = Math.round(newPlan.price_uah / 41);
-
   return (
     <div className="space-y-6">
       <div>
@@ -103,7 +101,7 @@ const ConfirmStep = ({ currentPlan, newPlan, isProcessing, onCancel, onPay }: Co
           <p className="text-muted-foreground text-xs">Ваш поточний тариф</p>
           <p className="mt-1 text-2xl font-bold uppercase">{currentPlan?.title ?? "—"}</p>
           <p className="text-muted-foreground mt-1 text-sm">
-            ${currentPlan ? Math.round(currentPlan.price_uah / 41) : 0} / місяць
+            ${currentPlan ? currentPlan.price_usd : 0} / місяць
           </p>
           <Badge variant="outline" className="bg-primary/10 text-primary mt-4 border-white px-5">
             Поточний
@@ -115,7 +113,7 @@ const ConfirmStep = ({ currentPlan, newPlan, isProcessing, onCancel, onPay }: Co
         <div className="border-primary flex-1 rounded-xl border p-4">
           <p className="text-muted-foreground text-xs">Новий тариф</p>
           <p className="text-primary mt-1 text-2xl font-bold uppercase">{newPlan.title}</p>
-          <p className="text-muted-foreground mt-1 text-sm">${priceDiff} / місяць</p>
+          <p className="text-muted-foreground mt-1 text-sm">${newPlan.price_usd} / місяць</p>
           <Badge variant="outline" className="bg-primary text-primary-foreground mt-4 px-5">
             Новий
           </Badge>
@@ -182,7 +180,7 @@ const ConfirmStep = ({ currentPlan, newPlan, isProcessing, onCancel, onPay }: Co
         <div className="flex items-center justify-between">
           <div>
             <p className="text-muted-foreground text-xs">До сплати сьогодні</p>
-            <p className="mt-2 text-2xl font-semibold">${priceDiff}</p>
+            <p className="mt-2 text-2xl font-semibold">${newPlan.price_usd}</p>
           </div>
           <p className="text-muted-foreground max-w-xs text-xs">
             Платіж буде списано одразу. <br /> Скасувати тариф можна в будь-який час
