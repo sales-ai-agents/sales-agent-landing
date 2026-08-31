@@ -9,6 +9,10 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
   const variant = pathname === "/sign-up" ? "sign-up" : "sign-in";
 
+  if (pathname.startsWith("/auth/")) {
+    return <main className="font-body min-h-screen">{children}</main>;
+  }
+
   return (
     <div className="font-body flex min-h-screen">
       <aside className="hidden lg:flex lg:w-1/2 xl:w-5/12">

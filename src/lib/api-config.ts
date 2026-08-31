@@ -23,6 +23,8 @@ export const API_ENDPOINTS = {
 
   // Integrations
   APP_INTEGRATIONS: `${API_BASE}/app/integrations`,
+  APP_INTEGRATIONS_GOOGLE_SHEETS_AUTH_URL: `${API_BASE}/app/integrations/google-sheets/auth-url`,
+  APP_INTEGRATIONS_GOOGLE_SHEETS: `${API_BASE}/app/integrations/google-sheets`,
   APP_WEBHOOKS: `${API_BASE}/app/webhooks`,
   APP_WEBHOOK_DELIVERIES: `${API_BASE}/app/webhooks/deliveries`,
   APP_API_KEYS: `${API_BASE}/app/api-keys`,

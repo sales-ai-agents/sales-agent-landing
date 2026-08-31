@@ -25,6 +25,7 @@ export {
 } from "./use-webhooks";
 export { useApiKeys, useCreateApiKey, useDeleteApiKey } from "./use-api-keys";
 export { useIntegrations } from "./use-integrations";
+export { useGoogleSheetsAuthUrl, useConnectGoogleSheets } from "./use-google-sheets";
 export {
   useTeam,
   useInviteTeamMember,

@@ -1,14 +1,43 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import Image from "next/image";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui";
+import { ApiError } from "@/lib/api-client";
+import { saveGoogleSheetsOAuthState } from "@/lib/google-sheets-oauth";
+import { useGoogleSheetsAuthUrl } from "@dashboard/hooks";
 
 interface GoogleSheetsCardProps {
   connected: boolean;
   email?: string;
+  ready: boolean;
 }
 
-export const GoogleSheetsCard = ({ connected, email }: GoogleSheetsCardProps) => {
+export const GoogleSheetsCard = ({ connected, email, ready }: GoogleSheetsCardProps) => {
+  const getAuthUrl = useGoogleSheetsAuthUrl();
+
+  const handleConnect = (): void => {
+    getAuthUrl.mutate(undefined, {
+      onSuccess: ({ url }) => {
+        if (!saveGoogleSheetsOAuthState(url)) {
+          toast.error("Сервер повернув некоректне посилання авторизації.");
+          return;
+        }
+
+        window.location.assign(url);
+      },
+      onError: (err) => {
+        if (err instanceof ApiError) {
+          toast.error(err.message ?? "Не вдалося отримати посилання для підключення.");
+        } else {
+          toast.error("Щось пішло не так.");
+        }
+      },
+    });
+  };
+
   return (
     <div className="border-border bg-background rounded-xl border p-5">
       <div className="flex items-start gap-4">
@@ -41,12 +70,20 @@ export const GoogleSheetsCard = ({ connected, email }: GoogleSheetsCardProps) =>
       </div>
       <div className="mt-4 flex justify-end">
         {connected ? (
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" disabled>
             Відключити
           </Button>
         ) : (
-          <Button variant="outline" size="sm" className="text-primary border-primary/40 w-full">
-            Підключити
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-primary border-primary/40 w-full"
+            disabled={!ready || getAuthUrl.isPending}
+            aria-busy={getAuthUrl.isPending}
+            onClick={handleConnect}
+          >
+            {getAuthUrl.isPending && <Loader2 className="animate-spin" aria-hidden="true" />}
+            {ready ? "Підключити" : "Незабаром"}
           </Button>
         )}
       </div>

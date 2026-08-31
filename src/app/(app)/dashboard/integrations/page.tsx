@@ -1,13 +1,24 @@
 "use client";
 
+import { PageError, PageLoading } from "@/components/dashboard";
 import { useIntegrations } from "@dashboard/hooks";
+
 import { GoogleSheetsCard } from "./_components/google-sheets-card";
 
 const IntegrationsPage = () => {
-  const { data: integrations } = useIntegrations();
+  const { data: integrations, isLoading, error, refetch } = useIntegrations();
 
-  const sheetsIntegration = integrations?.available?.find((a) => a.id === "google_sheets");
-  const sheetsConnected = sheetsIntegration?.connected ?? false;
+  if (isLoading) return <PageLoading message="Завантажуємо інтеграції..." />;
+  if (error || !integrations) {
+    return (
+      <PageError
+        message={error?.message ?? "Не вдалося завантажити інтеграції"}
+        onRetry={() => refetch()}
+      />
+    );
+  }
+
+  const sheetsIntegration = integrations.available.find(({ id }) => id === "google_sheets");
 
   return (
     <div className="space-y-6">
@@ -19,7 +30,13 @@ const IntegrationsPage = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <GoogleSheetsCard connected={sheetsConnected} email={undefined} />
+        {sheetsIntegration && (
+          <GoogleSheetsCard
+            connected={sheetsIntegration.connected}
+            email={sheetsIntegration.email}
+            ready={sheetsIntegration.ready}
+          />
+        )}
         {/*NOT READY YET*/}
         {/*<WebhookCard />*/}
       </div>
