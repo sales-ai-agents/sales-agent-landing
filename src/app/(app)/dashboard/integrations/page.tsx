@@ -33,7 +33,7 @@ const IntegrationsPage = () => {
         {sheetsIntegration && (
           <GoogleSheetsCard
             connected={sheetsIntegration.connected}
-            email={sheetsIntegration.email}
+            email={sheetsIntegration.account_email || sheetsIntegration.email}
             ready={sheetsIntegration.ready}
           />
         )}

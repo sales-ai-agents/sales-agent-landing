@@ -3,6 +3,9 @@ export interface AvailableIntegration {
   name: string;
   connected: boolean;
   ready: boolean;
+  status?: string;
+  error?: string;
+  account_email?: string;
   email?: string;
   spreadsheet_id?: string;
   spreadsheet_url?: string;
@@ -22,7 +25,8 @@ export interface GoogleSheetsAuthUrlResponse {
 
 export interface GoogleSheetsConnectResponse {
   ok: boolean;
-  email: string;
-  spreadsheet_id: string;
-  spreadsheet_url: string;
+  account_email?: string;
+  email?: string;
+  spreadsheet_id?: string;
+  spreadsheet_url?: string;
 }

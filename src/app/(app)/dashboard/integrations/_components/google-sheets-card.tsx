@@ -7,16 +7,25 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui";
 import { ApiError } from "@/lib/api-client";
 import { saveGoogleSheetsOAuthState } from "@/lib/google-sheets-oauth";
-import { useGoogleSheetsAuthUrl } from "@dashboard/hooks";
+import { useGoogleSheetsAuthUrl, useDisconnectGoogleSheets } from "@dashboard/hooks";
 
 interface GoogleSheetsCardProps {
   connected: boolean;
   email?: string;
+  account_email?: string;
   ready: boolean;
 }
 
-export const GoogleSheetsCard = ({ connected, email, ready }: GoogleSheetsCardProps) => {
+export const GoogleSheetsCard = ({
+  connected,
+  email,
+  account_email,
+  ready,
+}: GoogleSheetsCardProps) => {
   const getAuthUrl = useGoogleSheetsAuthUrl();
+  const disconnectGoogleSheets = useDisconnectGoogleSheets();
+
+  const displayEmail = email || account_email;
 
   const handleConnect = (): void => {
     getAuthUrl.mutate(undefined, {
@@ -31,6 +40,21 @@ export const GoogleSheetsCard = ({ connected, email, ready }: GoogleSheetsCardPr
       onError: (err) => {
         if (err instanceof ApiError) {
           toast.error(err.message ?? "Не вдалося отримати посилання для підключення.");
+        } else {
+          toast.error("Щось пішло не так.");
+        }
+      },
+    });
+  };
+
+  const handleDisconnect = (): void => {
+    disconnectGoogleSheets.mutate(undefined, {
+      onSuccess: () => {
+        toast.success("Google Sheets відключено");
+      },
+      onError: (err) => {
+        if (err instanceof ApiError) {
+          toast.error(err.message ?? "Не вдалося відключити Google Sheets.");
         } else {
           toast.error("Щось пішло не так.");
         }
@@ -56,9 +80,13 @@ export const GoogleSheetsCard = ({ connected, email, ready }: GoogleSheetsCardPr
             <>
               <div className="mt-1 flex items-center gap-1.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-                <span className="text-muted-foreground text-xs">Підключено як</span>
+                <span className="text-muted-foreground text-xs">
+                  {displayEmail ? "Підключено як" : "Підключено"}
+                </span>
               </div>
-              <p className="mt-0.5 text-xs font-medium">{email}</p>
+              {displayEmail && (
+                <p className="mt-0.5 truncate text-xs font-medium">{displayEmail}</p>
+              )}
             </>
           ) : (
             <div className="mt-1 flex items-center gap-1.5">
@@ -70,7 +98,16 @@ export const GoogleSheetsCard = ({ connected, email, ready }: GoogleSheetsCardPr
       </div>
       <div className="mt-4 flex justify-end">
         {connected ? (
-          <Button variant="outline" size="sm" disabled>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDisconnect}
+            disabled={disconnectGoogleSheets.isPending}
+            aria-busy={disconnectGoogleSheets.isPending}
+          >
+            {disconnectGoogleSheets.isPending && (
+              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+            )}
             Відключити
           </Button>
         ) : (
