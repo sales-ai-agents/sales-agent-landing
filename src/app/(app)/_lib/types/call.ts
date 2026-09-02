@@ -19,6 +19,8 @@ export interface CallLog {
   manager_note: string | null;
   sla_state: SlaState | null;
   sla_minutes_left: number | null;
+  crm_state?: CrmSyncState | null;
+  crm_synced?: boolean | null;
 }
 
 export interface TranscriptMessage {

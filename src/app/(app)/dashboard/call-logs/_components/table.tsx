@@ -13,8 +13,8 @@ import { Play, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui";
 import { getOutcomeConfig } from "@/app/(app)/_lib/call-outcome";
 import { formatDuration, cn } from "@/lib/utils";
-import type { CallLog, Agent, SlaState } from "@dashboard/types";
-import { resolveAgentName } from "../_lib/utils";
+import type { CallLog, Agent, SlaState, CrmSyncState } from "@dashboard/types";
+import { resolveAgentName, formatCrmStatus } from "../_lib/utils";
 
 const columnHelper = createColumnHelper<CallLog>();
 
@@ -23,6 +23,26 @@ interface TableProps {
   agents: Agent[];
   pageCount: number;
 }
+
+const CrmIndicator = ({
+  state,
+  synced,
+}: {
+  state?: CrmSyncState | null;
+  synced?: boolean | null;
+}) => {
+  const { label, color, dot } = formatCrmStatus(state, synced);
+  if (label === "—") {
+    return <span className="text-muted-foreground text-sm">—</span>;
+  }
+
+  return (
+    <span className={cn("inline-flex items-center gap-1.5 text-xs font-medium", color)}>
+      {dot && <span className={cn("inline-block h-1.5 w-1.5 rounded-full", dot)} />}
+      {label}
+    </span>
+  );
+};
 
 const SlaIndicator = ({
   state,
@@ -116,7 +136,9 @@ export const Table = ({ data, agents, pageCount }: TableProps) => {
       columnHelper.display({
         id: "crm",
         header: "CRM",
-        cell: () => <span className="text-muted-foreground text-sm">—</span>,
+        cell: ({ row }) => (
+          <CrmIndicator state={row.original.crm_state} synced={row.original.crm_synced} />
+        ),
         meta: { className: "hidden xl:table-cell" },
       }),
       columnHelper.display({

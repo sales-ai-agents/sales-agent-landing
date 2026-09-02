@@ -4,8 +4,25 @@ import Link from "next/link";
 import { Bot, Play, Pause } from "lucide-react";
 
 import { Button, buttonVariants, Badge, Progress } from "@/components/ui";
-import type { Agent } from "@dashboard/types";
+import type { Agent, AgentIntegration } from "@dashboard/types";
 import { cn, formatNumber, formatTimeSaved, formatMinutesUsed } from "@/lib/utils";
+
+const INTEGRATION_LABELS: Record<string, string> = {
+  google_sheets: "Google Sheets",
+  sheets: "Google Sheets",
+  bitrix24: "Bitrix24",
+  keycrm: "KeyCRM",
+  pipedrive: "Pipedrive",
+  webhook: "Webhook",
+  crm: "CRM",
+};
+
+const resolveIntegrationName = (item: string | AgentIntegration): string => {
+  if (typeof item === "string") {
+    return INTEGRATION_LABELS[item.toLowerCase()] ?? item;
+  }
+  return item.name || INTEGRATION_LABELS[item.id?.toLowerCase() ?? ""] || item.id || "Інтеграція";
+};
 
 export interface AgentCardProps {
   agent: Agent;
@@ -88,7 +105,30 @@ export const AgentCard = ({ agent, onToggle, onTest }: AgentCardProps) => {
 
       <div className="mt-4">
         <p className="text-muted-foreground text-xs">Інтеграції</p>
-        <p className="text-muted-foreground mt-1 text-sm">—</p>
+        {(() => {
+          const activeIntegrations = (agent.integrations ?? []).filter((item) =>
+            typeof item === "string" ? true : item.connected !== false
+          );
+
+          if (activeIntegrations.length === 0) {
+            return <p className="text-muted-foreground mt-1 text-sm">—</p>;
+          }
+
+          return (
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              {activeIntegrations.map((item, i) => (
+                <Badge
+                  key={typeof item === "string" ? `${item}-${i}` : `${item.id ?? item.name}-${i}`}
+                  variant="outline"
+                  className="border-border bg-muted/40 text-foreground text-xs font-normal"
+                >
+                  <span className="bg-primary mr-1.5 inline-block h-1.5 w-1.5 rounded-full" />
+                  {resolveIntegrationName(item)}
+                </Badge>
+              ))}
+            </div>
+          );
+        })()}
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">

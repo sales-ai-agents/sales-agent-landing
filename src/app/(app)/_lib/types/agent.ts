@@ -7,6 +7,13 @@ export interface AgentStats {
   talk_minutes_saved: number;
 }
 
+export interface AgentIntegration {
+  id?: string;
+  name?: string;
+  type?: string;
+  connected?: boolean;
+}
+
 export interface Agent {
   id: number;
   account_id: number;
@@ -17,6 +24,7 @@ export interface Agent {
   created_at: string;
   updated_at: string;
   stats?: AgentStats;
+  integrations?: (string | AgentIntegration)[];
 }
 
 export interface AgentsResponse {
