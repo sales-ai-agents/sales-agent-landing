@@ -4,6 +4,7 @@ import type { NextRequest } from "next/server";
 const PROTECTED_ROUTES = ["/dashboard"];
 const AUTH_ROUTES = ["/sign-in", "/sign-up"];
 const SESSION_COOKIE = "cs_session";
+const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "0.0.0.0", "[::1]"]);
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -17,7 +18,12 @@ export function proxy(request: NextRequest) {
     (route) => pathname === route || pathname.startsWith(route + "/")
   );
 
-  if (isProtectedRoute && !hasSession) {
+  // API6 uses bearer tokens on localhost and preview deployments, where the
+  // Secure production cookie may be unavailable. DashboardShell verifies those sessions.
+  const usesClientBearerAuth =
+    LOCAL_HOSTS.has(request.nextUrl.hostname) || process.env.VERCEL_ENV === "preview";
+
+  if (isProtectedRoute && !hasSession && !usesClientBearerAuth) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 

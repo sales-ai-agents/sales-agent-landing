@@ -22,6 +22,8 @@ interface TableProps {
   data: CallLog[];
   agents: Agent[];
   pageCount: number;
+  slaMinutes?: number;
+  crmConfigured?: boolean;
 }
 
 const CrmIndicator = ({
@@ -69,9 +71,12 @@ const SlaIndicator = ({
   }
 };
 
-export const Table = ({ data, agents, pageCount }: TableProps) => {
-  const columns = useMemo(
-    () => [
+export const Table = ({ data, agents, pageCount, slaMinutes, crmConfigured }: TableProps) => {
+  const showSla = slaMinutes !== undefined ? slaMinutes > 0 : true;
+  const showCrm = crmConfigured !== false;
+
+  const columns = useMemo(() => {
+    const cols = [
       columnHelper.accessor("created_at", {
         header: "Дата і час",
         cell: (info) => {
@@ -102,16 +107,18 @@ export const Table = ({ data, agents, pageCount }: TableProps) => {
         },
       }),
       columnHelper.accessor("outcome", {
-        header: "Статус / SLA",
+        header: showSla ? "Статус / SLA" : "Статус",
         cell: ({ row }) => {
           const config = getOutcomeConfig(row.original.outcome);
           return (
             <div className="flex flex-col gap-0.5">
               <Badge variant={config.variant}>● {config.label}</Badge>
-              <SlaIndicator
-                state={row.original.sla_state}
-                minutesLeft={row.original.sla_minutes_left}
-              />
+              {showSla && (
+                <SlaIndicator
+                  state={row.original.sla_state}
+                  minutesLeft={row.original.sla_minutes_left}
+                />
+              )}
             </div>
           );
         },
@@ -133,14 +140,22 @@ export const Table = ({ data, agents, pageCount }: TableProps) => {
         },
         meta: { className: "hidden lg:table-cell" },
       }),
-      columnHelper.display({
-        id: "crm",
-        header: "CRM",
-        cell: ({ row }) => (
-          <CrmIndicator state={row.original.crm_state} synced={row.original.crm_synced} />
-        ),
-        meta: { className: "hidden xl:table-cell" },
-      }),
+    ];
+
+    if (showCrm) {
+      cols.push(
+        columnHelper.display({
+          id: "crm",
+          header: "CRM",
+          cell: ({ row }) => (
+            <CrmIndicator state={row.original.crm_state} synced={row.original.crm_synced} />
+          ),
+          meta: { className: "hidden xl:table-cell" },
+        })
+      );
+    }
+
+    cols.push(
       columnHelper.display({
         id: "actions",
         header: "Дії",
@@ -149,10 +164,11 @@ export const Table = ({ data, agents, pageCount }: TableProps) => {
             <ExternalLink className="text-muted-foreground hover:text-foreground size-4" />
           </Link>
         ),
-      }),
-    ],
-    [agents]
-  );
+      })
+    );
+
+    return cols;
+  }, [agents, showSla, showCrm]);
 
   const table = useReactTable({
     data,

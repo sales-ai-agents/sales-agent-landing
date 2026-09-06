@@ -7,7 +7,15 @@ export {
   useUpdateAgent,
   useTestCall,
 } from "./use-agents";
-export { useBillingPlans, useCheckout, usePaymentStatus, useBillingHistory } from "./use-billing";
+export {
+  useBillingPlans,
+  useCheckout,
+  usePaymentStatus,
+  useBillingHistory,
+  usePaymentMethod,
+  useDeletePaymentMethod,
+  downloadReceipt,
+} from "./use-billing";
 export { useCallDetail, useSaveNote, useCrmStatus, useCrmRetry } from "./use-call-detail";
 export { useCallLogs } from "./use-call-logs";
 export { useContacts, useCreateContact, useUpdateContact, useDeleteContact } from "./use-contacts";
