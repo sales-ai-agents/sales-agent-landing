@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { CheckCircle, XCircle, Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
@@ -10,6 +10,7 @@ import { formatDateLong } from "@/lib/utils";
 
 interface PaymentStatusCheckerProps {
   invoiceId: string;
+  onTerminalStatus?: () => void;
 }
 
 const StatusLayout = ({ children }: { children: React.ReactNode }) => {
@@ -35,8 +36,20 @@ const BackButton = ({ label = "Назад до тарифів" }: { label?: stri
   );
 };
 
-const PaymentStatusChecker = ({ invoiceId }: PaymentStatusCheckerProps) => {
+const PaymentStatusChecker = ({ invoiceId, onTerminalStatus }: PaymentStatusCheckerProps) => {
   const { data, isLoading, isError } = usePaymentStatus(invoiceId);
+
+  useEffect(() => {
+    if (
+      data &&
+      (data.paid ||
+        data.status === "failure" ||
+        data.status === "reversed" ||
+        data.status === "expired")
+    ) {
+      onTerminalStatus?.();
+    }
+  }, [data, onTerminalStatus]);
 
   if (isLoading || (!data && !isError)) {
     return (
@@ -69,7 +82,7 @@ const PaymentStatusChecker = ({ invoiceId }: PaymentStatusCheckerProps) => {
         <p className="text-muted-foreground">
           Тариф <span className="font-medium">{data.current_plan}</span> активовано.
           {data.minutes > 0 && ` Ліміт: ${data.minutes} хвилин.`}
-          {data.expires_at && ` Наступне списання: ${formatDateLong(data.expires_at)}.`}
+          {data.expires_at && ` Тариф діє до: ${formatDateLong(data.expires_at)}.`}
         </p>
         <BackButton label="До тарифів" />
       </StatusLayout>
@@ -77,10 +90,14 @@ const PaymentStatusChecker = ({ invoiceId }: PaymentStatusCheckerProps) => {
   }
 
   if (data.status === "failure" || data.status === "expired" || data.status === "reversed") {
+    const isReversed = data.status === "reversed";
+
     return (
       <StatusLayout>
         <XCircle className="text-destructive h-12 w-12" />
-        <h1 className="font-display text-2xl font-bold">Оплата не пройшла</h1>
+        <h1 className="font-display text-2xl font-bold">
+          {isReversed ? "Платіж повернено" : "Оплата не пройшла"}
+        </h1>
         <p className="text-muted-foreground">
           {data.status === "expired" && "Час оплати минув. Спробуйте створити новий рахунок."}
           {data.status === "failure" && "Платіж відхилено. Перевірте картку або спробуйте ще раз."}

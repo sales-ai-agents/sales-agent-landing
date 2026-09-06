@@ -171,7 +171,13 @@ const CallLogsPage = () => {
         ))}
       </nav>
 
-      <Table data={callLogs} agents={agents} pageCount={pageCount} />
+      <Table
+        data={callLogs}
+        agents={agents}
+        pageCount={pageCount}
+        slaMinutes={data?.sla_minutes}
+        crmConfigured={data?.crm_configured}
+      />
       <Pagination
         total={total}
         pageSize={PAGE_SIZE}

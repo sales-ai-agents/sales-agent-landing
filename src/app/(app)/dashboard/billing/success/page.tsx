@@ -1,15 +1,47 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useEffect, useSyncExternalStore } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { XCircle, ArrowLeft } from "lucide-react";
+import { XCircle, ArrowLeft, Loader2 } from "lucide-react";
 
 import { Button, Card, CardContent } from "@/components/ui";
+import { clearPendingBillingInvoiceId, getPendingBillingInvoiceId } from "@/lib/billing-checkout";
 import PaymentStatusChecker from "./_components/payment-status-checker";
 
+const subscribeToNothing = () => () => {};
+const getClientReady = () => true;
+const getServerReady = () => false;
+const getServerInvoiceId = () => null;
+
 const BillingSuccessPage = () => {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const invoiceId = searchParams.get("invoice_id");
+  const invoiceIdFromUrl = searchParams.get("invoice_id") ?? searchParams.get("invoiceId");
+  const storedInvoiceId = useSyncExternalStore(
+    subscribeToNothing,
+    getPendingBillingInvoiceId,
+    getServerInvoiceId
+  );
+  const hasReadStorage = useSyncExternalStore(subscribeToNothing, getClientReady, getServerReady);
+  const invoiceId = invoiceIdFromUrl ?? storedInvoiceId;
+
+  useEffect(() => {
+    if (!invoiceIdFromUrl && storedInvoiceId) {
+      router.replace(
+        `/dashboard/billing/success?invoice_id=${encodeURIComponent(storedInvoiceId)}`,
+        { scroll: false }
+      );
+    }
+  }, [invoiceIdFromUrl, router, storedInvoiceId]);
+
+  if (!invoiceIdFromUrl && !hasReadStorage) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Loader2 className="text-primary h-12 w-12 animate-spin" aria-label="Завантаження" />
+      </div>
+    );
+  }
 
   if (!invoiceId) {
     return (
@@ -31,7 +63,12 @@ const BillingSuccessPage = () => {
     );
   }
 
-  return <PaymentStatusChecker invoiceId={invoiceId} />;
+  return (
+    <PaymentStatusChecker
+      invoiceId={invoiceId}
+      onTerminalStatus={invoiceIdFromUrl ? clearPendingBillingInvoiceId : undefined}
+    />
+  );
 };
 
 export default BillingSuccessPage;

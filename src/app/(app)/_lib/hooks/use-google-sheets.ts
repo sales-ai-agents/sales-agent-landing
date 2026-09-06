@@ -5,9 +5,11 @@ import { API_ENDPOINTS } from "@/lib/api-config";
 import type { GoogleSheetsAuthUrlResponse, GoogleSheetsConnectResponse } from "@dashboard/types";
 
 export const useGoogleSheetsAuthUrl = () => {
-  return useMutation<GoogleSheetsAuthUrlResponse>({
-    mutationFn: () =>
-      apiGet<GoogleSheetsAuthUrlResponse>(API_ENDPOINTS.APP_INTEGRATIONS_GOOGLE_SHEETS_AUTH_URL),
+  return useMutation<GoogleSheetsAuthUrlResponse, Error, string>({
+    mutationFn: (state) => {
+      const endpoint = `${API_ENDPOINTS.APP_INTEGRATIONS_GOOGLE_SHEETS_AUTH_URL}?state=${encodeURIComponent(state)}`;
+      return apiGet<GoogleSheetsAuthUrlResponse>(endpoint);
+    },
   });
 };
 

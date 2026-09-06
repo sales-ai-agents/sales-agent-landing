@@ -7,46 +7,59 @@ import type { BillingPlan } from "@dashboard/types";
 interface PlanCardProps {
   plan: BillingPlan;
   isCurrent: boolean;
+  cycle?: "month" | "year";
   onSelect: () => void;
 }
 
-const getPlanFeatures = (plan: BillingPlan): string[] => {
-  if (plan.minutes >= 3000) {
-    return [
-      `${formatNumber(plan.minutes)} хв розмов`,
-      "Усі доступні інтеграції",
-      "Усе з тарифу Business",
-      "Пріоритетна підтримка",
-      "Підключення до бізнес-процесів",
-    ];
-  }
-  if (plan.minutes >= 1000) {
-    return [
-      `${formatNumber(plan.minutes)} хв розмов`,
-      `До ${plan.agents} ШІ-агентів`,
-      "Усе з тарифу Start",
-      "CSV-кампанії",
-      "Webhooks",
-      "Кілька сценаріїв дзвінків",
-    ];
-  }
-  return [
-    `${plan.minutes} хв розмов`,
-    `${plan.agents} ШІ-агент`,
+const PLAN_FEATURES: Partial<Record<string, (plan: BillingPlan) => string[]>> = {
+  start: (plan) => [
+    `${formatNumber(plan.minutes)} хв розмов`,
+    plan.agents === 0 ? "Необмежено ШІ-агентів" : `${plan.agents} ШІ-агент`,
     "Журнал дзвінків",
     "Перегляд результатів розмов",
     "Базове налаштування сценарію",
+  ],
+  business: (plan) => [
+    `${formatNumber(plan.minutes)} хв розмов`,
+    plan.agents === 0 ? "Необмежено ШІ-агентів" : `До ${plan.agents} ШІ-агентів`,
+    "Усе з тарифу Start",
+    "CSV-кампанії",
+    "Webhooks",
+    "Кілька сценаріїв дзвінків",
+  ],
+  pro: (plan) => [
+    `${formatNumber(plan.minutes)} хв розмов`,
+    plan.agents === 0 ? "Необмежено ШІ-агентів" : `До ${plan.agents} ШІ-агентів`,
+    "Усе з тарифу Business",
+    "Усі доступні інтеграції",
+    "Пріоритетна підтримка",
+    "Підключення до бізнес-процесів",
+  ],
+};
+
+const getPlanFeatures = (plan: BillingPlan): string[] => {
+  const featureResolver = PLAN_FEATURES[plan.key];
+  if (featureResolver) {
+    return featureResolver(plan);
+  }
+  return [
+    `${formatNumber(plan.minutes)} хв розмов`,
+    plan.agents === 0 ? "Необмежено ШІ-агентів" : `До ${plan.agents} ШІ-агентів`,
   ];
 };
 
-export const PlanCard = ({ plan, isCurrent, onSelect }: PlanCardProps) => {
+export const PlanCard = ({ plan, isCurrent, cycle = "month", onSelect }: PlanCardProps) => {
   const features = getPlanFeatures(plan);
   const isPro = plan.key === "pro";
+  const isAnnual = cycle === "year" && !!plan.year;
+
+  const displayPriceUsd = isAnnual ? plan.year!.price_usd : plan.price_usd;
+  const displayPriceUah = isAnnual ? plan.year!.price_uah : plan.price_uah;
 
   return (
     <div
       className={cn(
-        "border-border flex flex-col rounded-2xl border p-6",
+        "border-border relative flex flex-col rounded-2xl border p-6",
         isCurrent ? "shadow-primary/30 bg-transparent shadow-sm" : "bg-background"
       )}
     >
@@ -57,11 +70,39 @@ export const PlanCard = ({ plan, isCurrent, onSelect }: PlanCardProps) => {
             Поточний
           </span>
         )}
+        {isAnnual && plan.year && (
+          <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700 dark:bg-green-950/60 dark:text-green-300">
+            {plan.year.months_free > 0
+              ? `-${plan.year.months_free} міс`
+              : plan.year.saving_usd > 0
+                ? `-${plan.year.saving_usd}$`
+                : "Річний"}
+          </span>
+        )}
       </div>
 
       <div className="mt-8">
-        <span className="text-3xl font-semibold">${plan.price_usd}</span>
-        <span className="text-muted-foreground text-lg"> / місяць</span>
+        <div className="flex items-baseline gap-1">
+          <span className="text-3xl font-semibold">${displayPriceUsd}</span>
+          <span className="text-muted-foreground text-lg">{isAnnual ? " / рік" : " / місяць"}</span>
+        </div>
+        {cycle === "year" && !plan.year && (
+          <p className="mt-0.5 text-xs text-amber-600 dark:text-amber-400">
+            Річний період недоступний для цього тарифу (оплата помісячно)
+          </p>
+        )}
+        {isAnnual && (
+          <p className="text-muted-foreground mt-0.5 text-xs">
+            ${(displayPriceUsd / 12).toFixed(1)} / міс
+            {plan.year!.saving_usd > 0 ? ` · економія $${plan.year!.saving_usd}` : ""}
+          </p>
+        )}
+        {displayPriceUah != null && (
+          <p className="text-muted-foreground mt-1 text-xs">
+            ≈ {formatNumber(displayPriceUah)} грн
+            {plan.usd_rate ? ` (${plan.usd_rate.toFixed(2)} ₴/$)` : ""}
+          </p>
+        )}
       </div>
 
       <ul className="mt-5 flex-1 space-y-1.5 text-sm">
@@ -75,9 +116,19 @@ export const PlanCard = ({ plan, isCurrent, onSelect }: PlanCardProps) => {
 
       <div className="mt-6">
         {isCurrent ? (
-          <div className="flex items-center justify-center gap-1.5 text-sm font-medium">
-            <Check className="h-4 w-4 text-green-600" />
-            Поточний тариф
+          <div className="flex flex-col gap-2">
+            <Button
+              size="lg"
+              variant={isAnnual ? "default" : "outline"}
+              className="w-full rounded-full"
+              onClick={onSelect}
+            >
+              {isAnnual ? "Оплатити на рік" : "Продовжити тариф"}
+            </Button>
+            <div className="text-muted-foreground flex items-center justify-center gap-1.5 text-xs">
+              <Check className="h-3.5 w-3.5 text-green-600" />
+              Ваш поточний тариф
+            </div>
           </div>
         ) : isPro ? (
           <Button size="lg" className="w-full rounded-full" onClick={onSelect}>
@@ -85,7 +136,7 @@ export const PlanCard = ({ plan, isCurrent, onSelect }: PlanCardProps) => {
           </Button>
         ) : (
           <Button size="lg" variant="outline" className="w-full rounded-full" onClick={onSelect}>
-            Обрати
+            Обрати {plan.title}
           </Button>
         )}
       </div>

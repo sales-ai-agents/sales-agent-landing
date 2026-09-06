@@ -52,6 +52,8 @@ export interface CallsResponse {
   total: number;
   limit: number;
   offset: number;
+  sla_minutes?: number;
+  crm_configured?: boolean;
 }
 
 export interface CallDetailResponse {
@@ -89,6 +91,7 @@ export interface StatsResponse {
   total_calls: number;
   successful_calls: number;
   missed_calls: number;
+  avg_call_usd?: number | null;
   talk_minutes_saved: number;
   period_days: number;
   period: PeriodStats;
