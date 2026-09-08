@@ -1,25 +1,22 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { Sidebar, DashboardHeader, PageLoading, SupportBotButton } from "@/components/dashboard";
+import React from "react";
+
+import {
+  Sidebar,
+  DashboardHeader,
+  PageLoading,
+  PageError,
+  SupportBotButton,
+} from "@/components/dashboard";
 import { OnboardingWrapper } from "@/components/dashboard/onboarding";
-import { useMe } from "@/lib/hooks";
+import { useRequireAuth } from "@/lib/hooks";
 
 const DashboardShell = ({ children }: { children: React.ReactNode }) => {
-  const router = useRouter();
-  const redirecting = useRef(false);
+  const { isLoading, isAuthenticated, isUnauthenticated, error, refetch } = useRequireAuth();
 
-  const { data: account, isLoading } = useMe();
-
-  useEffect(() => {
-    if (!isLoading && !account && !redirecting.current) {
-      redirecting.current = true;
-      router.replace("/sign-in");
-    }
-  }, [isLoading, account, router]);
-
-  if (isLoading || !account) return <PageLoading />;
+  if (isLoading || isUnauthenticated) return <PageLoading />;
+  if (!isAuthenticated) return <PageError message={error?.message} onRetry={() => refetch()} />;
 
   return (
     <OnboardingWrapper>

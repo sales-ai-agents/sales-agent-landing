@@ -2,7 +2,15 @@ import { type NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://api.calls4u.ai";
-const SKIP_HEADERS = new Set(["host", "connection", "keep-alive", "transfer-encoding"]);
+
+const SKIP_HEADERS = new Set([
+  "host",
+  "connection",
+  "keep-alive",
+  "transfer-encoding",
+  "content-encoding",
+  "content-length",
+]);
 
 async function handler(req: NextRequest) {
   const url = new URL(

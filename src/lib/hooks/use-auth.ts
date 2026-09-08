@@ -77,16 +77,14 @@ export const useSocialLogin = () => {
 };
 
 export const useMe = () => {
-  return useQuery<Account | null>({
+  return useQuery<Account | null, ApiError>({
     queryKey: AUTH_QUERY_KEY,
     queryFn: async () => {
       try {
         const data = await apiGet<MeResponse>(API_ENDPOINTS.AUTH_ME);
         return data.account;
       } catch (error) {
-        if (error instanceof ApiError && error.status === 401) {
-          return null;
-        }
+        if (error instanceof ApiError && error.status === 401) return null;
         throw error;
       }
     },
