@@ -153,7 +153,7 @@ export const SupportBotChat = ({ onClose }: SupportBotChatProps) => {
             <Bot className="text-primary-foreground h-4 w-4" />
           </div>
           <div>
-            <p className="text-sm font-medium">AI Помічник</p>
+            <p className="text-sm font-medium">AI Дмитро</p>
             <p className="text-muted-foreground text-xs">Онлайн</p>
           </div>
         </div>

@@ -1,9 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 import { ApiError } from "@/lib/api-client";
 import type { Account } from "@/lib/types";
-import { useMe } from "./use-auth";
+import { useMe, useLogout } from "./use-auth";
 
 interface RequireAuthResult {
   account: Account | null | undefined;
@@ -21,13 +21,21 @@ const resolveUnauthenticated = (account: Account | null | undefined, error: ApiE
 
 export const useRequireAuth = (): RequireAuthResult => {
   const router = useRouter();
+  const logout = useLogout();
+  const signedOut = useRef(false);
+
   const { data: account, isLoading, error, refetch } = useMe();
 
   const isUnauthenticated = !isLoading && resolveUnauthenticated(account, error);
 
   useEffect(() => {
-    if (isUnauthenticated) router.replace("/sign-in");
-  }, [isUnauthenticated, router]);
+    if (!isUnauthenticated || signedOut.current) return;
+
+    signedOut.current = true;
+    logout.mutate(undefined, {
+      onSettled: () => router.replace("/sign-in"),
+    });
+  }, [isUnauthenticated, logout, router]);
 
   return {
     account,

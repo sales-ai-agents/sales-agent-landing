@@ -44,10 +44,12 @@ export const DashboardHeader = () => {
   return (
     <header className="mb-6 flex">
       <Sheet>
-        <SheetTrigger asChild className="md:hidden">
-          <Button variant="ghost" size="icon" aria-label="Відкрити меню">
-            <Menu className="h-5 w-5" />
-          </Button>
+        <SheetTrigger
+          render={
+            <Button variant="ghost" size="icon" className="md:hidden" aria-label="Відкрити меню" />
+          }
+        >
+          <Menu className="h-5 w-5" />
         </SheetTrigger>
         <SheetContent side="left">
           <SheetTitle>

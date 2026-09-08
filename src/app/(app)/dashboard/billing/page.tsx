@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Info } from "lucide-react";
 
 import { ChangePlanDialog, PageError, PageLoading } from "@/components/dashboard";
 import { Button, Progress } from "@/components/ui";
@@ -79,7 +79,8 @@ const BillingPage = () => {
             variant="outline"
             size="sm"
             className="border-primary text-primary px-8"
-            onClick={() => openPlanDialog()}
+            nativeButton={false}
+            render={<a href="#plans" />}
           >
             Обрати тариф
           </Button>
@@ -88,21 +89,21 @@ const BillingPage = () => {
 
       <h1 className="text-2xl font-bold">Тариф / оплата</h1>
 
-      <section className="border-border bg-background rounded-2xl border p-6">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          <div>
+      <section className="border-border bg-background rounded-2xl border p-8">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-col gap-4">
             <p className="text-muted-foreground text-sm">Ваш тариф</p>
-            <p className="mt-2 text-3xl font-bold tracking-wide uppercase">
+            <p className="text-3xl font-bold tracking-wide uppercase">
               {currentPlan?.title ?? (isTrial ? "TRIAL" : billing.current)}
             </p>
-            <p className="text-muted-foreground mt-1 text-sm">
+            <p className="text-muted-foreground text-sm">
               {isTrial
                 ? "Безкоштовний період"
                 : billing.expires_at
                   ? `Діє до ${formatDateShort(billing.expires_at)} · ${formatNumber(currentPlan?.minutes ?? billing.minutes)} хв/міс`
                   : `${formatNumber(currentPlan?.minutes ?? billing.minutes)} хвилин на місяць`}
             </p>
-            <div className="mt-3 flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               {!isTrial && currentPlan && (
                 <Button
                   size="sm"
@@ -121,13 +122,13 @@ const BillingPage = () => {
                     else if (upgradePlanKey) openPlanDialog(upgradePlanKey);
                   }}
                 >
-                  {isTrial ? "Обрати тариф" : "Перейти на вищий тариф"}
+                  {isTrial ? "Обрати тариф" : "Змінити тариф"}
                 </button>
               )}
             </div>
           </div>
 
-          <div>
+          <div className="flex flex-col gap-2">
             <p className="text-muted-foreground text-sm">Використані хвилини</p>
             {statsQuery.isLoading ? (
               <div className="mt-2 space-y-2">
@@ -141,30 +142,43 @@ const BillingPage = () => {
                 <button
                   type="button"
                   onClick={() => statsQuery.refetch()}
-                  className="text-primary mt-1 cursor-pointer text-xs hover:underline"
+                  className="text-primary cursor-pointer text-xs hover:underline"
                 >
                   Спробувати знову
                 </button>
               </div>
             ) : (
               <>
-                <div className="mt-1 flex items-baseline gap-1">
+                <div className="flex items-baseline gap-1">
                   <span className="text-3xl font-bold">{formatNumber(minutesUsed)}</span>
                   <span className="text-muted-foreground text-lg">
                     / {formatNumber(minutesLimit)} хв
                   </span>
                 </div>
-                <Progress value={usagePercent} className="mt-2 h-2" />
-                <p className="text-muted-foreground mt-1 text-xs">
+                <Progress value={usagePercent} className="h-2" />
+                <p className="text-muted-foreground text-xs">
                   {daysLeft !== null
                     ? `Залишилось на ${daysLeft} днів при поточному темпі`
                     : "Дані з'являться після першого дзвінка"}
                 </p>
+                <div className="mt-5 flex items-center gap-4 rounded-md bg-blue-50 px-2 py-3">
+                  <Info className="text-primary h-4 w-4 shrink-0" />
+                  <p className="text-muted-foreground text-xs">
+                    Після вичерпання ліміту хвилин агенти зупинять дзвінки. <br />
+                    Щоб продовжити роботу без перерв - докупіть хвилини.
+                  </p>
+                  <Button
+                    variant="outline"
+                    className="border-primary text-primary border bg-transparent"
+                  >
+                    Докупити хвилини
+                  </Button>
+                </div>
               </>
             )}
           </div>
 
-          <div>
+          <div className="flex flex-col gap-4">
             <p className="text-muted-foreground text-sm">Середня вартість дзвінка</p>
             {statsQuery.isLoading ? (
               <div className="mt-2 space-y-2">
@@ -177,17 +191,15 @@ const BillingPage = () => {
                 <button
                   type="button"
                   onClick={() => statsQuery.refetch()}
-                  className="text-primary mt-1 cursor-pointer text-xs hover:underline"
+                  className="text-primary cursor-pointer text-xs hover:underline"
                 >
                   Спробувати знову
                 </button>
               </div>
             ) : (
               <>
-                <p className="mt-1 text-3xl font-bold">
-                  {avgCallCost !== null ? `$${avgCallCost}` : "—"}
-                </p>
-                <p className="text-muted-foreground mt-1 text-xs">
+                <p className="text-3xl">{avgCallCost !== null ? `${avgCallCost}$` : "—"}</p>
+                <p className="text-muted-foreground text-xs">
                   {stats?.total_calls
                     ? `за останні ${stats.period_days ?? 7} днів`
                     : "Ще немає дзвінків"}
@@ -239,7 +251,7 @@ const BillingPage = () => {
         onRetry={() => historyQuery.refetch()}
       />
 
-      <section>
+      <section id="plans" className="scroll-mt-4">
         <h2 className="mb-4 text-lg font-semibold">Тарифні плани</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {billing.plans.map((plan) => (

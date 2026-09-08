@@ -37,8 +37,13 @@ export const useDeletePaymentMethod = () => {
 };
 
 export const useCheckout = () => {
+  const queryClient = useQueryClient();
+
   return useMutation<CheckoutResponse, Error, CheckoutRequest>({
     mutationFn: (params) => apiPost<CheckoutResponse>(API_ENDPOINTS.APP_BILLING_CHECKOUT, params),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["billing", "history"] });
+    },
   });
 };
 

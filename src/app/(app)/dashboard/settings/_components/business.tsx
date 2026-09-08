@@ -27,7 +27,6 @@ interface BusinessProps {
 
 const LANGUAGE_OPTIONS = [
   { value: "uk", label: "Українська" },
-  { value: "ru", label: "Російська" },
   { value: "en", label: "English" },
 ];
 

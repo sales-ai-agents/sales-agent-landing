@@ -116,27 +116,22 @@ export const PlanCard = ({ plan, isCurrent, cycle = "month", onSelect }: PlanCar
 
       <div className="mt-6">
         {isCurrent ? (
-          <div className="flex flex-col gap-2">
-            <Button
-              size="lg"
-              variant={isAnnual ? "default" : "outline"}
-              className="w-full rounded-full"
-              onClick={onSelect}
-            >
-              {isAnnual ? "Оплатити на рік" : "Продовжити тариф"}
-            </Button>
-            <div className="text-muted-foreground flex items-center justify-center gap-1.5 text-xs">
-              <Check className="h-3.5 w-3.5 text-green-600" />
-              Ваш поточний тариф
-            </div>
-          </div>
+          <Button
+            size="lg"
+            variant="ghost"
+            className="pointer-events-none w-full rounded-full"
+            onClick={onSelect}
+          >
+            <Check className="h-3.5 w-3.5 text-green-600" />
+            Поточний тариф
+          </Button>
         ) : isPro ? (
           <Button size="lg" className="w-full rounded-full" onClick={onSelect}>
             Перейти на PRO
           </Button>
         ) : (
           <Button size="lg" variant="outline" className="w-full rounded-full" onClick={onSelect}>
-            Обрати {plan.title}
+            Обрати
           </Button>
         )}
       </div>

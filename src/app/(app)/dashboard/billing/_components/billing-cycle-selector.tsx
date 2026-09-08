@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { cn, formatNumber } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import type { BillingPeriod, BillingPlan } from "@dashboard/types";
 
 interface BillingCycleSelectorProps {
@@ -33,20 +33,15 @@ export const BillingCycleSelector = ({
               : "border-border hover:border-primary/40"
           )}
         >
-          <CycleLabel selected={cycle === "month"}>Оплата на місяць</CycleLabel>
+          <CycleLabel selected={cycle === "month"}>Щомісячна оплата</CycleLabel>
           {currentPlan && (
             <>
-              <p className="mt-2 text-xl leading-none font-bold">
-                ${currentPlan.price_usd}{" "}
-                <span className="text-muted-foreground text-lg font-normal">/ місяць</span>
+              <p className="mt-2 ml-6 text-xl leading-none">
+                ${currentPlan.price_usd} <span className="text-lg font-normal">/ місяць</span>
               </p>
-              {currentPlan.price_uah != null && (
-                <p className="text-muted-foreground mt-1 text-xs">
-                  ≈ {formatNumber(currentPlan.price_uah)} грн
-                  {currentPlan.usd_rate ? ` (${currentPlan.usd_rate.toFixed(2)} ₴/$)` : ""}
-                </p>
-              )}
-              <p className="text-muted-foreground mt-1 text-xs">Разова оплата за один місяць</p>
+              <p className="text-muted-foreground mt-1 ml-6 text-xs">
+                ${currentPlan.price_usd} щомісяця, без зобов’язань
+              </p>
             </>
           )}
         </button>
@@ -63,14 +58,14 @@ export const BillingCycleSelector = ({
           )}
         >
           <CycleLabel selected={cycle === "year"}>
-            Оплата на рік
+            Річна оплата
             {annualPlan && annualPlan.months_free > 0 && (
-              <span className="rounded-md bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-950/60 dark:text-green-300">
-                Економія {annualPlan.months_free} міс.
+              <span className="ml-2 rounded-md bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-950/60 dark:text-green-300">
+                Економія {annualPlan.months_free} місяці
               </span>
             )}
             {annualPlan && annualPlan.months_free === 0 && annualPlan.saving_usd > 0 && (
-              <span className="rounded-md bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-950/60 dark:text-green-300">
+              <span className="ml-2 rounded-md bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-950/60 dark:text-green-300">
                 Економія ${annualPlan.saving_usd}
               </span>
             )}
@@ -78,21 +73,15 @@ export const BillingCycleSelector = ({
 
           {annualPlan ? (
             <>
-              <p className="mt-2 text-xl leading-none font-bold">
-                ${annualPlan.price_usd}{" "}
-                <span className="text-muted-foreground text-lg font-normal">/ рік</span>
+              <p className="mt-2 ml-6 text-xl leading-none">
+                ${annualPlan.price_usd} <span className="text-lg font-normal">/ рік</span>
               </p>
               {annualPlan.price_uah != null && (
-                <p className="text-muted-foreground mt-1 text-xs">
-                  ≈ {formatNumber(annualPlan.price_uah)} грн/рік (~$
-                  {(annualPlan.price_usd / 12).toFixed(1)}/міс)
+                <p className="text-muted-foreground mt-1 ml-6 text-xs">
+                  ${(annualPlan.price_usd / 12).toFixed(1)} / місяць при річній оплаті ($
+                  {annualPlan.price_usd} раз на рік)
                 </p>
               )}
-              <p className="text-muted-foreground mt-1 text-xs">
-                {annualPlan.saving_usd > 0
-                  ? `Економія $${annualPlan.saving_usd} проти 12 місячних оплат`
-                  : "Разова оплата за один рік"}
-              </p>
             </>
           ) : (
             <p className="text-muted-foreground mt-2 text-xs">

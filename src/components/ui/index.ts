@@ -5,6 +5,32 @@ export { Button, buttonVariants } from "./button";
 export { Calendar, CalendarDayButton } from "./calendar";
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from "./card";
 export {
+  Combobox,
+  ComboboxInput,
+  ComboboxContent,
+  ComboboxList,
+  ComboboxItem,
+  ComboboxGroup,
+  ComboboxLabel,
+  ComboboxCollection,
+  ComboboxEmpty,
+  ComboboxSeparator,
+  ComboboxChips,
+  ComboboxChip,
+  ComboboxChipsInput,
+  ComboboxTrigger,
+  ComboboxValue,
+  useComboboxAnchor,
+} from "./combobox";
+export {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupText,
+  InputGroupInput,
+  InputGroupTextarea,
+} from "./input-group";
+export {
   Carousel,
   CarouselContent,
   CarouselItem,
@@ -78,7 +104,16 @@ export {
   SelectScrollUpButton,
   SelectScrollDownButton,
 } from "./select";
-export { Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetTitle } from "./sheet";
+export {
+  Sheet,
+  SheetTrigger,
+  SheetClose,
+  SheetContent,
+  SheetHeader,
+  SheetFooter,
+  SheetTitle,
+  SheetDescription,
+} from "./sheet";
 export { Slider } from "./slider";
 export { Toaster } from "./sonner";
 export { Switch } from "./switch";

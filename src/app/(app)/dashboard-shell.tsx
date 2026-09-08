@@ -24,7 +24,7 @@ const DashboardShell = ({ children }: { children: React.ReactNode }) => {
         <Sidebar />
         <div className="ml-5 flex flex-1 flex-col">
           <DashboardHeader />
-          <main className="bg-primary/5 flex-1 overflow-y-auto rounded-xl px-6 py-8">
+          <main className="bg-primary/5 flex-1 overflow-y-auto scroll-smooth rounded-xl px-6 py-8">
             {children}
           </main>
         </div>
