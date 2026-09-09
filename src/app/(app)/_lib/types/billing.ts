@@ -23,6 +23,8 @@ export interface BillingPlansResponse {
   ok: boolean;
   current: string;
   expires_at: string | null;
+  days_left: number | null;
+  expired: boolean;
   minutes: number;
   plans: BillingPlan[];
 }
@@ -56,6 +58,7 @@ export interface PaymentStatusResponse {
   amount_uah: number;
   current_plan: string;
   expires_at: string | null;
+  days_left: number | null;
   minutes: number;
 }
 
@@ -83,17 +86,9 @@ export interface PaymentHistoryItem {
   status: PaymentHistoryStatus;
   created_at: string;
   paid_at: string | null;
-  invoice_id?: string;
-  has_receipt?: boolean;
 }
 
 export interface PaymentHistoryResponse {
   ok: boolean;
   payments: PaymentHistoryItem[];
-}
-
-export interface ReceiptResponse {
-  file?: string;
-  url?: string;
-  [key: string]: unknown;
 }

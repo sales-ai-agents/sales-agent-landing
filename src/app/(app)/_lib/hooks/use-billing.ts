@@ -9,7 +9,6 @@ import type {
   PaymentStatusResponse,
   PaymentHistoryResponse,
   BillingPaymentMethodResponse,
-  ReceiptResponse,
 } from "@dashboard/types";
 
 export const useBillingPlans = () => {
@@ -73,39 +72,4 @@ export const useBillingHistory = () => {
     queryKey: ["billing", "history"],
     queryFn: () => apiGet<PaymentHistoryResponse>(API_ENDPOINTS.APP_BILLING_HISTORY),
   });
-};
-
-export const downloadReceipt = async (invoiceId: string): Promise<void> => {
-  const data = await apiGet<ReceiptResponse>(apiUrl.billingReceipt(invoiceId));
-  const base64 = data.file?.trim();
-
-  if (base64) {
-    const binary = atob(base64.replace(/^data:application\/pdf;base64,/, ""));
-    const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
-    const objectUrl = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
-    const link = document.createElement("a");
-
-    link.href = objectUrl;
-    link.download = `receipt-${invoiceId}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(objectUrl);
-    return;
-  }
-
-  const receiptUrl = data.url?.trim();
-  if (receiptUrl) {
-    const link = document.createElement("a");
-    link.href = receiptUrl;
-    link.target = "_blank";
-    link.rel = "noopener noreferrer";
-    link.download = `receipt-${invoiceId}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    return;
-  }
-
-  throw new Error("Банк повернув порожню квитанцію.");
 };

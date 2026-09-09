@@ -60,7 +60,7 @@ export const ChangePlanDialog = ({
             if (error.code === "unknown_plan") {
               toast.error("Невідомий тариф. Оновіть сторінку та спробуйте ще.");
             } else if (error.code === "payment_provider_error") {
-              toast.error("Помилка створення рахунку в Monobank. Спробуйте пізніше.");
+              toast.error("Не вдалося сформувати рахунок для оплати. Спробуйте пізніше.");
             } else if (error.code === "payments_unavailable") {
               toast.error("Оплата тимчасово недоступна.");
             } else if (error.code === "rate_unavailable") {
@@ -161,7 +161,7 @@ const ConfirmStep = ({
         </DialogTitle>
         <DialogDescription className="mt-1">
           {isSamePlan
-            ? `Створення рахунку для вашого поточного тарифу. Перевірте деталі перед переходом до Monobank.`
+            ? `Створення рахунку для вашого поточного тарифу. Перевірте деталі перед переходом до оплати.`
             : `Ви обрали тариф ${newPlan.title}. Перевірте деталі перед формуванням рахунку.`}
         </DialogDescription>
       </div>
@@ -318,7 +318,7 @@ const ConfirmStep = ({
 
       <div className="text-muted-foreground flex items-center justify-center gap-1.5">
         <Lock className="h-3 w-3" />
-        <span className="text-xs">Безпечна оплата через Monobank</span>
+        <span className="text-xs">Безпечна оплата через WayForPay</span>
       </div>
     </div>
   );
@@ -371,7 +371,7 @@ const CheckoutSummaryStep = ({
 
       <div className="border-border bg-muted/30 text-muted-foreground space-y-1 rounded-xl border p-4 text-xs">
         <p className="text-foreground font-medium">Зверніть увагу перед переходом:</p>
-        <p>• Саме ця гривнева сума буде вказана на захищеній сторінці Monobank.</p>
+        <p>• Саме ця гривнева сума буде вказана на захищеній сторінці оплати WayForPay.</p>
         <p>• Оплата є разовою — автосписань без вашої участі немає.</p>
         <p>• Тариф активується автоматично одразу після підтвердження оплати у додатку банку.</p>
       </div>
@@ -382,14 +382,14 @@ const CheckoutSummaryStep = ({
           Змінити тариф
         </Button>
         <Button onClick={onProceed} size="lg" className="flex-1 gap-2">
-          <span>Перейти до оплати в Monobank</span>
+          <span>Перейти до оплати WayForPay</span>
           <ExternalLink className="h-4 w-4" />
         </Button>
       </div>
 
       <div className="text-muted-foreground flex items-center justify-center gap-1.5">
         <Lock className="h-3 w-3" />
-        <span className="text-xs">Захищене з&apos;єднання Monobank Checkout</span>
+        <span className="text-xs">Захищене зʼєднання WayForPay</span>
       </div>
     </div>
   );

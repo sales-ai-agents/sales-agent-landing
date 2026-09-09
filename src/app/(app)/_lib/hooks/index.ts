@@ -14,7 +14,6 @@ export {
   useBillingHistory,
   usePaymentMethod,
   useDeletePaymentMethod,
-  downloadReceipt,
 } from "./use-billing";
 export { useCallDetail, useSaveNote, useCrmStatus, useCrmRetry } from "./use-call-detail";
 export { useCallLogs } from "./use-call-logs";
