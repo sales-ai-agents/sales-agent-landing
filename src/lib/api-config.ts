@@ -53,6 +53,8 @@ export const API_ENDPOINTS = {
 
 export const apiUrl = {
   agent: (id: number | string) => `${API_ENDPOINTS.APP_AGENTS}/${id}`,
+  voiceSample: (voiceKey: string) =>
+    `${API_ENDPOINTS.APP_VOICES}/${encodeURIComponent(voiceKey)}/sample`,
   agents: (params?: { stats?: boolean; days?: number }) => {
     const url = API_ENDPOINTS.APP_AGENTS;
     if (!params?.stats) return url;

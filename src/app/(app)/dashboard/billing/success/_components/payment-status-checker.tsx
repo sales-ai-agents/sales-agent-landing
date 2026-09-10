@@ -6,6 +6,7 @@ import Link from "next/link";
 
 import { Button, Card, CardContent } from "@/components/ui";
 import { usePaymentStatus } from "@dashboard/hooks";
+import { resolvePaymentOutcome } from "@dashboard/payment-status";
 import { formatDateLong } from "@/lib/utils";
 
 interface PaymentStatusCheckerProps {
@@ -36,20 +37,26 @@ const BackButton = ({ label = "Назад до тарифів" }: { label?: stri
   );
 };
 
+const getFailureMessage = (status: string): string => {
+  switch (status) {
+    case "expired":
+      return "Час оплати минув. Спробуйте створити новий рахунок.";
+    case "reversed":
+      return "Платіж було повернено.";
+    default:
+      return "Платіж відхилено. Перевірте картку або спробуйте ще раз.";
+  }
+};
+
 const PaymentStatusChecker = ({ invoiceId, onTerminalStatus }: PaymentStatusCheckerProps) => {
   const { data, isLoading, isError } = usePaymentStatus(invoiceId);
+  const outcome = data ? resolvePaymentOutcome(data) : null;
 
   useEffect(() => {
-    if (
-      data &&
-      (data.paid ||
-        data.status === "failure" ||
-        data.status === "reversed" ||
-        data.status === "expired")
-    ) {
+    if (outcome === "paid" || outcome === "failed") {
       onTerminalStatus?.();
     }
-  }, [data, onTerminalStatus]);
+  }, [outcome, onTerminalStatus]);
 
   if (isLoading || (!data && !isError)) {
     return (
@@ -74,7 +81,7 @@ const PaymentStatusChecker = ({ invoiceId, onTerminalStatus }: PaymentStatusChec
     );
   }
 
-  if (data.paid) {
+  if (outcome === "paid") {
     return (
       <StatusLayout>
         <CheckCircle className="text-primary h-12 w-12" />
@@ -89,7 +96,7 @@ const PaymentStatusChecker = ({ invoiceId, onTerminalStatus }: PaymentStatusChec
     );
   }
 
-  if (data.status === "failure" || data.status === "expired" || data.status === "reversed") {
+  if (outcome === "failed") {
     const isReversed = data.status === "reversed";
 
     return (
@@ -98,11 +105,7 @@ const PaymentStatusChecker = ({ invoiceId, onTerminalStatus }: PaymentStatusChec
         <h1 className="font-display text-2xl font-bold">
           {isReversed ? "Платіж повернено" : "Оплата не пройшла"}
         </h1>
-        <p className="text-muted-foreground">
-          {data.status === "expired" && "Час оплати минув. Спробуйте створити новий рахунок."}
-          {data.status === "failure" && "Платіж відхилено. Перевірте картку або спробуйте ще раз."}
-          {data.status === "reversed" && "Платіж було повернено."}
-        </p>
+        <p className="text-muted-foreground">{getFailureMessage(data.status)}</p>
         <BackButton />
       </StatusLayout>
     );

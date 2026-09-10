@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { apiGet, apiPost, apiDelete } from "@/lib/api-client";
 import { API_ENDPOINTS, apiUrl } from "@/lib/api-config";
+import { resolvePaymentOutcome } from "@dashboard/payment-status";
 import type {
   BillingPlansResponse,
   CheckoutRequest,
@@ -10,6 +11,8 @@ import type {
   PaymentHistoryResponse,
   BillingPaymentMethodResponse,
 } from "@dashboard/types";
+
+const POLL_INTERVAL_MS = 3000;
 
 export const useBillingPlans = () => {
   return useQuery<BillingPlansResponse>({
@@ -53,16 +56,8 @@ export const usePaymentStatus = (invoiceId: string | null) => {
     enabled: !!invoiceId,
     refetchInterval: (query) => {
       const data = query.state.data;
-      if (!data) return 3000;
-      if (
-        data.paid ||
-        data.status === "failure" ||
-        data.status === "reversed" ||
-        data.status === "expired"
-      ) {
-        return false;
-      }
-      return 3000;
+      if (!data) return POLL_INTERVAL_MS;
+      return resolvePaymentOutcome(data) === "pending" ? POLL_INTERVAL_MS : false;
     },
   });
 };

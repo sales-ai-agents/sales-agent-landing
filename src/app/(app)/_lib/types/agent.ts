@@ -69,6 +69,8 @@ export interface Voice {
   gender: "male" | "female";
   lang: string;
   label: string;
+  sample_url?: string;
+  sample_text?: string;
 }
 
 export interface VoicesResponse {

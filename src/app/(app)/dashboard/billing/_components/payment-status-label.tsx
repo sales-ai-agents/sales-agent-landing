@@ -18,5 +18,7 @@ export const PaymentStatusLabel = ({
       return <span className="text-muted-foreground text-xs font-medium">Термін минув</span>;
     case "failure":
       return <span className="text-xs font-medium text-red-600">Невдалий</span>;
+    default:
+      return <span className="text-xs font-medium text-red-600">Невдалий</span>;
   }
 };
