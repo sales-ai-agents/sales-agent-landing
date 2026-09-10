@@ -10,7 +10,7 @@ import {
   PageError,
   PageLoading,
   AddContactDialog,
-  UploadCsvDialog,
+  ImportContactsDialog,
   PageEmpty,
 } from "@/components/dashboard";
 import {
@@ -62,6 +62,10 @@ const ContactsPage = () => {
     return contacts.filter((c) => c.tags?.includes(activeTag));
   }, [contacts, activeTag]);
 
+  // The export-preview design (row selection, duplicate/invalid counts) needs a backend
+  // endpoint that returns those stats and a per-row breakdown. The current API only exposes
+  // GET /app/contacts/export, which streams a CSV directly. Until a preview endpoint exists,
+  // export stays a direct download of the current search results.
   const handleExport = useCallback(() => {
     const exportUrl = apiUrl.contactsExport(globalFilter || undefined);
     window.open(exportUrl, "_blank");
@@ -113,7 +117,7 @@ const ContactsPage = () => {
             <div className="mt-4 flex justify-center gap-3">
               <Button variant="outline" onClick={() => setShowUploadDialog(true)}>
                 <Upload className="mr-2 h-4 w-4" />
-                Імпорт CSV
+                Імпорт контактів
               </Button>
               <Button onClick={() => setShowAddDialog(true)}>
                 <Plus className="mr-2 h-4 w-4" />
@@ -126,7 +130,9 @@ const ContactsPage = () => {
                 onClose={() => setShowAddDialog(false)}
               />
             )}
-            {showUploadDialog && <UploadCsvDialog onClose={() => setShowUploadDialog(false)} />}
+            {showUploadDialog && (
+              <ImportContactsDialog onClose={() => setShowUploadDialog(false)} />
+            )}
           </>
         }
       />
@@ -163,7 +169,7 @@ const ContactsPage = () => {
           </Button>
           <Button variant="outline" className="px-6" onClick={() => setShowUploadDialog(true)}>
             <Upload className="mr-2 h-4 w-4" />
-            Імпорт CSV
+            Імпорт контактів
           </Button>
           <Button onClick={() => setShowAddDialog(true)}>
             <Plus className="mr-2 h-4 w-4" />
@@ -253,7 +259,7 @@ const ContactsPage = () => {
       {showAddDialog && (
         <AddContactDialog onSubmit={handleAddContact} onClose={() => setShowAddDialog(false)} />
       )}
-      {showUploadDialog && <UploadCsvDialog onClose={() => setShowUploadDialog(false)} />}
+      {showUploadDialog && <ImportContactsDialog onClose={() => setShowUploadDialog(false)} />}
     </div>
   );
 };

@@ -34,7 +34,7 @@ export const SectionBasics = ({ form, voices }: SectionBasicsProps) => {
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="agent-name">Назва агента</Label>
-          <Input id="agent-name" {...register("name")} />
+          <Input id="agent-name" className="h-8" {...register("name")} />
           {errors.name && <p className="text-destructive text-sm">{errors.name.message}</p>}
         </div>
 

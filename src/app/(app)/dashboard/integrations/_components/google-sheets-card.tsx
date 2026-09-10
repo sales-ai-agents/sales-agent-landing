@@ -1,7 +1,6 @@
 "use client";
 
-import { ExternalLink, Loader2 } from "lucide-react";
-import Image from "next/image";
+import { ExternalLink, FileSpreadsheet, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui";
@@ -81,13 +80,7 @@ export const GoogleSheetsCard = ({
     <div className="border-border bg-background rounded-xl border p-5">
       <div className="flex items-start gap-4">
         <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-green-100">
-          <Image
-            src="https://upload.wikimedia.org/wikipedia/commons/a/ae/Google_Sheets_2020_Logo.svg"
-            alt="Google Sheets"
-            width={30}
-            height={30}
-            unoptimized
-          />
+          <FileSpreadsheet className="h-10 w-10 text-green-600" />
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium">Google Sheets</p>
