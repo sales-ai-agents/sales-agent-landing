@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Controller, type UseFormReturn } from "react-hook-form";
-import { Phone, ArrowRight, Info } from "lucide-react";
+import { Info } from "lucide-react";
 
 import {
   Label,
@@ -15,34 +15,17 @@ import {
   SelectValue,
 } from "@/components/ui";
 import { cn } from "@/lib/utils";
-import type { CreateAgentFormData, CallDirection } from "@/lib/schemas";
-import { CONTACT_BASE_OPTIONS } from "./wizard";
+import {
+  CALL_DIRECTION_OPTIONS,
+  CONTACT_BASE_OPTIONS,
+  type CreateAgentFormData,
+  type CallDirection,
+} from "@/lib/schemas";
+import { DIRECTION_ICONS } from "../../_components/direction-icons";
 
 interface StepCallTypeProps {
   form: UseFormReturn<CreateAgentFormData>;
 }
-
-interface DirectionOption {
-  value: CallDirection;
-  title: string;
-  description: string;
-  icon: typeof Phone;
-}
-
-const DIRECTION_OPTIONS: DirectionOption[] = [
-  {
-    value: "inbound",
-    title: "Вхідні дзвінки",
-    description: "Агент приймає дзвінки від ваших клієнтів.",
-    icon: Phone,
-  },
-  {
-    value: "outbound",
-    title: "Вихідні дзвінки",
-    description: "Агент телефонує по вашій базі контактів.",
-    icon: ArrowRight,
-  },
-];
 
 export const StepCallType = ({ form }: StepCallTypeProps) => {
   const {
@@ -73,9 +56,9 @@ export const StepCallType = ({ form }: StepCallTypeProps) => {
             onValueChange={(value) => field.onChange(value as CallDirection)}
             className="grid grid-cols-1 gap-3 sm:grid-cols-2"
           >
-            {DIRECTION_OPTIONS.map((option) => {
+            {CALL_DIRECTION_OPTIONS.map((option) => {
               const isSelected = field.value === option.value;
-              const Icon = option.icon;
+              const Icon = DIRECTION_ICONS[option.value];
 
               return (
                 <Label

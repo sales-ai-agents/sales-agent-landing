@@ -13,6 +13,7 @@ import {
 } from "@/components/ui";
 import type { EditAgentFormData } from "@/lib/schemas";
 import type { Voice } from "@dashboard/types";
+import { VoiceSampleButton } from "../../../_components/voice-sample-button";
 
 interface SectionBasicsProps {
   form: UseFormReturn<EditAgentFormData>;
@@ -46,31 +47,34 @@ export const SectionBasics = ({ form, voices }: SectionBasicsProps) => {
               const selected = voices.find((voice) => voice.key === field.value);
 
               return (
-                <Select
-                  value={field.value || null}
-                  onValueChange={(value) => field.onChange(value ?? "")}
-                >
-                  <SelectTrigger id="agent-voice" className="w-full">
-                    <SelectValue placeholder="Оберіть голос">
-                      {selected ? (
-                        <span>
-                          {selected.name}
-                          <span className="text-muted-foreground"> — {selected.label}</span>
-                        </span>
-                      ) : (
-                        field.value
-                      )}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {voices.map((voice) => (
-                      <SelectItem key={voice.key} value={voice.key}>
-                        {voice.name}
-                        <span className="text-muted-foreground"> — {voice.label}</span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex items-center gap-2">
+                  {selected && <VoiceSampleButton key={selected.key} voice={selected} />}
+                  <Select
+                    value={field.value || null}
+                    onValueChange={(value) => field.onChange(value ?? "")}
+                  >
+                    <SelectTrigger id="agent-voice" className="w-full">
+                      <SelectValue placeholder="Оберіть голос">
+                        {selected ? (
+                          <span>
+                            {selected.name}
+                            <span className="text-muted-foreground"> — {selected.label}</span>
+                          </span>
+                        ) : (
+                          field.value
+                        )}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {voices.map((voice) => (
+                        <SelectItem key={voice.key} value={voice.key}>
+                          {voice.name}
+                          <span className="text-muted-foreground"> — {voice.label}</span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               );
             }}
           />

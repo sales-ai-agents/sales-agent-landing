@@ -29,6 +29,45 @@ export type Weekday = (typeof WEEKDAYS)[number];
 
 export const CALLS_PER_DAY_OPTIONS = [10, 20, 50, 100, 200] as const;
 
+export const WEEKDAY_LABELS: Record<Weekday, string> = {
+  mon: "Пн",
+  tue: "Вт",
+  wed: "Ср",
+  thu: "Чт",
+  fri: "Пт",
+  sat: "Сб",
+  sun: "Нд",
+};
+
+export const DEFAULT_SCHEDULE_START = "09:00";
+export const DEFAULT_SCHEDULE_END = "18:00";
+
+// BE not ready: no endpoint binds a contact base to an agent, so these mirror
+// the supported integrations and are collected in the UI only.
+export const CONTACT_BASE_OPTIONS = [
+  { value: "google_sheets", label: "Google Sheets" },
+  { value: "csv_xlsx", label: "CSV / XLSX" },
+] as const;
+
+export interface CallDirectionOption {
+  value: CallDirection;
+  title: string;
+  description: string;
+}
+
+export const CALL_DIRECTION_OPTIONS: CallDirectionOption[] = [
+  {
+    value: "inbound",
+    title: "Вхідні дзвінки",
+    description: "Агент приймає дзвінки від ваших клієнтів.",
+  },
+  {
+    value: "outbound",
+    title: "Вихідні дзвінки",
+    description: "Агент телефонує по вашій базі контактів.",
+  },
+];
+
 export const createAgentBaseSchema = z.object({
   name: z.string().min(1, "Назва агента обов'язкова"),
   voice: z.string().min(1, "Оберіть голос"),

@@ -6,7 +6,7 @@ import { Input, Label, RadioGroup, RadioGroupItem } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import type { CreateAgentFormData } from "@/lib/schemas";
 import type { Voice } from "@dashboard/types";
-import { VoiceSampleButton } from "./voice-sample-button";
+import { VoiceSampleButton } from "../../_components/voice-sample-button";
 
 interface StepBasicsProps {
   form: UseFormReturn<CreateAgentFormData>;

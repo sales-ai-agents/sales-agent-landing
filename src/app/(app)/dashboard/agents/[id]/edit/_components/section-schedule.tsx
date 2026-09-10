@@ -8,8 +8,8 @@ import {
   WEEKDAYS,
   type EditAgentFormData,
   type Weekday,
+  WEEKDAY_LABELS,
 } from "@/lib/schemas";
-import { WEEKDAY_LABELS } from "./constants";
 
 interface SectionScheduleProps {
   form: UseFormReturn<EditAgentFormData>;

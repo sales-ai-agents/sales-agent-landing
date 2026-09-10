@@ -9,8 +9,8 @@ import {
   type CreateAgentFormData,
   WEEKDAYS,
   type Weekday,
+  WEEKDAY_LABELS,
 } from "@/lib/schemas";
-import { WEEKDAY_LABELS } from "./wizard";
 
 interface StepScheduleProps {
   form: UseFormReturn<CreateAgentFormData>;

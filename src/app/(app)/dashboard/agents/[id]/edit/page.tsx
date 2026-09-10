@@ -19,7 +19,12 @@ import {
   DialogTrigger,
 } from "@/components/ui";
 import { PageLoading } from "@/components/dashboard";
-import { editAgentSchema, type EditAgentFormData } from "@/lib/schemas";
+import {
+  editAgentSchema,
+  type EditAgentFormData,
+  DEFAULT_SCHEDULE_START,
+  DEFAULT_SCHEDULE_END,
+} from "@/lib/schemas";
 import { useAgent, useUpdateAgent, useDeleteAgent, useVoices } from "@dashboard/hooks";
 import { handleMutationError } from "@/lib/mutation-error";
 import { AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
@@ -31,9 +36,6 @@ import { SectionCalls } from "./_components/section-calls";
 import { SectionSchedule } from "./_components/section-schedule";
 import { SectionNumber } from "./_components/section-number";
 import { SectionInstructions } from "./_components/section-instructions";
-
-const DEFAULT_SCHEDULE_START = "09:00";
-const DEFAULT_SCHEDULE_END = "18:00";
 
 // BE not ready: no endpoints list account numbers, so the connected number is
 // derived from the agent when available and otherwise offered as a single option.

@@ -2,7 +2,6 @@ import { Bot } from "lucide-react";
 
 import { Badge } from "@/components/ui";
 import { cn } from "@/lib/utils";
-import { formatAgentCode } from "./constants";
 
 interface AgentHeaderProps {
   name: string;
@@ -19,7 +18,7 @@ export const AgentHeader = ({ name, id, isActive }: AgentHeaderProps) => {
         </div>
         <div className="min-w-0">
           <p className="truncate text-sm font-medium">{name}</p>
-          <p className="text-muted-foreground text-xs font-light">{formatAgentCode(id)}</p>
+          <p className="text-muted-foreground text-xs font-light">{`agent_${id}`}</p>
         </div>
       </div>
       <Badge

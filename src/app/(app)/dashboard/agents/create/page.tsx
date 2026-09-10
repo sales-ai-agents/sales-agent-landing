@@ -8,7 +8,12 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui";
-import { createAgentSchema, type CreateAgentFormData } from "@/lib/schemas";
+import {
+  createAgentSchema,
+  type CreateAgentFormData,
+  DEFAULT_SCHEDULE_START,
+  DEFAULT_SCHEDULE_END,
+} from "@/lib/schemas";
 import { useCreateAgent, useTestCall, useVoices } from "@dashboard/hooks";
 import { handleMutationError } from "@/lib/mutation-error";
 import { AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
@@ -18,13 +23,7 @@ import { StepCallType } from "./_components/step-call-type";
 import { StepSchedule } from "./_components/step-schedule";
 import { StepNumber } from "./_components/step-number";
 import { StepInstructions } from "./_components/step-instructions";
-import {
-  TOTAL_STEPS,
-  STEP_FIELDS,
-  DEFAULT_SCHEDULE_START,
-  DEFAULT_SCHEDULE_END,
-  isStepValid,
-} from "./_components/wizard";
+import { TOTAL_STEPS, STEP_FIELDS, isStepValid } from "./_components/wizard";
 
 const DEFAULT_VALUES: CreateAgentFormData = {
   name: "",

@@ -11,8 +11,6 @@ interface VoiceSampleButtonProps {
   voice: Voice;
 }
 
-// `voice.sample_url` is relative to the API origin and bypasses the /api proxy,
-// so the proxied endpoint is used instead.
 const resolveSampleSrc = (voice: Voice): string => apiUrl.voiceSample(voice.key);
 
 export const VoiceSampleButton = ({ voice }: VoiceSampleButtonProps) => {
