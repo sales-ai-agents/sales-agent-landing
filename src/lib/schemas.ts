@@ -59,6 +59,30 @@ export const createAgentSchema = createAgentBaseSchema.refine(contactBaseIsProvi
 
 export type CreateAgentFormData = z.infer<typeof createAgentBaseSchema>;
 
+export const editAgentBaseSchema = z.object({
+  name: z.string().min(1, "Назва агента обов'язкова"),
+  voice: z.string().min(1, "Оберіть голос"),
+  // BE not ready: no agent field for call direction, contact base, schedule or number.
+  callDirection: z.enum(CALL_DIRECTIONS),
+  contactBase: z.string(),
+  scheduleStart: z.string(),
+  scheduleEnd: z.string(),
+  workingDays: z.array(z.enum(WEEKDAYS)),
+  callsPerDay: z.number(),
+  connectedNumber: z.string(),
+  instructions: z
+    .string()
+    .min(1, "Інструкції обов'язкові")
+    .max(INSTRUCTIONS_MAX_LENGTH, `Максимум ${INSTRUCTIONS_MAX_LENGTH} символів`),
+});
+
+export const editAgentSchema = editAgentBaseSchema.refine(contactBaseIsProvided, {
+  path: ["contactBase"],
+  message: "Оберіть базу контактів",
+});
+
+export type EditAgentFormData = z.infer<typeof editAgentBaseSchema>;
+
 export const contactSchema = z.object({
   name: z.string().min(2, "Ім'я обов'язкове"),
   phone: z.string().min(7, "Введіть коректний номер телефону"),

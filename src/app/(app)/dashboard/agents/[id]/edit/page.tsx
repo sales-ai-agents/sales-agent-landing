@@ -1,42 +1,43 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { ArrowLeft, Save, Trash2, Phone } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import {
   Button,
-  Input,
-  Label,
-  Textarea,
-  Card,
-  CardContent,
-  CardHeader,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui";
 import { PageLoading } from "@/components/dashboard";
-import { useAgent, useUpdateAgent, useDeleteAgent, useTestCall, useVoices } from "@dashboard/hooks";
+import { editAgentSchema, type EditAgentFormData } from "@/lib/schemas";
+import { useAgent, useUpdateAgent, useDeleteAgent, useVoices } from "@dashboard/hooks";
 import { handleMutationError } from "@/lib/mutation-error";
 import { AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
 import type { Agent } from "@dashboard/types";
 import AgentNotFound from "@/app/(app)/dashboard/agents/[id]/not-found";
+import { AgentHeader } from "./_components/agent-header";
+import { SectionBasics } from "./_components/section-basics";
+import { SectionCalls } from "./_components/section-calls";
+import { SectionSchedule } from "./_components/section-schedule";
+import { SectionNumber } from "./_components/section-number";
+import { SectionInstructions } from "./_components/section-instructions";
 
-interface AgentFormData {
-  name: string;
-  voice: string;
-  instructions: string;
-}
+const DEFAULT_SCHEDULE_START = "09:00";
+const DEFAULT_SCHEDULE_END = "18:00";
+
+// BE not ready: no endpoints list account numbers, so the connected number is
+// derived from the agent when available and otherwise offered as a single option.
+const FALLBACK_NUMBER = "+380 67 214 88 03";
 
 const EditAgentPage = () => {
   const { data: agent, isLoading } = useAgent(useParams().id as string);
@@ -47,6 +48,19 @@ const EditAgentPage = () => {
   return <EditAgentForm key={agent.id} agent={agent} />;
 };
 
+const buildDefaultValues = (agent: Agent): EditAgentFormData => ({
+  name: agent.name,
+  voice: agent.voice,
+  callDirection: "outbound",
+  contactBase: "google_sheets",
+  scheduleStart: DEFAULT_SCHEDULE_START,
+  scheduleEnd: DEFAULT_SCHEDULE_END,
+  workingDays: ["mon", "tue", "wed", "thu", "fri"],
+  callsPerDay: 20,
+  connectedNumber: FALLBACK_NUMBER,
+  instructions: agent.instructions,
+});
+
 const EditAgentForm = ({ agent }: { agent: Agent }) => {
   const router = useRouter();
 
@@ -54,28 +68,36 @@ const EditAgentForm = ({ agent }: { agent: Agent }) => {
 
   const updateAgent = useUpdateAgent();
   const deleteAgent = useDeleteAgent();
-  const testCall = useTestCall();
 
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [testPhone, setTestPhone] = useState("");
-  const [formData, setFormData] = useState<AgentFormData>({
-    name: agent.name,
-    voice: agent.voice,
-    instructions: agent.instructions,
+  const form = useForm<EditAgentFormData>({
+    resolver: zodResolver(editAgentSchema),
+    defaultValues: buildDefaultValues(agent),
+    mode: "onChange",
   });
 
-  const handleSave = useCallback(() => {
-    updateAgent.mutate(
-      { id: agent.id, ...formData },
-      {
-        onSuccess: () => {
-          toast.success("Зміни збережено");
-          router.push("/dashboard/agents");
+  const numbers = [FALLBACK_NUMBER];
+
+  const handleSave = useCallback(
+    (data: EditAgentFormData) => {
+      // BE not ready: PATCH /app/agents/:id accepts only name/voice/instructions.
+      updateAgent.mutate(
+        {
+          id: agent.id,
+          name: data.name,
+          voice: data.voice,
+          instructions: data.instructions,
         },
-        onError: (err) => handleMutationError(err, AGENT_ERROR_MESSAGES),
-      }
-    );
-  }, [updateAgent, agent.id, formData, router]);
+        {
+          onSuccess: () => {
+            toast.success("Зміни збережено");
+            router.push("/dashboard/agents");
+          },
+          onError: (error) => handleMutationError(error, AGENT_ERROR_MESSAGES),
+        }
+      );
+    },
+    [updateAgent, agent.id, router]
+  );
 
   const handleDelete = useCallback(() => {
     deleteAgent.mutate(agent.id, {
@@ -83,137 +105,67 @@ const EditAgentForm = ({ agent }: { agent: Agent }) => {
         toast.success("Агента видалено");
         router.push("/dashboard/agents");
       },
-      onError: (err) => handleMutationError(err, AGENT_ERROR_MESSAGES),
+      onError: (error) => handleMutationError(error, AGENT_ERROR_MESSAGES),
     });
   }, [deleteAgent, agent.id, router]);
 
-  const handleTestCall = useCallback(() => {
-    if (!testPhone) return;
-
-    testCall.mutate(
-      { agent_id: agent.id, phone: testPhone },
-      {
-        onSuccess: () => {
-          toast.success("Дзвінок ініційовано — очікуйте виклик");
-        },
-        onError: (err) => handleMutationError(err, AGENT_ERROR_MESSAGES),
-      }
-    );
-  }, [testCall, agent.id, testPhone]);
-
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Назад">
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div>
-          <h1 className="font-display text-2xl font-bold">Редагування агента</h1>
-          <p className="text-muted-foreground">Оновіть конфігурацію вашого агента</p>
-        </div>
-      </div>
+    <div className="border-border bg-background mx-auto max-w-4xl space-y-8 rounded-2xl border p-6 sm:p-8">
+      <header className="space-y-1">
+        <h1 className="text-xl font-bold">Редагувати агента</h1>
+        <p className="text-muted-foreground text-sm">Керуйте вашими голосовими ШІ-агентами</p>
+      </header>
 
-      <Card className="border-border rounded-2xl">
-        <CardHeader>
-          <h2 className="font-display text-2xl font-semibold">Конфігурація агента</h2>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Назва агента</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+      <AgentHeader name={agent.name} id={agent.id} isActive={agent.is_active} />
+
+      <form onSubmit={form.handleSubmit(handleSave)} noValidate className="space-y-8">
+        <SectionBasics form={form} voices={voices} />
+        <SectionCalls form={form} />
+        <SectionSchedule form={form} />
+        <SectionNumber form={form} numbers={numbers} />
+        <SectionInstructions form={form} />
+
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+          <Dialog>
+            <DialogTrigger
+              render={
+                <Button type="button" variant="ghost" className="text-destructive">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Видалити агента
+                </Button>
+              }
             />
-          </div>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Видалити агента?</DialogTitle>
+                <DialogDescription>
+                  Цю дію неможливо скасувати. Агент та вся його історія дзвінків будуть видалені
+                  назавжди.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <DialogClose render={<Button variant="outline" />}>Скасувати</DialogClose>
+                <Button
+                  variant="destructive"
+                  onClick={handleDelete}
+                  disabled={deleteAgent.isPending}
+                >
+                  {deleteAgent.isPending ? "Видалення..." : "Видалити"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
-          <div className="space-y-2">
-            <Label htmlFor="voice">Голос</Label>
-            <Select
-              value={formData.voice}
-              onValueChange={(value) => setFormData({ ...formData, voice: value ?? "" })}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Оберіть голос">
-                  {voices.find((v) => v.key === formData.voice)?.label ?? formData.voice}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {voices.map((v) => (
-                  <SelectItem key={v.key} value={v.key}>
-                    {v.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="instructions">Інструкції</Label>
-            <Textarea
-              id="instructions"
-              rows={5}
-              value={formData.instructions}
-              onChange={(e) => setFormData({ ...formData, instructions: e.target.value })}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="border-border rounded-2xl">
-        <CardHeader>
-          <h2 className="font-display text-lg font-semibold">Тестовий дзвінок</h2>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex gap-2">
-            <Input
-              aria-label="Номер телефону для тестового дзвінка"
-              placeholder="+380 XX XXX XXXX"
-              value={testPhone}
-              onChange={(e) => setTestPhone(e.target.value)}
-            />
-            <Button
-              onClick={handleTestCall}
-              disabled={testCall.isPending || !testPhone}
-              variant="outline"
-            >
-              <Phone className="mr-2 h-4 w-4" />
-              {testCall.isPending ? "Дзвінок..." : "Тест"}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="flex justify-between">
-        <Button variant="destructive" onClick={() => setShowDeleteConfirm(true)}>
-          <Trash2 className="mr-2 h-4 w-4" />
-          Видалити агента
-        </Button>
-        <Button onClick={handleSave} disabled={updateAgent.isPending}>
-          <Save className="mr-2 h-4 w-4" />
-          {updateAgent.isPending ? "Збереження..." : "Зберегти зміни"}
-        </Button>
-      </div>
-
-      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Видалити агента?</DialogTitle>
-            <DialogDescription>
-              Цю дію неможливо скасувати. Агент та вся його історія дзвінків будуть видалені
-              назавжди.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>
+          <div className="flex items-center gap-3">
+            <Button type="button" variant="outline" onClick={() => router.back()}>
               Скасувати
             </Button>
-            <Button variant="destructive" onClick={handleDelete} disabled={deleteAgent.isPending}>
-              {deleteAgent.isPending ? "Видалення..." : "Видалити"}
+            <Button type="submit" disabled={updateAgent.isPending}>
+              {updateAgent.isPending ? "Збереження..." : "Зберегти зміни"}
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </div>
+        </div>
+      </form>
     </div>
   );
 };
