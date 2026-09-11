@@ -86,6 +86,8 @@ export interface PaymentHistoryItem {
   status: PaymentHistoryStatus;
   created_at: string;
   paid_at: string | null;
+  invoice_id: string;
+  has_receipt: boolean;
 }
 
 export interface PaymentHistoryResponse {

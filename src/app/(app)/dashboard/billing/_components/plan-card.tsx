@@ -2,6 +2,7 @@ import { Check } from "lucide-react";
 
 import { Button } from "@/components/ui";
 import { cn, formatNumber } from "@/lib/utils";
+import { getPlanFeatures } from "@dashboard/billing";
 import type { BillingPlan } from "@dashboard/types";
 
 interface PlanCardProps {
@@ -10,43 +11,6 @@ interface PlanCardProps {
   cycle?: "month" | "year";
   onSelect: () => void;
 }
-
-const PLAN_FEATURES: Partial<Record<string, (plan: BillingPlan) => string[]>> = {
-  start: (plan) => [
-    `${formatNumber(plan.minutes)} хв розмов`,
-    plan.agents === 0 ? "Необмежено ШІ-агентів" : `${plan.agents} ШІ-агент`,
-    "Журнал дзвінків",
-    "Перегляд результатів розмов",
-    "Базове налаштування сценарію",
-  ],
-  business: (plan) => [
-    `${formatNumber(plan.minutes)} хв розмов`,
-    plan.agents === 0 ? "Необмежено ШІ-агентів" : `До ${plan.agents} ШІ-агентів`,
-    "Усе з тарифу Start",
-    "CSV-кампанії",
-    "Webhooks",
-    "Кілька сценаріїв дзвінків",
-  ],
-  pro: (plan) => [
-    `${formatNumber(plan.minutes)} хв розмов`,
-    plan.agents === 0 ? "Необмежено ШІ-агентів" : `До ${plan.agents} ШІ-агентів`,
-    "Усе з тарифу Business",
-    "Усі доступні інтеграції",
-    "Пріоритетна підтримка",
-    "Підключення до бізнес-процесів",
-  ],
-};
-
-const getPlanFeatures = (plan: BillingPlan): string[] => {
-  const featureResolver = PLAN_FEATURES[plan.key];
-  if (featureResolver) {
-    return featureResolver(plan);
-  }
-  return [
-    `${formatNumber(plan.minutes)} хв розмов`,
-    plan.agents === 0 ? "Необмежено ШІ-агентів" : `До ${plan.agents} ШІ-агентів`,
-  ];
-};
 
 export const PlanCard = ({ plan, isCurrent, cycle = "month", onSelect }: PlanCardProps) => {
   const features = getPlanFeatures(plan);
@@ -106,8 +70,8 @@ export const PlanCard = ({ plan, isCurrent, cycle = "month", onSelect }: PlanCar
       </div>
 
       <ul className="mt-5 flex-1 space-y-1.5 text-sm">
-        {features.map((feature, i) => (
-          <li key={i} className="flex items-center gap-2">
+        {features.map((feature) => (
+          <li key={feature} className="flex items-center gap-2">
             <Check className="h-4 w-4 shrink-0" />
             <span>{feature}</span>
           </li>

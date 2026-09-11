@@ -81,6 +81,8 @@ export interface DeltaPct {
   talk_minutes_saved: number | null;
 }
 
+export type CallBlockedReason = "minutes_exhausted" | "plan_expired";
+
 export interface StatsResponse {
   ok: boolean;
   minutes_used: number;
@@ -88,6 +90,9 @@ export interface StatsResponse {
   minutes_left: number;
   plan: string;
   plan_expires_at: string | null;
+  trial: boolean;
+  can_call: boolean;
+  blocked_reason: CallBlockedReason | null;
   total_calls: number;
   successful_calls: number;
   missed_calls: number;
