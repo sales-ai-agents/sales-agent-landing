@@ -4,10 +4,9 @@ import { useState, useMemo, useCallback } from "react";
 import { Phone, Download } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 
-import { Button } from "@/components/ui";
+import { Button, Tabs, TabsList, TabsTrigger } from "@/components/ui";
 import { PageError, PageEmpty, PageLoading } from "@/components/dashboard";
 import { useCallLogs, useAgents } from "@dashboard/hooks";
-import { cn } from "@/lib/utils";
 import { apiUrl } from "@/lib/api-config";
 import type { CallStatusFilter, CallsFilter } from "@dashboard/types";
 
@@ -72,22 +71,14 @@ const CallLogsPage = () => {
     window.open(exportUrl, "_blank");
   }, [dateRange, status, agentId, phoneSearch]);
 
-  const handleStatusTabChange = useCallback((tab: StatusTab) => {
-    setStatusTab(tab);
+  const handleStatusTabChange = useCallback((value: string) => {
+    setStatusTab(value as StatusTab);
     setCurrentPage(0);
   }, []);
 
   const handleDateRangeChange = useCallback(
     (range: DateRange | undefined) => {
       setDateRange(range);
-      resetPage();
-    },
-    [resetPage]
-  );
-
-  const handleStatusChange = useCallback(
-    (val: CallStatusFilter | undefined) => {
-      setStatusTab(val ?? "all");
       resetPage();
     },
     [resetPage]
@@ -141,8 +132,6 @@ const CallLogsPage = () => {
       <Filters
         dateRange={dateRange}
         onDateRangeChange={handleDateRangeChange}
-        status={status}
-        onStatusChange={handleStatusChange}
         agentId={agentId}
         onAgentChange={handleAgentChange}
         agents={agents}
@@ -151,25 +140,23 @@ const CallLogsPage = () => {
         onPhoneSubmit={handlePhoneSubmit}
       />
 
-      <nav
-        className="border-border flex gap-1 rounded-lg border bg-white px-2 pt-1"
-        aria-label="Фільтр статусу дзвінків"
+      <Tabs
+        value={statusTab}
+        onValueChange={handleStatusTabChange}
+        className="border-border w-full rounded-lg border bg-white px-4 pt-1"
       >
-        {STATUS_TABS.map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => handleStatusTabChange(tab.key)}
-            className={cn(
-              "px-4 py-2 text-sm font-medium transition-colors",
-              statusTab === tab.key
-                ? "border-primary text-foreground border-b-2"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </nav>
+        <TabsList variant="line" aria-label="Фільтр статусу дзвінків">
+          {STATUS_TABS.map((tab) => (
+            <TabsTrigger
+              key={tab.key}
+              value={tab.key}
+              className="data-active:text-primary after:bg-primary hover:text-primary"
+            >
+              {tab.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
       <Table
         data={callLogs}

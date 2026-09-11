@@ -3,21 +3,13 @@
 import type { DateRange } from "react-day-picker";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui";
-import type { Agent, CallStatusFilter } from "@dashboard/types";
+import type { Agent } from "@dashboard/types";
 import { DateRangePicker } from "./date-range-picker";
 import { FilterField } from "./filter-field";
-
-const STATUS_OPTIONS: { value: CallStatusFilter; label: string }[] = [
-  { value: "success", label: "Успішні" },
-  { value: "failed", label: "Неуспішні" },
-  { value: "attention", label: "Потребує уваги" },
-];
 
 interface FiltersProps {
   dateRange: DateRange | undefined;
   onDateRangeChange: (range: DateRange | undefined) => void;
-  status: CallStatusFilter | undefined;
-  onStatusChange: (status: CallStatusFilter | undefined) => void;
   agentId: number | undefined;
   onAgentChange: (agentId: number | undefined) => void;
   agents: Agent[];
@@ -29,8 +21,6 @@ interface FiltersProps {
 export const Filters = ({
   dateRange,
   onDateRangeChange,
-  status,
-  onStatusChange,
   agentId,
   onAgentChange,
   agents,
@@ -42,29 +32,6 @@ export const Filters = ({
     <div className="flex flex-wrap items-end gap-3">
       <FilterField label="Діапазон дат">
         <DateRangePicker value={dateRange} onChange={onDateRangeChange} />
-      </FilterField>
-
-      <FilterField label="Статус">
-        <Select
-          value={status ?? "all"}
-          onValueChange={(val) =>
-            onStatusChange(val === "all" ? undefined : (val as CallStatusFilter))
-          }
-        >
-          <SelectTrigger className="h-6! w-auto border-none p-0">
-            <SelectValue>
-              {status ? STATUS_OPTIONS.find((o) => o.value === status)?.label : "Усі статуси"}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Усі статуси</SelectItem>
-            {STATUS_OPTIONS.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </FilterField>
 
       <FilterField label="Агент">

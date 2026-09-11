@@ -11,7 +11,7 @@ import { PageLoading, PageError, AudioPlayer } from "@/components/dashboard";
 import { useCallDetail, useSaveNote, useAgents, useCrmStatus, useCrmRetry } from "@dashboard/hooks";
 import { handleMutationError } from "@/lib/mutation-error";
 import { getOutcomeConfig } from "@/app/(app)/_lib/call-outcome";
-import { formatDuration, cn } from "@/lib/utils";
+import { formatDuration, formatSlaMinutes, cn } from "@/lib/utils";
 import { formatTranscriptTime } from "@/app/(app)/dashboard/call-logs/_lib/utils";
 import { InfoField } from "@/app/(app)/dashboard/call-logs/_components/info-field";
 import type { CrmStatus, SlaState } from "@dashboard/types";
@@ -27,12 +27,12 @@ const SlaDisplay = ({
 
   switch (state) {
     case "breached": {
-      const overdue = minutesLeft !== null ? Math.abs(Math.round(minutesLeft)) : 0;
-      return <p className="mt-1 text-sm font-medium text-red-500">⊘ Прострочено {overdue} хв</p>;
+      const overdue = minutesLeft !== null ? formatSlaMinutes(minutesLeft) : "0 хв";
+      return <p className="mt-1 text-sm font-medium text-red-500">⊘ Прострочено {overdue}</p>;
     }
     case "ok": {
-      const left = minutesLeft !== null ? Math.round(minutesLeft) : 0;
-      return <p className="mt-1 text-sm font-medium text-orange-500">Залишилось {left} хв</p>;
+      const left = minutesLeft !== null ? formatSlaMinutes(minutesLeft) : "0 хв";
+      return <p className="mt-1 text-sm font-medium text-orange-500">Залишилось {left}</p>;
     }
     case "handled":
       return <p className="mt-1 text-sm font-medium text-green-600">Оброблено</p>;

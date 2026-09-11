@@ -8,11 +8,11 @@ import {
   flexRender,
   createColumnHelper,
 } from "@tanstack/react-table";
-import { Play, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 
 import { Badge } from "@/components/ui";
 import { getOutcomeConfig } from "@/app/(app)/_lib/call-outcome";
-import { formatDuration, cn } from "@/lib/utils";
+import { formatDuration, formatSlaMinutes, cn } from "@/lib/utils";
 import type { CallLog, Agent, SlaState, CrmSyncState } from "@dashboard/types";
 import { resolveAgentName, formatCrmStatus } from "../_lib/utils";
 
@@ -57,12 +57,12 @@ const SlaIndicator = ({
 
   switch (state) {
     case "breached": {
-      const overdue = minutesLeft !== null ? Math.abs(Math.round(minutesLeft)) : 0;
-      return <span className="text-xs font-medium text-red-500">⊘ Прострочено {overdue} хв</span>;
+      const overdue = minutesLeft !== null ? formatSlaMinutes(minutesLeft) : "0 хв";
+      return <span className="text-xs font-medium text-red-500">⊘ Прострочено {overdue}</span>;
     }
     case "ok": {
-      const left = minutesLeft !== null ? Math.round(minutesLeft) : 0;
-      return <span className="text-xs font-medium text-orange-500">⊘ Залишилось {left} хв</span>;
+      const left = minutesLeft !== null ? formatSlaMinutes(minutesLeft) : "0 хв";
+      return <span className="text-xs font-medium text-orange-500">⊘ Залишилось {left}</span>;
     }
     case "handled":
       return null;
@@ -82,13 +82,10 @@ export const Table = ({ data, agents, pageCount, slaMinutes, crmConfigured }: Ta
         cell: (info) => {
           const dt = new Date(info.getValue());
           return (
-            <div className="flex items-center gap-2">
-              <Play className="text-muted-foreground size-3" />
-              <div className="text-sm">
-                <div>{dt.toLocaleDateString("uk-UA")}</div>
-                <div className="text-muted-foreground text-xs">
-                  {dt.toLocaleTimeString("uk-UA", { hour: "2-digit", minute: "2-digit" })}
-                </div>
+            <div className="text-sm">
+              <div>{dt.toLocaleDateString("uk-UA")}</div>
+              <div className="text-muted-foreground text-xs">
+                {dt.toLocaleTimeString("uk-UA", { hour: "2-digit", minute: "2-digit" })}
               </div>
             </div>
           );
@@ -112,7 +109,9 @@ export const Table = ({ data, agents, pageCount, slaMinutes, crmConfigured }: Ta
           const config = getOutcomeConfig(row.original.outcome);
           return (
             <div className="flex flex-col gap-0.5">
-              <Badge variant={config.variant}>● {config.label}</Badge>
+              <Badge variant={config.variant} className="w-fit">
+                ● {config.label}
+              </Badge>
               {showSla && (
                 <SlaIndicator
                   state={row.original.sla_state}

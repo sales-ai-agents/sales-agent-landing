@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { AlertTriangle, Info } from "lucide-react";
 
 import { ChangePlanDialog, PageError, PageLoading } from "@/components/dashboard";
-import { Button, Progress } from "@/components/ui";
+import { Button, Progress, Separator } from "@/components/ui";
 import { formatDateShort, formatNumber } from "@/lib/utils";
 import { useBillingHistory, useBillingPlans, usePaymentMethod, useStats } from "@dashboard/hooks";
 import type { BillingPeriod } from "@dashboard/types";
@@ -128,6 +128,8 @@ const BillingPage = () => {
             </div>
           </div>
 
+          <Separator orientation="vertical" />
+
           <div className="flex flex-col gap-2">
             <p className="text-muted-foreground text-sm">Використані хвилини</p>
             {statsQuery.isLoading ? (
@@ -177,6 +179,8 @@ const BillingPage = () => {
               </>
             )}
           </div>
+
+          <Separator orientation="vertical" />
 
           <div className="flex flex-col gap-4">
             <p className="text-muted-foreground text-sm">Середня вартість дзвінка</p>

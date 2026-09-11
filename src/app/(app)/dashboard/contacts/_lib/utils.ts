@@ -38,12 +38,16 @@ export const formatConsentLabel = (consent: ConsentStatus): ConsentDisplay => {
 export const formatLastCallResult = (result: string | null): string => {
   if (!result) return "";
   switch (result) {
-    case "meeting":
+    case "зустріч":
       return "Ціль досягнута";
-    case "не_відповів":
+    case "не відповів":
+    case "немає часу":
+    case "скинув":
+    case "погано чути":
+    case "не дійшли до людини":
       return "Не вдалося зв'язатися";
     case "відмова":
-    case "не_цікаво":
+    case "не цікаво":
       return "Відмова";
     case "передзвонити":
       return "Передзвонити";

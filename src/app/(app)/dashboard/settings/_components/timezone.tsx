@@ -62,11 +62,7 @@ export const Timezone = ({ initialTimezone }: TimezoneProps) => {
           itemToStringValue={(option) => option.value}
           disabled={updateProfile.isPending}
         >
-          <ComboboxInput
-            id="timezone"
-            className="focus:border-border w-full"
-            placeholder="Пошук часового поясу..."
-          />
+          <ComboboxInput id="timezone" placeholder="Пошук часового поясу..." />
           <ComboboxContent>
             <ComboboxEmpty>Часовий пояс не знайдено</ComboboxEmpty>
             <ComboboxList>

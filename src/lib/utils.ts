@@ -38,6 +38,25 @@ export function formatMinutesUsed(minutes: number): string {
   return `${Math.round(minutes)} хв`;
 }
 
+const MINUTES_PER_HOUR = 60;
+const MINUTES_PER_DAY = 24 * MINUTES_PER_HOUR;
+
+export function formatSlaMinutes(minutes: number): string {
+  const total = Math.abs(Math.round(minutes));
+  if (total < MINUTES_PER_HOUR) return `${total} хв`;
+
+  const days = Math.floor(total / MINUTES_PER_DAY);
+  const hours = Math.floor((total % MINUTES_PER_DAY) / MINUTES_PER_HOUR);
+  const mins = total % MINUTES_PER_HOUR;
+
+  const parts: string[] = [];
+  if (days > 0) parts.push(`${days} дн`);
+  if (hours > 0) parts.push(`${hours} год`);
+  if (mins > 0 && days === 0) parts.push(`${mins} хв`);
+
+  return parts.join(" ");
+}
+
 export function formatTime(dateStr: string): string {
   const d = new Date(dateStr);
   return d.toLocaleTimeString("uk-UA", { hour: "2-digit", minute: "2-digit" });

@@ -123,3 +123,4 @@ export { Toggle, toggleVariants } from "./toggle";
 export { ToggleGroup } from "./toggle-group";
 export { RadioGroup, RadioGroupItem } from "./radio-group";
 export { Checkbox } from "./checkbox";
+export { Separator } from "./separator";
