@@ -18,10 +18,11 @@ import type {
 } from "@/lib/types";
 
 const AUTH_QUERY_KEY = ["auth", "me"] as const;
+const AUTH_PROVIDERS_QUERY_KEY = ["auth", "providers"] as const;
 
 export const useAuthProviders = () => {
   return useQuery<AuthProvidersResponse>({
-    queryKey: ["auth", "providers"],
+    queryKey: AUTH_PROVIDERS_QUERY_KEY,
     queryFn: () => apiGet<AuthProvidersResponse>(API_ENDPOINTS.AUTH_PROVIDERS),
     staleTime: 10 * 60 * 1000,
   });
@@ -58,8 +59,10 @@ export const useLogout = () => {
     mutationFn: () => apiPost(API_ENDPOINTS.AUTH_LOGOUT),
     onSettled: () => {
       clearAuthToken();
+      queryClient.removeQueries({
+        predicate: (query) => query.queryKey[0] !== "auth" || query.queryKey[1] === "me",
+      });
       queryClient.setQueryData(AUTH_QUERY_KEY, null);
-      queryClient.clear();
     },
   });
 };
