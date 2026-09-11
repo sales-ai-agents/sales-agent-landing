@@ -17,7 +17,13 @@ export {
 } from "./use-billing";
 export { useCallDetail, useSaveNote, useCrmStatus, useCrmRetry } from "./use-call-detail";
 export { useCallLogs } from "./use-call-logs";
-export { useContacts, useCreateContact, useUpdateContact, useDeleteContact } from "./use-contacts";
+export {
+  useContacts,
+  useContactsExportPreview,
+  useCreateContact,
+  useUpdateContact,
+  useDeleteContact,
+} from "./use-contacts";
 export { useContactBases } from "./use-contact-bases";
 export { useNumbers } from "./use-numbers";
 export { useStats } from "./use-stats";
@@ -38,7 +44,10 @@ export {
   useGoogleSheetsAuthUrl,
   useConnectGoogleSheets,
   useDisconnectGoogleSheets,
+  useGoogleSheetsPreview,
+  useImportGoogleSheets,
 } from "./use-google-sheets";
+export { useGooglePicker } from "./use-google-picker";
 export {
   useTeam,
   useInviteTeamMember,

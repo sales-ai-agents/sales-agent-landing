@@ -27,6 +27,9 @@ export const API_ENDPOINTS = {
   APP_INTEGRATIONS: `${API_BASE}/app/integrations`,
   APP_INTEGRATIONS_GOOGLE_SHEETS_AUTH_URL: `${API_BASE}/app/integrations/google-sheets/auth-url`,
   APP_INTEGRATIONS_GOOGLE_SHEETS: `${API_BASE}/app/integrations/google-sheets`,
+  APP_INTEGRATIONS_GOOGLE_SHEETS_PREVIEW: `${API_BASE}/app/integrations/google-sheets/preview`,
+  APP_INTEGRATIONS_GOOGLE_SHEETS_IMPORT: `${API_BASE}/app/integrations/google-sheets/import`,
+  APP_CONTACTS_EXPORT_PREVIEW: `${API_BASE}/app/contacts/export/preview`,
   APP_WEBHOOKS: `${API_BASE}/app/webhooks`,
   APP_WEBHOOK_DELIVERIES: `${API_BASE}/app/webhooks/deliveries`,
   APP_API_KEYS: `${API_BASE}/app/api-keys`,
@@ -131,6 +134,16 @@ export const apiUrl = {
     const url = API_ENDPOINTS.APP_CONTACTS_EXPORT;
     if (!search) return url;
     return `${url}?search=${encodeURIComponent(search)}`;
+  },
+  contactsExportPreview: (search?: string) => {
+    const url = API_ENDPOINTS.APP_CONTACTS_EXPORT_PREVIEW;
+    if (!search) return url;
+    return `${url}?search=${encodeURIComponent(search)}`;
+  },
+  googleSheetsPreview: (spreadsheetId: string, sheet?: string) => {
+    const sp = new URLSearchParams({ spreadsheet_id: spreadsheetId });
+    if (sheet) sp.set("sheet", sheet);
+    return `${API_ENDPOINTS.APP_INTEGRATIONS_GOOGLE_SHEETS_PREVIEW}?${sp.toString()}`;
   },
   webhook: (id: number) => `${API_ENDPOINTS.APP_WEBHOOKS}/${id}`,
   webhookTest: (id: number) => `${API_ENDPOINTS.APP_WEBHOOKS}/${id}/test`,

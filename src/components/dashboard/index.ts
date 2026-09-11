@@ -4,6 +4,7 @@ export { CallLogDetailDrawer } from "./call-log-detail-drawer";
 export { CallsChart } from "./calls-chart";
 export { ChangePlanDialog } from "./change-plan-dialog";
 export { DashboardHeader } from "./header";
+export { ExportContactsDialog } from "./export-contacts-dialog";
 export { ImportContactsDialog } from "./import-contacts-dialog";
 export { PageLoading, PageError, PageEmpty } from "./page-states";
 export { Pagination } from "./pagination";

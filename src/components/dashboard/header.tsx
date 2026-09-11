@@ -97,7 +97,7 @@ export const DashboardHeader = () => {
 
       <div className="ml-auto flex items-center gap-6">
         <Link id="onboarding-create-agent-btn" href="/dashboard/agents/create">
-          <Button className="rounded-xl">
+          <Button>
             <Plus className="mr-2 h-4 w-4" />
             Новий агент
           </Button>

@@ -54,3 +54,13 @@ export interface UploadContactsResponse {
   added: number;
   duplicates: number;
 }
+
+export interface ContactsExportPreviewResponse {
+  ok: boolean;
+  total: number;
+  exportable: number;
+  duplicates: number;
+  invalid: number;
+  truncated: boolean;
+  sample: Contact[];
+}

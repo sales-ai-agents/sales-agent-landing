@@ -11,6 +11,7 @@ import {
   PageLoading,
   AddContactDialog,
   ImportContactsDialog,
+  ExportContactsDialog,
   PageEmpty,
 } from "@/components/dashboard";
 import {
@@ -21,7 +22,6 @@ import {
 } from "@dashboard/hooks";
 import { handleMutationError } from "@/lib/mutation-error";
 import { formatNumber, cn } from "@/lib/utils";
-import { apiUrl } from "@/lib/api-config";
 import type { ContactFormData } from "@/lib/schemas";
 import { Table } from "./_components/table";
 import { KpiCard } from "./_components/kpi-card";
@@ -44,6 +44,7 @@ const ContactsPage = () => {
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [showExportDialog, setShowExportDialog] = useState(false);
 
   const tagCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -61,15 +62,6 @@ const ContactsPage = () => {
     if (!activeTag) return contacts;
     return contacts.filter((c) => c.tags?.includes(activeTag));
   }, [contacts, activeTag]);
-
-  // The export-preview design (row selection, duplicate/invalid counts) needs a backend
-  // endpoint that returns those stats and a per-row breakdown. The current API only exposes
-  // GET /app/contacts/export, which streams a CSV directly. Until a preview endpoint exists,
-  // export stays a direct download of the current search results.
-  const handleExport = useCallback(() => {
-    const exportUrl = apiUrl.contactsExport(globalFilter || undefined);
-    window.open(exportUrl, "_blank");
-  }, [globalFilter]);
 
   const handleAddContact = useCallback(
     (formData: ContactFormData) => {
@@ -163,7 +155,7 @@ const ContactsPage = () => {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="px-6" onClick={handleExport}>
+          <Button variant="outline" className="px-6" onClick={() => setShowExportDialog(true)}>
             <Download className="mr-2 h-4 w-4" />
             Експорт CSV
           </Button>
@@ -260,6 +252,12 @@ const ContactsPage = () => {
         <AddContactDialog onSubmit={handleAddContact} onClose={() => setShowAddDialog(false)} />
       )}
       {showUploadDialog && <ImportContactsDialog onClose={() => setShowUploadDialog(false)} />}
+      {showExportDialog && (
+        <ExportContactsDialog
+          search={globalFilter || undefined}
+          onClose={() => setShowExportDialog(false)}
+        />
+      )}
     </div>
   );
 };

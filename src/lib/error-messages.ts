@@ -41,6 +41,20 @@ export const AGENT_ERROR_MESSAGES: ErrorMessageMap = {
   do_not_call: "Цей номер просив більше не дзвонити.",
 };
 
+export const GOOGLE_SHEETS_ERROR_MESSAGES: ErrorMessageMap = {
+  spreadsheet_required: "Оберіть таблицю Google Sheets.",
+  phone_column_required: "Вкажіть колонку з номером телефону.",
+  empty_sheet: "Обраний аркуш порожній.",
+  no_access: "Немає доступу до таблиці. Оберіть її ще раз через Google.",
+  not_connected: "Google Sheets не підключено.",
+  read_failed: "Не вдалося прочитати таблицю. Спробуйте ще раз.",
+  invalid_json: "Некоректні дані запиту.",
+};
+
+export const CONTACTS_EXPORT_ERROR_MESSAGES: ErrorMessageMap = {
+  export_failed: "Не вдалося сформувати експорт. Спробуйте ще раз.",
+};
+
 export const resolveErrorMessage = (code: string, domainMap?: ErrorMessageMap): string => {
   return domainMap?.[code] ?? "Щось пішло не так.";
 };

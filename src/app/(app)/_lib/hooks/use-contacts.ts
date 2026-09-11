@@ -4,6 +4,7 @@ import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api-client";
 import { API_ENDPOINTS, apiUrl } from "@/lib/api-config";
 import type {
   Contact,
+  ContactsExportPreviewResponse,
   ContactsResponse,
   ContactsStats,
   CreateContactParams,
@@ -33,6 +34,15 @@ export const useContacts = (search?: string) => {
         stats: data.stats ?? EMPTY_STATS,
       };
     },
+  });
+};
+
+export const useContactsExportPreview = (search: string | undefined, enabled: boolean) => {
+  return useQuery<ContactsExportPreviewResponse>({
+    queryKey: ["contacts-export-preview", search ?? ""],
+    queryFn: () => apiGet<ContactsExportPreviewResponse>(apiUrl.contactsExportPreview(search)),
+    enabled,
+    staleTime: 30 * 1000,
   });
 };
 

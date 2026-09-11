@@ -1,8 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
-import type { ChangeEvent, DragEvent } from "react";
-import { FileSpreadsheet, FileText, Info, Table2, Upload } from "lucide-react";
+import { useCallback, useState } from "react";
+import { FileSpreadsheet, FileText } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -18,46 +17,75 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui";
-import { useUploadContacts } from "@dashboard/hooks";
+import {
+  useGoogleSheetsAuthUrl,
+  useImportGoogleSheets,
+  useIntegrations,
+  useUploadContacts,
+} from "@dashboard/hooks";
+import { ApiError } from "@/lib/api-client";
+import { GOOGLE_SHEETS_ERROR_MESSAGES } from "@/lib/error-messages";
+import { handleMutationError } from "@/lib/mutation-error";
+import {
+  clearGoogleSheetsOAuthState,
+  generateAndSaveGoogleSheetsOAuthState,
+} from "@/lib/google-sheets-oauth";
+
+import { FileUploadPanel } from "./import/file-upload-panel";
+import {
+  GoogleSheetsImportPanel,
+  type SheetsImportSelection,
+} from "./import/google-sheets-import-panel";
 
 type ImportSource = "file" | "google_sheets";
 
-const ACCEPTED_FILE_EXTENSIONS = ".csv,.xlsx";
-const BYTES_IN_KILOBYTE = 1024;
+const GOOGLE_SHEETS_INTEGRATION_ID = "google_sheets";
 
 interface ImportContactsDialogProps {
   onClose: () => void;
 }
 
-const isSupportedFile = (file: File): boolean => {
-  const name = file.name.toLowerCase();
-  return name.endsWith(".csv") || name.endsWith(".xlsx");
-};
-
-const formatFileSize = (bytes: number): string => {
-  const kilobytes = bytes / BYTES_IN_KILOBYTE;
-  return `${kilobytes.toFixed(1)} КБ`;
-};
-
 export const ImportContactsDialog = ({ onClose }: ImportContactsDialogProps) => {
   const [source, setSource] = useState<ImportSource>("file");
   const [file, setFile] = useState<File | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const { mutate: upload, isPending } = useUploadContacts();
+  const [sheetsSelection, setSheetsSelection] = useState<SheetsImportSelection | null>(null);
 
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    setFile(event.target.files?.[0] ?? null);
-  };
+  const { data: integrations } = useIntegrations();
+  const uploadContacts = useUploadContacts();
+  const importSheets = useImportGoogleSheets();
+  const getAuthUrl = useGoogleSheetsAuthUrl();
 
-  const handleDrop = (event: DragEvent): void => {
-    event.preventDefault();
-    const dropped = event.dataTransfer.files[0] ?? null;
-    if (dropped && isSupportedFile(dropped)) setFile(dropped);
-  };
+  const googleSheets = integrations?.available.find(
+    (item) => item.id === GOOGLE_SHEETS_INTEGRATION_ID
+  );
 
-  const handleImport = (): void => {
+  const handleConnectGoogleSheets = useCallback((): void => {
+    let state: string;
+    try {
+      state = generateAndSaveGoogleSheetsOAuthState();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Не вдалося ініціалізувати підключення."
+      );
+      return;
+    }
+
+    getAuthUrl.mutate(state, {
+      onSuccess: ({ url }) => window.location.assign(url),
+      onError: (error) => {
+        clearGoogleSheetsOAuthState();
+        toast.error(
+          error instanceof ApiError
+            ? (error.message ?? "Не вдалося отримати посилання для підключення.")
+            : "Щось пішло не так."
+        );
+      },
+    });
+  }, [getAuthUrl]);
+
+  const handleUploadFile = (): void => {
     if (!file) return;
-    upload(file, {
+    uploadContacts.mutate(file, {
       onSuccess: (data) => {
         const skipped = data.duplicates ? `, ${data.duplicates} дублікатів пропущено` : "";
         toast.success(`Додано ${data.added} контактів${skipped}`);
@@ -65,6 +93,40 @@ export const ImportContactsDialog = ({ onClose }: ImportContactsDialogProps) => 
       },
       onError: (error) => toast.error(error.message),
     });
+  };
+
+  const handleImportSheets = (): void => {
+    if (!sheetsSelection) return;
+    importSheets.mutate(
+      {
+        spreadsheet_id: sheetsSelection.spreadsheetId,
+        sheet: sheetsSelection.sheet || undefined,
+        phone_column: sheetsSelection.phoneColumn,
+        name_column: sheetsSelection.nameColumn >= 0 ? sheetsSelection.nameColumn : undefined,
+        base_title: sheetsSelection.spreadsheetName,
+      },
+      {
+        onSuccess: (data) => {
+          const invalid = data.invalid ? `, ${data.invalid} некоректних` : "";
+          const duplicates = data.duplicates ? `, ${data.duplicates} дублікатів` : "";
+          toast.success(`Додано ${data.added} контактів${duplicates}${invalid}`);
+          onClose();
+        },
+        onError: (error) => handleMutationError(error, GOOGLE_SHEETS_ERROR_MESSAGES),
+      }
+    );
+  };
+
+  const isFileSource = source === "file";
+  const isPending = uploadContacts.isPending || importSheets.isPending;
+  const canImport = isFileSource ? Boolean(file) : Boolean(sheetsSelection);
+
+  const handleImport = (): void => {
+    if (isFileSource) {
+      handleUploadFile();
+      return;
+    }
+    handleImportSheets();
   };
 
   return (
@@ -99,102 +161,17 @@ export const ImportContactsDialog = ({ onClose }: ImportContactsDialogProps) => 
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="file" className="space-y-4">
-            <div
-              role="button"
-              tabIndex={0}
-              aria-label="Обрати файл контактів"
-              className="border-border hover:border-primary/50 flex flex-col items-center rounded-lg border-2 border-dashed p-8 text-center transition-colors"
-              onClick={() => inputRef.current?.click()}
-              onDrop={handleDrop}
-              onDragOver={(event) => event.preventDefault()}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  inputRef.current?.click();
-                }
-              }}
-            >
-              <div className="bg-primary/10 mb-3 flex h-12 w-12 items-center justify-center rounded-full">
-                <Upload className="text-primary h-5 w-5" />
-              </div>
-              {file ? (
-                <>
-                  <p className="text-sm font-medium">{file.name}</p>
-                  <p className="text-muted-foreground mt-1 text-xs">{formatFileSize(file.size)}</p>
-                </>
-              ) : (
-                <>
-                  <p className="text-sm font-medium">Перетягніть файл сюди</p>
-                  <p className="text-muted-foreground mt-1 text-xs">або натисніть, щоб вибрати</p>
-                </>
-              )}
-              <Button
-                type="button"
-                size="lg"
-                className="mt-4 w-2xs"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  inputRef.current?.click();
-                }}
-              >
-                Вибрати файл
-              </Button>
-              <p className="text-muted-foreground mt-4 text-xs">Підтримувані формати: CSV, XLSX</p>
-              <p className="text-muted-foreground text-xs">Максимальний розмір файлу: 10 МБ</p>
-              <input
-                ref={inputRef}
-                type="file"
-                accept={ACCEPTED_FILE_EXTENSIONS}
-                className="hidden"
-                onChange={handleFileChange}
-              />
-            </div>
-
-            <div className="bg-primary/5 rounded-lg p-4">
-              <div className="flex items-center gap-2">
-                <Info className="text-primary h-4 w-4 shrink-0" />
-                <p className="text-sm font-medium">Вимоги до файлу</p>
-              </div>
-              <ul className="text-muted-foreground mt-2 list-disc space-y-1 pl-9 text-xs">
-                <li>Рекомендовані колонки: Ім&apos;я, Телефон</li>
-                <li>Допустимі формати телефону: +380 67 123 45 67, 0671234567</li>
-                <li>Перший рядок може бути заголовком</li>
-              </ul>
-            </div>
+          <TabsContent value="file">
+            <FileUploadPanel file={file} onFileChange={setFile} />
           </TabsContent>
 
-          {/* Google Sheets import requires a backend endpoint to list spreadsheets/sheets and
-              read contacts from a user's file. The existing Google Sheets integration is
-              outbound only (it writes completed calls to a sheet). Until that endpoint exists,
-              this tab shows the not-connected state and the connect action stays disabled. */}
-          <TabsContent value="google_sheets" className="space-y-4">
-            <div className="border-border flex flex-col items-center rounded-lg border-2 border-dashed p-8 text-center">
-              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-                <Table2 className="h-5 w-5 text-green-600" />
-              </div>
-              <p className="text-sm font-medium">Google Sheets не підключено</p>
-              <p className="text-muted-foreground mt-1 max-w-2xs text-xs">
-                Підключіть Google-акаунт, щоб імпортувати контакти з ваших таблиць.
-              </p>
-              <Button type="button" className="mt-4" disabled>
-                Підключити Google Sheets
-              </Button>
-              <p className="text-muted-foreground mt-4 text-xs">
-                Відкриється вікно Google для безпечної авторизації.
-              </p>
-            </div>
-
-            <div className="bg-primary/5 rounded-lg p-4">
-              <div className="flex items-center gap-2">
-                <Info className="text-primary h-4 w-4 shrink-0" />
-                <p className="text-sm font-medium">Про безпеку</p>
-              </div>
-              <p className="text-muted-foreground mt-2 text-xs">
-                Ми отримаємо доступ тільки до ваших таблиць. Ваші дані в Google залишаються
-                конфіденційними.
-              </p>
-            </div>
+          <TabsContent value="google_sheets">
+            <GoogleSheetsImportPanel
+              integration={googleSheets}
+              onConnect={handleConnectGoogleSheets}
+              isConnecting={getAuthUrl.isPending}
+              onSelectionChange={setSheetsSelection}
+            />
           </TabsContent>
         </Tabs>
 
@@ -202,7 +179,7 @@ export const ImportContactsDialog = ({ onClose }: ImportContactsDialogProps) => 
           <Button variant="outline" onClick={onClose} disabled={isPending}>
             Скасувати
           </Button>
-          <Button onClick={handleImport} disabled={source !== "file" || !file || isPending}>
+          <Button onClick={handleImport} disabled={!canImport || isPending}>
             {isPending ? "Імпортування..." : "Імпортувати"}
           </Button>
         </DialogFooter>
