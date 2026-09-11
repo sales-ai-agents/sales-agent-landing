@@ -15,6 +15,8 @@ import type { EditAgentFormData } from "@/lib/schemas";
 import type { Voice } from "@dashboard/types";
 import { VoiceSampleButton } from "../../../_components/voice-sample-button";
 
+const VOICE_PLACEHOLDER = "Оберіть голос";
+
 interface SectionBasicsProps {
   form: UseFormReturn<EditAgentFormData>;
   voices: Voice[];
@@ -26,6 +28,18 @@ export const SectionBasics = ({ form, voices }: SectionBasicsProps) => {
     register,
     formState: { errors },
   } = form;
+
+  const renderVoiceLabel = (selected: string | null) => {
+    const voice = voices.find((item) => item.key === selected);
+    if (!voice) return VOICE_PLACEHOLDER;
+
+    return (
+      <span>
+        {voice.name}
+        <span className="text-muted-foreground"> — {voice.label}</span>
+      </span>
+    );
+  };
 
   return (
     <section className="space-y-4">
@@ -54,16 +68,7 @@ export const SectionBasics = ({ form, voices }: SectionBasicsProps) => {
                     onValueChange={(value) => field.onChange(value ?? "")}
                   >
                     <SelectTrigger id="agent-voice" className="w-full">
-                      <SelectValue placeholder="Оберіть голос">
-                        {selected ? (
-                          <span>
-                            {selected.name}
-                            <span className="text-muted-foreground"> — {selected.label}</span>
-                          </span>
-                        ) : (
-                          field.value
-                        )}
-                      </SelectValue>
+                      <SelectValue placeholder={VOICE_PLACEHOLDER}>{renderVoiceLabel}</SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {voices.map((voice) => (

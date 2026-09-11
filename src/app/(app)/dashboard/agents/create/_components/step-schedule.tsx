@@ -28,8 +28,6 @@ export const StepSchedule = ({ form }: StepScheduleProps) => {
         </p>
       </div>
 
-      {/* BE not ready: no endpoint persists a per-agent schedule — campaigns run
-          09:00–20:00 Kyiv on weekdays server-side. */}
       <fieldset className="space-y-2">
         <legend className="text-sm leading-none font-medium">Час прозвону</legend>
         <div className="grid grid-cols-2 gap-3">

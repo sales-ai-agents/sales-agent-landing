@@ -14,6 +14,8 @@ export interface AgentIntegration {
   connected?: boolean;
 }
 
+export type CallDirection = "" | "inbound" | "outbound";
+
 export interface Agent {
   id: number;
   account_id: number;
@@ -23,6 +25,14 @@ export interface Agent {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  call_direction: CallDirection;
+  contact_base_id: number;
+  schedule_start: string;
+  schedule_end: string;
+  working_days: string;
+  calls_per_day: number;
+  number_id: number;
+  number_phone: string;
   stats?: AgentStats;
   integrations?: (string | AgentIntegration)[];
 }
@@ -32,7 +42,17 @@ export interface AgentsResponse {
   agents: Agent[];
 }
 
-export interface CreateAgentParams {
+export interface AgentConfigParams {
+  call_direction?: "inbound" | "outbound";
+  contact_base_id?: number;
+  schedule_start?: string;
+  schedule_end?: string;
+  working_days?: string[];
+  calls_per_day?: number;
+  number_id?: number;
+}
+
+export interface CreateAgentParams extends AgentConfigParams {
   name: string;
   voice?: string;
   instructions?: string;
@@ -43,7 +63,7 @@ export interface CreateAgentResponse {
   id: number;
 }
 
-export interface UpdateAgentParams {
+export interface UpdateAgentParams extends AgentConfigParams {
   name?: string;
   voice?: string;
   instructions?: string;

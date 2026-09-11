@@ -11,10 +11,19 @@ import { Button } from "@/components/ui";
 import {
   createAgentSchema,
   type CreateAgentFormData,
+  toAgentApiPayload,
   DEFAULT_SCHEDULE_START,
   DEFAULT_SCHEDULE_END,
+  UNSET_CONTACT_BASE_ID,
+  DEFAULT_NUMBER_ID,
 } from "@/lib/schemas";
-import { useCreateAgent, useTestCall, useVoices } from "@dashboard/hooks";
+import {
+  useCreateAgent,
+  useTestCall,
+  useVoices,
+  useContactBases,
+  useNumbers,
+} from "@dashboard/hooks";
 import { handleMutationError } from "@/lib/mutation-error";
 import { AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
 import { StepIndicator } from "./_components/step-indicator";
@@ -29,12 +38,12 @@ const DEFAULT_VALUES: CreateAgentFormData = {
   name: "",
   voice: "",
   callDirection: "outbound",
-  contactBase: "",
+  contactBaseId: UNSET_CONTACT_BASE_ID,
   scheduleStart: DEFAULT_SCHEDULE_START,
   scheduleEnd: DEFAULT_SCHEDULE_END,
   workingDays: ["mon", "tue", "wed", "thu", "fri"],
   callsPerDay: 20,
-  phoneNumber: "",
+  numberId: DEFAULT_NUMBER_ID,
   instructions: "",
   testPhone: "",
 };
@@ -43,6 +52,8 @@ const CreateAgentPage = () => {
   const router = useRouter();
 
   const { data: voices = [] } = useVoices();
+  const { data: contactBases = [] } = useContactBases();
+  const { data: numbers = [] } = useNumbers();
   const createAgent = useCreateAgent();
   const testCall = useTestCall();
 
@@ -61,20 +72,13 @@ const CreateAgentPage = () => {
   const stepValid = isStepValid(step, values);
 
   const createAgentFromForm = useCallback(() => {
-    const data = getValues();
-
-    // BE not ready: POST /app/agents accepts only name/voice/instructions.
-    // Call direction, contact base, schedule and number are UI-only for now.
-    createAgent.mutate(
-      { name: data.name, voice: data.voice, instructions: data.instructions },
-      {
-        onSuccess: () => {
-          toast.success("Агента створено");
-          router.push("/dashboard/agents");
-        },
-        onError: (error) => handleMutationError(error, AGENT_ERROR_MESSAGES),
-      }
-    );
+    createAgent.mutate(toAgentApiPayload(getValues()), {
+      onSuccess: () => {
+        toast.success("Агента створено");
+        router.push("/dashboard/agents");
+      },
+      onError: (error) => handleMutationError(error, AGENT_ERROR_MESSAGES),
+    });
   }, [getValues, createAgent, router]);
 
   const handleSubmit = useCallback(
@@ -122,11 +126,11 @@ const CreateAgentPage = () => {
       case 0:
         return <StepBasics form={form} voices={voices} />;
       case 1:
-        return <StepCallType form={form} />;
+        return <StepCallType form={form} contactBases={contactBases} />;
       case 2:
         return <StepSchedule form={form} />;
       case 3:
-        return <StepNumber />;
+        return <StepNumber form={form} numbers={numbers} />;
       case 4:
         return (
           <StepInstructions

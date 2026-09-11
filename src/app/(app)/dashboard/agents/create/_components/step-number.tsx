@@ -1,15 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import { Controller, type UseFormReturn } from "react-hook-form";
 import { Copy, Info } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button, Input, Label, Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui";
+import type { CreateAgentFormData } from "@/lib/schemas";
+import type { AgentNumber } from "@dashboard/types";
+import { NumberSelect } from "../../_components/number-select";
 
-// BE not ready: no endpoints to list account numbers, connect a SIP trunk or
-// verify it, and POST /app/agents accepts no number. This step is informational.
+interface StepNumberProps {
+  form: UseFormReturn<CreateAgentFormData>;
+  numbers: AgentNumber[];
+}
 
-export const StepNumber = () => {
+export const StepNumber = ({ form, numbers }: StepNumberProps) => {
   const [sipAddress, setSipAddress] = useState("");
 
   const handleCopy = async () => {
@@ -42,9 +48,27 @@ export const StepNumber = () => {
         </TabsList>
 
         <TabsContent value="my-numbers" className="mt-4">
-          <div className="border-border text-muted-foreground rounded-lg border border-dashed p-6 text-center text-sm">
-            Ще немає підключених номерів. Підключіть номер на вкладці «Підключити номер».
-          </div>
+          {numbers.length === 0 ? (
+            <div className="border-border text-muted-foreground rounded-lg border border-dashed p-6 text-center text-sm">
+              Ще немає підключених номерів. Підключіть номер на вкладці «Підключити номер».
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Label htmlFor="number-id">Номер для дзвінків</Label>
+              <Controller
+                control={form.control}
+                name="numberId"
+                render={({ field }) => (
+                  <NumberSelect
+                    id="number-id"
+                    value={field.value}
+                    numbers={numbers}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="connect" className="mt-4 space-y-4">

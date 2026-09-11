@@ -16,6 +16,8 @@ export const API_ENDPOINTS = {
   APP_CALLS_EXPORT: `${API_BASE}/app/calls/export`,
   APP_AGENTS: `${API_BASE}/app/agents`,
   APP_VOICES: `${API_BASE}/app/voices`,
+  APP_NUMBERS: `${API_BASE}/app/numbers`,
+  APP_CONTACT_BASES: `${API_BASE}/app/contact-bases`,
   APP_CONTACTS: `${API_BASE}/app/contacts`,
   APP_CONTACTS_UPLOAD: `${API_BASE}/app/contacts/upload`,
   APP_CONTACTS_EXPORT: `${API_BASE}/app/contacts/export`,
@@ -66,6 +68,8 @@ export const apiUrl = {
     return `${url}?${sp.toString()}`;
   },
   contact: (id: number | string) => `${API_ENDPOINTS.APP_CONTACTS}/${id}`,
+  contactBase: (id: number | string) => `${API_ENDPOINTS.APP_CONTACT_BASES}/${id}`,
+  number: (id: number | string) => `${API_ENDPOINTS.APP_NUMBERS}/${id}`,
   call: (id: string) => `${API_ENDPOINTS.APP_CALLS}/${id}`,
   calls: (params?: {
     limit?: number;

@@ -42,12 +42,8 @@ export const WEEKDAY_LABELS: Record<Weekday, string> = {
 export const DEFAULT_SCHEDULE_START = "09:00";
 export const DEFAULT_SCHEDULE_END = "18:00";
 
-// BE not ready: no endpoint binds a contact base to an agent, so these mirror
-// the supported integrations and are collected in the UI only.
-export const CONTACT_BASE_OPTIONS = [
-  { value: "google_sheets", label: "Google Sheets" },
-  { value: "csv_xlsx", label: "CSV / XLSX" },
-] as const;
+export const UNSET_CONTACT_BASE_ID = -1;
+export const DEFAULT_NUMBER_ID = 0;
 
 export interface CallDirectionOption {
   value: CallDirection;
@@ -68,59 +64,92 @@ export const CALL_DIRECTION_OPTIONS: CallDirectionOption[] = [
   },
 ];
 
-export const createAgentBaseSchema = z.object({
+const agentConfigShape = {
   name: z.string().min(1, "Назва агента обов'язкова"),
   voice: z.string().min(1, "Оберіть голос"),
-  // BE not ready: no agent field for call direction, contact base, schedule or number.
   callDirection: z.enum(CALL_DIRECTIONS),
-  contactBase: z.string(),
+  contactBaseId: z.number(),
   scheduleStart: z.string(),
   scheduleEnd: z.string(),
   workingDays: z.array(z.enum(WEEKDAYS)),
   callsPerDay: z.number(),
-  phoneNumber: z.string(),
+  numberId: z.number(),
   instructions: z
     .string()
     .min(1, "Інструкції обов'язкові")
     .max(INSTRUCTIONS_MAX_LENGTH, `Максимум ${INSTRUCTIONS_MAX_LENGTH} символів`),
-  testPhone: z.string(),
-});
+};
 
 export const contactBaseIsProvided = (data: {
   callDirection?: CallDirection;
-  contactBase?: string;
-}): boolean => data.callDirection === "inbound" || Boolean(data.contactBase);
+  contactBaseId?: number;
+}): boolean =>
+  data.callDirection === "inbound" || (data.contactBaseId ?? UNSET_CONTACT_BASE_ID) >= 0;
+
+const isWeekday = (value: string): value is Weekday =>
+  (WEEKDAYS as readonly string[]).includes(value);
+
+export const parseWorkingDays = (value: string): Weekday[] =>
+  value
+    .split(",")
+    .map((day) => day.trim())
+    .filter(isWeekday);
+
+export const createAgentBaseSchema = z.object({
+  ...agentConfigShape,
+  testPhone: z.string(),
+});
 
 export const createAgentSchema = createAgentBaseSchema.refine(contactBaseIsProvided, {
-  path: ["contactBase"],
+  path: ["contactBaseId"],
   message: "Оберіть базу контактів",
 });
 
 export type CreateAgentFormData = z.infer<typeof createAgentBaseSchema>;
 
-export const editAgentBaseSchema = z.object({
-  name: z.string().min(1, "Назва агента обов'язкова"),
-  voice: z.string().min(1, "Оберіть голос"),
-  // BE not ready: no agent field for call direction, contact base, schedule or number.
-  callDirection: z.enum(CALL_DIRECTIONS),
-  contactBase: z.string(),
-  scheduleStart: z.string(),
-  scheduleEnd: z.string(),
-  workingDays: z.array(z.enum(WEEKDAYS)),
-  callsPerDay: z.number(),
-  connectedNumber: z.string(),
-  instructions: z
-    .string()
-    .min(1, "Інструкції обов'язкові")
-    .max(INSTRUCTIONS_MAX_LENGTH, `Максимум ${INSTRUCTIONS_MAX_LENGTH} символів`),
-});
+export const editAgentBaseSchema = z.object(agentConfigShape);
 
 export const editAgentSchema = editAgentBaseSchema.refine(contactBaseIsProvided, {
-  path: ["contactBase"],
+  path: ["contactBaseId"],
   message: "Оберіть базу контактів",
 });
 
 export type EditAgentFormData = z.infer<typeof editAgentBaseSchema>;
+
+export interface AgentApiPayload {
+  name: string;
+  voice: string;
+  instructions: string;
+  call_direction: CallDirection;
+  contact_base_id?: number;
+  schedule_start: string;
+  schedule_end: string;
+  working_days: Weekday[];
+  calls_per_day: number;
+  number_id: number;
+}
+
+export const toAgentApiPayload = (
+  data: CreateAgentFormData | EditAgentFormData
+): AgentApiPayload => {
+  const payload: AgentApiPayload = {
+    name: data.name,
+    voice: data.voice,
+    instructions: data.instructions,
+    call_direction: data.callDirection,
+    schedule_start: data.scheduleStart,
+    schedule_end: data.scheduleEnd,
+    working_days: data.workingDays,
+    calls_per_day: data.callsPerDay,
+    number_id: data.numberId,
+  };
+
+  if (data.callDirection === "outbound" && data.contactBaseId >= 0) {
+    payload.contact_base_id = data.contactBaseId;
+  }
+
+  return payload;
+};
 
 export const contactSchema = z.object({
   name: z.string().min(2, "Ім'я обов'язкове"),

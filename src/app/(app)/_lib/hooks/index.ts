@@ -18,6 +18,8 @@ export {
 export { useCallDetail, useSaveNote, useCrmStatus, useCrmRetry } from "./use-call-detail";
 export { useCallLogs } from "./use-call-logs";
 export { useContacts, useCreateContact, useUpdateContact, useDeleteContact } from "./use-contacts";
+export { useContactBases } from "./use-contact-bases";
+export { useNumbers } from "./use-numbers";
 export { useStats } from "./use-stats";
 export { useUploadContacts } from "./use-upload-contacts";
 export { useVoices } from "./use-voices";

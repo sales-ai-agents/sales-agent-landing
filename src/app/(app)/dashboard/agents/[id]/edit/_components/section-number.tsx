@@ -4,19 +4,14 @@ import Link from "next/link";
 import { Controller, type UseFormReturn } from "react-hook-form";
 import { Info } from "lucide-react";
 
-import {
-  Label,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui";
+import { Label } from "@/components/ui";
 import type { EditAgentFormData } from "@/lib/schemas";
+import type { AgentNumber } from "@dashboard/types";
+import { NumberSelect } from "../../../_components/number-select";
 
 interface SectionNumberProps {
   form: UseFormReturn<EditAgentFormData>;
-  numbers: string[];
+  numbers: AgentNumber[];
 }
 
 export const SectionNumber = ({ form, numbers }: SectionNumberProps) => {
@@ -26,28 +21,18 @@ export const SectionNumber = ({ form, numbers }: SectionNumberProps) => {
     <section className="space-y-4">
       <h2 className="text-lg font-medium">Номер</h2>
 
-      {/* BE not ready: no endpoints list account numbers or bind one to an agent. */}
       <div className="space-y-2">
         <Label htmlFor="connected-number">Підключений номер</Label>
         <Controller
           control={control}
-          name="connectedNumber"
+          name="numberId"
           render={({ field }) => (
-            <Select
-              value={field.value || null}
-              onValueChange={(value) => field.onChange(value ?? "")}
-            >
-              <SelectTrigger id="connected-number" className="w-full">
-                <SelectValue placeholder="Оберіть номер" />
-              </SelectTrigger>
-              <SelectContent>
-                {numbers.map((number) => (
-                  <SelectItem key={number} value={number}>
-                    {number}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <NumberSelect
+              id="connected-number"
+              value={field.value}
+              numbers={numbers}
+              onChange={field.onChange}
+            />
           )}
         />
         <p className="text-muted-foreground flex items-center gap-1.5 text-sm">

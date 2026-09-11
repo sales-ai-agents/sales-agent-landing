@@ -28,6 +28,17 @@ export const AUTH_ERROR_MESSAGES: ErrorMessageMap = {
 
 export const AGENT_ERROR_MESSAGES: ErrorMessageMap = {
   too_soon: "Лише один тестовий дзвінок на хвилину. Спробуйте пізніше.",
+  name_required: "Вкажіть назву агента.",
+  invalid_call_direction: "Оберіть тип дзвінків.",
+  contact_base_required: "Оберіть базу контактів для вихідних дзвінків.",
+  invalid_schedule: "Некоректний час прозвону: початок має бути раніше за кінець.",
+  invalid_working_days: "Оберіть коректні робочі дні.",
+  invalid_calls_per_day: "Некоректна кількість дзвінків на день.",
+  number_not_connected: "Обраний номер не підключено до вашого акаунта.",
+  agent_not_found: "Агента не знайдено.",
+  agent_has_no_instructions: "Додайте інструкції, щоб агент міг дзвонити.",
+  invalid_phone: "Введіть коректний номер телефону.",
+  do_not_call: "Цей номер просив більше не дзвонити.",
 };
 
 export const resolveErrorMessage = (code: string, domainMap?: ErrorMessageMap): string => {

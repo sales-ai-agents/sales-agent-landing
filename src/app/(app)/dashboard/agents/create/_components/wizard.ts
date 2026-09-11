@@ -8,7 +8,7 @@ export const TOTAL_STEPS = 5;
 
 export const STEP_FIELDS: (keyof CreateAgentFormData)[][] = [
   ["name", "voice"],
-  ["contactBase"],
+  ["contactBaseId"],
   [],
   [],
   ["instructions"],
@@ -30,7 +30,7 @@ export const isStepValid = (step: number, values: Partial<CreateAgentFormData>):
   if (!schema) return true;
 
   if (!schema.safeParse(values).success) return false;
-  if (STEP_FIELDS[step].includes("contactBase")) return contactBaseIsProvided(values);
+  if (STEP_FIELDS[step].includes("contactBaseId")) return contactBaseIsProvided(values);
 
   return true;
 };

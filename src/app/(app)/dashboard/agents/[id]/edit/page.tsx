@@ -22,10 +22,21 @@ import { PageLoading } from "@/components/dashboard";
 import {
   editAgentSchema,
   type EditAgentFormData,
+  toAgentApiPayload,
+  parseWorkingDays,
   DEFAULT_SCHEDULE_START,
   DEFAULT_SCHEDULE_END,
+  UNSET_CONTACT_BASE_ID,
+  DEFAULT_NUMBER_ID,
 } from "@/lib/schemas";
-import { useAgent, useUpdateAgent, useDeleteAgent, useVoices } from "@dashboard/hooks";
+import {
+  useAgent,
+  useUpdateAgent,
+  useDeleteAgent,
+  useVoices,
+  useContactBases,
+  useNumbers,
+} from "@dashboard/hooks";
 import { handleMutationError } from "@/lib/mutation-error";
 import { AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
 import type { Agent } from "@dashboard/types";
@@ -36,10 +47,6 @@ import { SectionCalls } from "./_components/section-calls";
 import { SectionSchedule } from "./_components/section-schedule";
 import { SectionNumber } from "./_components/section-number";
 import { SectionInstructions } from "./_components/section-instructions";
-
-// BE not ready: no endpoints list account numbers, so the connected number is
-// derived from the agent when available and otherwise offered as a single option.
-const FALLBACK_NUMBER = "+380 67 214 88 03";
 
 const EditAgentPage = () => {
   const { data: agent, isLoading } = useAgent(useParams().id as string);
@@ -53,13 +60,13 @@ const EditAgentPage = () => {
 const buildDefaultValues = (agent: Agent): EditAgentFormData => ({
   name: agent.name,
   voice: agent.voice,
-  callDirection: "outbound",
-  contactBase: "google_sheets",
-  scheduleStart: DEFAULT_SCHEDULE_START,
-  scheduleEnd: DEFAULT_SCHEDULE_END,
-  workingDays: ["mon", "tue", "wed", "thu", "fri"],
-  callsPerDay: 20,
-  connectedNumber: FALLBACK_NUMBER,
+  callDirection: agent.call_direction === "inbound" ? "inbound" : "outbound",
+  contactBaseId: agent.contact_base_id >= 0 ? agent.contact_base_id : UNSET_CONTACT_BASE_ID,
+  scheduleStart: agent.schedule_start || DEFAULT_SCHEDULE_START,
+  scheduleEnd: agent.schedule_end || DEFAULT_SCHEDULE_END,
+  workingDays: parseWorkingDays(agent.working_days),
+  callsPerDay: agent.calls_per_day,
+  numberId: agent.number_id ?? DEFAULT_NUMBER_ID,
   instructions: agent.instructions,
 });
 
@@ -67,6 +74,8 @@ const EditAgentForm = ({ agent }: { agent: Agent }) => {
   const router = useRouter();
 
   const { data: voices = [] } = useVoices();
+  const { data: contactBases = [] } = useContactBases();
+  const { data: numbers = [] } = useNumbers();
 
   const updateAgent = useUpdateAgent();
   const deleteAgent = useDeleteAgent();
@@ -77,18 +86,10 @@ const EditAgentForm = ({ agent }: { agent: Agent }) => {
     mode: "onChange",
   });
 
-  const numbers = [FALLBACK_NUMBER];
-
   const handleSave = useCallback(
     (data: EditAgentFormData) => {
-      // BE not ready: PATCH /app/agents/:id accepts only name/voice/instructions.
       updateAgent.mutate(
-        {
-          id: agent.id,
-          name: data.name,
-          voice: data.voice,
-          instructions: data.instructions,
-        },
+        { id: agent.id, ...toAgentApiPayload(data) },
         {
           onSuccess: () => {
             toast.success("Зміни збережено");
@@ -122,7 +123,7 @@ const EditAgentForm = ({ agent }: { agent: Agent }) => {
 
       <form onSubmit={form.handleSubmit(handleSave)} noValidate className="space-y-8">
         <SectionBasics form={form} voices={voices} />
-        <SectionCalls form={form} />
+        <SectionCalls form={form} contactBases={contactBases} />
         <SectionSchedule form={form} />
         <SectionNumber form={form} numbers={numbers} />
         <SectionInstructions form={form} />

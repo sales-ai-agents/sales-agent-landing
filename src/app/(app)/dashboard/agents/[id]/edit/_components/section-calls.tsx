@@ -4,30 +4,19 @@ import Link from "next/link";
 import { Controller, type UseFormReturn } from "react-hook-form";
 import { Info } from "lucide-react";
 
-import {
-  Label,
-  RadioGroup,
-  RadioGroupItem,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui";
+import { Label, RadioGroup, RadioGroupItem } from "@/components/ui";
 import { cn } from "@/lib/utils";
-import {
-  CALL_DIRECTION_OPTIONS,
-  CONTACT_BASE_OPTIONS,
-  type EditAgentFormData,
-  type CallDirection,
-} from "@/lib/schemas";
+import { CALL_DIRECTION_OPTIONS, type EditAgentFormData, type CallDirection } from "@/lib/schemas";
+import type { ContactBase } from "@dashboard/types";
 import { DIRECTION_ICONS } from "../../../_components/direction-icons";
+import { ContactBaseSelect } from "../../../_components/contact-base-select";
 
 interface SectionCallsProps {
   form: UseFormReturn<EditAgentFormData>;
+  contactBases: ContactBase[];
 }
 
-export const SectionCalls = ({ form }: SectionCallsProps) => {
+export const SectionCalls = ({ form, contactBases }: SectionCallsProps) => {
   const {
     control,
     watch,
@@ -43,7 +32,6 @@ export const SectionCalls = ({ form }: SectionCallsProps) => {
         <p className="mt-3 text-sm">Тип дзвінків</p>
       </div>
 
-      {/* BE not ready: POST /app/agents accepts no call direction or contact base. */}
       <div className="grid gap-4 lg:grid-cols-[1fr_auto]">
         <Controller
           control={control}
@@ -90,27 +78,18 @@ export const SectionCalls = ({ form }: SectionCallsProps) => {
         {isOutbound && (
           <Controller
             control={control}
-            name="contactBase"
+            name="contactBaseId"
             render={({ field }) => (
               <div className="space-y-2 lg:w-56 lg:self-start">
                 <Label htmlFor="contact-base">База контактів</Label>
-                <Select
-                  value={field.value || null}
-                  onValueChange={(value) => field.onChange(value ?? "")}
-                >
-                  <SelectTrigger id="contact-base" className="w-full">
-                    <SelectValue placeholder="Вибрати базу контактів" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CONTACT_BASE_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.contactBase && (
-                  <p className="text-destructive text-sm">{errors.contactBase.message}</p>
+                <ContactBaseSelect
+                  id="contact-base"
+                  value={field.value}
+                  bases={contactBases}
+                  onChange={field.onChange}
+                />
+                {errors.contactBaseId && (
+                  <p className="text-destructive text-sm">{errors.contactBaseId.message}</p>
                 )}
                 <div className="bg-primary/5 text-muted-foreground flex items-center gap-2 rounded-lg p-3 text-xs">
                   <Info className="text-primary h-4 w-4 shrink-0" />

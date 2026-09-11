@@ -22,8 +22,6 @@ export const SectionSchedule = ({ form }: SectionScheduleProps) => {
     <section className="space-y-4">
       <h2 className="text-lg font-medium">Розклад і ліміти дзвінків</h2>
 
-      {/* BE not ready: no endpoint persists a per-agent schedule — campaigns run
-          09:00–20:00 Kyiv on weekdays server-side. */}
       <div className="grid gap-6 lg:grid-cols-[auto_1fr_auto]">
         <fieldset className="space-y-2">
           <legend className="mb-2 text-sm">Час прозвону</legend>
