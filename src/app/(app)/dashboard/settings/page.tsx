@@ -6,6 +6,8 @@ import { Business } from "./_components/business";
 import { Profile } from "./_components/profile";
 import { Password } from "./_components/password";
 import { Notifications } from "./_components/notifications";
+import { MarketingConsent } from "./_components/marketing-consent";
+import { DangerZone } from "./_components/danger-zone";
 import { Timezone } from "./_components/timezone";
 
 const SettingsPage = () => {
@@ -35,6 +37,10 @@ const SettingsPage = () => {
       <Password />
 
       <Notifications />
+
+      <MarketingConsent initialGranted={account?.marketing_consent ?? false} />
+
+      <DangerZone />
 
       {/*AFTER MVP*/}
       {/*<Team />*/}

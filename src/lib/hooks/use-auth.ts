@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { apiPost, apiGet, apiPatch, ApiError } from "@/lib/api-client";
+import { apiPost, apiGet, apiPatch, apiDelete, ApiError } from "@/lib/api-client";
 import { API_ENDPOINTS } from "@/lib/api-config";
 import { setAuthToken, clearAuthToken } from "@/lib/auth-token";
 import type {
@@ -15,6 +15,10 @@ import type {
   UpdateProfileResponse,
   ChangePasswordParams,
   ChangePasswordResponse,
+  DeleteAccountParams,
+  DeleteAccountResponse,
+  MarketingConsentParams,
+  MarketingConsentResponse,
 } from "@/lib/types";
 
 const AUTH_QUERY_KEY = ["auth", "me"] as const;
@@ -111,5 +115,31 @@ export const useUpdateProfile = () => {
 export const useChangePassword = () => {
   return useMutation<ChangePasswordResponse, ApiError, ChangePasswordParams>({
     mutationFn: (params) => apiPost<ChangePasswordResponse>(API_ENDPOINTS.AUTH_PASSWORD, params),
+  });
+};
+
+export const useUpdateMarketingConsent = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<MarketingConsentResponse, ApiError, MarketingConsentParams>({
+    mutationFn: (params) =>
+      apiPost<MarketingConsentResponse>(API_ENDPOINTS.APP_ACCOUNT_MARKETING_CONSENT, params),
+    onSuccess: (data) => {
+      queryClient.setQueryData<Account | null>(AUTH_QUERY_KEY, (previous) =>
+        previous ? { ...previous, marketing_consent: data.granted } : previous
+      );
+    },
+  });
+};
+
+export const useDeleteAccount = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<DeleteAccountResponse, ApiError, DeleteAccountParams>({
+    mutationFn: (params) => apiDelete<DeleteAccountResponse>(API_ENDPOINTS.APP_ACCOUNT, params),
+    onSuccess: () => {
+      clearAuthToken();
+      queryClient.clear();
+    },
   });
 };

@@ -11,6 +11,7 @@ export interface Account {
   short_name?: string;
   website?: string;
   agent_language?: AgentLanguage;
+  marketing_consent?: boolean;
 }
 
 export interface AuthResponse {
@@ -29,6 +30,26 @@ export interface RegisterParams {
   password: string;
   name?: string;
   company?: string;
+  marketing_consent?: boolean;
+}
+
+export interface DeleteAccountParams {
+  password: string;
+  confirm: "DELETE";
+}
+
+export interface DeleteAccountResponse {
+  ok: boolean;
+  deleted: boolean;
+}
+
+export interface MarketingConsentParams {
+  granted: boolean;
+}
+
+export interface MarketingConsentResponse {
+  ok: boolean;
+  granted: boolean;
 }
 
 export interface MeResponse {

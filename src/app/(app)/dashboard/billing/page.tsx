@@ -12,6 +12,7 @@ import type { BillingPeriod } from "@dashboard/types";
 import { BillingCycleSelector } from "./_components/billing-cycle-selector";
 import { PaymentHistorySection } from "./_components/payment-history-section";
 import { PaymentMethodSection } from "./_components/payment-method-section";
+import { SubscriptionSection } from "./_components/subscription-section";
 import { PlanCard } from "./_components/plan-card";
 import { getDefaultUpgradePlan } from "./_lib/utils";
 
@@ -248,6 +249,14 @@ const BillingPage = () => {
         onRetry={() => paymentMethodQuery.refetch()}
         onSelectPlan={() => openPlanDialog()}
       />
+      {!isTrial && paymentMethodQuery.data?.card.saved && (
+        <SubscriptionSection
+          hasSavedCard={paymentMethodQuery.data.card.saved}
+          autoCharge={paymentMethodQuery.data.auto_charge}
+          expiresAt={billing.expires_at}
+          isTrial={isTrial}
+        />
+      )}
       <PaymentHistorySection
         payments={historyQuery.data?.payments}
         isLoading={historyQuery.isLoading}

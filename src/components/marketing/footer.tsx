@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Mail, Phone } from "lucide-react";
 import { ScrollReveal, StaggerReveal } from "@/components/marketing/scroll-reveal";
+import { LEGAL_PAGE_LIST } from "@/lib/constants";
 
 export function Footer() {
   return (
@@ -23,7 +24,7 @@ export function Footer() {
           direction="up"
           distance={25}
           threshold={0.15}
-          className="grid grid-cols-1 gap-10 md:grid-cols-3"
+          className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4"
         >
           <div className="flex flex-col gap-4">
             <Link href="/" className="text-base font-semibold text-white">
@@ -67,6 +68,22 @@ export function Footer() {
                   FAQ
                 </a>
               </li>
+            </ul>
+          </nav>
+
+          <nav aria-label="Правові документи">
+            <h3 className="font-body mb-4 text-white uppercase">Документи</h3>
+            <ul className="flex flex-col gap-3">
+              {LEGAL_PAGE_LIST.map((page) => (
+                <li key={page.href}>
+                  <Link
+                    href={page.href}
+                    className="text-base text-white transition-colors hover:text-white/80"
+                  >
+                    {page.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </nav>
 

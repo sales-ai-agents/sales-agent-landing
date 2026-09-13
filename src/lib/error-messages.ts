@@ -24,6 +24,8 @@ export const AUTH_ERROR_MESSAGES: ErrorMessageMap = {
   email_not_verified: "Email не підтверджений у провайдера.",
   unknown_provider: "Невідомий спосіб входу.",
   provider_not_configured: "Цей спосіб входу тимчасово недоступний.",
+  confirm_required: "Введіть DELETE для підтвердження.",
+  invalid_json: "Некоректні дані запиту.",
 };
 
 export const AGENT_ERROR_MESSAGES: ErrorMessageMap = {

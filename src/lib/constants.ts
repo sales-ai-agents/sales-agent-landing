@@ -29,3 +29,31 @@ export const DASHBOARD_SETTINGS_ITEM: NavItem = {
   icon: Settings,
   label: "Налаштування",
 };
+
+export const COMPANY_INFO = {
+  legalName: "Фізична особа-підприємець Овсієнко Богдан Володимирович",
+  shortName: "ФОП Овсієнко Богдан Володимирович",
+  taxId: "3888313957",
+  taxSystem: "Спрощена система оподаткування, 3 група, 5% (не платник ПДВ)",
+  address: "02000, м. Київ, б-р Ярослава Гашека, 24",
+  email: "support@calls4u.ai",
+  phone: "+380 99 036 73 86",
+  site: "calls4u.ai",
+} as const;
+
+export interface LegalPageLink {
+  readonly href: string;
+  readonly label: string;
+}
+
+export const LEGAL_PAGES = {
+  offer: { href: "/offer", label: "Публічна оферта" },
+  serviceTerms: { href: "/service-terms", label: "Умови надання послуг" },
+  refundPolicy: { href: "/refund-policy", label: "Умови повернення коштів" },
+  privacyPolicy: { href: "/privacy-policy", label: "Політика конфіденційності" },
+  cookiePolicy: { href: "/cookie-policy", label: "Політика cookie" },
+  termsOfUse: { href: "/terms-of-use", label: "Умови використання сайту" },
+  contacts: { href: "/contacts", label: "Контакти" },
+} as const satisfies Record<string, LegalPageLink>;
+
+export const LEGAL_PAGE_LIST: readonly LegalPageLink[] = Object.values(LEGAL_PAGES);

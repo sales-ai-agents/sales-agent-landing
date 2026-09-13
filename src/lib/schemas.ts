@@ -15,6 +15,10 @@ export const signUpSchema = z.object({
     .min(8, "Пароль має містити щонайменше 8 символів")
     .regex(/[0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/, "Має містити цифру або спецсимвол")
     .regex(/[A-ZА-ЯІЇЄҐ]/, "Має містити велику літеру"),
+  termsAccepted: z
+    .boolean()
+    .refine((value) => value, "Щоб продовжити, підтвердіть згоду з умовами"),
+  marketingConsent: z.boolean(),
 });
 
 export type SignUpFormData = z.infer<typeof signUpSchema>;

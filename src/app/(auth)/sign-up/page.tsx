@@ -7,10 +7,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Check } from "lucide-react";
 
-import { Button, Input, Label } from "@/components/ui";
+import { Controller } from "react-hook-form";
+
+import { Button, Checkbox, Input, Label } from "@/components/ui";
 import { PasswordInput } from "@/components/auth/password-input";
 import { SocialLoginButtons } from "@/components/auth/social-login-buttons";
 import { signUpSchema, type SignUpFormData } from "@/lib/schemas";
+import { LEGAL_PAGES } from "@/lib/constants";
 import { useRegister } from "@/lib/hooks";
 import { ApiError } from "@/lib/api-client";
 import { resolveErrorMessage, AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
@@ -32,6 +35,7 @@ export default function SignUpPage() {
     register,
     handleSubmit,
     watch,
+    control,
     formState: { errors },
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
@@ -39,6 +43,8 @@ export default function SignUpPage() {
       name: "",
       email: "",
       password: "",
+      termsAccepted: false,
+      marketingConsent: false,
     },
   });
 
@@ -50,6 +56,7 @@ export default function SignUpPage() {
         email: data.email,
         password: data.password,
         name: data.name,
+        marketing_consent: data.marketingConsent,
       },
       {
         onSuccess: () => {
@@ -137,6 +144,78 @@ export default function SignUpPage() {
           })}
         </ul>
 
+        <div className="space-y-3">
+          <div className="flex flex-col gap-1.5">
+            <Label
+              htmlFor="terms-accepted"
+              className="group/field-label text-muted-foreground flex items-start gap-3 text-xs leading-relaxed font-normal"
+            >
+              <Controller
+                control={control}
+                name="termsAccepted"
+                render={({ field }) => (
+                  <Checkbox
+                    id="terms-accepted"
+                    className="mt-0.5"
+                    checked={field.value}
+                    onCheckedChange={(checked) => field.onChange(checked)}
+                    aria-invalid={errors.termsAccepted ? true : undefined}
+                  />
+                )}
+              />
+              <span>
+                Я ознайомився(-лась) та погоджуюсь з{" "}
+                <Link href={LEGAL_PAGES.offer.href} className="text-primary hover:underline">
+                  Публічною офертою
+                </Link>
+                ,{" "}
+                <Link href={LEGAL_PAGES.serviceTerms.href} className="text-primary hover:underline">
+                  Умовами надання послуг
+                </Link>
+                ,{" "}
+                <Link
+                  href={LEGAL_PAGES.privacyPolicy.href}
+                  className="text-primary hover:underline"
+                >
+                  Політикою конфіденційності
+                </Link>{" "}
+                та{" "}
+                <Link href={LEGAL_PAGES.cookiePolicy.href} className="text-primary hover:underline">
+                  Політикою cookie
+                </Link>
+                , а також надаю згоду на обробку моїх персональних даних.
+              </span>
+            </Label>
+            {errors.termsAccepted && (
+              <p role="alert" className="text-sm text-red-600">
+                {errors.termsAccepted.message}
+              </p>
+            )}
+          </div>
+
+          <Label
+            htmlFor="marketing-consent"
+            className="group/field-label text-muted-foreground flex items-start gap-3 text-xs leading-relaxed font-normal"
+          >
+            <Controller
+              control={control}
+              name="marketingConsent"
+              render={({ field }) => (
+                <Checkbox
+                  id="marketing-consent"
+                  className="mt-0.5"
+                  checked={field.value}
+                  onCheckedChange={(checked) => field.onChange(checked)}
+                />
+              )}
+            />
+            <span>
+              Я погоджуюсь отримувати інформаційні та рекламні повідомлення від calls4u.ai
+              (необов&apos;язково, можна відкликати будь-коли).
+            </span>
+          </Label>
+        </div>
+
         <Button
           type="submit"
           className="bg-primary hover:bg-primary/90 h-11 w-full rounded-lg text-base font-semibold text-white"
@@ -149,18 +228,6 @@ export default function SignUpPage() {
       <div className="mt-6">
         <SocialLoginButtons />
       </div>
-
-      {/*NO PAGES YES*/}
-      {/*<p className="text-muted-foreground mt-8 text-center text-xs leading-relaxed">*/}
-      {/*  Реєструючись, ви погоджуєтесь з нашими <br />*/}
-      {/*  <Link href="/terms" className="text-primary hover:underline">*/}
-      {/*    Умовами використання*/}
-      {/*  </Link>{" "}*/}
-      {/*  та{" "}*/}
-      {/*  <Link href="/privacy" className="text-primary hover:underline">*/}
-      {/*    Політикою конфіденційності*/}
-      {/*  </Link>*/}
-      {/*</p>*/}
     </div>
   );
 }

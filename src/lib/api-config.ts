@@ -10,6 +10,10 @@ export const API_ENDPOINTS = {
   AUTH_LOGOUT: `${API_BASE}/auth/logout`,
   AUTH_SOCIAL: `${API_BASE}/auth/social`,
 
+  // Account
+  APP_ACCOUNT: `${API_BASE}/app/account`,
+  APP_ACCOUNT_MARKETING_CONSENT: `${API_BASE}/app/account/marketing-consent`,
+
   // App (authenticated)
   APP_STATS: `${API_BASE}/app/stats`,
   APP_CALLS: `${API_BASE}/app/calls`,

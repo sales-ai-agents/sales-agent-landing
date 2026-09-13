@@ -120,6 +120,6 @@ export function apiPatch<T>(url: string, body: unknown): Promise<T> {
   return request<T>(url, "PATCH", { body });
 }
 
-export function apiDelete<T>(url: string): Promise<T> {
-  return request<T>(url, "DELETE");
+export function apiDelete<T>(url: string, body?: unknown): Promise<T> {
+  return request<T>(url, "DELETE", body === undefined ? undefined : { body });
 }
