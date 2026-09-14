@@ -119,6 +119,7 @@ export { Toaster } from "./sonner";
 export { Switch } from "./switch";
 export { Tabs, TabsList, TabsTrigger, TabsContent } from "./tabs";
 export { Textarea } from "./textarea";
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "./tooltip";
 export { Toggle, toggleVariants } from "./toggle";
 export { ToggleGroup } from "./toggle-group";
 export { RadioGroup, RadioGroupItem } from "./radio-group";

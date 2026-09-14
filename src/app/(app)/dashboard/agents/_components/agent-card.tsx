@@ -1,9 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { Bot, Play, Pause } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { Bot, Info, Pause, Play, Plug, FileSpreadsheet, Table, Webhook } from "lucide-react";
 
-import { Button, buttonVariants, Badge, Progress } from "@/components/ui";
+import {
+  Badge,
+  Button,
+  buttonVariants,
+  Progress,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui";
 import type { Agent, AgentIntegration } from "@dashboard/types";
 import { cn, formatNumber, formatTimeSaved, formatMinutesUsed } from "@/lib/utils";
 
@@ -16,6 +26,22 @@ const INTEGRATION_LABELS: Record<string, string> = {
   webhook: "Webhook",
   crm: "CRM",
 };
+
+const INTEGRATION_ICONS: Record<string, LucideIcon> = {
+  google_sheets: FileSpreadsheet,
+  sheets: FileSpreadsheet,
+  bitrix24: Table,
+  keycrm: Table,
+  pipedrive: Table,
+  webhook: Webhook,
+  crm: Table,
+};
+
+const resolveIntegrationKey = (item: string | AgentIntegration): string =>
+  (typeof item === "string" ? item : (item.type ?? item.id ?? "")).toLowerCase();
+
+const resolveIntegrationIcon = (item: string | AgentIntegration): LucideIcon =>
+  INTEGRATION_ICONS[resolveIntegrationKey(item)] ?? Plug;
 
 const resolveIntegrationName = (item: string | AgentIntegration): string => {
   if (typeof item === "string") {
@@ -41,6 +67,52 @@ const StatItem = ({ label, value, highlight = false }: StatItemProps) => {
     <div>
       <p className="text-muted-foreground text-xs">{label}</p>
       <p className={`text-lg font-semibold ${highlight ? "text-primary" : ""}`}>{value}</p>
+    </div>
+  );
+};
+
+const MAX_VISIBLE_INTEGRATIONS = 3;
+
+interface IntegrationIconsProps {
+  integrations?: (string | AgentIntegration)[];
+}
+
+const IntegrationIcons = ({ integrations }: IntegrationIconsProps) => {
+  const active = (integrations ?? []).filter((item) =>
+    typeof item === "string" ? true : item.connected !== false
+  );
+
+  if (active.length === 0) {
+    return <p className="text-muted-foreground mt-1 text-sm">—</p>;
+  }
+
+  const visible = active.slice(0, MAX_VISIBLE_INTEGRATIONS);
+  const hiddenCount = active.length - visible.length;
+
+  return (
+    <div className="mt-2 flex flex-wrap items-center gap-4">
+      {visible.map((item, index) => {
+        const Icon = resolveIntegrationIcon(item);
+        const name = resolveIntegrationName(item);
+
+        return (
+          <span
+            key={typeof item === "string" ? `${item}-${index}` : `${item.id ?? item.name}-${index}`}
+            title={name}
+            aria-label={name}
+            className="border-border bg-background relative flex size-9 items-center justify-center rounded-full border"
+          >
+            <Icon className="size-4" aria-hidden="true" />
+            <span className="absolute right-0 bottom-0 size-2 rounded-full border-white bg-green-500" />
+          </span>
+        );
+      })}
+
+      {hiddenCount > 0 && (
+        <span className="bg-primary/10 text-primary flex h-6 items-center rounded-full px-2.5 text-xs font-medium">
+          +{hiddenCount}
+        </span>
+      )}
     </div>
   );
 };
@@ -105,30 +177,7 @@ export const AgentCard = ({ agent, onToggle, onTest }: AgentCardProps) => {
 
       <div className="mt-4">
         <p className="text-muted-foreground text-xs">Інтеграції</p>
-        {(() => {
-          const activeIntegrations = (agent.integrations ?? []).filter((item) =>
-            typeof item === "string" ? true : item.connected !== false
-          );
-
-          if (activeIntegrations.length === 0) {
-            return <p className="text-muted-foreground mt-1 text-sm">—</p>;
-          }
-
-          return (
-            <div className="mt-1.5 flex flex-wrap gap-1.5">
-              {activeIntegrations.map((item, i) => (
-                <Badge
-                  key={typeof item === "string" ? `${item}-${i}` : `${item.id ?? item.name}-${i}`}
-                  variant="outline"
-                  className="border-border bg-muted/40 text-foreground text-xs font-normal"
-                >
-                  <span className="bg-primary mr-1.5 inline-block h-1.5 w-1.5 rounded-full" />
-                  {resolveIntegrationName(item)}
-                </Badge>
-              ))}
-            </div>
-          );
-        })()}
+        <IntegrationIcons integrations={agent.integrations} />
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
@@ -140,9 +189,21 @@ export const AgentCard = ({ agent, onToggle, onTest }: AgentCardProps) => {
             Редагувати
           </Link>
         </div>
-        <Button variant="outline" size="sm" onClick={onTest}>
-          Тестувати
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button variant="outline" size="sm" onClick={onTest}>
+                  Тестувати
+                  <Info className="text-muted-foreground ml-1 size-3.5" aria-hidden="true" />
+                </Button>
+              }
+            />
+            <TooltipContent side="bottom">
+              Дзвінок надійде на ваш номер - клієнтам ми не телефонуватимемо
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         <Button variant="ghost" size="sm" onClick={onToggle}>
           {isActive ? (
             <>
