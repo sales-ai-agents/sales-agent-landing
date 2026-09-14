@@ -2,12 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Check } from "lucide-react";
-
-import { Controller } from "react-hook-form";
 
 import { Button, Checkbox, Input, Label } from "@/components/ui";
 import { PasswordInput } from "@/components/auth/password-input";

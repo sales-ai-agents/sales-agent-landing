@@ -249,14 +249,7 @@ const BillingPage = () => {
         onRetry={() => paymentMethodQuery.refetch()}
         onSelectPlan={() => openPlanDialog()}
       />
-      {!isTrial && paymentMethodQuery.data?.card.saved && (
-        <SubscriptionSection
-          hasSavedCard={paymentMethodQuery.data.card.saved}
-          autoCharge={paymentMethodQuery.data.auto_charge}
-          expiresAt={billing.expires_at}
-          isTrial={isTrial}
-        />
-      )}
+      {!isTrial && <SubscriptionSection expiresAt={billing.expires_at} />}
       <PaymentHistorySection
         payments={historyQuery.data?.payments}
         isLoading={historyQuery.isLoading}

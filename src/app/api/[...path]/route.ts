@@ -2,7 +2,15 @@ import { type NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://api.calls4u.ai";
-const SKIP_HEADERS = new Set(["host", "connection", "keep-alive", "transfer-encoding"]);
+const SKIP_REQUEST_HEADERS = new Set([
+  "host",
+  "connection",
+  "keep-alive",
+  "transfer-encoding",
+  "content-length",
+]);
+const SKIP_RESPONSE_HEADERS = new Set(["connection", "keep-alive", "transfer-encoding"]);
+const METHODS_WITHOUT_BODY = new Set(["GET", "HEAD"]);
 
 async function handler(req: NextRequest) {
   const url = new URL(
@@ -11,28 +19,45 @@ async function handler(req: NextRequest) {
   );
 
   const headers = new Headers();
-  req.headers.forEach((v, k) => {
-    if (!SKIP_HEADERS.has(k)) headers.set(k, v);
+  req.headers.forEach((value, key) => {
+    if (!SKIP_REQUEST_HEADERS.has(key)) headers.set(key, value);
   });
 
   const session = (await cookies()).get("cs_session");
   if (session) headers.set("cookie", `cs_session=${session.value}`);
 
-  const res = await fetch(url, {
-    method: req.method,
-    headers,
-    body: req.body,
-    // @ts-expect-error — duplex required for streaming request bodies
-    duplex: "half",
-    redirect: "manual",
+  const body = METHODS_WITHOUT_BODY.has(req.method) ? undefined : await req.arrayBuffer();
+  const hasBody = body !== undefined && body.byteLength > 0;
+
+  let upstream: Response;
+  try {
+    upstream = await fetch(url, {
+      method: req.method,
+      headers,
+      body: hasBody ? body : undefined,
+      redirect: "manual",
+    });
+  } catch {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "gateway_error",
+        message: "Не вдалося з'єднатися з сервером. Спробуйте ще раз.",
+      },
+      { status: 502 }
+    );
+  }
+
+  const responseHeaders = new Headers();
+  upstream.headers.forEach((value, key) => {
+    if (!SKIP_RESPONSE_HEADERS.has(key)) responseHeaders.append(key, value);
   });
 
-  const resHeaders = new Headers();
-  res.headers.forEach((v, k) => {
-    if (!SKIP_HEADERS.has(k)) resHeaders.append(k, v);
+  return new NextResponse(upstream.body, {
+    status: upstream.status,
+    statusText: upstream.statusText,
+    headers: responseHeaders,
   });
-
-  return new NextResponse(res.body, { status: res.status, headers: resHeaders });
 }
 
 export const GET = handler;
