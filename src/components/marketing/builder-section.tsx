@@ -18,7 +18,7 @@ export function BuilderSection() {
 
   function handleStart(): void {
     if (!form.isValid) return;
-    trackEvent("check_test_call");
+    trackEvent("test_call_start", { location: "builder" });
     startAgent({
       instruction: form.instruction,
       voice: form.voiceApiValue,

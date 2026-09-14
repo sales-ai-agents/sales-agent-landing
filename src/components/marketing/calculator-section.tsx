@@ -23,7 +23,7 @@ export function CalculatorSection() {
     const costPerMonth = Math.round(parseFloat(hoursPerMonth) * hourlyRate).toLocaleString("uk-UA");
 
     setResult({ hoursPerMonth, costPerMonth });
-    trackEvent("calculator_count");
+    trackEvent("calculator_calculate");
   }, [callsPerMonth, avgDuration, hourlyRate]);
 
   return (

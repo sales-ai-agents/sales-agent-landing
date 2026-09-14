@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Button, buttonVariants } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
-import { LeadFormModal } from "@/components/marketing/lead-form-card";
+import { FeedbackFormModal } from "@/components/marketing/feedback-form-modal";
 import { ScaleReveal } from "@/components/marketing/scroll-reveal";
 
 export function FinalCtaSection() {
@@ -27,7 +27,7 @@ export function FinalCtaSection() {
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <a
               href="#hero"
-              onClick={() => trackEvent("footer_start_test_call")}
+              onClick={() => trackEvent("test_call_start_click", { location: "final_cta" })}
               className={cn(
                 buttonVariants(),
                 "font-body h-12 w-full rounded-xl bg-white px-7 text-lg font-normal text-black hover:bg-gray-100 sm:w-sm"
@@ -39,7 +39,7 @@ export function FinalCtaSection() {
             <Button
               variant="outline"
               onClick={() => {
-                trackEvent("footer_lead_form");
+                trackEvent("lead_modal_open", { location: "final_cta" });
                 setLeadFormOpen(true);
               }}
               className="font-body h-12 w-full rounded-xl border-white/30 bg-transparent px-7 text-lg font-normal text-white hover:bg-white/10 sm:w-sm"
@@ -54,7 +54,7 @@ export function FinalCtaSection() {
         </div>
       </ScaleReveal>
 
-      <LeadFormModal
+      <FeedbackFormModal
         open={leadFormOpen}
         onClose={() => setLeadFormOpen(false)}
         sourcePage="final-cta"

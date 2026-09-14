@@ -6,6 +6,7 @@ import type {
   Integration,
   MockCallLogRow,
   OnboardingStep,
+  PricingPlan,
   Scenario,
   TrustItem,
 } from "@marketing/types";
@@ -362,5 +363,71 @@ export const INTEGRATIONS: readonly MarketingIntegration[] = [
     icon: Code,
     description:
       "Передавайте події після дзвінка у вашу систему: CRM, чат, аналітику або автоматизацію",
+  },
+] as const;
+
+// --- Pricing Section ---
+
+export const PRICING_PLANS: readonly PricingPlan[] = [
+  {
+    id: "start",
+    name: "Start",
+    tagline: "Для першого запуску",
+    price: "$29",
+    period: "/ місяць",
+    description: "Для невеликого потоку дзвінків",
+    features: [
+      "100 хвилин AI-агента",
+      "1 AI-агент",
+      "1 телефонний номер",
+      "$5 балансу на дзвінки",
+      "Журнал дзвінків",
+      "Перегляд результатів розмов",
+      "Базове налаштування сценарію",
+    ],
+    ctaLabel: "Спробувати безкоштовно",
+    ctaHref: "/sign-up",
+  },
+  {
+    id: "business",
+    name: "Business",
+    tagline: "Для регулярної обробки звернень",
+    price: "$79",
+    period: "/ місяць",
+    description: "Для регулярної обробки звернень",
+    features: [
+      "300 хвилин розмов",
+      "До 3 ШІ-агентів",
+      "1 телефонний номер",
+      "$10 балансу на дзвінки",
+      "Все з тарифу Start",
+      "CSV-кампанії",
+      "Webhooks",
+      "Кілька сценаріїв дзвінків",
+    ],
+    ctaLabel: "Спробувати безкоштовно",
+    ctaHref: "/sign-up",
+    badge: "Найпопулярніший",
+    featured: true,
+  },
+  {
+    id: "pro",
+    name: "Pro",
+    tagline: "Для масштабування",
+    price: "$199",
+    period: "/ місяць",
+    description: "Для команд із великим обсягом дзвінків",
+    features: [
+      "800 хвилин розмов",
+      "Необмежено AI-агентів",
+      "До 3 телефонних номерів",
+      "$20 балансу на дзвінки",
+      "Все з тарифу Business",
+      "Усі доступні інтеграції",
+      "Пріоритетна підтримка",
+      "Підключення до бізнес-процесів",
+    ],
+    ctaLabel: "Обговорити підключення",
+    ctaHref: "/sign-up",
   },
 ] as const;

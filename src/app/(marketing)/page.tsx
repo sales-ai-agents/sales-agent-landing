@@ -6,6 +6,7 @@ import { HowItWorksSection } from "@/components/marketing/how-it-works-section";
 import { CallLogsSection } from "@/components/marketing/call-logs-section";
 import { HandoffSection } from "@/components/marketing/handoff-section";
 import { IntegrationsSection } from "@/components/marketing/integrations-section";
+import { PricingSection } from "@/components/marketing/pricing-section";
 import { TrustSection } from "@/components/marketing/trust-section";
 import { FaqSection } from "@/components/marketing/faq-section";
 import { FinalCtaSection } from "@/components/marketing/final-cta-section";
@@ -74,6 +75,7 @@ export default function MarketingPage() {
       <HandoffSection />
       <IntegrationsSection />
       <CalculatorSection />
+      <PricingSection />
       <TrustSection />
       <FaqSection />
       <FinalCtaSection />

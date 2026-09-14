@@ -6,7 +6,7 @@ import { Phone, Lock } from "lucide-react";
 
 import { Button, Input } from "@/components/ui";
 import { useDemoCall } from "@marketing/hooks";
-import { LeadFormModal } from "@/components/marketing/lead-form-card";
+import { FeedbackFormModal } from "@/components/marketing/feedback-form-modal";
 import { cn, formatUaPhoneDigits } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
 
@@ -25,7 +25,7 @@ export default function DemoCallCard() {
 
   function handleSubmit(): void {
     if (digits.length === UA_SUBSCRIBER_DIGITS) {
-      trackEvent("start_test_call");
+      trackEvent("test_call_start", { location: "hero_demo" });
       requestCall(digits);
     }
   }
@@ -62,7 +62,7 @@ export default function DemoCallCard() {
         />
       )}
 
-      <LeadFormModal
+      <FeedbackFormModal
         open={isSuccess && showLeadForm}
         onClose={() => setShowLeadForm(false)}
         sourcePage="calls4u.ai/#hero-demo"

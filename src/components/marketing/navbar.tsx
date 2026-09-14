@@ -1,19 +1,15 @@
 "use client";
 
-import { useState } from "react";
-
 import Image from "next/image";
 import Link from "next/link";
 
-import { Button } from "@/components/ui";
-import { LeadFormModal } from "@/components/marketing/lead-form-card";
+import { buttonVariants } from "@/components/ui";
 import { ScrollReveal } from "@/components/marketing/scroll-reveal";
 import { NAV_LINKS } from "@marketing/content";
 import { trackEvent } from "@/lib/analytics";
+import { cn } from "@/lib/utils";
 
 export function Navbar() {
-  const [isLeadFormOpen, setIsLeadFormOpen] = useState(false);
-
   return (
     <>
       <ScrollReveal
@@ -56,31 +52,21 @@ export function Navbar() {
                 {link.label}
               </a>
             ))}
-            <Button
-              className="rounded-full px-5 py-5 text-lg"
-              onClick={() => {
-                trackEvent("navbar_lead_form");
-                setIsLeadFormOpen(true);
-              }}
+            <Link
+              href="/sign-up"
+              onClick={() => trackEvent("signup_click", { location: "navbar" })}
+              className={cn(buttonVariants(), "rounded-full px-5 py-5 text-lg")}
             >
               Реєстрація
-            </Button>
+            </Link>
           </div>
         </nav>
       </ScrollReveal>
-
-      <LeadFormModal
-        open={isLeadFormOpen}
-        onClose={() => setIsLeadFormOpen(false)}
-        sourcePage="navbar"
-      />
     </>
   );
 }
 
 export function MobileNavbar() {
-  const [isLeadFormOpen, setIsLeadFormOpen] = useState(false);
-
   return (
     <>
       <ScrollReveal
@@ -101,24 +87,15 @@ export function MobileNavbar() {
             />
           </Link>
 
-          <Button
-            size="sm"
-            className="rounded-full px-5 py-4 text-sm"
-            onClick={() => {
-              trackEvent("mobile_navbar_lead_form");
-              setIsLeadFormOpen(true);
-            }}
+          <Link
+            href="/sign-up"
+            onClick={() => trackEvent("signup_click", { location: "navbar_mobile" })}
+            className={cn(buttonVariants({ size: "sm" }), "rounded-full px-5 py-4 text-sm")}
           >
             Реєстрація
-          </Button>
+          </Link>
         </div>
       </ScrollReveal>
-
-      <LeadFormModal
-        open={isLeadFormOpen}
-        onClose={() => setIsLeadFormOpen(false)}
-        sourcePage="navbar-mobile"
-      />
     </>
   );
 }

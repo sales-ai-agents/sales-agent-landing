@@ -90,6 +90,20 @@ export interface TrustItem {
   readonly description: string;
 }
 
+export interface PricingPlan {
+  readonly id: string;
+  readonly name: string;
+  readonly tagline: string;
+  readonly price: string;
+  readonly period: string;
+  readonly description: string;
+  readonly features: readonly string[];
+  readonly ctaLabel: string;
+  readonly ctaHref: string;
+  readonly badge?: string;
+  readonly featured?: boolean;
+}
+
 export interface FaqEntry {
   readonly question: string;
   readonly answer: string | React.ReactNode;

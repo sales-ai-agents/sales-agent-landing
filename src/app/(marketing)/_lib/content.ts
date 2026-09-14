@@ -5,7 +5,7 @@ import { Clock, Globe, Link2, Lock, PhoneCall, Shield } from "lucide-react";
 
 export const NAV_LINKS: readonly NavLink[] = [
   { href: "#features", label: "Продукт" },
-  { href: "#pricing", label: "Тарифи" },
+  { href: "#tariffs", label: "Тарифи" },
 ] as const;
 
 // --- Hero Section ---

@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Mail, Phone } from "lucide-react";
 import { ScrollReveal, StaggerReveal } from "@/components/marketing/scroll-reveal";
+import { FooterLeadFormLink } from "@/components/marketing/footer-lead-form-link";
 import { LEGAL_PAGE_LIST } from "@/lib/constants";
 
 export function Footer() {
@@ -90,6 +91,9 @@ export function Footer() {
           <div>
             <h3 className="font-body mb-4 text-white uppercase">Контакти</h3>
             <ul className="flex flex-col gap-3">
+              <li>
+                <FooterLeadFormLink />
+              </li>
               <li>
                 <a
                   href="mailto:salesagentswork@gmail.com"

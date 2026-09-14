@@ -99,7 +99,7 @@ export function AudioDemoSection() {
       setActiveId(id);
       setPlaying(id);
       howl.play();
-      trackEvent(`demo_play_${id}`);
+      trackEvent("demo_audio_play", { demo_id: id });
     },
     [playing, activeId]
   );

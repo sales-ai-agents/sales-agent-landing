@@ -5,7 +5,7 @@ import { PhoneOff } from "lucide-react";
 
 import { useLiveKitRoom } from "@marketing/hooks";
 import type { WebAgentSession } from "@marketing/types";
-import { LeadFormModal } from "@/components/marketing/lead-form-card";
+import { FeedbackFormModal } from "@/components/marketing/feedback-form-modal";
 import { cn } from "@/lib/utils";
 
 interface LiveCallPanelProps {
@@ -74,7 +74,7 @@ export function LiveCallPanel({ session, agentName }: LiveCallPanelProps) {
         )}
       </div>
 
-      <LeadFormModal
+      <FeedbackFormModal
         open={showLeadModal}
         onClose={() => setModalDismissed(true)}
         sourcePage="calls4u.ai/#builder"

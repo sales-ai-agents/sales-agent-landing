@@ -162,3 +162,19 @@ export const contactSchema = z.object({
 });
 
 export type ContactFormData = z.infer<typeof contactSchema>;
+
+export const FEEDBACK_MESSAGE_MAX_LENGTH = 1000;
+
+export const feedbackSchema = z.object({
+  message: z
+    .string()
+    .trim()
+    .min(10, "Опишіть детальніше, щонайменше 10 символів")
+    .max(FEEDBACK_MESSAGE_MAX_LENGTH, `Максимум ${FEEDBACK_MESSAGE_MAX_LENGTH} символів`),
+  email: z.email("Введіть коректну електронну адресу"),
+  marketingConsent: z
+    .boolean()
+    .refine((value) => value, "Щоб продовжити, підтвердіть згоду на отримання повідомлень"),
+});
+
+export type FeedbackFormData = z.infer<typeof feedbackSchema>;
