@@ -84,14 +84,47 @@ const PaymentStatusChecker = ({ invoiceId, onTerminalStatus }: PaymentStatusChec
   if (outcome === "paid") {
     return (
       <StatusLayout>
-        <CheckCircle className="text-primary h-12 w-12" />
-        <h1 className="font-display text-2xl font-bold">Оплата пройшла</h1>
-        <p className="text-muted-foreground">
-          Тариф <span className="font-medium">{data.current_plan}</span> активовано.
-          {data.minutes > 0 && ` Ліміт: ${data.minutes} хвилин.`}
-          {data.expires_at && ` Тариф діє до: ${formatDateLong(data.expires_at)}.`}
-        </p>
-        <BackButton label="До тарифів" />
+        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-green-500 text-white">
+          <CheckCircle className="h-8 w-8" />
+        </span>
+        <div className="space-y-1">
+          <h1 className="font-display text-2xl font-bold">Оплата успішна!</h1>
+          <p className="text-muted-foreground">Ваш тариф змінено</p>
+        </div>
+
+        <div className="border-border mt-2 w-full rounded-xl border p-4 text-left">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-muted-foreground text-xs">Ваш новий тариф</p>
+              <p className="text-primary text-xl font-bold tracking-wide uppercase">
+                {data.current_plan}
+              </p>
+            </div>
+            <span className="bg-primary/10 text-primary rounded-full px-2.5 py-0.5 text-xs font-medium">
+              Активний
+            </span>
+          </div>
+          {data.minutes > 0 && (
+            <div className="border-border mt-3 flex items-center justify-between border-t pt-3 text-sm">
+              <span className="text-muted-foreground">Ліміт розмов</span>
+              <span className="font-medium">{data.minutes} хвилин / місяць</span>
+            </div>
+          )}
+          {data.next_charge_at && data.auto_charge && (
+            <div className="mt-2 flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Наступне списання</span>
+              <span className="font-medium">{formatDateLong(data.next_charge_at)}</span>
+            </div>
+          )}
+          {!data.next_charge_at && data.expires_at && (
+            <div className="mt-2 flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Діє до</span>
+              <span className="font-medium">{formatDateLong(data.expires_at)}</span>
+            </div>
+          )}
+        </div>
+
+        <BackButton label="Готово" />
       </StatusLayout>
     );
   }

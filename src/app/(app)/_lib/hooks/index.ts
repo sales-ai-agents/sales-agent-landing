@@ -10,6 +10,8 @@ export {
 export {
   useBillingPlans,
   useCheckout,
+  useTopUp,
+  useAutoRenew,
   usePaymentStatus,
   useBillingHistory,
   usePaymentMethod,

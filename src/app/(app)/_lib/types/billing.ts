@@ -1,3 +1,12 @@
+export type BillingPeriod = "month" | "year";
+
+export interface AutoRenewState {
+  auto_renew: boolean;
+  auto_charge: boolean;
+  next_charge_at: string | null;
+  auto_renew_period: BillingPeriod;
+}
+
 export interface BillingPlanYear {
   price_usd: number;
   price_uah: number | null;
@@ -17,23 +26,35 @@ export interface BillingPlan {
   year?: BillingPlanYear;
   minutes: number;
   agents: number;
+  numbers?: number;
 }
 
-export interface BillingPlansResponse {
+export type TopUpPackKey = "100" | "250" | "500" | "1000" | "2500";
+
+export interface MinutesPack {
+  key: TopUpPackKey;
+  minutes: number;
+  price_uah: number;
+  currency: "UAH";
+  per_minute_uah: number;
+}
+
+export interface BillingPlansResponse extends Partial<AutoRenewState> {
   ok: boolean;
   current: string;
   expires_at: string | null;
   days_left: number | null;
   expired: boolean;
   minutes: number;
+  bonus_minutes: number;
+  packs: MinutesPack[];
   plans: BillingPlan[];
 }
-
-export type BillingPeriod = "month" | "year";
 
 export interface CheckoutRequest {
   plan: string;
   period?: BillingPeriod;
+  auto_renew?: boolean;
 }
 
 export interface CheckoutResponse {
@@ -47,10 +68,31 @@ export interface CheckoutResponse {
   period: BillingPeriod;
 }
 
+export interface TopUpRequest {
+  pack: TopUpPackKey;
+}
+
+export interface TopUpResponse {
+  ok: boolean;
+  invoice_id: string;
+  payment_url: string;
+  amount_uah: number;
+  minutes: number;
+  pack: TopUpPackKey;
+}
+
+export interface AutoRenewRequest {
+  enabled: boolean;
+}
+
+export interface AutoRenewResponse extends AutoRenewState {
+  ok: boolean;
+}
+
 export type PaymentStatus =
   "created" | "processing" | "hold" | "success" | "failure" | "reversed" | "expired";
 
-export interface PaymentStatusResponse {
+export interface PaymentStatusResponse extends Partial<AutoRenewState> {
   ok: boolean;
   paid: boolean;
   status: PaymentStatus;
@@ -69,10 +111,9 @@ export interface PaymentMethodCard {
   saved_at?: string | null;
 }
 
-export interface BillingPaymentMethodResponse {
+export interface BillingPaymentMethodResponse extends AutoRenewState {
   ok: boolean;
   card: PaymentMethodCard;
-  auto_charge: boolean;
 }
 
 export type PaymentHistoryStatus = "created" | "success" | "failure" | "reversed" | "expired";

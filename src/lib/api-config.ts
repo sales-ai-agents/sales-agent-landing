@@ -46,8 +46,11 @@ export const API_ENDPOINTS = {
   // Billing
   APP_BILLING_PLANS: `${API_BASE}/app/billing/plans`,
   APP_BILLING_CHECKOUT: `${API_BASE}/app/billing/checkout`,
+  APP_BILLING_TOPUP: `${API_BASE}/app/billing/topup`,
+  APP_BILLING_AUTO_RENEW: `${API_BASE}/app/billing/auto-renew`,
   APP_BILLING_STATUS: `${API_BASE}/app/billing/status`,
   APP_BILLING_HISTORY: `${API_BASE}/app/billing/history`,
+  APP_BILLING_RECEIPT: `${API_BASE}/app/billing/receipt`,
   APP_BILLING_PAYMENT_METHOD: `${API_BASE}/app/billing/payment-method`,
 
   // Support
@@ -112,6 +115,8 @@ export const apiUrl = {
   },
   billingStatus: (invoiceId: string) =>
     `${API_ENDPOINTS.APP_BILLING_STATUS}?invoice_id=${encodeURIComponent(invoiceId)}`,
+  billingReceipt: (invoiceId: string) =>
+    `${API_ENDPOINTS.APP_BILLING_RECEIPT}?invoice_id=${encodeURIComponent(invoiceId)}`,
   callAudio: (callId: string) => `${API_ENDPOINTS.APP_CALLS}/${callId}/audio`,
   callCrmStatus: (callId: string) => `${API_ENDPOINTS.APP_CALLS}/${callId}/crm-status`,
   callCrmRetry: (callId: string) => `${API_ENDPOINTS.APP_CALLS}/${callId}/crm-retry`,

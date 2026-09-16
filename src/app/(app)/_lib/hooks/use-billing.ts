@@ -4,12 +4,16 @@ import { apiGet, apiPost, apiDelete } from "@/lib/api-client";
 import { API_ENDPOINTS, apiUrl } from "@/lib/api-config";
 import { resolvePaymentOutcome } from "@dashboard/payment-status";
 import type {
+  AutoRenewRequest,
+  AutoRenewResponse,
   BillingPlansResponse,
   CheckoutRequest,
   CheckoutResponse,
   PaymentStatusResponse,
   PaymentHistoryResponse,
   BillingPaymentMethodResponse,
+  TopUpRequest,
+  TopUpResponse,
 } from "@dashboard/types";
 
 const POLL_INTERVAL_MS = 3000;
@@ -34,15 +38,37 @@ export const useDeletePaymentMethod = () => {
     mutationFn: () => apiDelete<{ ok: boolean }>(API_ENDPOINTS.APP_BILLING_PAYMENT_METHOD),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["billing", "payment-method"] });
+      queryClient.invalidateQueries({ queryKey: ["billing", "plans"] });
+    },
+  });
+};
+
+export const useAutoRenew = () => {
+  const queryClient = useQueryClient();
+  return useMutation<AutoRenewResponse, Error, AutoRenewRequest>({
+    mutationFn: (params) =>
+      apiPost<AutoRenewResponse>(API_ENDPOINTS.APP_BILLING_AUTO_RENEW, params),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["billing", "payment-method"] });
+      queryClient.invalidateQueries({ queryKey: ["billing", "plans"] });
     },
   });
 };
 
 export const useCheckout = () => {
   const queryClient = useQueryClient();
-
   return useMutation<CheckoutResponse, Error, CheckoutRequest>({
     mutationFn: (params) => apiPost<CheckoutResponse>(API_ENDPOINTS.APP_BILLING_CHECKOUT, params),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["billing", "history"] });
+    },
+  });
+};
+
+export const useTopUp = () => {
+  const queryClient = useQueryClient();
+  return useMutation<TopUpResponse, Error, TopUpRequest>({
+    mutationFn: (params) => apiPost<TopUpResponse>(API_ENDPOINTS.APP_BILLING_TOPUP, params),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["billing", "history"] });
     },

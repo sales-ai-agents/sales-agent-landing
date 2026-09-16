@@ -2,6 +2,7 @@ import { ApiError } from "@/lib/api-client";
 
 const CHECKOUT_ERROR_MESSAGES: Record<string, string> = {
   unknown_plan: "Невідомий тариф. Оновіть сторінку та спробуйте ще.",
+  unknown_pack: "Невідомий пакет хвилин. Оновіть сторінку та спробуйте ще.",
   payment_provider_error: "Не вдалося сформувати рахунок для оплати. Спробуйте пізніше.",
   payments_unavailable: "Оплата тимчасово недоступна.",
   rate_unavailable:

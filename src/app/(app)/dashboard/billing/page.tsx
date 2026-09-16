@@ -1,20 +1,28 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { AlertTriangle, Info } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 
 import { ChangePlanDialog, PageError, PageLoading } from "@/components/dashboard";
-import { Button, Progress, Separator } from "@/components/ui";
-import { formatDateShort, formatNumber } from "@/lib/utils";
+import { Button } from "@/components/ui";
 import { useBillingHistory, useBillingPlans, usePaymentMethod, useStats } from "@dashboard/hooks";
-import type { BillingPeriod } from "@dashboard/types";
+import type { AutoRenewState, BillingPeriod } from "@dashboard/types";
 
 import { BillingCycleSelector } from "./_components/billing-cycle-selector";
 import { PaymentHistorySection } from "./_components/payment-history-section";
 import { PaymentMethodSection } from "./_components/payment-method-section";
+import { PlanOverviewSection } from "./_components/plan-overview-section";
 import { SubscriptionSection } from "./_components/subscription-section";
 import { PlanCard } from "./_components/plan-card";
+import { TopUpDialog } from "./_components/top-up-dialog";
 import { getDefaultUpgradePlan } from "./_lib/utils";
+
+const DEFAULT_AUTO_RENEW: AutoRenewState = {
+  auto_renew: false,
+  auto_charge: false,
+  next_charge_at: null,
+  auto_renew_period: "month",
+};
 
 const BillingPage = () => {
   const statsQuery = useStats();
@@ -22,9 +30,9 @@ const BillingPage = () => {
   const historyQuery = useBillingHistory();
   const paymentMethodQuery = usePaymentMethod();
   const [selectedPlanKey, setSelectedPlanKey] = useState<string | null>(null);
+  const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const [cycle, setCycle] = useState<BillingPeriod>("month");
   const billing = billingQuery.data;
-  const stats = statsQuery.data;
 
   const openPlanDialog = useCallback(
     (planKey?: string) => {
@@ -54,17 +62,12 @@ const BillingPage = () => {
   const currentPlan = billing.plans.find((plan) => plan.key === billing.current);
   const upgradePlanKey = getDefaultUpgradePlan(billing.plans, billing.current);
   const isTrial = billing.current === "trial";
-  const minutesUsed = stats?.minutes_used ?? 0;
-  const minutesLimit = stats?.minutes_limit ?? billing.minutes;
-  const minutesLeft = stats?.minutes_left ?? 0;
-  const usagePercent = minutesLimit > 0 ? Math.min((minutesUsed / minutesLimit) * 100, 100) : 0;
-  const daysLeft =
-    minutesUsed > 0
-      ? Math.round(minutesLeft / (minutesUsed / (stats?.period_days ?? 7) || 1))
-      : null;
-  const avgCallCost = stats?.avg_call_usd != null ? stats.avg_call_usd.toFixed(2) : null;
-  const isMinutesLimitLow =
-    statsQuery.isSuccess && minutesUsed > 0 && minutesLeft < minutesLimit * 0.1;
+  const autoRenew: AutoRenewState = {
+    auto_renew: billing.auto_renew ?? DEFAULT_AUTO_RENEW.auto_renew,
+    auto_charge: billing.auto_charge ?? DEFAULT_AUTO_RENEW.auto_charge,
+    next_charge_at: billing.next_charge_at ?? DEFAULT_AUTO_RENEW.next_charge_at,
+    auto_renew_period: billing.auto_renew_period ?? DEFAULT_AUTO_RENEW.auto_renew_period,
+  };
 
   return (
     <div className="space-y-6">
@@ -90,150 +93,20 @@ const BillingPage = () => {
 
       <h1 className="text-2xl font-bold">Тариф / оплата</h1>
 
-      <section className="border-border bg-background rounded-2xl border p-8">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex flex-col gap-4">
-            <p className="text-muted-foreground text-sm">Ваш тариф</p>
-            <p className="text-3xl font-bold tracking-wide uppercase">
-              {currentPlan?.title ?? (isTrial ? "TRIAL" : billing.current)}
-            </p>
-            <p className="text-muted-foreground text-sm">
-              {isTrial
-                ? "Безкоштовний період"
-                : billing.expires_at
-                  ? `Діє до ${formatDateShort(billing.expires_at)} · ${formatNumber(currentPlan?.minutes ?? billing.minutes)} хв/міс`
-                  : `${formatNumber(currentPlan?.minutes ?? billing.minutes)} хвилин на місяць`}
-            </p>
-            <div className="flex flex-wrap items-center gap-3">
-              {!isTrial && currentPlan && (
-                <Button
-                  size="sm"
-                  className="rounded-lg text-xs"
-                  onClick={() => openPlanDialog(currentPlan.key)}
-                >
-                  {cycle === "year" && currentPlan.year ? "Оплатити на рік" : "Продовжити тариф"}
-                </Button>
-              )}
-              {(isTrial || upgradePlanKey) && (
-                <button
-                  type="button"
-                  className="text-primary cursor-pointer text-xs font-medium hover:underline"
-                  onClick={() => {
-                    if (isTrial) openPlanDialog();
-                    else if (upgradePlanKey) openPlanDialog(upgradePlanKey);
-                  }}
-                >
-                  {isTrial ? "Обрати тариф" : "Змінити тариф"}
-                </button>
-              )}
-            </div>
-          </div>
-
-          <Separator orientation="vertical" />
-
-          <div className="flex flex-col gap-2">
-            <p className="text-muted-foreground text-sm">Використані хвилини</p>
-            {statsQuery.isLoading ? (
-              <div className="mt-2 space-y-2">
-                <div className="bg-muted h-8 w-32 animate-pulse rounded" />
-                <div className="bg-muted h-2 w-full animate-pulse rounded" />
-                <div className="bg-muted h-3 w-40 animate-pulse rounded" />
-              </div>
-            ) : statsQuery.isError ? (
-              <div className="border-destructive/20 bg-destructive/5 mt-2 rounded-lg border p-2.5">
-                <p className="text-destructive text-xs font-medium">Не вдалося завантажити</p>
-                <button
-                  type="button"
-                  onClick={() => statsQuery.refetch()}
-                  className="text-primary cursor-pointer text-xs hover:underline"
-                >
-                  Спробувати знову
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-bold">{formatNumber(minutesUsed)}</span>
-                  <span className="text-muted-foreground text-lg">
-                    / {formatNumber(minutesLimit)} хв
-                  </span>
-                </div>
-                <Progress value={usagePercent} className="h-2" />
-                <p className="text-muted-foreground text-xs">
-                  {daysLeft !== null
-                    ? `Залишилось на ${daysLeft} днів при поточному темпі`
-                    : "Дані з'являться після першого дзвінка"}
-                </p>
-                <div className="mt-5 flex items-center gap-4 rounded-md bg-blue-50 px-2 py-3">
-                  <Info className="text-primary h-4 w-4 shrink-0" />
-                  <p className="text-muted-foreground text-xs">
-                    Після вичерпання ліміту хвилин агенти зупинять дзвінки. <br />
-                    Щоб продовжити роботу без перерв - докупіть хвилини.
-                  </p>
-                  <Button
-                    variant="outline"
-                    className="border-primary text-primary border bg-transparent"
-                  >
-                    Докупити хвилини
-                  </Button>
-                </div>
-              </>
-            )}
-          </div>
-
-          <Separator orientation="vertical" />
-
-          <div className="flex flex-col gap-4">
-            <p className="text-muted-foreground text-sm">Середня вартість дзвінка</p>
-            {statsQuery.isLoading ? (
-              <div className="mt-2 space-y-2">
-                <div className="bg-muted h-8 w-24 animate-pulse rounded" />
-                <div className="bg-muted h-3 w-32 animate-pulse rounded" />
-              </div>
-            ) : statsQuery.isError ? (
-              <div className="border-destructive/20 bg-destructive/5 mt-2 rounded-lg border p-2.5">
-                <p className="text-destructive text-xs font-medium">Не вдалося завантажити</p>
-                <button
-                  type="button"
-                  onClick={() => statsQuery.refetch()}
-                  className="text-primary cursor-pointer text-xs hover:underline"
-                >
-                  Спробувати знову
-                </button>
-              </div>
-            ) : (
-              <>
-                <p className="text-3xl">{avgCallCost !== null ? `${avgCallCost}$` : "—"}</p>
-                <p className="text-muted-foreground text-xs">
-                  {stats?.total_calls
-                    ? `за останні ${stats.period_days ?? 7} днів`
-                    : "Ще немає дзвінків"}
-                </p>
-              </>
-            )}
-          </div>
-        </div>
-
-        {isMinutesLimitLow && (
-          <div className="border-primary/20 bg-primary/5 mt-5 flex flex-col gap-3 rounded-lg border px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-blue-800 dark:text-blue-200">
-              {upgradePlanKey
-                ? "Після вичерпання ліміту агенти зупинять дзвінки. Перейдіть на тариф із більшою кількістю хвилин, щоб уникнути перерви."
-                : "Використано майже весь ліміт хвилин за максимальним тарифом."}
-            </p>
-            {upgradePlanKey && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="shrink-0"
-                onClick={() => openPlanDialog(upgradePlanKey)}
-              >
-                Змінити тариф
-              </Button>
-            )}
-          </div>
-        )}
-      </section>
+      <PlanOverviewSection
+        currentPlan={currentPlan}
+        isTrial={isTrial}
+        daysLeft={billing.days_left}
+        expiresAt={billing.expires_at}
+        planMinutes={currentPlan?.minutes ?? billing.minutes}
+        bonusMinutes={billing.bonus_minutes ?? 0}
+        statsQuery={statsQuery}
+        onChangePlan={() => {
+          if (isTrial) openPlanDialog();
+          else openPlanDialog(upgradePlanKey ?? billing.current);
+        }}
+        onTopUp={() => setIsTopUpOpen(true)}
+      />
 
       <BillingCycleSelector
         cycle={cycle}
@@ -241,6 +114,7 @@ const BillingPage = () => {
         isTrial={isTrial}
         onChange={setCycle}
       />
+
       <PaymentMethodSection
         data={paymentMethodQuery.data}
         isLoading={paymentMethodQuery.isLoading}
@@ -249,7 +123,9 @@ const BillingPage = () => {
         onRetry={() => paymentMethodQuery.refetch()}
         onSelectPlan={() => openPlanDialog()}
       />
-      {!isTrial && <SubscriptionSection expiresAt={billing.expires_at} />}
+
+      {!isTrial && <SubscriptionSection autoRenew={autoRenew} expiresAt={billing.expires_at} />}
+
       <PaymentHistorySection
         payments={historyQuery.data?.payments}
         isLoading={historyQuery.isLoading}
@@ -280,6 +156,10 @@ const BillingPage = () => {
           initialCycle={cycle}
           onClose={() => setSelectedPlanKey(null)}
         />
+      )}
+
+      {isTopUpOpen && (
+        <TopUpDialog packs={billing.packs ?? []} onClose={() => setIsTopUpOpen(false)} />
       )}
     </div>
   );

@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, History, Loader2 } from "lucide-react";
+import { AlertTriangle, Download, History, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui";
+import { ApiError, apiGet } from "@/lib/api-client";
+import { apiUrl } from "@/lib/api-config";
 import { formatDateShort, formatNumber } from "@/lib/utils";
 import type { PaymentHistoryItem } from "@dashboard/types";
 
@@ -63,7 +66,7 @@ export const PaymentHistorySection = ({
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b">
-                  {["Дата", "Опис", "Сума", "Статус"].map((heading) => (
+                  {["Дата", "Опис", "Сума", "Статус", "Інвойс"].map((heading) => (
                     <th
                       key={heading}
                       className="text-muted-foreground px-3 py-2 text-left text-sm font-medium"
@@ -130,6 +133,55 @@ const PaymentRow = ({ payment }: PaymentRowProps) => {
       <td className="px-3 py-2.5">
         <PaymentStatusLabel status={payment.status} />
       </td>
+      <td className="px-3 py-2.5">
+        <ReceiptCell payment={payment} />
+      </td>
     </tr>
+  );
+};
+
+interface ReceiptResponse {
+  url?: string;
+}
+
+const ReceiptCell = ({ payment }: { payment: PaymentHistoryItem }) => {
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  if (!payment.has_receipt) {
+    return <span className="text-muted-foreground text-xs">—</span>;
+  }
+
+  const handleDownload = async () => {
+    setIsDownloading(true);
+    try {
+      const receipt = await apiGet<ReceiptResponse>(apiUrl.billingReceipt(payment.invoice_id));
+      if (receipt.url) {
+        window.open(receipt.url, "_blank", "noopener,noreferrer");
+        return;
+      }
+      toast.info("Квитанція недоступна для завантаження.");
+    } catch (error) {
+      const isMissing = error instanceof ApiError && error.code === "receipt_not_available";
+      toast.error(isMissing ? "Квитанція наразі недоступна." : "Не вдалося завантажити квитанцію.");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleDownload}
+      disabled={isDownloading}
+      aria-busy={isDownloading}
+      className="text-primary flex cursor-pointer items-center gap-1.5 text-xs hover:underline disabled:opacity-60"
+    >
+      <span>{payment.invoice_id}</span>
+      {isDownloading ? (
+        <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+      ) : (
+        <Download className="h-3.5 w-3.5" aria-hidden="true" />
+      )}
+    </button>
   );
 };
