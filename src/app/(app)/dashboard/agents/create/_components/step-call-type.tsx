@@ -1,33 +1,49 @@
 "use client";
 
-import Link from "next/link";
+import { useState } from "react";
 import { Controller, type UseFormReturn } from "react-hook-form";
-import { Info } from "lucide-react";
+import { Upload, Plus } from "lucide-react";
+import { toast } from "sonner";
 
-import { Label, RadioGroup, RadioGroupItem } from "@/components/ui";
+import { Button, Label, RadioGroup, RadioGroupItem } from "@/components/ui";
+import { AddContactDialog, ImportContactsDialog } from "@/components/dashboard";
 import { cn } from "@/lib/utils";
 import {
   CALL_DIRECTION_OPTIONS,
+  type ContactFormData,
   type CreateAgentFormData,
   type CallDirection,
 } from "@/lib/schemas";
-import type { ContactBase } from "@dashboard/types";
+import { useCreateContact } from "@dashboard/hooks";
 import { DIRECTION_ICONS } from "../../_components/direction-icons";
-import { ContactBaseSelect } from "../../_components/contact-base-select";
+import { ContactPicker } from "../../_components/contact-picker";
 
 interface StepCallTypeProps {
   form: UseFormReturn<CreateAgentFormData>;
-  contactBases: ContactBase[];
 }
 
-export const StepCallType = ({ form, contactBases }: StepCallTypeProps) => {
+export const StepCallType = ({ form }: StepCallTypeProps) => {
   const {
     control,
     watch,
     formState: { errors },
   } = form;
 
+  const [showAddContact, setShowAddContact] = useState(false);
+  const [showImport, setShowImport] = useState(false);
+  const createContact = useCreateContact();
+
   const isOutbound = watch("callDirection") === "outbound";
+
+  const handleCreateContact = (data: ContactFormData): void => {
+    createContact.mutate(data, {
+      onSuccess: () => {
+        toast.success("Контакт додано");
+        setShowAddContact(false);
+      },
+      onError: (error) => toast.error(error.message),
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -57,7 +73,7 @@ export const StepCallType = ({ form, contactBases }: StepCallTypeProps) => {
                   key={option.value}
                   htmlFor={`direction-${option.value}`}
                   className={cn(
-                    "flex w-2xs cursor-pointer flex-col items-start gap-3 rounded-xl border p-5 transition-colors",
+                    "flex cursor-pointer flex-col items-start gap-3 rounded-xl border p-5 transition-colors",
                     isSelected
                       ? "border-primary bg-primary/5"
                       : "border-border hover:border-primary/50"
@@ -72,7 +88,7 @@ export const StepCallType = ({ form, contactBases }: StepCallTypeProps) => {
                     />
                   </div>
                   <p className="text-sm font-semibold">{option.title}</p>
-                  <p className="text-muted-foreground w-fit text-xs">{option.description}</p>
+                  <p className="text-muted-foreground text-xs">{option.description}</p>
                 </Label>
               );
             })}
@@ -81,34 +97,38 @@ export const StepCallType = ({ form, contactBases }: StepCallTypeProps) => {
       />
 
       {isOutbound && (
-        <Controller
-          control={control}
-          name="contactBaseId"
-          render={({ field }) => (
-            <div className="space-y-2">
-              <Label htmlFor="contact-base">База контактів</Label>
-              <ContactBaseSelect
-                id="contact-base"
-                value={field.value}
-                bases={contactBases}
-                onChange={field.onChange}
-              />
-              {errors.contactBaseId && (
-                <p className="text-destructive text-sm">{errors.contactBaseId.message}</p>
-              )}
-              <div className="bg-primary/5 text-muted-foreground mt-5 flex items-center gap-2 rounded-lg p-3 text-xs">
-                <Info className="text-primary h-4 w-4 shrink-0" />
-                <span>
-                  Бази контактів можна додати в розділі{" "}
-                  <Link href="/dashboard/integrations" className="text-primary font-medium">
-                    Інтеграції
-                  </Link>
-                </span>
-              </div>
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h3 className="text-base font-semibold">База контактів</h3>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" size="sm" onClick={() => setShowImport(true)}>
+                <Upload className="mr-1.5 h-4 w-4" />
+                Імпорт контактів
+              </Button>
+              <Button type="button" size="sm" onClick={() => setShowAddContact(true)}>
+                <Plus className="mr-1.5 h-4 w-4" />
+                Додати контакт
+              </Button>
             </div>
+          </div>
+
+          <Controller
+            control={control}
+            name="contactIds"
+            render={({ field }) => (
+              <ContactPicker selectedIds={field.value} onChange={field.onChange} />
+            )}
+          />
+          {errors.contactIds && (
+            <p className="text-destructive text-sm">{errors.contactIds.message}</p>
           )}
-        />
+        </div>
       )}
+
+      {showAddContact && (
+        <AddContactDialog onSubmit={handleCreateContact} onClose={() => setShowAddContact(false)} />
+      )}
+      {showImport && <ImportContactsDialog onClose={() => setShowImport(false)} />}
     </div>
   );
 };

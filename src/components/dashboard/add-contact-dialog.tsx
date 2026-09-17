@@ -29,6 +29,11 @@ export const AddContactDialog = ({ onSubmit, onClose }: AddContactDialogProps) =
     resolver: zodResolver(contactSchema),
   });
 
+  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
+    event.stopPropagation();
+    void handleSubmit(onSubmit)(event);
+  };
+
   return (
     <Dialog
       open
@@ -40,7 +45,7 @@ export const AddContactDialog = ({ onSubmit, onClose }: AddContactDialogProps) =
         <DialogHeader>
           <DialogTitle>Додати контакт</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleFormSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="contact-name">Ім&apos;я</Label>
             <Input id="contact-name" placeholder="Повне ім'я" {...register("name")} />

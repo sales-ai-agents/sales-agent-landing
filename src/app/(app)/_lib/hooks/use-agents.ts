@@ -4,6 +4,8 @@ import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api-client";
 import { API_ENDPOINTS, apiUrl } from "@/lib/api-config";
 import type {
   Agent,
+  AgentDetail,
+  AgentDetailResponse,
   AgentsResponse,
   CreateAgentParams,
   CreateAgentResponse,
@@ -32,11 +34,11 @@ export const useAgents = (options?: UseAgentsOptions) => {
 };
 
 export const useAgent = (id: string) => {
-  return useQuery<Agent | null>({
-    queryKey: ["agents", id],
+  return useQuery<AgentDetail | null>({
+    queryKey: ["agents", "detail", id],
     queryFn: async () => {
-      const data = await apiGet<AgentsResponse>(API_ENDPOINTS.APP_AGENTS);
-      return data.agents.find((agent) => String(agent.id) === id) ?? null;
+      const data = await apiGet<AgentDetailResponse>(apiUrl.agent(id));
+      return data.agent;
     },
     enabled: !!id,
   });

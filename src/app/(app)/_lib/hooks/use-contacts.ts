@@ -7,6 +7,7 @@ import type {
   ContactsExportPreviewResponse,
   ContactsResponse,
   ContactsStats,
+  ContactTagCount,
   CreateContactParams,
   CreateContactResponse,
   UpdateContactParams,
@@ -14,7 +15,13 @@ import type {
 
 interface ContactsData {
   contacts: Contact[];
+  tags: ContactTagCount[];
   stats: ContactsStats;
+}
+
+interface UseContactsParams {
+  search?: string;
+  tag?: string;
 }
 
 const EMPTY_STATS: ContactsStats = {
@@ -24,16 +31,21 @@ const EMPTY_STATS: ContactsStats = {
   conversion_pct: null,
 };
 
-export const useContacts = (search?: string) => {
+export const useContacts = (params?: UseContactsParams) => {
+  const search = params?.search ?? "";
+  const tag = params?.tag ?? "";
+
   return useQuery<ContactsData>({
-    queryKey: ["contacts", search ?? ""],
+    queryKey: ["contacts", search, tag],
     queryFn: async () => {
-      const data = await apiGet<ContactsResponse>(apiUrl.contacts(search));
+      const data = await apiGet<ContactsResponse>(apiUrl.contacts({ search, tag }));
       return {
         contacts: data.contacts,
+        tags: data.tags ?? [],
         stats: data.stats ?? EMPTY_STATS,
       };
     },
+    placeholderData: (previous) => previous,
   });
 };
 

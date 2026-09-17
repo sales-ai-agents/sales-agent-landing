@@ -14,16 +14,9 @@ import {
   toAgentApiPayload,
   DEFAULT_SCHEDULE_START,
   DEFAULT_SCHEDULE_END,
-  UNSET_CONTACT_BASE_ID,
   DEFAULT_NUMBER_ID,
 } from "@/lib/schemas";
-import {
-  useCreateAgent,
-  useTestCall,
-  useVoices,
-  useContactBases,
-  useNumbers,
-} from "@dashboard/hooks";
+import { useCreateAgent, useTestCall, useVoices, useNumbers } from "@dashboard/hooks";
 import { handleMutationError } from "@/lib/mutation-error";
 import { AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
 import { StepIndicator } from "./_components/step-indicator";
@@ -38,7 +31,7 @@ const DEFAULT_VALUES: CreateAgentFormData = {
   name: "",
   voice: "",
   callDirection: "outbound",
-  contactBaseId: UNSET_CONTACT_BASE_ID,
+  contactIds: [],
   scheduleStart: DEFAULT_SCHEDULE_START,
   scheduleEnd: DEFAULT_SCHEDULE_END,
   workingDays: ["mon", "tue", "wed", "thu", "fri"],
@@ -52,8 +45,8 @@ const CreateAgentPage = () => {
   const router = useRouter();
 
   const { data: voices = [] } = useVoices();
-  const { data: contactBases = [] } = useContactBases();
   const { data: numbers = [] } = useNumbers();
+
   const createAgent = useCreateAgent();
   const testCall = useTestCall();
 
@@ -126,7 +119,7 @@ const CreateAgentPage = () => {
       case 0:
         return <StepBasics form={form} voices={voices} />;
       case 1:
-        return <StepCallType form={form} contactBases={contactBases} />;
+        return <StepCallType form={form} />;
       case 2:
         return <StepSchedule form={form} />;
       case 3:

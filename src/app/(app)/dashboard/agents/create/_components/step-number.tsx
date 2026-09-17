@@ -1,22 +1,42 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Controller, type UseFormReturn } from "react-hook-form";
-import { Copy, Info } from "lucide-react";
+import { Check, Copy, Info } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button, Input, Label, Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui";
+import {
+  Button,
+  Input,
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  Label,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/components/ui";
 import type { CreateAgentFormData } from "@/lib/schemas";
 import type { AgentNumber } from "@dashboard/types";
-import { NumberSelect } from "../../_components/number-select";
+import { NumberPicker } from "../../_components/number-picker";
 
 interface StepNumberProps {
   form: UseFormReturn<CreateAgentFormData>;
   numbers: AgentNumber[];
 }
 
+const SIP_HINTS = [
+  "Скопіюйте SIP-адресу вище.",
+  "Додайте її у своє АТС як напрямок для вихідних дзвінків.",
+  "Збережіть налаштування.",
+];
+
 export const StepNumber = ({ form, numbers }: StepNumberProps) => {
   const [sipAddress, setSipAddress] = useState("");
+  const [connectPhone, setConnectPhone] = useState("");
+  const [isVerified, setIsVerified] = useState(false);
 
   const handleCopy = async () => {
     if (!sipAddress) return;
@@ -53,21 +73,13 @@ export const StepNumber = ({ form, numbers }: StepNumberProps) => {
               Ще немає підключених номерів. Підключіть номер на вкладці «Підключити номер».
             </div>
           ) : (
-            <div className="space-y-2">
-              <Label htmlFor="number-id">Номер для дзвінків</Label>
-              <Controller
-                control={form.control}
-                name="numberId"
-                render={({ field }) => (
-                  <NumberSelect
-                    id="number-id"
-                    value={field.value}
-                    numbers={numbers}
-                    onChange={field.onChange}
-                  />
-                )}
-              />
-            </div>
+            <Controller
+              control={form.control}
+              name="numberId"
+              render={({ field }) => (
+                <NumberPicker numbers={numbers} value={field.value} onChange={field.onChange} />
+              )}
+            />
           )}
         </TabsContent>
 
@@ -80,11 +92,19 @@ export const StepNumber = ({ form, numbers }: StepNumberProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="sip-address">SIP-адреса</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="sip-address">SIP-адреса</Label>
+              {isVerified && (
+                <span className="flex items-center gap-1 text-xs font-medium text-green-600">
+                  <Check className="h-3.5 w-3.5" />
+                  Підключення успішне
+                </span>
+              )}
+            </div>
             <div className="flex gap-2">
               <Input
                 id="sip-address"
-                className="h-8"
+                className="h-9"
                 placeholder="sip:example.sip.livekit.cloud"
                 value={sipAddress}
                 onChange={(event) => setSipAddress(event.target.value)}
@@ -98,7 +118,9 @@ export const StepNumber = ({ form, numbers }: StepNumberProps) => {
               >
                 <Copy className="h-4 w-4" />
               </Button>
-              <Button type="button">Перевірити</Button>
+              <Button type="button" onClick={() => setIsVerified(true)} disabled={!sipAddress}>
+                Перевірити
+              </Button>
             </div>
           </div>
 
@@ -108,18 +130,35 @@ export const StepNumber = ({ form, numbers }: StepNumberProps) => {
               Як підключити номер
             </p>
             <ol className="list-inside list-decimal space-y-0.5 text-xs">
-              <li>Скопіюйте SIP-адресу вище.</li>
-              <li>Додайте її у своє АТС як напрямок для вихідних дзвінків.</li>
-              <li>Збережіть налаштування.</li>
+              {SIP_HINTS.map((hint) => (
+                <li key={hint}>{hint}</li>
+              ))}
             </ol>
           </div>
 
-          <div className="bg-primary/5 text-muted-foreground mt-5 rounded-lg p-3 text-xs">
+          <div className="space-y-1.5">
+            <Label htmlFor="connect-phone">Вкажіть номер, який підключаєте</Label>
+            <InputGroup>
+              <InputGroupAddon>
+                <Image src="/image/ua-flag.svg" alt="" width={24} height={16} aria-hidden="true" />
+              </InputGroupAddon>
+              <InputGroupInput
+                id="connect-phone"
+                inputMode="tel"
+                value={connectPhone}
+                onChange={(event) => setConnectPhone(event.target.value)}
+                placeholder="+380 32 245 11 90"
+              />
+            </InputGroup>
+            <p className="text-muted-foreground text-xs">Вводьте у форматі +380 XX XXX XX XX</p>
+          </div>
+
+          <div className="bg-primary/5 text-muted-foreground rounded-lg p-3 text-xs">
             <p className="text-foreground flex items-center gap-1.5 font-medium">
               <Info className="text-primary h-4 w-4" />
               Важливо
             </p>
-            <p className="mt-1 w-md">
+            <p className="mt-1">
               Дані надає ваш оператор (Binotel, Ringostat, Phonet, Київстар тощо). Якщо виникнуть
               питання, зверніться до їхньої підтримки.
             </p>

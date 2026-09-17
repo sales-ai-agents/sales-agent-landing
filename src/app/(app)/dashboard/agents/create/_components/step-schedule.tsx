@@ -5,6 +5,7 @@ import { Info } from "lucide-react";
 
 import { Input, Label, Toggle, ToggleGroup } from "@/components/ui";
 import {
+  ALL_WEEKDAYS,
   CALLS_PER_DAY_OPTIONS,
   type CreateAgentFormData,
   WEEKDAYS,
@@ -49,23 +50,36 @@ export const StepSchedule = ({ form }: StepScheduleProps) => {
       <Controller
         control={control}
         name="workingDays"
-        render={({ field }) => (
-          <fieldset className="space-y-2">
-            <legend className="text-sm leading-none font-medium">Робочі дні</legend>
-            <ToggleGroup
-              multiple
-              aria-label="Робочі дні"
-              value={field.value}
-              onValueChange={(value) => field.onChange(value as Weekday[])}
-            >
-              {WEEKDAYS.map((day) => (
-                <Toggle key={day} value={day} aria-label={WEEKDAY_LABELS[day]}>
-                  {WEEKDAY_LABELS[day]}
+        render={({ field }) => {
+          const isAlwaysOn = field.value.length === ALL_WEEKDAYS.length;
+
+          return (
+            <fieldset className="space-y-2">
+              <legend className="text-sm leading-none font-medium">Робочі дні</legend>
+              <div className="flex flex-wrap items-center gap-2">
+                <ToggleGroup
+                  multiple
+                  aria-label="Робочі дні"
+                  value={field.value}
+                  onValueChange={(value) => field.onChange(value as Weekday[])}
+                >
+                  {WEEKDAYS.map((day) => (
+                    <Toggle key={day} value={day} aria-label={WEEKDAY_LABELS[day]}>
+                      {WEEKDAY_LABELS[day]}
+                    </Toggle>
+                  ))}
+                </ToggleGroup>
+                <Toggle
+                  aria-label="Цілодобово"
+                  pressed={isAlwaysOn}
+                  onPressedChange={(pressed) => field.onChange(pressed ? [...ALL_WEEKDAYS] : [])}
+                >
+                  24/7
                 </Toggle>
-              ))}
-            </ToggleGroup>
-          </fieldset>
-        )}
+              </div>
+            </fieldset>
+          );
+        }}
       />
 
       <Controller

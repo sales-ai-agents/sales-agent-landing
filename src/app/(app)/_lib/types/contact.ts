@@ -22,10 +22,16 @@ export interface ContactsStats {
   conversion_pct: number | null;
 }
 
+export interface ContactTagCount {
+  tag: string;
+  count: number;
+}
+
 export interface ContactsResponse {
   ok: boolean;
   contacts: Contact[];
   total: number;
+  tags: ContactTagCount[];
   stats: ContactsStats;
 }
 

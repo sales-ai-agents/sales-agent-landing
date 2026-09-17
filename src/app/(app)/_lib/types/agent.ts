@@ -27,6 +27,7 @@ export interface Agent {
   updated_at: string;
   call_direction: CallDirection;
   contact_base_id: number;
+  contacts_count: number;
   schedule_start: string;
   schedule_end: string;
   working_days: string;
@@ -37,6 +38,15 @@ export interface Agent {
   integrations?: (string | AgentIntegration)[];
 }
 
+export interface AgentDetail extends Agent {
+  contact_ids: number[];
+}
+
+export interface AgentDetailResponse {
+  ok: boolean;
+  agent: AgentDetail;
+}
+
 export interface AgentsResponse {
   ok: boolean;
   agents: Agent[];
@@ -44,6 +54,7 @@ export interface AgentsResponse {
 
 export interface AgentConfigParams {
   call_direction?: "inbound" | "outbound";
+  contact_ids?: number[];
   contact_base_id?: number;
   schedule_start?: string;
   schedule_end?: string;
@@ -61,6 +72,7 @@ export interface CreateAgentParams extends AgentConfigParams {
 export interface CreateAgentResponse {
   ok: boolean;
   id: number;
+  contacts_count: number;
 }
 
 export interface UpdateAgentParams extends AgentConfigParams {

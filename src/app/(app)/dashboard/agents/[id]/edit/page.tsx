@@ -26,20 +26,12 @@ import {
   parseWorkingDays,
   DEFAULT_SCHEDULE_START,
   DEFAULT_SCHEDULE_END,
-  UNSET_CONTACT_BASE_ID,
   DEFAULT_NUMBER_ID,
 } from "@/lib/schemas";
-import {
-  useAgent,
-  useUpdateAgent,
-  useDeleteAgent,
-  useVoices,
-  useContactBases,
-  useNumbers,
-} from "@dashboard/hooks";
+import { useAgent, useUpdateAgent, useDeleteAgent, useVoices, useNumbers } from "@dashboard/hooks";
 import { handleMutationError } from "@/lib/mutation-error";
 import { AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
-import type { Agent } from "@dashboard/types";
+import type { AgentDetail } from "@dashboard/types";
 import AgentNotFound from "@/app/(app)/dashboard/agents/[id]/not-found";
 import { AgentHeader } from "./_components/agent-header";
 import { SectionBasics } from "./_components/section-basics";
@@ -57,11 +49,11 @@ const EditAgentPage = () => {
   return <EditAgentForm key={agent.id} agent={agent} />;
 };
 
-const buildDefaultValues = (agent: Agent): EditAgentFormData => ({
+const buildDefaultValues = (agent: AgentDetail): EditAgentFormData => ({
   name: agent.name,
   voice: agent.voice,
   callDirection: agent.call_direction === "inbound" ? "inbound" : "outbound",
-  contactBaseId: agent.contact_base_id >= 0 ? agent.contact_base_id : UNSET_CONTACT_BASE_ID,
+  contactIds: agent.contact_ids ?? [],
   scheduleStart: agent.schedule_start || DEFAULT_SCHEDULE_START,
   scheduleEnd: agent.schedule_end || DEFAULT_SCHEDULE_END,
   workingDays: parseWorkingDays(agent.working_days),
@@ -70,11 +62,10 @@ const buildDefaultValues = (agent: Agent): EditAgentFormData => ({
   instructions: agent.instructions,
 });
 
-const EditAgentForm = ({ agent }: { agent: Agent }) => {
+const EditAgentForm = ({ agent }: { agent: AgentDetail }) => {
   const router = useRouter();
 
   const { data: voices = [] } = useVoices();
-  const { data: contactBases = [] } = useContactBases();
   const { data: numbers = [] } = useNumbers();
 
   const updateAgent = useUpdateAgent();
@@ -123,7 +114,7 @@ const EditAgentForm = ({ agent }: { agent: Agent }) => {
 
       <form onSubmit={form.handleSubmit(handleSave)} noValidate className="space-y-8">
         <SectionBasics form={form} voices={voices} />
-        <SectionCalls form={form} contactBases={contactBases} />
+        <SectionCalls form={form} />
         <SectionSchedule form={form} />
         <SectionNumber form={form} numbers={numbers} />
         <SectionInstructions form={form} />

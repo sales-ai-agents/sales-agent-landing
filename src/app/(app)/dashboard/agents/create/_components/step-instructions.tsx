@@ -1,9 +1,17 @@
 "use client";
 
+import Image from "next/image";
 import type { UseFormReturn } from "react-hook-form";
 import { Phone } from "lucide-react";
 
-import { Button, Input, Label, Textarea } from "@/components/ui";
+import {
+  Button,
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  Label,
+  Textarea,
+} from "@/components/ui";
 import { INSTRUCTIONS_MAX_LENGTH, type CreateAgentFormData } from "@/lib/schemas";
 
 interface StepInstructionsProps {
@@ -83,12 +91,16 @@ export const StepInstructions = ({ form, isTesting, onTestCall }: StepInstructio
           </div>
         </div>
         <div className="flex gap-2">
-          <Input
-            aria-label="Номер телефону для тестового дзвінка"
-            placeholder="+380 XX XXX XXXX"
-            className="h-8"
-            {...register("testPhone")}
-          />
+          <InputGroup className="flex-1">
+            <InputGroupAddon>
+              <Image src="/image/ua-flag.svg" alt="" width={24} height={16} aria-hidden="true" />
+            </InputGroupAddon>
+            <InputGroupInput
+              aria-label="Номер телефону для тестового дзвінка"
+              placeholder="+380 XX XXX XXXX"
+              {...register("testPhone")}
+            />
+          </InputGroup>
           <Button type="button" onClick={onTestCall} disabled={isTesting || !testPhone}>
             {isTesting ? "Дзвінок..." : "Подзвонити мені"}
           </Button>

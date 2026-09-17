@@ -109,10 +109,16 @@ export const apiUrl = {
 
     return qs ? `${url}?${qs}` : url;
   },
-  contacts: (search?: string) => {
-    if (!search) return API_ENDPOINTS.APP_CONTACTS;
+  contacts: (params?: { search?: string; tag?: string }) => {
+    const url = API_ENDPOINTS.APP_CONTACTS;
+    if (!params) return url;
 
-    return `${API_ENDPOINTS.APP_CONTACTS}?search=${encodeURIComponent(search)}`;
+    const sp = new URLSearchParams();
+    if (params.search) sp.set("search", params.search);
+    if (params.tag) sp.set("tag", params.tag);
+
+    const qs = sp.toString();
+    return qs ? `${url}?${qs}` : url;
   },
   billingStatus: (invoiceId: string) =>
     `${API_ENDPOINTS.APP_BILLING_STATUS}?invoice_id=${encodeURIComponent(invoiceId)}`,
