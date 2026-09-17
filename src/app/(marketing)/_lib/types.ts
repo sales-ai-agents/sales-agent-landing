@@ -17,6 +17,17 @@ export interface LeadFormResult {
   id: number;
 }
 
+export interface FeedbackFormParams {
+  message: string;
+  email: string;
+  marketingConsent: boolean;
+  source_page?: string;
+}
+
+export interface FeedbackFormResult {
+  id: number;
+}
+
 export type RoomStatus = "idle" | "connecting" | "connected" | "disconnected" | "error";
 
 export interface WebAgentSession {

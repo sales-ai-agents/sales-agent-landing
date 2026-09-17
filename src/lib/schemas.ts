@@ -178,3 +178,22 @@ export const feedbackSchema = z.object({
 });
 
 export type FeedbackFormData = z.infer<typeof feedbackSchema>;
+
+export const LEAD_FIELD_MAX_LENGTH = 500;
+export const UA_SUBSCRIBER_DIGITS = 9;
+
+export const leadSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, "Введіть ім'я")
+    .max(LEAD_FIELD_MAX_LENGTH, `Максимум ${LEAD_FIELD_MAX_LENGTH} символів`),
+  phone: z
+    .string()
+    .length(UA_SUBSCRIBER_DIGITS, "Введіть коректний номер телефону")
+    .regex(/^\d+$/, "Введіть коректний номер телефону"),
+  niche: z.string().trim().max(LEAD_FIELD_MAX_LENGTH).optional(),
+  contact: z.string().trim().max(LEAD_FIELD_MAX_LENGTH).optional(),
+});
+
+export type LeadFormData = z.infer<typeof leadSchema>;

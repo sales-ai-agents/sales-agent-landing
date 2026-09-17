@@ -59,6 +59,7 @@ export const API_ENDPOINTS = {
   // Landing page (public)
   DEMO_CALL: `${API_BASE}/demo-call`,
   LEAD: `${API_BASE}/website/lead`,
+  FEEDBACK: `${API_BASE}/website/feedback`,
   WEB_AGENT: `${API_BASE}/web-agent/start`,
   PRESETS: `${API_BASE}/constructor/presets`,
 } as const;

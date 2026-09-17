@@ -1,14 +1,18 @@
 "use client";
 
-import type { ChangeEvent, FormEvent } from "react";
-import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button, Input } from "@/components/ui";
 import { useLeadForm } from "@marketing/hooks";
-import { formatUaPhoneDigits } from "@/lib/utils";
+import {
+  leadSchema,
+  LEAD_FIELD_MAX_LENGTH,
+  UA_SUBSCRIBER_DIGITS,
+  type LeadFormData,
+} from "@/lib/schemas";
+import { cn, formatUaPhoneDigits } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
-
-const UA_SUBSCRIBER_DIGITS = 9;
 
 const FIELD_CLASSES =
   "text-foreground border-primary h-auto rounded-none border-0 border-b bg-transparent px-0 py-2 text-lg font-normal shadow-none focus-visible:ring-0 focus-visible:ring-offset-0";
@@ -19,104 +23,129 @@ interface LeadFormProps {
 }
 
 export function LeadForm({ sourcePage, onSuccess }: LeadFormProps) {
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [niche, setNiche] = useState("");
-  const [contact, setContact] = useState("");
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<LeadFormData>({
+    resolver: zodResolver(leadSchema),
+    defaultValues: {
+      name: "",
+      phone: "",
+      niche: "",
+      contact: "",
+    },
+  });
 
-  const { submitLead, isLoading, errorMessage, reset } = useLeadForm();
+  const { submitLeadAsync, errorMessage, reset: resetMutation } = useLeadForm();
 
-  const isValid = name.trim().length > 0 && phone.length === UA_SUBSCRIBER_DIGITS;
-
-  const handleSubmit = (event: FormEvent): void => {
-    event.preventDefault();
-    if (!isValid) return;
-
+  const onSubmit = async (data: LeadFormData): Promise<void> => {
     trackEvent("lead_form_submit", sourcePage ? { location: sourcePage } : undefined);
-    submitLead(
-      {
-        name: name.trim(),
-        phone: `+380${phone}`,
-        niche: niche.trim() || undefined,
-        contact: contact.trim() || undefined,
+
+    try {
+      await submitLeadAsync({
+        name: data.name,
+        phone: `+380${data.phone}`,
+        niche: data.niche || undefined,
+        contact: data.contact || undefined,
         source_page: sourcePage,
-      },
-      { onSuccess }
-    );
+      });
+      reset();
+      onSuccess();
+    } catch {
+      return;
+    }
   };
-
-  const handlePhoneChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    setPhone(event.target.value.replace(/\D/g, "").slice(0, UA_SUBSCRIBER_DIGITS));
-    if (errorMessage) reset();
-  };
-
-  const handleChange =
-    (setter: (value: string) => void) => (event: ChangeEvent<HTMLInputElement>) => {
-      setter(event.target.value);
-      if (errorMessage) reset();
-    };
 
   return (
-    <form onSubmit={handleSubmit} className="flex h-full flex-col justify-between">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      onChange={() => {
+        if (errorMessage) resetMutation();
+      }}
+      className="flex h-full flex-col justify-between"
+      noValidate
+    >
       <p className="text-foreground mb-8 text-center text-xl font-medium">Заповніть заявку</p>
 
-      <div>
+      <div className="flex flex-col gap-1.5">
         <Input
           placeholder="Ім'я"
-          value={name}
-          onChange={handleChange(setName)}
-          required
-          disabled={isLoading}
-          maxLength={500}
           aria-label="Ім'я"
+          aria-invalid={errors.name ? true : undefined}
+          disabled={isSubmitting}
+          maxLength={LEAD_FIELD_MAX_LENGTH}
           className={FIELD_CLASSES}
+          {...register("name")}
         />
+        {errors.name && (
+          <p role="alert" className="text-sm text-red-600">
+            {errors.name.message}
+          </p>
+        )}
+
         <div className="border-primary flex items-center border-0 border-b">
           <span className="text-foreground shrink-0 py-2 text-lg font-normal">+380&nbsp;</span>
-          <Input
-            placeholder="__ ___ __ __"
-            type="tel"
-            inputMode="numeric"
-            value={phone.length > 0 ? formatUaPhoneDigits(phone) : ""}
-            onChange={handlePhoneChange}
-            required
-            disabled={isLoading}
-            aria-label="Номер телефону після +380"
-            className="text-foreground h-auto rounded-none border-0 bg-transparent px-0 py-2 text-lg font-normal shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+          <Controller
+            control={control}
+            name="phone"
+            render={({ field }) => (
+              <Input
+                placeholder="__ ___ __ __"
+                type="tel"
+                inputMode="numeric"
+                aria-label="Номер телефону після +380"
+                aria-invalid={errors.phone ? true : undefined}
+                disabled={isSubmitting}
+                value={field.value ? formatUaPhoneDigits(field.value) : ""}
+                onChange={(event) =>
+                  field.onChange(
+                    event.target.value.replace(/\D/g, "").slice(0, UA_SUBSCRIBER_DIGITS)
+                  )
+                }
+                className="text-foreground h-auto rounded-none border-0 bg-transparent px-0 py-2 text-lg font-normal shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+              />
+            )}
           />
         </div>
+        {errors.phone && (
+          <p role="alert" className="text-sm text-red-600">
+            {errors.phone.message}
+          </p>
+        )}
+
         <Input
           placeholder="Сфера діяльності / Ніша"
-          value={niche}
-          onChange={handleChange(setNiche)}
-          disabled={isLoading}
-          maxLength={500}
           aria-label="Сфера діяльності / Ніша"
-          className={FIELD_CLASSES}
+          disabled={isSubmitting}
+          maxLength={LEAD_FIELD_MAX_LENGTH}
+          className={cn(FIELD_CLASSES, "mt-1.5")}
+          {...register("niche")}
         />
         <Input
           placeholder="Telegram / email"
-          value={contact}
-          onChange={handleChange(setContact)}
-          disabled={isLoading}
-          maxLength={500}
           aria-label="Telegram / email"
+          disabled={isSubmitting}
+          maxLength={LEAD_FIELD_MAX_LENGTH}
           className={FIELD_CLASSES}
+          {...register("contact")}
         />
-
-        {errorMessage && (
-          <p role="alert" className="mt-3 text-center text-sm text-red-600">
-            {errorMessage}
-          </p>
-        )}
       </div>
+
+      {errorMessage && (
+        <p role="alert" className="mt-4 text-center text-sm text-red-600">
+          {errorMessage}
+        </p>
+      )}
 
       <Button
         type="submit"
-        disabled={isLoading || !isValid}
+        disabled={isSubmitting}
         className="bg-primary hover:bg-primary/90 shadow-primary/30 mt-8 h-12 w-full rounded-full text-lg font-medium text-white disabled:opacity-50"
       >
-        {isLoading ? "Надсилаємо…" : "Отримати розрахунок"}
+        {isSubmitting ? "Надсилаємо…" : "Отримати розрахунок"}
       </Button>
     </form>
   );

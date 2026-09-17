@@ -4,6 +4,7 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button, Checkbox, Input, Label, Textarea } from "@/components/ui";
+import { useFeedbackForm } from "@marketing/hooks";
 import { feedbackSchema, FEEDBACK_MESSAGE_MAX_LENGTH, type FeedbackFormData } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
@@ -32,16 +33,26 @@ export function FeedbackForm({ sourcePage, onSubmitted }: FeedbackFormProps) {
     },
   });
 
-  const onSubmit = (data: FeedbackFormData): void => {
+  const { submitFeedbackAsync, errorMessage, reset: resetMutation } = useFeedbackForm();
+
+  const onSubmit = async (data: FeedbackFormData): Promise<void> => {
     trackEvent("feedback_form_submit", sourcePage ? { location: sourcePage } : undefined);
-    console.log("Feedback form submitted", { ...data, source_page: sourcePage });
-    reset();
-    onSubmitted();
+
+    try {
+      await submitFeedbackAsync({ ...data, source_page: sourcePage });
+      reset();
+      onSubmitted();
+    } catch {
+      return;
+    }
   };
 
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
+      onChange={() => {
+        if (errorMessage) resetMutation();
+      }}
       className="flex h-full flex-col justify-between"
       noValidate
     >
@@ -117,6 +128,12 @@ export function FeedbackForm({ sourcePage, onSubmitted }: FeedbackFormProps) {
           )}
         </div>
       </div>
+
+      {errorMessage && (
+        <p role="alert" className="mt-4 text-center text-sm text-red-600">
+          {errorMessage}
+        </p>
+      )}
 
       <Button
         type="submit"

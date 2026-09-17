@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { toast } from "sonner";
 
 import { buttonVariants } from "@/components/ui";
 import { LeadDialogShell } from "@/components/marketing/lead-dialog-shell";
@@ -17,6 +18,13 @@ interface FeedbackFormModalProps {
 }
 
 export function FeedbackFormModal({ open, onClose, sourcePage }: FeedbackFormModalProps) {
+  const handleSubmitted = (): void => {
+    onClose();
+    toast.success("Дякуємо за відгук!", {
+      description: "Ми надішлемо вашу знижку на вказану пошту.",
+    });
+  };
+
   return (
     <LeadDialogShell
       open={open}
@@ -38,7 +46,7 @@ export function FeedbackFormModal({ open, onClose, sourcePage }: FeedbackFormMod
         </>
       }
     >
-      <FeedbackForm sourcePage={sourcePage} onSubmitted={onClose} />
+      <FeedbackForm sourcePage={sourcePage} onSubmitted={handleSubmitted} />
     </LeadDialogShell>
   );
 }
