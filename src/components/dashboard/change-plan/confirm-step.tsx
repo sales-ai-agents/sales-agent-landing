@@ -13,7 +13,6 @@ interface ConfirmStepProps {
   isSamePlan: boolean;
   cycle: BillingPeriod;
   onCycleChange: (cycle: BillingPeriod) => void;
-  isProcessing: boolean;
   onCancel: () => void;
   onPay: () => void;
 }
@@ -24,7 +23,6 @@ export const ConfirmStep = ({
   isSamePlan,
   cycle,
   onCycleChange,
-  isProcessing,
   onCancel,
   onPay,
 }: ConfirmStepProps) => {
@@ -52,19 +50,14 @@ export const ConfirmStep = ({
 
       <PlanComparison currentPlan={currentPlan} newPlan={newPlan} isSamePlan={isSamePlan} />
 
-      <PriceSummary
-        plan={newPlan}
-        isAnnual={isAnnual}
-        priceUsd={payPriceUsd}
-        priceUah={payPriceUah}
-      />
+      <PriceSummary isAnnual={isAnnual} priceUsd={payPriceUsd} priceUah={payPriceUah} />
 
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
-        <Button variant="outline" onClick={onCancel} disabled={isProcessing} className="px-8">
+        <Button variant="outline" onClick={onCancel} className="px-8">
           Скасувати
         </Button>
-        <Button onClick={onPay} disabled={isProcessing} className="px-8">
-          {isProcessing ? "Формування рахунку..." : "Сформувати рахунок"}
+        <Button onClick={onPay} className="px-8">
+          Перейти до оплати
         </Button>
       </div>
 
@@ -110,32 +103,32 @@ const CycleSelector = ({ plan, cycle, onCycleChange }: CycleSelectorProps) => {
 
   const tabClassName = (period: BillingPeriod) =>
     cn(
-      "flex-1 cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+      "h-auto flex-1 rounded-md px-3 py-1.5 text-sm font-medium",
       cycle === period
-        ? "bg-background text-foreground shadow-xs"
-        : "text-muted-foreground hover:text-foreground"
+        ? "bg-background text-foreground shadow-xs hover:bg-background"
+        : "text-muted-foreground hover:text-foreground hover:bg-transparent"
     );
 
   return (
     <div className="bg-muted/50 border-border flex flex-col rounded-lg border p-1 sm:flex-row">
-      <button
-        type="button"
+      <Button
+        variant="ghost"
         onClick={() => onCycleChange("month")}
         className={tabClassName("month")}
       >
         Оплата щомісяця (${plan.price_usd}/міс)
-      </button>
-      <button
-        type="button"
+      </Button>
+      <Button
+        variant="ghost"
         onClick={() => onCycleChange("year")}
-        className={cn(tabClassName("year"), "flex items-center justify-center gap-1.5")}
+        className={cn(tabClassName("year"), "gap-1.5")}
       >
         <span>Оплата на рік (${year.price_usd}/рік)</span>
         {year.months_free > 0 && <SavingBadge>-{year.months_free} міс</SavingBadge>}
         {year.months_free === 0 && year.saving_usd > 0 && (
           <SavingBadge>-${year.saving_usd}</SavingBadge>
         )}
-      </button>
+      </Button>
     </div>
   );
 };
@@ -210,31 +203,25 @@ const PlanSwitchSummary = ({
 );
 
 interface PriceSummaryProps {
-  plan: BillingPlan;
   isAnnual: boolean;
   priceUsd: number;
   priceUah: number | null;
 }
 
-const PriceSummary = ({ plan, isAnnual, priceUsd, priceUah }: PriceSummaryProps) => (
+const PriceSummary = ({ isAnnual, priceUsd, priceUah }: PriceSummaryProps) => (
   <div className="border-border bg-primary/5 rounded-xl border px-4 py-5">
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <p className="text-muted-foreground text-xs">Орієнтовна сума</p>
+        <p className="text-muted-foreground text-xs">До сплати сьогодні</p>
         <div className="mt-1 flex items-baseline gap-2">
           <span className="text-2xl font-bold">${priceUsd}</span>
           {priceUah != null && (
             <span className="text-muted-foreground text-sm">(≈ {formatNumber(priceUah)} грн)</span>
           )}
         </div>
-        {plan.usd_rate && (
-          <p className="text-muted-foreground mt-0.5 text-xs">
-            Попередній курс НБУ {plan.usd_rate.toFixed(2)} ₴/$
-          </p>
-        )}
       </div>
       <p className="text-muted-foreground max-w-xs text-xs sm:text-right">
-        Точна сума в гривнях розраховується сервером за курсом НБУ на момент створення рахунку.
+        Платіж буде списано одразу. <br /> Скасувати тариф можна в будь-який час.
         <br />
         {isAnnual ? "Період: 1 рік." : "Період: 1 місяць."}
       </p>

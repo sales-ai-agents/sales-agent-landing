@@ -54,6 +54,7 @@ export interface BillingPlansResponse extends Partial<AutoRenewState> {
 export interface CheckoutRequest {
   plan: string;
   period?: BillingPeriod;
+  save_card?: boolean;
   auto_renew?: boolean;
 }
 

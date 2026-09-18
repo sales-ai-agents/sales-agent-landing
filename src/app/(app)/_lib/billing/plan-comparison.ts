@@ -75,6 +75,9 @@ const flagRow = (
   next: { included: select(context.next) },
 });
 
+export const isDifferentComparisonRow = (row: PlanComparisonRow) =>
+  row.current.text !== row.next.text || row.current.included !== row.next.included;
+
 export const getPlanComparisonRows = (
   currentPlan: BillingPlan | undefined,
   nextPlan: BillingPlan

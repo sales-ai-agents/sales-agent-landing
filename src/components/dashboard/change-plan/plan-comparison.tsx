@@ -15,7 +15,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { getPlanComparisonRows } from "@dashboard/billing";
+import { getPlanComparisonRows, isDifferentComparisonRow } from "@dashboard/billing";
 import type { PlanComparisonIcon, PlanComparisonValue } from "@dashboard/billing";
 import type { BillingPlan } from "@dashboard/types";
 
@@ -70,7 +70,10 @@ const ComparisonValue = ({ value, tone }: ComparisonValueProps) => {
 
 export const PlanComparison = ({ currentPlan, newPlan, isSamePlan }: PlanComparisonProps) => {
   const showCurrent = !!currentPlan && !isSamePlan;
-  const rows = getPlanComparisonRows(currentPlan, newPlan);
+  const allRows = getPlanComparisonRows(currentPlan, newPlan);
+  const rows = showCurrent ? allRows.filter(isDifferentComparisonRow) : allRows;
+
+  if (rows.length === 0) return null;
 
   return (
     <div className="border-border overflow-hidden rounded-xl border">
