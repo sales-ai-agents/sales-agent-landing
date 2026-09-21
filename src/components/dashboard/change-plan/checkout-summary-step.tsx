@@ -2,7 +2,7 @@ import { Check, ShieldCheck } from "lucide-react";
 
 import { Badge, Button, Checkbox, DialogTitle, Separator } from "@/components/ui";
 import { cn } from "@/lib/utils";
-import { getPlanFeatures } from "@dashboard/billing";
+import { getPlanFeatures, POPULAR_PLAN_KEY } from "@dashboard/billing";
 import type { BillingPeriod, BillingPlan } from "@dashboard/types";
 
 interface CheckoutSummaryStepProps {
@@ -16,8 +16,6 @@ interface CheckoutSummaryStepProps {
   onProceed: () => void;
   onBack: () => void;
 }
-
-const POPULAR_PLAN_KEY = "business";
 
 const resolvePriceUsd = (plan: BillingPlan, isYear: boolean): number =>
   isYear && plan.year ? plan.year.price_usd : plan.price_usd;
@@ -139,7 +137,15 @@ const PaymentPanel = ({
         </span>
       </div>
 
-      <ProviderBanner />
+      <div className="bg-primary/10 mt-4 flex items-start gap-3 rounded-lg p-3">
+        <ShieldCheck className="text-primary mt-0.5 h-5 w-5 shrink-0" />
+        <div>
+          <p className="text-foreground text-sm font-medium">Оплата відбувається через WayForPay</p>
+          <p className="text-muted-foreground mt-0.5 text-xs">
+            Ваші платіжні дані захищені та обробляються сервісом WayForPay
+          </p>
+        </div>
+      </div>
 
       <div className="mt-5 space-y-4">
         <PaymentOption
@@ -175,18 +181,6 @@ const PaymentPanel = ({
     </div>
   );
 };
-
-const ProviderBanner = () => (
-  <div className="bg-primary/10 mt-4 flex items-start gap-3 rounded-lg p-3">
-    <ShieldCheck className="text-primary mt-0.5 h-5 w-5 shrink-0" />
-    <div>
-      <p className="text-foreground text-sm font-medium">Оплата відбувається через WayForPay</p>
-      <p className="text-muted-foreground mt-0.5 text-xs">
-        Ваші платіжні дані захищені та обробляються сервісом WayForPay
-      </p>
-    </div>
-  </div>
-);
 
 interface PaymentOptionProps {
   checked: boolean;

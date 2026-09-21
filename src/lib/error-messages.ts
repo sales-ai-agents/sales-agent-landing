@@ -43,6 +43,27 @@ export const AGENT_ERROR_MESSAGES: ErrorMessageMap = {
   do_not_call: "Цей номер просив більше не дзвонити.",
 };
 
+export const NUMBER_ERROR_MESSAGES: ErrorMessageMap = {
+  number_unavailable:
+    "Номер уже підключений або не схожий на телефонний. Перевірте написання або зверніться до підтримки.",
+  number_limit: "Ваш тариф не дозволяє більше номерів. Оберіть вищий тариф.",
+  pool_empty: "Зараз немає вільних номерів — ми вже замовляємо нові. Спробуйте переадресацію.",
+  agent_not_found: "Агента не знайдено.",
+  bad_source: "Невірний спосіб підключення номера.",
+  bad_direction: "Невірний напрямок дзвінків.",
+  bad_kind: "Невірний тип номера.",
+  bad_hours: "Початок робочого часу має бути раніше за кінець.",
+  bad_daily_cap: "Некоректна добова стеля дзвінків.",
+  bad_working_days: "Оберіть коректні робочі дні.",
+  inbound_required: "Цей номер не приймає вхідні дзвінки — увімкніть вхідні, щоб видати SIP-транк.",
+  number_required: "Спершу додайте номер для вхідних дзвінків.",
+  trunk_failed: "Не вдалося створити SIP-транк. Спробуйте ще раз.",
+  sip_not_configured: "SIP тимчасово недоступний. Спробуйте пізніше.",
+  not_found: "Номер не знайдено.",
+  nothing_to_update: "Нічого не змінено.",
+  invalid_json: "Некоректні дані запиту.",
+};
+
 export const GOOGLE_SHEETS_ERROR_MESSAGES: ErrorMessageMap = {
   spreadsheet_required: "Оберіть таблицю Google Sheets.",
   phone_column_required: "Вкажіть колонку з номером телефону.",

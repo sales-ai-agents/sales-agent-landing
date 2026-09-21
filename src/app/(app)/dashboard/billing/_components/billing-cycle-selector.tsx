@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { cn } from "@/lib/utils";
+import { cn, pluralizeMonths } from "@/lib/utils";
 import type { BillingPeriod, BillingPlan } from "@dashboard/types";
 
 interface BillingCycleSelectorProps {
@@ -61,7 +61,7 @@ export const BillingCycleSelector = ({
             Річна оплата
             {annualPlan && annualPlan.months_free > 0 && (
               <span className="ml-2 rounded-md bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-950/60 dark:text-green-300">
-                Економія {annualPlan.months_free} місяці
+                Економія {annualPlan.months_free} {pluralizeMonths(annualPlan.months_free)}
               </span>
             )}
             {annualPlan && annualPlan.months_free === 0 && annualPlan.saving_usd > 0 && (

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { Dialog, DialogContent } from "@/components/ui";
-import { savePendingBillingInvoiceId } from "@/lib/billing-checkout";
+import { SAVE_INVOICE_ERROR, savePendingBillingInvoiceId } from "@/lib/billing-checkout";
 import { useCheckout } from "@dashboard/hooks";
 import type { BillingPeriod, BillingPlan } from "@dashboard/types";
 
@@ -19,9 +19,6 @@ interface ChangePlanDialogProps {
   initialCycle?: BillingPeriod;
   onClose: () => void;
 }
-
-const SAVE_INVOICE_ERROR =
-  "Не вдалося зберегти дані рахунку для перевірки оплати. Дозвольте сайту зберігати дані та спробуйте ще раз.";
 
 export const ChangePlanDialog = ({
   plans,
@@ -43,8 +40,6 @@ export const ChangePlanDialog = ({
     hasAnnual && initialCycle === "year" ? "year" : "month"
   );
 
-  const effectiveCycle: BillingPeriod = hasAnnual && cycle === "year" ? "year" : "month";
-
   const handleSaveCardChange = (nextSaveCard: boolean) => {
     setSaveCard(nextSaveCard);
     if (!nextSaveCard) setAutoRenew(false);
@@ -56,7 +51,7 @@ export const ChangePlanDialog = ({
     checkout.mutate(
       {
         plan: selectedPlan.key,
-        period: effectiveCycle,
+        period: cycle,
         save_card: saveCard,
         auto_renew: autoRenew,
       },
@@ -87,7 +82,7 @@ export const ChangePlanDialog = ({
         {showSummary ? (
           <CheckoutSummaryStep
             plan={selectedPlan}
-            period={effectiveCycle}
+            period={cycle}
             saveCard={saveCard}
             autoRenew={autoRenew}
             isProcessing={checkout.isPending}
@@ -101,7 +96,7 @@ export const ChangePlanDialog = ({
             currentPlan={currentPlan}
             newPlan={selectedPlan}
             isSamePlan={currentPlanKey === selectedPlanKey}
-            cycle={effectiveCycle}
+            cycle={cycle}
             onCycleChange={handleCycleChange}
             onCancel={onClose}
             onPay={() => setShowSummary(true)}

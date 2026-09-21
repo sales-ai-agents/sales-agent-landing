@@ -3,8 +3,9 @@
 import { useCallback, useState } from "react";
 import { AlertTriangle } from "lucide-react";
 
-import { ChangePlanDialog, PageError, PageLoading } from "@/components/dashboard";
 import { Button } from "@/components/ui";
+import { ChangePlanDialog, PageError, PageLoading } from "@/components/dashboard";
+import { DEFAULT_AUTO_RENEW } from "@dashboard/billing";
 import { useBillingHistory, useBillingPlans, usePaymentMethod, useStats } from "@dashboard/hooks";
 import type { AutoRenewState, BillingPeriod } from "@dashboard/types";
 
@@ -17,11 +18,8 @@ import { PlanCard } from "./_components/plan-card";
 import { TopUpDialog } from "./_components/top-up-dialog";
 import { getDefaultUpgradePlan } from "./_lib/utils";
 
-const DEFAULT_AUTO_RENEW: AutoRenewState = {
-  auto_renew: false,
-  auto_charge: false,
-  next_charge_at: null,
-  auto_renew_period: "month",
+const scrollToPlans = () => {
+  document.getElementById("plans")?.scrollIntoView({ behavior: "smooth" });
 };
 
 const BillingPage = () => {
@@ -29,25 +27,20 @@ const BillingPage = () => {
   const billingQuery = useBillingPlans();
   const historyQuery = useBillingHistory();
   const paymentMethodQuery = usePaymentMethod();
+
   const [selectedPlanKey, setSelectedPlanKey] = useState<string | null>(null);
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const [cycle, setCycle] = useState<BillingPeriod>("month");
+
   const billing = billingQuery.data;
+  const stats = statsQuery.data;
 
   const openPlanDialog = useCallback(
     (planKey?: string) => {
       if (!billing) return;
-
-      if (planKey) {
-        setSelectedPlanKey(planKey);
-        return;
-      }
-
-      const defaultPlanKey =
-        billing.current === "trial"
-          ? getDefaultUpgradePlan(billing.plans, billing.current)
-          : billing.current;
-      setSelectedPlanKey(defaultPlanKey);
+      const key =
+        planKey ?? getDefaultUpgradePlan(billing.plans, billing.current) ?? billing.current;
+      setSelectedPlanKey(key);
     },
     [billing]
   );
@@ -62,6 +55,7 @@ const BillingPage = () => {
   const currentPlan = billing.plans.find((plan) => plan.key === billing.current);
   const upgradePlanKey = getDefaultUpgradePlan(billing.plans, billing.current);
   const isTrial = billing.current === "trial";
+
   const autoRenew: AutoRenewState = {
     auto_renew: billing.auto_renew ?? DEFAULT_AUTO_RENEW.auto_renew,
     auto_charge: billing.auto_charge ?? DEFAULT_AUTO_RENEW.auto_charge,
@@ -76,15 +70,14 @@ const BillingPage = () => {
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 shrink-0 text-red-500" />
             <p className="text-sm text-red-500">
-              Оберіть тариф, щоб не втратити доступ після завершення безкоштовного періоду Trial
+              Оберіть тариф, щоб не втратити доступ після завершення безкоштовного периоду Trial
             </p>
           </div>
           <Button
             variant="outline"
             size="sm"
             className="border-primary text-primary px-8"
-            nativeButton={false}
-            render={<a href="#plans" />}
+            onClick={scrollToPlans}
           >
             Обрати тариф
           </Button>
@@ -100,11 +93,16 @@ const BillingPage = () => {
         expiresAt={billing.expires_at}
         planMinutes={currentPlan?.minutes ?? billing.minutes}
         bonusMinutes={billing.bonus_minutes ?? 0}
-        statsQuery={statsQuery}
-        onChangePlan={() => {
-          if (isTrial) openPlanDialog();
-          else openPlanDialog(upgradePlanKey ?? billing.current);
-        }}
+        minutesUsed={stats?.minutes_used ?? 0}
+        minutesLimit={stats?.minutes_limit ?? currentPlan?.minutes ?? billing.minutes}
+        minutesLeft={stats?.minutes_left ?? 0}
+        avgCallUsd={stats?.avg_call_usd ?? null}
+        totalCalls={stats?.total_calls ?? 0}
+        periodDays={stats?.period_days ?? 7}
+        isStatsLoading={statsQuery.isLoading}
+        isStatsError={statsQuery.isError}
+        onRetryStats={() => statsQuery.refetch()}
+        onChangePlan={() => openPlanDialog(upgradePlanKey ?? undefined)}
         onTopUp={() => setIsTopUpOpen(true)}
       />
 

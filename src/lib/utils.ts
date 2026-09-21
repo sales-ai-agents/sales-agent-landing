@@ -89,6 +89,20 @@ export function getInitials(name: string): string {
   return name.slice(0, 2).toUpperCase();
 }
 
+type UkrainianForms = [one: string, few: string, many: string];
+
+export function pluralizeUk(n: number, [one, few, many]: UkrainianForms): string {
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return one;
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return few;
+  return many;
+}
+
+export const pluralizeDays = (n: number): string => pluralizeUk(n, ["день", "дні", "днів"]);
+export const pluralizeMonths = (n: number): string =>
+  pluralizeUk(n, ["місяць", "місяці", "місяців"]);
+
 export function getPageIndex(currentPage: number, pageCount: number, index: number): number {
   if (pageCount <= 5) return index;
   if (currentPage <= 2) return index;

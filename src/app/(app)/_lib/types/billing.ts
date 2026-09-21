@@ -136,3 +136,7 @@ export interface PaymentHistoryResponse {
   ok: boolean;
   payments: PaymentHistoryItem[];
 }
+
+export interface ReceiptResponse {
+  url?: string;
+}

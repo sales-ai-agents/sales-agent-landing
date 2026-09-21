@@ -1,3 +1,6 @@
+export const SAVE_INVOICE_ERROR =
+  "Не вдалося зберегти дані рахунку для перевірки оплати. Дозвольте сайту зберігати дані та спробуйте ще раз.";
+
 const PENDING_BILLING_INVOICE_KEY = "pending_billing_invoice_id";
 
 export function savePendingBillingInvoiceId(invoiceId: string): boolean {

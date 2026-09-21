@@ -1,52 +1,52 @@
 "use client";
 
-import React, { useEffect } from "react";
+import type { ReactNode } from "react";
+import { useEffect } from "react";
 import { CheckCircle, XCircle, Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 import { Button, Card, CardContent } from "@/components/ui";
+import { formatDateLong } from "@/lib/utils";
 import { usePaymentStatus } from "@dashboard/hooks";
 import { resolvePaymentOutcome } from "@dashboard/payment-status";
-import { formatDateLong } from "@/lib/utils";
+import type { PaymentStatus } from "@dashboard/types";
 
 interface PaymentStatusCheckerProps {
   invoiceId: string;
   onTerminalStatus?: () => void;
 }
 
-const StatusLayout = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <div className="flex min-h-[60vh] items-center justify-center">
-      <Card className="border-border w-full max-w-md rounded-2xl">
-        <CardContent className="flex flex-col items-center gap-4 pt-8 text-center">
-          {children}
-        </CardContent>
-      </Card>
-    </div>
-  );
+const FAILURE_MESSAGES: Partial<Record<PaymentStatus, string>> = {
+  expired: "Час оплати минув. Спробуйте створити новий рахунок.",
+  reversed: "Платіж було повернено.",
+  failure: "Платіж відхилено. Перевірте картку або спробуйте ще раз.",
 };
 
-const BackButton = ({ label = "Назад до тарифів" }: { label?: string }) => {
-  return (
-    <Link href="/dashboard/billing">
-      <Button variant="outline" className="mt-2 gap-2">
-        <ArrowLeft className="h-4 w-4" />
-        {label}
-      </Button>
-    </Link>
-  );
+const FAILURE_TITLES: Partial<Record<PaymentStatus, string>> = {
+  reversed: "Платіж повернено",
 };
 
-const getFailureMessage = (status: string): string => {
-  switch (status) {
-    case "expired":
-      return "Час оплати минув. Спробуйте створити новий рахунок.";
-    case "reversed":
-      return "Платіж було повернено.";
-    default:
-      return "Платіж відхилено. Перевірте картку або спробуйте ще раз.";
-  }
-};
+const DEFAULT_FAILURE_MESSAGE = "Платіж відхилено. Перевірте картку або спробуйте ще раз.";
+const DEFAULT_FAILURE_TITLE = "Оплата не пройшла";
+
+const StatusLayout = ({ children }: { children: ReactNode }) => (
+  <div className="flex min-h-[60vh] items-center justify-center">
+    <Card className="border-border w-full max-w-md rounded-2xl">
+      <CardContent className="flex flex-col items-center gap-4 pt-8 text-center">
+        {children}
+      </CardContent>
+    </Card>
+  </div>
+);
+
+const BackButton = ({ label = "Назад до тарифів" }: { label?: string }) => (
+  <Link href="/dashboard/billing">
+    <Button variant="outline" className="mt-2 gap-2">
+      <ArrowLeft className="h-4 w-4" />
+      {label}
+    </Button>
+  </Link>
+);
 
 const PaymentStatusChecker = ({ invoiceId, onTerminalStatus }: PaymentStatusCheckerProps) => {
   const { data, isLoading, isError } = usePaymentStatus(invoiceId);
@@ -84,9 +84,7 @@ const PaymentStatusChecker = ({ invoiceId, onTerminalStatus }: PaymentStatusChec
   if (outcome === "paid") {
     return (
       <StatusLayout>
-        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-green-500 text-white">
-          <CheckCircle className="h-8 w-8" />
-        </span>
+        <CheckCircle className="h-12 w-12 text-green-600" />
         <div className="space-y-1">
           <h1 className="font-display text-2xl font-bold">Оплата успішна!</h1>
           <p className="text-muted-foreground">Ваш тариф змінено</p>
@@ -110,7 +108,7 @@ const PaymentStatusChecker = ({ invoiceId, onTerminalStatus }: PaymentStatusChec
               <span className="font-medium">{data.minutes} хвилин / місяць</span>
             </div>
           )}
-          {data.next_charge_at && data.auto_charge && (
+          {data.auto_charge && data.next_charge_at && (
             <div className="mt-2 flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Наступне списання</span>
               <span className="font-medium">{formatDateLong(data.next_charge_at)}</span>
@@ -130,15 +128,15 @@ const PaymentStatusChecker = ({ invoiceId, onTerminalStatus }: PaymentStatusChec
   }
 
   if (outcome === "failed") {
-    const isReversed = data.status === "reversed";
-
     return (
       <StatusLayout>
         <XCircle className="text-destructive h-12 w-12" />
         <h1 className="font-display text-2xl font-bold">
-          {isReversed ? "Платіж повернено" : "Оплата не пройшла"}
+          {FAILURE_TITLES[data.status] ?? DEFAULT_FAILURE_TITLE}
         </h1>
-        <p className="text-muted-foreground">{getFailureMessage(data.status)}</p>
+        <p className="text-muted-foreground">
+          {FAILURE_MESSAGES[data.status] ?? DEFAULT_FAILURE_MESSAGE}
+        </p>
         <BackButton />
       </StatusLayout>
     );

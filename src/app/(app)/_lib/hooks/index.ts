@@ -27,7 +27,17 @@ export {
   useDeleteContact,
 } from "./use-contacts";
 export { useContactBases } from "./use-contact-bases";
-export { useNumbers } from "./use-numbers";
+export {
+  useNumbers,
+  useNumberPool,
+  useSipAddresses,
+  useClaimNumber,
+  useConnectNumber,
+  useProvisionSipTrunk,
+  useVerifySip,
+  useUpdateNumber,
+  useDeleteNumber,
+} from "./use-numbers";
 export { useStats } from "./use-stats";
 export { useUploadContacts } from "./use-upload-contacts";
 export { useVoices } from "./use-voices";

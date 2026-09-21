@@ -8,7 +8,7 @@ import { Button } from "@/components/ui";
 import { ApiError, apiGet } from "@/lib/api-client";
 import { apiUrl } from "@/lib/api-config";
 import { formatDateShort, formatNumber } from "@/lib/utils";
-import type { PaymentHistoryItem } from "@dashboard/types";
+import type { PaymentHistoryItem, ReceiptResponse } from "@dashboard/types";
 
 import { PaymentStatusLabel } from "./payment-status-label";
 
@@ -139,10 +139,6 @@ const PaymentRow = ({ payment }: PaymentRowProps) => {
     </tr>
   );
 };
-
-interface ReceiptResponse {
-  url?: string;
-}
 
 const ReceiptCell = ({ payment }: { payment: PaymentHistoryItem }) => {
   const [isDownloading, setIsDownloading] = useState(false);

@@ -68,7 +68,7 @@ export const SubscriptionSection = ({ autoRenew, expiresAt }: SubscriptionSectio
       </div>
 
       {!autoRenew.auto_charge && (
-        <div className="mt-4 flex items-center gap-3 rounded-lg bg-blue-50 p-3">
+        <div className="bg-primary/10 mt-4 flex items-center gap-3 rounded-lg p-3">
           <Info className="text-primary h-4 w-4 shrink-0" aria-hidden="true" />
           <p className="text-muted-foreground text-xs">
             {isEnabled

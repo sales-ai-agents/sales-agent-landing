@@ -48,13 +48,27 @@ export const PaymentMethodSection = ({
       <h2 className="text-muted-foreground mb-4 text-sm font-medium">Спосіб оплати</h2>
 
       {isLoading ? (
-        <SectionLoading label="Завантаження способу оплати..." />
+        <div className="border-border text-muted-foreground flex items-center justify-center gap-2 rounded-lg border p-6 text-sm">
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+          <span>Завантаження способу оплати...</span>
+        </div>
       ) : isError ? (
-        <SectionError
-          title="Не вдалося завантажити спосіб оплати"
-          description="Виникла помилка під час отримання даних про картку"
-          onRetry={onRetry}
-        />
+        <div className="border-destructive/30 bg-destructive/5 flex flex-col justify-between gap-3 rounded-lg border p-4 sm:flex-row sm:items-center">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="text-destructive h-5 w-5 shrink-0" />
+            <div>
+              <p className="text-destructive text-sm font-medium">
+                Не вдалося завантажити спосіб оплати
+              </p>
+              <p className="text-muted-foreground text-xs">
+                Виникла помилка під час отримання даних про картку
+              </p>
+            </div>
+          </div>
+          <Button variant="outline" size="sm" onClick={onRetry}>
+            Повторити
+          </Button>
+        </div>
       ) : (
         <div className="border-border flex flex-col justify-between gap-4 rounded-lg border p-4 sm:flex-row sm:items-center">
           <div className="flex items-center gap-4">
@@ -109,31 +123,3 @@ export const PaymentMethodSection = ({
     </section>
   );
 };
-
-const SectionLoading = ({ label }: { label: string }) => (
-  <div className="border-border text-muted-foreground flex items-center justify-center gap-2 rounded-lg border p-6 text-sm">
-    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-    <span>{label}</span>
-  </div>
-);
-
-interface SectionErrorProps {
-  title: string;
-  description: string;
-  onRetry: () => void;
-}
-
-const SectionError = ({ title, description, onRetry }: SectionErrorProps) => (
-  <div className="border-destructive/30 bg-destructive/5 flex flex-col justify-between gap-3 rounded-lg border p-4 sm:flex-row sm:items-center">
-    <div className="flex items-center gap-3">
-      <AlertTriangle className="text-destructive h-5 w-5 shrink-0" />
-      <div>
-        <p className="text-destructive text-sm font-medium">{title}</p>
-        <p className="text-muted-foreground text-xs">{description}</p>
-      </div>
-    </div>
-    <Button variant="outline" size="sm" onClick={onRetry}>
-      Повторити
-    </Button>
-  </div>
-);

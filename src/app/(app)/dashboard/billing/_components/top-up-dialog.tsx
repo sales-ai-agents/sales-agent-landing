@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Info, Loader2, ShieldCheck } from "lucide-react";
+import { Info, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -12,8 +12,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui";
-import { savePendingBillingInvoiceId } from "@/lib/billing-checkout";
+import { SAVE_INVOICE_ERROR, savePendingBillingInvoiceId } from "@/lib/billing-checkout";
 import { cn, formatNumber } from "@/lib/utils";
+import { SecureNote } from "@/components/dashboard/change-plan/confirm-step";
 import { resolveCheckoutErrorMessage } from "@/components/dashboard/change-plan/checkout-error";
 import { useTopUp } from "@dashboard/hooks";
 import type { MinutesPack, TopUpPackKey } from "@dashboard/types";
@@ -24,16 +25,19 @@ interface TopUpDialogProps {
   onClose: () => void;
 }
 
-const SAVE_INVOICE_ERROR =
-  "Не вдалося зберегти дані рахунку для перевірки оплати. Дозвольте сайту зберігати дані та спробуйте ще раз.";
+const DEFAULT_POPULAR_PACK: TopUpPackKey = "250";
 
-export const TopUpDialog = ({ packs, popularPackKey = "250", onClose }: TopUpDialogProps) => {
+export const TopUpDialog = ({
+  packs,
+  popularPackKey = DEFAULT_POPULAR_PACK,
+  onClose,
+}: TopUpDialogProps) => {
   const topUp = useTopUp();
   const [selectedKey, setSelectedKey] = useState<TopUpPackKey>(
-    packs.some((pack) => pack.key === popularPackKey) ? popularPackKey : (packs[0]?.key ?? "100")
+    packs.some((p) => p.key === popularPackKey) ? popularPackKey : (packs[0]?.key ?? "100")
   );
 
-  const selectedPack = packs.find((pack) => pack.key === selectedKey);
+  const selectedPack = packs.find((p) => p.key === selectedKey);
 
   const handlePay = () => {
     if (!selectedPack) return;
@@ -97,10 +101,7 @@ export const TopUpDialog = ({ packs, popularPackKey = "250", onClose }: TopUpDia
           </Button>
         </div>
 
-        <p className="text-muted-foreground flex items-center justify-center gap-1.5 text-xs">
-          <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
-          Безпечна оплата через WayForPay
-        </p>
+        <SecureNote label="Безпечна оплата через WayForPay" />
       </DialogContent>
     </Dialog>
   );
@@ -141,26 +142,25 @@ const OrderSummary = ({ pack }: { pack: MinutesPack }) => (
     <p className="text-sm font-semibold">Ваше замовлення</p>
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       <div className="border-border space-y-2 rounded-lg border p-4 text-sm">
-        <SummaryRow label="Пакет хвилин" value={`${formatNumber(pack.minutes)} хв`} />
-        <SummaryRow label="Ціна за хвилину" value={`${pack.per_minute_uah.toFixed(2)}/хв`} />
+        <div className="text-muted-foreground flex items-center justify-between">
+          <span>Пакет хвилин</span>
+          <span className="text-foreground font-medium">{formatNumber(pack.minutes)} хв</span>
+        </div>
+        <div className="text-muted-foreground flex items-center justify-between">
+          <span>Ціна за хвилину</span>
+          <span className="text-foreground font-medium">{pack.per_minute_uah.toFixed(2)}/хв</span>
+        </div>
         <div className="border-border flex items-center justify-between border-t pt-2 font-semibold">
           <span>До сплати</span>
           <span>{formatNumber(pack.price_uah)} ₴</span>
         </div>
       </div>
-      <div className="flex items-center gap-2 rounded-lg bg-blue-50 p-4">
+      <div className="bg-primary/10 flex items-center gap-2 rounded-lg p-4">
         <Info className="text-primary h-4 w-4 shrink-0" aria-hidden="true" />
         <p className="text-muted-foreground text-xs">
           Хвилини зараховуються одразу після успішної оплати.
         </p>
       </div>
     </div>
-  </div>
-);
-
-const SummaryRow = ({ label, value }: { label: string; value: string }) => (
-  <div className="text-muted-foreground flex items-center justify-between">
-    <span>{label}</span>
-    <span className="text-foreground font-medium">{value}</span>
   </div>
 );
