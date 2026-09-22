@@ -165,6 +165,13 @@ export const SipFlow = ({ agentId, onDone, onCancel }: SipFlowProps) => {
             {isPolling ? "Перевіряємо підключення..." : "Ще не бачили дзвінка"}
           </p>
           <p className="text-muted-foreground text-sm">{verifyHint}</p>
+          <div className="bg-primary/5 text-muted-foreground flex gap-2 rounded-lg p-3 text-left text-xs">
+            <Info className="text-primary h-4 w-4 shrink-0" />
+            <p>
+              <b>Важливо:</b> телефонуйте з того номера, який ви вказали на попередньому кроці.
+              Дзвінок буде автоматично завантажено після перевірки.
+            </p>
+          </div>
           <div className="flex justify-between">
             <Button type="button" variant="outline" onClick={onCancel}>
               Скасувати
@@ -237,16 +244,15 @@ const SipSetupStep = ({
           value={phone}
           onChange={onPhoneChange}
         />
+        <p className="text-muted-foreground text-xs">Вводіть у форматі +380 ХХ ХХХ ХХ ХХ</p>
       </section>
 
       <section className="border-border space-y-3 rounded-lg border p-4">
-        <div>
-          <h3 className="font-medium">Натисніть «Перевірити підключення»</h3>
-          <p className="text-muted-foreground text-sm">
-            Після того як налаштуєте АТС, натисніть кнопку нижче. Ми перевіримо, чи надходять
-            дзвінки з вашого номера.
-          </p>
-        </div>
+        <h3 className="font-medium">Натисніть «Перевірити підключення»</h3>
+        <p className="text-muted-foreground text-sm">
+          Після того як налаштуєте АТС, натисніть кнопку нижче. Ми перевіримо, чи надходять дзвінки
+          з вашого номера.
+        </p>
         <Button type="button" className="w-full" onClick={onVerify} disabled={!canVerify}>
           Перевірити підключення
         </Button>

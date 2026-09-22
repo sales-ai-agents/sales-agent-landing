@@ -78,7 +78,7 @@ export const ConnectMethods = ({ onConnected }: ConnectMethodsProps) => {
             <ul className="space-y-3">
               {card.features.map((feature) => (
                 <li key={feature} className="flex items-center gap-3 text-sm">
-                  <span className="flex h-4 w-4 items-center justify-center rounded-full bg-green-600">
+                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-green-600">
                     <Check className="h-2.5 w-2.5 text-white" />
                   </span>
                   <span className="text-muted-foreground">{feature}</span>
@@ -91,7 +91,11 @@ export const ConnectMethods = ({ onConnected }: ConnectMethodsProps) => {
                 initialMethod={card.method}
                 onConnected={onConnected}
                 trigger={
-                  <Button variant="outline" className="border-primary/50 text-primary w-full">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-primary/50 text-primary w-full"
+                  >
                     {card.cta}
                   </Button>
                 }

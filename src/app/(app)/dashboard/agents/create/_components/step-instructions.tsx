@@ -98,6 +98,7 @@ export const StepInstructions = ({ form, isTesting, onTestCall }: StepInstructio
             <InputGroupInput
               aria-label="Номер телефону для тестового дзвінка"
               placeholder="+380 XX XXX XXXX"
+              maxLength={11}
               {...register("testPhone")}
             />
           </InputGroup>

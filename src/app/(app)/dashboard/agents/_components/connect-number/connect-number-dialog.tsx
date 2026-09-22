@@ -71,7 +71,7 @@ export const ConnectNumberDialog = ({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger render={trigger} />
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-xl">
         {method === null && (
           <div className="space-y-4">
             <DialogTitle>Підключити номер</DialogTitle>
