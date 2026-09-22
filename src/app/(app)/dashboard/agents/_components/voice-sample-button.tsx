@@ -1,87 +1,169 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Loader2, Play, Square } from "lucide-react";
 import { Howl } from "howler";
-import { Play, Pause, Loader2 } from "lucide-react";
 
+import { useAudioAnalyser } from "@/app/(app)/_lib/hooks/use-audio-analyser";
 import { apiUrl } from "@/lib/api-config";
 import type { Voice } from "@dashboard/types";
+import { AnimatedVoiceOrb } from "./animated-voice-orb";
 
 interface VoiceSampleButtonProps {
   voice: Voice;
 }
 
+type PlaybackState = "idle" | "loading" | "playing" | "paused" | "error";
+
 const resolveSampleSrc = (voice: Voice): string => apiUrl.voiceSample(voice.key);
 
-export const VoiceSampleButton = ({ voice }: VoiceSampleButtonProps) => {
-  const howlRef = useRef<Howl | null>(null);
+const VoiceSampleButton = ({ voice }: VoiceSampleButtonProps) => {
+  return <VoiceSampleButtonContent key={voice.key} voice={voice} />;
+};
 
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasError, setHasError] = useState(false);
+const VoiceSampleButtonContent = ({ voice }: VoiceSampleButtonProps) => {
+  const howlRef = useRef<Howl | null>(null);
+  const [playbackState, setPlaybackState] = useState<PlaybackState>("idle");
+
+  const analyser = useAudioAnalyser();
+
+  const destroyHowl = useCallback((): void => {
+    if (howlRef.current) {
+      howlRef.current.stop();
+      howlRef.current.unload();
+      howlRef.current = null;
+    }
+
+    analyser.disconnect();
+  }, [analyser]);
 
   useEffect(() => {
     return () => {
-      howlRef.current?.unload();
-      howlRef.current = null;
+      destroyHowl();
     };
+  }, [destroyHowl]);
+
+  const handlePlaybackError = useCallback((): void => {
+    destroyHowl();
+    setPlaybackState("error");
+  }, [destroyHowl]);
+
+  const handleOrbClose = useCallback((): void => {
+    if (!howlRef.current) return;
+
+    howlRef.current.stop();
+    setPlaybackState("idle");
   }, []);
 
-  const toggle = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
-      event.stopPropagation();
-      if (hasError) return;
+  const createHowl = useCallback((): Howl => {
+    const howl = new Howl({
+      src: [resolveSampleSrc(voice)],
+      format: ["ogg", "mp3", "wav"],
+      html5: true,
+      preload: true,
 
-      const existing = howlRef.current;
-      if (existing) {
-        if (existing.playing()) existing.pause();
-        else existing.play();
+      onload: () => {
+        setPlaybackState("paused");
+      },
+
+      onplay: () => {
+        setPlaybackState("playing");
+        analyser.connect(howl);
+      },
+
+      onpause: () => {
+        setPlaybackState("paused");
+      },
+
+      onstop: () => {
+        setPlaybackState("idle");
+        analyser.disconnect();
+      },
+
+      onend: () => {
+        setPlaybackState("idle");
+        analyser.disconnect();
+        howlRef.current = null;
+        howl.unload();
+      },
+
+      onloaderror: handlePlaybackError,
+      onplayerror: handlePlaybackError,
+    });
+
+    return howl;
+  }, [voice, analyser, handlePlaybackError]);
+
+  const handleToggle = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>): void => {
+      event.stopPropagation();
+
+      if (playbackState === "error") {
         return;
       }
 
-      setIsLoading(true);
-      const howl = new Howl({
-        src: [resolveSampleSrc(voice)],
-        format: ["ogg", "mp3", "wav"],
-        html5: true,
-        preload: true,
-        onload: () => setIsLoading(false),
-        onplay: () => setIsPlaying(true),
-        onpause: () => setIsPlaying(false),
-        onend: () => setIsPlaying(false),
-        onloaderror: () => {
-          setHasError(true);
-          setIsLoading(false);
-        },
-        onplayerror: () => {
-          setHasError(true);
-          setIsLoading(false);
-        },
-      });
+      if (playbackState === "playing" && howlRef.current) {
+        howlRef.current.stop();
+        return;
+      }
+
+      if (playbackState === "paused" && howlRef.current) {
+        howlRef.current.play();
+        return;
+      }
+
+      setPlaybackState("loading");
+
+      const howl = createHowl();
 
       howlRef.current = howl;
       howl.play();
     },
-    [voice, hasError]
+    [playbackState, createHowl]
   );
 
-  if (hasError) return null;
+  if (playbackState === "error") {
+    return null;
+  }
+
+  const isPlaying = playbackState === "playing";
+  const isLoading = playbackState === "loading";
+  const isOrbVisible = isPlaying || isLoading;
+
+  const renderButtonIcon = () => {
+    if (isLoading) {
+      return <Loader2 className="h-3.5 w-3.5 animate-spin" />;
+    }
+
+    if (isPlaying) {
+      return <Square className="h-3 w-3 fill-current" />;
+    }
+
+    return <Play className="h-3 w-3 fill-current" />;
+  };
 
   return (
-    <button
-      type="button"
-      onClick={toggle}
-      disabled={isLoading}
-      aria-label={isPlaying ? `Пауза — ${voice.name}` : `Прослухати голос ${voice.name}`}
-      className="bg-muted text-muted-foreground hover:bg-muted/80 flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors disabled:opacity-50"
-    >
-      {isLoading ? (
-        <Loader2 className="h-3 w-3 animate-spin" />
-      ) : isPlaying ? (
-        <Pause className="h-3 w-3" />
-      ) : (
-        <Play className="h-3 w-3" />
-      )}
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={handleToggle}
+        disabled={isLoading}
+        aria-label={isPlaying ? `Зупинити голос ${voice.name}` : `Прослухати голос ${voice.name}`}
+        className="bg-muted text-muted-foreground hover:bg-muted/70 flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {renderButtonIcon()}
+      </button>
+
+      <AnimatedVoiceOrb
+        isVisible={isOrbVisible}
+        isPlaying={isPlaying}
+        isLoading={isLoading}
+        voiceName={voice.name}
+        analyser={analyser}
+        onClose={handleOrbClose}
+      />
+    </>
   );
 };
+
+export { VoiceSampleButton };
