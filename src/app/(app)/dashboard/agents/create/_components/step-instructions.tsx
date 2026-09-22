@@ -1,18 +1,11 @@
 "use client";
 
-import Image from "next/image";
-import type { UseFormReturn } from "react-hook-form";
+import { Controller, UseFormReturn } from "react-hook-form";
 import { Phone } from "lucide-react";
 
-import {
-  Button,
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-  Label,
-  Textarea,
-} from "@/components/ui";
+import { Button, Label, Textarea } from "@/components/ui";
 import { INSTRUCTIONS_MAX_LENGTH, type CreateAgentFormData } from "@/lib/schemas";
+import { PhoneField } from "@/app/(app)/dashboard/agents/_components/connect-number/phone-field";
 
 interface StepInstructionsProps {
   form: UseFormReturn<CreateAgentFormData>;
@@ -31,6 +24,7 @@ export const StepInstructions = ({ form, isTesting, onTestCall }: StepInstructio
     register,
     watch,
     formState: { errors },
+    control,
   } = form;
 
   const instructions = watch("instructions");
@@ -40,7 +34,7 @@ export const StepInstructions = ({ form, isTesting, onTestCall }: StepInstructio
     <div className="space-y-6">
       <div>
         <h2 className="font-display text-xl font-bold">Інструкція для агента та тест</h2>
-        <p className="text-muted-foreground mt-1 w-xs text-sm">
+        <p className="text-muted-foreground mt-1 w-sm text-sm">
           Опишіть, як агент має спілкуватися, і перевірте, як він звучить в реальному дзвінку
         </p>
       </div>
@@ -85,23 +79,25 @@ export const StepInstructions = ({ form, isTesting, onTestCall }: StepInstructio
           <div>
             <p className="text-sm font-semibold">Тестовий дзвінок</p>
             <p className="text-muted-foreground w-xs text-xs">
-              Перевірте, як агент звучить і відповідає. Дзвінок на ваш номер надійде протягом 30
-              секунд.
+              Перевірте, як агент звучить і відповідає. <br />
+              Дзвінок на ваш номер надійде протягом 30 секунд.
             </p>
           </div>
         </div>
-        <div className="flex gap-2">
-          <InputGroup className="flex-1">
-            <InputGroupAddon>
-              <Image src="/image/ua-flag.svg" alt="" width={24} height={16} aria-hidden="true" />
-            </InputGroupAddon>
-            <InputGroupInput
-              aria-label="Номер телефону для тестового дзвінка"
-              placeholder="+380 XX XXX XXXX"
-              maxLength={11}
-              {...register("testPhone")}
-            />
-          </InputGroup>
+        <div className="flex items-end gap-2">
+          <Controller
+            control={control}
+            name="testPhone"
+            render={({ field }) => (
+              <PhoneField
+                classname="w-full"
+                id="sip-verify-phone"
+                label="Номер телефону"
+                value={field.value}
+                onChange={field.onChange}
+              />
+            )}
+          />
           <Button type="button" onClick={onTestCall} disabled={isTesting || !testPhone}>
             {isTesting ? "Дзвінок..." : "Подзвонити мені"}
           </Button>

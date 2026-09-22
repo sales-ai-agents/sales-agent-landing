@@ -2,7 +2,14 @@
 
 import type { DateRange } from "react-day-picker";
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui";
+import {
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui";
 import type { Agent } from "@dashboard/types";
 import { DateRangePicker } from "./date-range-picker";
 import { FilterField } from "./filter-field";
@@ -58,15 +65,16 @@ export const Filters = ({
       </FilterField>
 
       <FilterField label="Номер телефону">
-        <input
-          type="text"
+        <Input
+          type="tel"
+          inputMode="tel"
+          aria-label="Пошук за номером телефону"
+          placeholder="Введіть номер телефону"
           value={phoneInput}
           onChange={(e) => onPhoneInputChange(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && onPhoneSubmit()}
           onBlur={onPhoneSubmit}
-          placeholder="Введіть номер телефону"
-          className="placeholder:text-muted-foreground h-6 w-full bg-transparent text-sm"
-          aria-label="Пошук за номером телефону"
+          className="h-6 border-none p-0"
         />
       </FilterField>
     </div>

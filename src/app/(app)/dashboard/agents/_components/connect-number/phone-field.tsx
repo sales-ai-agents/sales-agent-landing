@@ -3,7 +3,7 @@
 import Image from "next/image";
 
 import { InputGroup, InputGroupAddon, InputGroupInput, Label } from "@/components/ui";
-import { formatUaPhoneDigits } from "@/lib/utils";
+import { cn, formatUaPhoneDigits } from "@/lib/utils";
 
 interface PhoneFieldProps {
   id: string;
@@ -11,11 +11,12 @@ interface PhoneFieldProps {
   value: string;
   onChange: (value: string) => void;
   hint?: string;
+  classname?: string;
 }
 
-export const PhoneField = ({ id, label, value, onChange, hint }: PhoneFieldProps) => {
+export const PhoneField = ({ id, label, value, onChange, hint, classname }: PhoneFieldProps) => {
   return (
-    <div className="space-y-1.5">
+    <div className={cn("space-y-2", classname)}>
       <Label htmlFor={id}>{label}</Label>
       <InputGroup>
         <InputGroupAddon>

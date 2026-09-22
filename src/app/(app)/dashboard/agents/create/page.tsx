@@ -26,6 +26,7 @@ import { StepSchedule } from "./_components/step-schedule";
 import { StepNumber } from "./_components/step-number";
 import { StepInstructions } from "./_components/step-instructions";
 import { TOTAL_STEPS, STEP_FIELDS, isStepValid } from "./_components/wizard";
+import { normalizeUaPhone } from "@/app/(app)/dashboard/agents/_components/connect-number/constants";
 
 const DEFAULT_VALUES: CreateAgentFormData = {
   name: "",
@@ -102,7 +103,7 @@ const CreateAgentPage = () => {
 
     testCall.mutate(
       {
-        phone: data.testPhone,
+        phone: normalizeUaPhone(data.testPhone),
         name: data.name,
         voice: data.voice,
         instructions: data.instructions,

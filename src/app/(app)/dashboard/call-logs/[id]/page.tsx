@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Download, Bot, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button, Textarea, Badge } from "@/components/ui";
+import { Button, Textarea, Badge, Separator } from "@/components/ui";
 import { PageLoading, PageError, AudioPlayer } from "@/components/dashboard";
 import { useCallDetail, useSaveNote, useAgents, useCrmStatus, useCrmRetry } from "@dashboard/hooks";
 import { handleMutationError } from "@/lib/mutation-error";
@@ -137,31 +137,46 @@ const CallDetailPage = () => {
           download
           target="_blank"
           rel="noopener noreferrer"
-          className="border-border bg-background hover:bg-muted inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-medium transition-colors"
+          className="border-border bg-background hover:bg-muted inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors"
         >
           <Download className="h-4 w-4" />
           Завантажити аудіо
         </a>
       </div>
 
-      <div className="border-border bg-background grid grid-cols-2 gap-3 rounded-2xl border p-5 md:grid-cols-4 lg:grid-cols-6">
+      <div className="border-border bg-background flex justify-between gap-3 rounded-2xl border p-5">
         <InfoField label="Клієнт" value={call.phone} />
+
+        <Separator orientation="vertical" />
+
         <InfoField
           label="Агент"
           value={agentName}
           icon={<Bot className="text-primary h-4 w-4" />}
         />
+
+        <Separator orientation="vertical" />
+
         <div>
           <p className="text-muted-foreground text-xs">Результат дзвінка</p>
-          <Badge variant={outcomeConfig.variant} className="mt-1">
+          <Badge variant={outcomeConfig.variant} className="mt-1 p-0">
             {outcomeConfig.label}
           </Badge>
         </div>
+
+        <Separator orientation="vertical" />
+
         <InfoField label="Тривалість дзвінка" value={duration} />
+
+        <Separator orientation="vertical" />
+
         <div>
           <p className="text-muted-foreground text-xs">Статус / SLA</p>
           <SlaDisplay state={call.sla_state} minutesLeft={call.sla_minutes_left} />
         </div>
+
+        <Separator orientation="vertical" />
+
         <div>
           <p className="text-muted-foreground text-xs">Витрачено хвилин</p>
           <p className="mt-1 text-sm font-medium">{minutesUsed} хв</p>
@@ -175,7 +190,7 @@ const CallDetailPage = () => {
           <div className="border-border bg-background rounded-2xl border p-5">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-sm font-semibold">Транскрипція</h2>
-              <Button variant="outline" size="sm" className="gap-1.5">
+              <Button variant="outline" className="gap-1.5">
                 <Download className="h-3.5 w-3.5" />
                 Завантажити .txt
               </Button>
