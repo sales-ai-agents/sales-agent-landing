@@ -9,7 +9,7 @@ const FALLBACK_ERROR_MESSAGE = "Щось пішло не так. Спробуй�
 const LEAD_ERROR_MESSAGES: Record<string, string> = {
   name_and_phone_required: "Ім'я та номер телефону обов'язкові.",
   invalid_json: "Невірний формат запиту. Спробуйте ще раз.",
-  too_many_requests: "Забагато запитів. Спробуйте через 20 секунд.",
+  too_many_requests: "Забагато запитів. Спробуйте через пару хв.",
   network_error: "Не вдалося з'єднатися з сервером. Перевірте інтернет.",
   internal_error: "Сервер тимчасово недоступний. Спробуйте пізніше.",
 };

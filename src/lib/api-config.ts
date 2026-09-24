@@ -9,6 +9,10 @@ export const API_ENDPOINTS = {
   AUTH_PASSWORD: `${API_BASE}/auth/password`,
   AUTH_LOGOUT: `${API_BASE}/auth/logout`,
   AUTH_SOCIAL: `${API_BASE}/auth/social`,
+  AUTH_PASSWORD_RESET: `${API_BASE}/auth/password-reset`,
+  AUTH_PASSWORD_RESET_CONFIRM: `${API_BASE}/auth/password-reset/confirm`,
+  AUTH_EMAIL_CODE: `${API_BASE}/auth/email-code`,
+  AUTH_EMAIL_CONFIRM: `${API_BASE}/auth/email-confirm`,
 
   // Account
   APP_ACCOUNT: `${API_BASE}/app/account`,

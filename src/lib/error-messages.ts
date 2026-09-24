@@ -16,7 +16,7 @@ export const AUTH_ERROR_MESSAGES: ErrorMessageMap = {
   invalid_email: "Невірний формат email.",
   weak_password: "Пароль має містити мінімум 8 символів.",
   email_taken: "Цей email вже зареєстрований.",
-  too_many_requests: "Забагато спроб. Спробуйте через хвилину.",
+  too_many_requests: "Забагато спроб. Спробуйте через пару хв",
   bad_current_password: "Невірний поточний пароль.",
   no_password_login: "Цей акаунт використовує вхід через Google/Apple. Пароля немає.",
   nothing_to_update: "Нічого не змінено.",
@@ -26,6 +26,13 @@ export const AUTH_ERROR_MESSAGES: ErrorMessageMap = {
   provider_not_configured: "Цей спосіб входу тимчасово недоступний.",
   confirm_required: "Введіть DELETE для підтвердження.",
   invalid_json: "Некоректні дані запиту.",
+  invalid_code: "Невірний або застарілий код.",
+  bad_code: "Невірний код.",
+  code_expired: "Код застарів. Запросіть новий.",
+  no_code: "Код не знайдено. Запросіть новий лист.",
+  too_many_attempts: "Занадто багато спроб — код заблоковано. Запросіть новий.",
+  too_soon: "Зачекайте хвилину перед повторним надсиланням.",
+  mail_failed: "Не вдалося надіслати лист. Спробуйте ще раз.",
 };
 
 export const AGENT_ERROR_MESSAGES: ErrorMessageMap = {

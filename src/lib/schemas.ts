@@ -23,6 +23,36 @@ export const signUpSchema = z.object({
 
 export type SignUpFormData = z.infer<typeof signUpSchema>;
 
+export const forgotPasswordSchema = z.object({
+  email: z.email("Введіть коректну електронну адресу"),
+});
+
+export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
+
+const strongPassword = z
+  .string()
+  .min(8, "Пароль має містити щонайменше 8 символів")
+  .regex(/[0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/, "Має містити цифру або спецсимвол")
+  .regex(/[A-ZА-ЯІЇЄҐ]/, "Має містити велику літеру");
+
+export const resetPasswordSchema = z
+  .object({
+    password: strongPassword,
+    confirmPassword: z.string().min(1, "Підтвердіть пароль"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Паролі не збігаються",
+    path: ["confirmPassword"],
+  });
+
+export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
+
+export const emailConfirmSchema = z.object({
+  code: z.string().length(6, "Введіть 6-значний код"),
+});
+
+export type EmailConfirmFormData = z.infer<typeof emailConfirmSchema>;
+
 export const INSTRUCTIONS_MAX_LENGTH = 4000;
 
 export const CALL_DIRECTIONS = ["inbound", "outbound"] as const;

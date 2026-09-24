@@ -12,6 +12,7 @@ export interface Account {
   website?: string;
   agent_language?: AgentLanguage;
   marketing_consent?: boolean;
+  email_verified?: boolean;
 }
 
 export interface AuthResponse {
@@ -98,4 +99,40 @@ export interface ChangePasswordParams {
 export interface ChangePasswordResponse {
   ok: boolean;
   sessions_closed: number;
+}
+
+export interface PasswordResetParams {
+  email: string;
+}
+
+export interface PasswordResetResponse {
+  ok: boolean;
+  sent: boolean;
+  hint?: string;
+}
+
+export interface PasswordResetConfirmParams {
+  email: string;
+  code: string;
+  password: string;
+}
+
+export interface PasswordResetConfirmResponse {
+  ok: boolean;
+  sessions_closed: number;
+}
+
+export interface EmailCodeResponse {
+  ok: boolean;
+  already_verified: boolean;
+}
+
+export interface EmailConfirmParams {
+  code: string;
+}
+
+export interface EmailConfirmResponse {
+  ok: boolean;
+  verified: boolean;
+  already_verified: boolean;
 }

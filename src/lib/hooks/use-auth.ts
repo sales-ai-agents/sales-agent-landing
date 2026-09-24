@@ -19,6 +19,13 @@ import type {
   DeleteAccountResponse,
   MarketingConsentParams,
   MarketingConsentResponse,
+  PasswordResetParams,
+  PasswordResetResponse,
+  PasswordResetConfirmParams,
+  PasswordResetConfirmResponse,
+  EmailCodeResponse,
+  EmailConfirmParams,
+  EmailConfirmResponse,
 } from "@/lib/types";
 
 const AUTH_QUERY_KEY = ["auth", "me"] as const;
@@ -140,6 +147,37 @@ export const useDeleteAccount = () => {
     onSuccess: () => {
       clearAuthToken();
       queryClient.clear();
+    },
+  });
+};
+
+export const usePasswordReset = () => {
+  return useMutation<PasswordResetResponse, ApiError, PasswordResetParams>({
+    mutationFn: (params) =>
+      apiPost<PasswordResetResponse>(API_ENDPOINTS.AUTH_PASSWORD_RESET, params),
+  });
+};
+
+export const usePasswordResetConfirm = () => {
+  return useMutation<PasswordResetConfirmResponse, ApiError, PasswordResetConfirmParams>({
+    mutationFn: (params) =>
+      apiPost<PasswordResetConfirmResponse>(API_ENDPOINTS.AUTH_PASSWORD_RESET_CONFIRM, params),
+  });
+};
+
+export const useEmailCode = () => {
+  return useMutation<EmailCodeResponse, ApiError, void>({
+    mutationFn: () => apiPost<EmailCodeResponse>(API_ENDPOINTS.AUTH_EMAIL_CODE),
+  });
+};
+
+export const useEmailConfirm = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<EmailConfirmResponse, ApiError, EmailConfirmParams>({
+    mutationFn: (params) => apiPost<EmailConfirmResponse>(API_ENDPOINTS.AUTH_EMAIL_CONFIRM, params),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
     },
   });
 };

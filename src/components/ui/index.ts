@@ -125,3 +125,4 @@ export { ToggleGroup } from "./toggle-group";
 export { RadioGroup, RadioGroupItem } from "./radio-group";
 export { Checkbox } from "./checkbox";
 export { Separator } from "./separator";
+export { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from "./input-otp";

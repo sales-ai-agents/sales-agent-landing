@@ -94,13 +94,12 @@ export default function SignInPage() {
             />
             <span>Запам&apos;ятати мене</span>
           </label>
-          {/*NO PAGE YET*/}
-          {/*<Link*/}
-          {/*  href="/forgot-password"*/}
-          {/*  className="text-primary text-sm font-medium hover:underline"*/}
-          {/*>*/}
-          {/*  Забули пароль?*/}
-          {/*</Link>*/}
+          <Link
+            href="/forgot-password"
+            className="text-primary text-sm font-medium hover:underline"
+          >
+            Забули пароль?
+          </Link>
         </div>
 
         <Button
@@ -115,18 +114,6 @@ export default function SignInPage() {
       <div className="mt-6">
         <SocialLoginButtons />
       </div>
-
-      {/*NO PAGES YES*/}
-      {/*<p className="text-muted-foreground mt-8 text-center text-xs leading-relaxed">*/}
-      {/*  Реєструючись, ви погоджуєтесь з нашими <br />*/}
-      {/*  <Link href="/terms" className="text-primary hover:underline">*/}
-      {/*    Умовами використання*/}
-      {/*  </Link>{" "}*/}
-      {/*  та{" "}*/}
-      {/*  <Link href="/privacy" className="text-primary hover:underline">*/}
-      {/*    Політикою конфіденційності*/}
-      {/*  </Link>*/}
-      {/*</p>*/}
     </div>
   );
 }

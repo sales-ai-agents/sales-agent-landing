@@ -9,6 +9,10 @@ export {
   useChangePassword,
   useUpdateMarketingConsent,
   useDeleteAccount,
+  usePasswordReset,
+  usePasswordResetConfirm,
+  useEmailCode,
+  useEmailConfirm,
 } from "./use-auth";
 
 export { useRequireAuth } from "./use-require-auth";

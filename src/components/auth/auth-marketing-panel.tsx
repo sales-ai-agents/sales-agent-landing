@@ -25,7 +25,7 @@ const BENEFITS = [
 ] as const;
 
 interface AuthMarketingPanelProps {
-  variant?: "sign-in" | "sign-up";
+  variant?: "sign-in" | "sign-up" | "forgot-password" | "email-confirm";
 }
 
 export function AuthMarketingPanel({ variant = "sign-in" }: AuthMarketingPanelProps) {
@@ -49,29 +49,66 @@ export function AuthMarketingPanel({ variant = "sign-in" }: AuthMarketingPanelPr
       </div>
 
       <div className="mt-10">
-        {variant === "sign-in" ? (
-          <h1 className="font-display text-2xl xl:text-3xl">
-            Розумні <span className="text-primary">ШІ-агенти</span>
-            <br />
-            для ваших дзвінків
-          </h1>
-        ) : (
-          <h1 className="font-display text-2xl xl:text-3xl">
-            Створіть акаунт
-            <br />
-            <span className="text-primary">за 30 секунд</span>
-          </h1>
+        {variant === "sign-in" && (
+          <>
+            <h1 className="font-display text-2xl xl:text-3xl">
+              Розумні <span className="text-primary">ШІ-агенти</span>
+              <br />
+              для ваших дзвінків
+            </h1>
+            <p className="text-muted-foreground mt-3 max-w-sm text-sm">
+              Почніть працювати з ШІ-агентами для дзвінків та автоматизуйте рутинні процеси вже
+              сьогодні
+            </p>
+          </>
         )}
-        <p className="text-muted-foreground mt-3 max-w-sm text-sm">
-          Почніть працювати з ШІ-агентами для дзвінків та автоматизуйте рутинні процеси вже сьогодні
-        </p>
+
+        {variant === "sign-up" && (
+          <>
+            <h1 className="font-display text-2xl xl:text-3xl">
+              Створіть акаунт
+              <br />
+              <span className="text-primary">за 30 секунд</span>
+            </h1>
+            <p className="text-muted-foreground mt-3 max-w-sm text-sm">
+              Почніть працювати з ШІ-агентами для дзвінків та автоматизуйте рутинні процеси вже
+              сьогодні
+            </p>
+          </>
+        )}
+
+        {variant === "forgot-password" && (
+          <>
+            <h1 className="font-display text-2xl xl:text-3xl">
+              Відновлення пароля
+              <br />
+              <span className="text-primary text-xl">Ми допоможемо вам повернути доступ</span>
+            </h1>
+            <p className="text-muted-foreground mt-3 max-w-sm text-sm">
+              Введіть електронну пошту та новий пароль для вашого акаунту Calls4U
+            </p>
+          </>
+        )}
+
+        {variant === "email-confirm" && (
+          <>
+            <h1 className="font-display text-2xl xl:text-3xl">
+              Створюємо відносини
+              <br />
+              <span className="text-primary">на 30 секунд</span>
+            </h1>
+            <p className="text-muted-foreground mt-3 max-w-sm text-sm">
+              Голосові ШІ-агенти, які дзвонять, спілкуються та закривають рутину за вас.
+            </p>
+          </>
+        )}
 
         <div className="border-border/50 mt-8 max-w-xs rounded-lg border bg-white px-5 py-9">
           <div className="space-y-3">
             {BENEFITS.map(({ icon: Icon, title, description }) => (
               <div key={title} className="flex items-center gap-4">
-                <div className="bg-primary/10 flex h-12 w-12 shrink-0 items-center justify-center rounded">
-                  <Icon className="text-primary h-5 w-5" />
+                <div className="bg-primary/10 flex h-12 w-12 shrink-0 items-center justify-center rounded-md">
+                  <Icon className="text-primary h-6 w-6" />
                 </div>
                 <div className="pt-1">
                   <p className="text-sm font-normal">{title}</p>

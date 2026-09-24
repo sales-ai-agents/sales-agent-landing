@@ -5,13 +5,24 @@ import { usePathname } from "next/navigation";
 
 import { AuthMarketingPanel } from "@/components/auth/auth-marketing-panel";
 
+const MARKETING_PANEL_VARIANTS: Record<
+  string,
+  "sign-in" | "sign-up" | "forgot-password" | "email-confirm"
+> = {
+  "/sign-up": "sign-up",
+  "/forgot-password": "forgot-password",
+  "/email-confirm": "email-confirm",
+  "/email-confirmed": "email-confirm",
+};
+
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const variant = pathname === "/sign-up" ? "sign-up" : "sign-in";
 
   if (pathname.startsWith("/auth/")) {
     return <main className="font-body min-h-screen">{children}</main>;
   }
+
+  const variant = MARKETING_PANEL_VARIANTS[pathname] ?? "sign-in";
 
   return (
     <div className="font-body flex min-h-screen">

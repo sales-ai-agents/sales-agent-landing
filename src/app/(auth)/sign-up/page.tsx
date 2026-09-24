@@ -5,14 +5,14 @@ import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Check } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 
 import { Button, Checkbox, Input, Label } from "@/components/ui";
 import { PasswordInput } from "@/components/auth/password-input";
 import { SocialLoginButtons } from "@/components/auth/social-login-buttons";
 import { signUpSchema, type SignUpFormData } from "@/lib/schemas";
 import { LEGAL_PAGES } from "@/lib/constants";
-import { useRegister } from "@/lib/hooks";
+import { useRegister, useEmailCode } from "@/lib/hooks";
 import { ApiError } from "@/lib/api-client";
 import { resolveErrorMessage, AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
 
@@ -28,6 +28,7 @@ const PASSWORD_REQUIREMENTS = [
 export default function SignUpPage() {
   const router = useRouter();
   const registerMutation = useRegister();
+  const emailCode = useEmailCode();
 
   const {
     register,
@@ -58,8 +59,10 @@ export default function SignUpPage() {
       },
       {
         onSuccess: () => {
-          toast.success("Акаунт створено");
-          router.replace("/dashboard");
+          emailCode.mutate(undefined, {
+            onSuccess: () => router.replace("/email-confirm"),
+            onError: () => router.replace("/email-confirm"),
+          });
         },
         onError: (error) => {
           if (error instanceof ApiError) {
@@ -217,9 +220,16 @@ export default function SignUpPage() {
         <Button
           type="submit"
           className="bg-primary hover:bg-primary/90 h-11 w-full rounded-lg text-base font-semibold text-white"
-          disabled={registerMutation.isPending}
+          disabled={registerMutation.isPending || emailCode.isPending}
         >
-          {registerMutation.isPending ? "Створення акаунту..." : "Створити акаунт"}
+          {registerMutation.isPending || emailCode.isPending ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Створення акаунту...
+            </>
+          ) : (
+            "Створити акаунт"
+          )}
         </Button>
       </form>
 

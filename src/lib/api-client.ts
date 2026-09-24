@@ -7,7 +7,11 @@ export type AuthFlowCode =
   | "email_taken"
   | "too_many_requests"
   | "bad_current_password"
-  | "no_password_login";
+  | "no_password_login"
+  | "invalid_code"
+  | "bad_code"
+  | "code_expired"
+  | "no_code";
 
 export const AUTH_FLOW_CODES: ReadonlySet<string> = new Set<AuthFlowCode>([
   "bad_credentials",
@@ -17,19 +21,31 @@ export const AUTH_FLOW_CODES: ReadonlySet<string> = new Set<AuthFlowCode>([
   "too_many_requests",
   "bad_current_password",
   "no_password_login",
+  "invalid_code",
+  "bad_code",
+  "code_expired",
+  "no_code",
 ]);
 
 export class ApiError extends Error {
   readonly status: number;
   readonly code: string;
   readonly retryAfter?: number;
+  readonly attemptsLeft?: number;
 
-  constructor(status: number, code: string, message: string, retryAfter?: number) {
+  constructor(
+    status: number,
+    code: string,
+    message: string,
+    retryAfter?: number,
+    attemptsLeft?: number
+  ) {
     super(message);
     this.name = "ApiError";
     this.status = status;
     this.code = code;
     this.retryAfter = retryAfter;
+    this.attemptsLeft = attemptsLeft;
   }
 }
 
@@ -37,6 +53,7 @@ interface ApiErrorBody {
   error?: string;
   message?: string;
   retry_after?: number;
+  attempts_left?: number;
 }
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -94,7 +111,7 @@ async function request<T>(url: string, method: HttpMethod, options?: RequestOpti
       throw new ApiError(401, "session_expired", "Сесія закінчилася. Увійдіть знову.");
     }
 
-    throw new ApiError(response.status, code, message);
+    throw new ApiError(response.status, code, message, undefined, body?.attempts_left);
   }
 
   return response.json();

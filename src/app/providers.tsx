@@ -9,7 +9,7 @@ import { ApiError, AUTH_FLOW_CODES } from "@/lib/api-client";
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
 
-function isSessionExpired(error: unknown): boolean {
+function isSessionExpired(error: unknown) {
   return error instanceof ApiError && error.status === 401 && !AUTH_FLOW_CODES.has(error.code);
 }
 
