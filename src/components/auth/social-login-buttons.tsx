@@ -91,9 +91,12 @@ export function SocialLoginButtons() {
         <div className="bg-border h-px flex-1" />
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-between">
         {showGoogle && (
           <GoogleLogin
+            text="signin_with"
+            width={200}
+            logo_alignment="center"
             onSuccess={handleGoogleSuccess}
             onError={() => toast.error("Не вдалося увійти через Google.")}
           />
@@ -102,14 +105,12 @@ export function SocialLoginButtons() {
           <Button
             type="button"
             variant="outline"
-            className="hover:bg-primary/5 hover:border-primary/20 h-10 justify-start rounded-[0.25rem] px-3"
+            className="hover:bg-primary/5 hover:border-primary/20 h-10 w-50 rounded-[0.25rem] px-3"
             disabled={socialLogin.isPending}
             onClick={initiateGitHubLogin}
           >
             <GitHubIcon />
-            <span className="w-full text-center text-sm font-normal text-gray-600">
-              Вхід через GitHub
-            </span>
+            <span className="text-sm font-normal text-gray-600">Вхід через GitHub</span>
           </Button>
         )}
       </div>
