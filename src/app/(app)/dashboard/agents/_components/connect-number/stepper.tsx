@@ -9,7 +9,7 @@ interface StepperProps {
 
 export const Stepper = ({ steps, current }: StepperProps) => {
   return (
-    <div className="flex items-center justify-center gap-6">
+    <div className="flex items-center justify-center gap-3 sm:gap-6">
       {steps.map((label, index) => {
         const isDone = index < current;
         const isActive = index === current;
@@ -18,7 +18,7 @@ export const Stepper = ({ steps, current }: StepperProps) => {
           <div key={label} className="flex items-center gap-2">
             <span
               className={cn(
-                "flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium",
+                "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-medium",
                 isDone && "bg-primary text-primary-foreground",
                 isActive && "bg-primary text-primary-foreground",
                 !isDone && !isActive && "bg-muted text-muted-foreground"
@@ -29,6 +29,7 @@ export const Stepper = ({ steps, current }: StepperProps) => {
             <span
               className={cn(
                 "text-sm",
+                !isActive && "hidden sm:inline",
                 isActive || isDone ? "text-primary font-medium" : "text-muted-foreground"
               )}
             >

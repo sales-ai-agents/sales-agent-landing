@@ -279,7 +279,7 @@ export const AnimatedVoiceOrb = ({
             </div>
 
             <p className="text-sm font-medium text-white drop-shadow-md">{statusLabel}</p>
-            <p className="text-xs text-white/50">Натисніть поза орбом, щоб закрити</p>
+            <p className="text-center text-xs text-white/50">Натисніть поза орбом, щоб закрити</p>
           </motion.div>
         </>
       )}

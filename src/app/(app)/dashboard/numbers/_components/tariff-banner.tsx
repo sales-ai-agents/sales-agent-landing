@@ -25,7 +25,7 @@ export const TariffBanner = ({ limit, used, canAdd }: TariffBannerProps) => {
   const subtitle = isUnlimited
     ? `Підключено ${formatCount(used)}`
     : canAdd
-      ? `Підключено ${used} з ${limit}. Ви можете додати ще`
+      ? `Підключено ${used} з ${limit}. Ви можете додати ще ${formatCount(limit - used)}`
       : `Підключено ${used} з ${limit}. Щоб додати більше, оберіть вищий тариф`;
 
   return (

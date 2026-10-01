@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Download, Bot, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button, Textarea, Badge, Separator } from "@/components/ui";
+import { Button, Textarea, Badge } from "@/components/ui";
 import { PageLoading, PageError, AudioPlayer } from "@/components/dashboard";
 import { useCallDetail, useSaveNote, useAgents, useCrmStatus, useCrmRetry } from "@dashboard/hooks";
 import { handleMutationError } from "@/lib/mutation-error";
@@ -124,7 +124,7 @@ const CallDetailPage = () => {
         Назад до дзвінків
       </Link>
 
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold">Деталі дзвінка</h1>
           <p className="text-muted-foreground text-sm">
@@ -137,25 +137,21 @@ const CallDetailPage = () => {
           download
           target="_blank"
           rel="noopener noreferrer"
-          className="border-border bg-background hover:bg-muted inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors"
+          className="border-border bg-background hover:bg-muted inline-flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors"
         >
           <Download className="h-4 w-4" />
           Завантажити аудіо
         </a>
       </div>
 
-      <div className="border-border bg-background flex justify-between gap-3 rounded-2xl border p-5">
+      <div className="border-border bg-background grid grid-cols-2 gap-4 rounded-2xl border p-5 sm:grid-cols-3 lg:grid-cols-6">
         <InfoField label="Клієнт" value={call.phone} />
-
-        <Separator orientation="vertical" />
 
         <InfoField
           label="Агент"
           value={agentName}
           icon={<Bot className="text-primary h-4 w-4" />}
         />
-
-        <Separator orientation="vertical" />
 
         <div>
           <p className="text-muted-foreground text-xs">Результат дзвінка</p>
@@ -164,18 +160,12 @@ const CallDetailPage = () => {
           </Badge>
         </div>
 
-        <Separator orientation="vertical" />
-
         <InfoField label="Тривалість дзвінка" value={duration} />
-
-        <Separator orientation="vertical" />
 
         <div>
           <p className="text-muted-foreground text-xs">Статус / SLA</p>
           <SlaDisplay state={call.sla_state} minutesLeft={call.sla_minutes_left} />
         </div>
-
-        <Separator orientation="vertical" />
 
         <div>
           <p className="text-muted-foreground text-xs">Витрачено хвилин</p>

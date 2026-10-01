@@ -30,9 +30,9 @@ interface StatItemProps {
 
 const StatItem = ({ label, value, highlight = false }: StatItemProps) => {
   return (
-    <div>
+    <div className="min-w-0">
       <p className="text-muted-foreground text-xs">{label}</p>
-      <p className={`text-lg font-semibold ${highlight ? "text-primary" : ""}`}>{value}</p>
+      <p className={`truncate text-lg font-semibold ${highlight ? "text-primary" : ""}`}>{value}</p>
     </div>
   );
 };

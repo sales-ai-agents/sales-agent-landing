@@ -21,7 +21,7 @@ const NumbersPage = () => {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-start justify-between gap-4">
+      <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="max-w-2xl">
           <h1 className="text-2xl font-bold">Номери</h1>
           <p className="text-muted-foreground mt-1 text-sm">
@@ -31,7 +31,7 @@ const NumbersPage = () => {
         </div>
         <ConnectNumberDialog
           trigger={
-            <Button>
+            <Button className="w-full shrink-0 lg:w-auto">
               <Plus className="mr-2 h-4 w-4" />
               Підключити номер
             </Button>

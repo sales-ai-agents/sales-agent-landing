@@ -39,6 +39,7 @@ export const getOutcomeDisplay = (call: CallLog): OutcomeDisplay => {
   switch (call.outcome) {
     case "не відповів":
     case "немає часу":
+    case "нейтрально":
     case "скинув":
     case "погано чути":
     case "не дійшли до людини":
@@ -47,7 +48,7 @@ export const getOutcomeDisplay = (call: CallLog): OutcomeDisplay => {
       return { label: "Передано", badgeClass: "bg-warning/10 text-warning", icon: "↗" };
     case "відмова":
     case "не цікаво":
-      return { label: "Помилка", badgeClass: "bg-destructive/80 text-destructive", icon: "!" };
+      return { label: "Помилка", badgeClass: "bg-destructive/80 text-white", icon: "!" };
     default:
       return {
         label: call.outcome ?? "В процесі",

@@ -44,7 +44,7 @@ export const DashboardHeader = () => {
   const initials = getInitials(displayName);
 
   return (
-    <header className="mb-6 flex">
+    <header className="mb-6 flex items-center gap-3">
       <Sheet>
         <SheetTrigger
           render={
@@ -53,9 +53,9 @@ export const DashboardHeader = () => {
         >
           <Menu className="h-5 w-5" />
         </SheetTrigger>
-        <SheetContent side="left">
+        <SheetContent side="left" className="w-72">
           <SheetTitle>
-            <div className="mb-6 flex items-center gap-2">
+            <div className="flex items-center gap-2 p-2">
               <Image
                 src="/image/Logo.svg"
                 alt="Calls4U logo"
@@ -95,11 +95,31 @@ export const DashboardHeader = () => {
         </SheetContent>
       </Sheet>
 
+      <Link href="/dashboard" className="flex items-center gap-2 md:hidden" aria-label="Calls4U">
+        <Image
+          src="/image/Logo.svg"
+          alt="Calls4U logo"
+          width={32}
+          height={32}
+          className="h-8 w-auto"
+        />
+        <Image
+          src="/image/calls4u.svg"
+          alt="Calls4U"
+          width={80}
+          height={18}
+          className="h-auto w-auto"
+        />
+      </Link>
+
       <div className="hidden flex-1 md:block" />
 
-      <div className="ml-auto flex items-center gap-6">
-        <Link id="onboarding-create-agent-btn" href="/dashboard/agents/create">
-          <Button>
+      <div className="ml-auto flex items-center gap-3 sm:gap-6">
+        <Link id="onboarding-create-agent-btn" href="/dashboard/agents/create" className="shrink-0">
+          <Button size="icon" className="sm:hidden" aria-label="Новий агент">
+            <Plus className="h-4 w-4" />
+          </Button>
+          <Button className="hidden sm:inline-flex">
             <Plus className="mr-2 h-4 w-4" />
             Новий агент
           </Button>

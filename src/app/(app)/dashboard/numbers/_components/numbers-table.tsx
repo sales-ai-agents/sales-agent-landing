@@ -157,32 +157,102 @@ export const NumbersTable = ({ numbers, agents }: NumbersTableProps) => {
     getCoreRowModel: getCoreRowModel(),
   });
 
+  const renderAgentSelect = (number: AgentNumber) => (
+    <Select
+      value={number.agent_id ? String(number.agent_id) : UNASSIGNED_VALUE}
+      onValueChange={(value) => handleAssign(number.id, value)}
+    >
+      <SelectTrigger className="w-full sm:w-[190px]">
+        <SelectValue>{(value) => renderAgentLabel(value, agents)}</SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value={UNASSIGNED_VALUE}>Вибрати агента</SelectItem>
+        {agents.map((agent) => (
+          <SelectItem key={agent.id} value={String(agent.id)}>
+            {agent.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+
   return (
     <div className="border-border bg-card overflow-hidden rounded-xl border">
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id} className="px-4 font-normal">
-                  {flexRender(header.column.columnDef.header, header.getContext())}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows.map((row) => (
-            <TableRow key={row.id}>
-              {row.getVisibleCells().map((cell) => (
-                <TableCell key={cell.id} className="px-4 py-3">
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <div className="divide-border divide-y md:hidden">
+        {numbers.map((number) => {
+          const badge = resolveDisplayBadge(number.source, number.status);
+          const dailyCap = formatDailyCap(number.daily_cap);
+
+          return (
+            <div key={number.id} className="flex flex-col gap-3 p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="truncate font-medium">{number.phone}</p>
+                  {number.provider && (
+                    <p className="text-muted-foreground truncate text-xs">{number.provider}</p>
+                  )}
+                </div>
+                <span
+                  className={cn(
+                    "inline-flex shrink-0 items-center rounded-md px-2 py-0.5 text-xs font-medium",
+                    badge.className
+                  )}
+                >
+                  {badge.label}
+                </span>
+              </div>
+              <div>
+                <p className="text-muted-foreground mb-1 text-xs">Призначений агент</p>
+                {renderAgentSelect(number)}
+              </div>
+              <div className="text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                <span>
+                  Напрямок: {DIRECTION_LABELS[number.direction]}
+                  {dailyCap ? ` · ${dailyCap}` : ""}
+                </span>
+                {number.source === "forward" && (
+                  <span className="flex items-center gap-1.5">
+                    <span
+                      className={cn(
+                        "inline-block h-2 w-2 rounded-full",
+                        number.status === "ready" ? "bg-success" : "bg-warning"
+                      )}
+                    />
+                    {number.status === "ready" ? "Активна" : "Очікує підтвердження"}
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="hidden md:block">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id} className="px-4 font-normal">
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.map((row) => (
+              <TableRow key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id} className="px-4 py-3">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 };

@@ -25,13 +25,13 @@ export const Pagination = ({
   const endRow = Math.min((currentPage + 1) * pageSize, total);
 
   return (
-    <div className="flex items-center justify-between">
-      <p className="text-muted-foreground text-sm">
+    <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
+      <p className="text-muted-foreground order-2 text-sm sm:order-1">
         {total > 0
           ? `Показано ${startRow}-${endRow} з ${formatNumber(total)} ${itemLabel}`
           : "Немає результатів"}
       </p>
-      <div className="flex items-center gap-1">
+      <div className="order-1 flex items-center gap-1 sm:order-2">
         <Button
           variant="outline"
           size="icon"

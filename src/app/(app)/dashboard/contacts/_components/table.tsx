@@ -27,6 +27,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { Contact } from "@dashboard/types";
 import { getTagColor, formatConsentLabel, formatLastCallResult } from "../_lib/utils";
+import { ContactCard } from "./contact-card";
 
 const columnHelper = createColumnHelper<Contact>();
 
@@ -176,49 +177,70 @@ export const Table = ({
     initialState: { pagination: { pageSize } },
   });
 
+  const rows = table.getRowModel().rows;
+
   return (
-    <UiTable>
-      <TableHeader>
-        {table.getHeaderGroups().map((headerGroup) => (
-          <TableRow key={headerGroup.id} className="bg-muted/50">
-            {headerGroup.headers.map((header) => {
-              const meta = header.column.columnDef.meta as { className?: string } | undefined;
-              return (
-                <TableHead key={header.id} className={cn("px-4", meta?.className)}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(header.column.columnDef.header, header.getContext())}
-                </TableHead>
-              );
-            })}
-          </TableRow>
-        ))}
-      </TableHeader>
-      <TableBody>
-        {table.getRowModel().rows.length === 0 ? (
-          <TableRow>
-            <TableCell
-              colSpan={columns.length}
-              className="text-muted-foreground px-4 py-12 text-center"
-            >
-              Нічого не знайдено
-            </TableCell>
-          </TableRow>
+    <>
+      <div className="divide-border divide-y sm:hidden">
+        {rows.length === 0 ? (
+          <p className="text-muted-foreground px-4 py-12 text-center text-sm">Нічого не знайдено</p>
         ) : (
-          table.getRowModel().rows.map((row) => (
-            <TableRow key={row.id}>
-              {row.getVisibleCells().map((cell) => {
-                const meta = cell.column.columnDef.meta as { className?: string } | undefined;
-                return (
-                  <TableCell key={cell.id} className={cn("px-4 py-3", meta?.className)}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                );
-              })}
-            </TableRow>
+          rows.map((row) => (
+            <ContactCard
+              key={row.id}
+              contact={row.original}
+              onDelete={onDelete}
+              onToggleDoNotCall={onToggleDoNotCall}
+            />
           ))
         )}
-      </TableBody>
-    </UiTable>
+      </div>
+
+      <div className="hidden sm:block">
+        <UiTable>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id} className="bg-muted/50">
+                {headerGroup.headers.map((header) => {
+                  const meta = header.column.columnDef.meta as { className?: string } | undefined;
+                  return (
+                    <TableHead key={header.id} className={cn("px-4", meta?.className)}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="text-muted-foreground px-4 py-12 text-center"
+                >
+                  Нічого не знайдено
+                </TableCell>
+              </TableRow>
+            ) : (
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell) => {
+                    const meta = cell.column.columnDef.meta as { className?: string } | undefined;
+                    return (
+                      <TableCell key={cell.id} className={cn("px-4 py-3", meta?.className)}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </UiTable>
+      </div>
+    </>
   );
 };

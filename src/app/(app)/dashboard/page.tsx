@@ -25,6 +25,7 @@ import { KpiCard } from "./_components/kpi-card";
 import { ChartLegend } from "./_components/chart-legend";
 import { AgentEfficiencyRow } from "./_components/agent-efficiency-row";
 import { RecentCallRow } from "./_components/recent-call-row";
+import { RecentCallCard } from "./_components/recent-call-card";
 
 const PERIOD_OPTIONS = [
   { label: "7 днів", value: 7 },
@@ -189,30 +190,42 @@ const DashboardPage = () => {
           </Link>
         </div>
         <div className="border-border bg-card overflow-hidden rounded-xl border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="px-4">Клієнт</TableHead>
-                <TableHead className="px-4">Агент</TableHead>
-                <TableHead className="px-4">Тривалість</TableHead>
-                <TableHead className="px-4">Результат</TableHead>
-                <TableHead className="px-4">Час</TableHead>
-                <TableHead className="w-8 px-2" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {recentCalls.map((call) => (
-                <RecentCallRow key={call.id} call={call} agents={agents} />
-              ))}
-              {recentCalls.length === 0 && (
+          <div className="hidden sm:block">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={6} className="text-muted-foreground px-4 py-6 text-center">
-                    Дзвінків поки немає
-                  </TableCell>
+                  <TableHead className="px-4">Клієнт</TableHead>
+                  <TableHead className="px-4">Агент</TableHead>
+                  <TableHead className="px-4">Тривалість</TableHead>
+                  <TableHead className="px-4">Результат</TableHead>
+                  <TableHead className="px-4">Час</TableHead>
+                  <TableHead className="w-8 px-2" />
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {recentCalls.map((call) => (
+                  <RecentCallRow key={call.id} call={call} agents={agents} />
+                ))}
+                {recentCalls.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-muted-foreground px-4 py-6 text-center">
+                      Дзвінків поки немає
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+          <div className="sm:hidden">
+            {recentCalls.map((call) => (
+              <RecentCallCard key={call.id} call={call} agents={agents} />
+            ))}
+            {recentCalls.length === 0 && (
+              <p className="text-muted-foreground px-4 py-6 text-center text-sm">
+                Дзвінків поки немає
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </div>

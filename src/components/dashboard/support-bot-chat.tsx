@@ -146,7 +146,7 @@ export const SupportBotChat = ({ onClose }: SupportBotChatProps) => {
   };
 
   return (
-    <div className="bg-background fixed right-6 bottom-24 z-50 flex h-130 w-95 flex-col overflow-hidden rounded-2xl border shadow-2xl">
+    <div className="bg-background fixed right-3 bottom-24 left-3 z-50 flex h-130 flex-col overflow-hidden rounded-2xl border shadow-2xl sm:right-6 sm:left-auto sm:w-95">
       <header className="flex items-center justify-between border-b px-4 py-3">
         <div className="flex items-center gap-2">
           <div className="bg-primary flex h-8 w-8 items-center justify-center rounded-full">

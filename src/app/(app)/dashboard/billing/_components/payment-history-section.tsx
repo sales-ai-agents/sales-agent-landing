@@ -39,7 +39,7 @@ export const PaymentHistorySection = ({
   const visiblePayments = showAll ? payments : payments.slice(0, INITIAL_PAYMENT_COUNT);
 
   return (
-    <section className="border-border bg-background rounded-2xl border p-6">
+    <section className="border-border bg-background rounded-2xl border p-4 sm:p-6">
       <h2 className="text-muted-foreground mb-4 text-sm font-medium">Історія платежів</h2>
 
       {isLoading ? (
@@ -70,22 +70,30 @@ export const PaymentHistorySection = ({
         </div>
       ) : (
         <>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {["Дата", "Опис", "Сума", "Статус", "Інвойс"].map((heading) => (
-                  <TableHead key={heading} className="px-3">
-                    {heading}
-                  </TableHead>
+          <div className="divide-border divide-y sm:hidden">
+            {visiblePayments.map((payment) => (
+              <PaymentCard key={payment.id} payment={payment} />
+            ))}
+          </div>
+
+          <div className="hidden sm:block">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  {["Дата", "Опис", "Сума", "Статус", "Інвойс"].map((heading) => (
+                    <TableHead key={heading} className="px-3">
+                      {heading}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {visiblePayments.map((payment) => (
+                  <PaymentRow key={payment.id} payment={payment} />
                 ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {visiblePayments.map((payment) => (
-                <PaymentRow key={payment.id} payment={payment} />
-              ))}
-            </TableBody>
-          </Table>
+              </TableBody>
+            </Table>
+          </div>
 
           {payments.length > INITIAL_PAYMENT_COUNT && (
             <div className="mt-3 text-center">
@@ -108,40 +116,64 @@ interface PaymentRowProps {
   payment: PaymentHistoryItem;
 }
 
-const PaymentRow = ({ payment }: PaymentRowProps) => {
+const getPaymentDate = (payment: PaymentHistoryItem): string =>
+  payment.paid_at ?? payment.created_at;
+
+const formatPaymentDescription = (payment: PaymentHistoryItem): string => {
+  const period = new Date(getPaymentDate(payment)).toLocaleString("uk-UA", {
+    month: "long",
+    year: "numeric",
+  });
+  return `Тариф ${payment.plan.toUpperCase()} — ${period}`;
+};
+
+const PaymentAmount = ({ payment }: { payment: PaymentHistoryItem }) => {
   const displayUsd = payment.price_usd != null ? `$${payment.price_usd}` : null;
-  const paymentDate = payment.paid_at ?? payment.created_at;
 
   return (
-    <TableRow>
-      <TableCell className="px-3 py-2.5">{formatDateShort(paymentDate)}</TableCell>
-      <TableCell className="px-3 py-2.5">
-        Тариф {payment.plan.toUpperCase()} —{` `}
-        {new Date(paymentDate).toLocaleString("uk-UA", {
-          month: "long",
-          year: "numeric",
-        })}
-      </TableCell>
-      <TableCell className="px-3 py-2.5 font-medium">
-        <div className="flex flex-col">
-          <span>{displayUsd ?? `${formatNumber(payment.amount_uah)} грн`}</span>
-          {displayUsd && (
-            <span className="text-muted-foreground text-xs font-normal">
-              {formatNumber(payment.amount_uah)} грн
-              {payment.usd_rate ? ` (${payment.usd_rate.toFixed(2)} ₴/$)` : ""}
-            </span>
-          )}
-        </div>
-      </TableCell>
-      <TableCell className="px-3 py-2.5">
-        <PaymentStatusLabel status={payment.status} />
-      </TableCell>
-      <TableCell className="px-3 py-2.5">
-        <ReceiptCell payment={payment} />
-      </TableCell>
-    </TableRow>
+    <div className="flex flex-col">
+      <span>{displayUsd ?? `${formatNumber(payment.amount_uah)} грн`}</span>
+      {displayUsd && (
+        <span className="text-muted-foreground text-xs font-normal">
+          {formatNumber(payment.amount_uah)} грн
+          {payment.usd_rate ? ` (${payment.usd_rate.toFixed(2)} ₴/$)` : ""}
+        </span>
+      )}
+    </div>
   );
 };
+
+const PaymentRow = ({ payment }: PaymentRowProps) => (
+  <TableRow>
+    <TableCell className="px-3 py-2.5">{formatDateShort(getPaymentDate(payment))}</TableCell>
+    <TableCell className="px-3 py-2.5">{formatPaymentDescription(payment)}</TableCell>
+    <TableCell className="px-3 py-2.5 font-medium">
+      <PaymentAmount payment={payment} />
+    </TableCell>
+    <TableCell className="px-3 py-2.5">
+      <PaymentStatusLabel status={payment.status} />
+    </TableCell>
+    <TableCell className="px-3 py-2.5">
+      <ReceiptCell payment={payment} />
+    </TableCell>
+  </TableRow>
+);
+
+const PaymentCard = ({ payment }: PaymentRowProps) => (
+  <div className="flex flex-col gap-2 py-3">
+    <div className="flex items-start justify-between gap-3">
+      <div className="min-w-0">
+        <p className="truncate text-sm font-medium">{formatPaymentDescription(payment)}</p>
+        <p className="text-muted-foreground text-xs">{formatDateShort(getPaymentDate(payment))}</p>
+      </div>
+      <PaymentStatusLabel status={payment.status} />
+    </div>
+    <div className="flex items-end justify-between gap-3 text-sm font-medium">
+      <PaymentAmount payment={payment} />
+      <ReceiptCell payment={payment} />
+    </div>
+  </div>
+);
 
 const ReceiptCell = ({ payment }: { payment: PaymentHistoryItem }) => {
   const [isDownloading, setIsDownloading] = useState(false);

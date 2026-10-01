@@ -157,7 +157,9 @@ const CreateAgentPage = () => {
       <StepIndicator currentStep={step} />
 
       <form onSubmit={handleSubmit} noValidate className="space-y-6">
-        <div className="border-border bg-background rounded-2xl border p-6">{renderStep()}</div>
+        <div className="border-border bg-background rounded-2xl border p-4 sm:p-6">
+          {renderStep()}
+        </div>
 
         <div className="flex justify-between">
           <Button type="button" variant="outline" size="sm" onClick={handleBack}>

@@ -86,7 +86,9 @@ export const PlanComparison = ({ currentPlan, newPlan, isSamePlan }: PlanCompari
             key={row.key}
             className={cn(
               "grid items-center gap-x-4 px-4 py-3",
-              showCurrent ? "grid-cols-[1fr_auto_auto]" : "grid-cols-[1fr_auto]",
+              showCurrent
+                ? "grid-cols-[1fr_auto] sm:grid-cols-[1fr_auto_auto]"
+                : "grid-cols-[1fr_auto]",
               !isLast && "border-b"
             )}
           >
@@ -96,7 +98,7 @@ export const PlanComparison = ({ currentPlan, newPlan, isSamePlan }: PlanCompari
             </div>
 
             {showCurrent && (
-              <div className="flex justify-end sm:min-w-28">
+              <div className="hidden justify-end sm:flex sm:min-w-28">
                 <ComparisonValue value={row.current} tone="current" />
               </div>
             )}

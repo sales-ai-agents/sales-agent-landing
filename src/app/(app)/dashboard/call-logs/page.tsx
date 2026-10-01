@@ -118,12 +118,12 @@ const CallLogsPage = () => {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-center justify-between">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold">Дзвінки</h1>
           <p className="text-muted-foreground text-sm">Журнал всіх дзвінків ваших ШІ-агентів</p>
         </div>
-        <Button variant="outline" className="px-6" onClick={handleExport}>
+        <Button variant="outline" className="w-full px-6 sm:w-auto" onClick={handleExport}>
           <Download className="mr-2 h-4 w-4" />
           Експорт CSV
         </Button>
@@ -143,9 +143,9 @@ const CallLogsPage = () => {
       <Tabs
         value={statusTab}
         onValueChange={handleStatusTabChange}
-        className="border-border bg-card w-full rounded-lg border px-4 pt-1"
+        className="border-border bg-card w-full overflow-x-auto rounded-lg border px-4 pt-1"
       >
-        <TabsList variant="line" aria-label="Фільтр статусу дзвінків">
+        <TabsList variant="line" className="w-max min-w-full" aria-label="Фільтр статусу дзвінків">
           {STATUS_TABS.map((tab) => (
             <TabsTrigger
               key={tab.key}

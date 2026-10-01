@@ -1,6 +1,5 @@
 export { AddContactDialog } from "./add-contact-dialog";
 export { AudioPlayer } from "./audio-player";
-export { CallLogDetailDrawer } from "./call-log-detail-drawer";
 export { CallsChart } from "./calls-chart";
 export { ChangePlanDialog } from "./change-plan-dialog";
 export { DashboardHeader } from "./header";

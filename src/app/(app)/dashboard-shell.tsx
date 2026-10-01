@@ -20,11 +20,11 @@ const DashboardShell = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <OnboardingWrapper>
-      <div className="flex h-screen px-5 py-8">
+      <div className="flex h-screen flex-col px-4 py-4 md:flex-row md:px-5 md:py-8">
         <Sidebar />
-        <div className="ml-5 flex flex-1 flex-col">
+        <div className="flex min-w-0 flex-1 flex-col md:ml-5">
           <DashboardHeader />
-          <main className="bg-primary/5 flex-1 overflow-y-auto scroll-smooth rounded-xl px-6 py-8">
+          <main className="bg-primary/5 flex-1 overflow-y-auto scroll-smooth rounded-xl px-4 py-6 md:px-6 md:py-8">
             {children}
           </main>
         </div>

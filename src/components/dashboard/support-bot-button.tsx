@@ -11,7 +11,7 @@ export const SupportBotButton = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div id="onboarding-support-btn" className="fixed right-3 bottom-0 z-50">
+    <div id="onboarding-support-btn" className="fixed right-3 -bottom-4 z-50">
       <AnimatePresence>
         {isOpen && (
           <motion.div

@@ -106,7 +106,7 @@ const ContactsPage = () => {
         description={
           <>
             <p className="text-muted-foreground mt-1 text-lg">Додайте перший контакт, щоб почати</p>
-            <div className="mt-4 flex justify-center gap-3">
+            <div className="mt-4 flex flex-col justify-center gap-3 sm:flex-row">
               <Button variant="outline" onClick={() => setShowUploadDialog(true)}>
                 <Upload className="mr-2 h-4 w-4" />
                 Імпорт контактів
@@ -147,14 +147,14 @@ const ContactsPage = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="text-2xl font-bold">Контакти</h1>
           <p className="text-muted-foreground text-sm">
             Керуйте базою контактів для дзвінків ШІ-агента
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 lg:flex lg:w-auto">
           <Button variant="outline" className="px-6" onClick={() => setShowExportDialog(true)}>
             <Download className="mr-2 h-4 w-4" />
             Експорт CSV
@@ -194,7 +194,7 @@ const ContactsPage = () => {
         />
       </div>
 
-      <div className="relative max-w-sm">
+      <div className="relative w-full max-w-full sm:max-w-sm">
         <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
         <Input
           aria-label="Пошук контактів"

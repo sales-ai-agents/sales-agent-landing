@@ -15,10 +15,10 @@ export const StepIndicator = ({ currentStep }: StepIndicatorProps) => {
         const isCurrent = index === currentStep;
 
         return (
-          <div key={index} className="flex items-center">
+          <div key={index} className={cn("flex items-center", index < TOTAL_STEPS - 1 && "flex-1")}>
             <div
               className={cn(
-                "flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-colors",
+                "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-medium transition-colors",
                 isCompleted || isCurrent
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground"
@@ -29,7 +29,7 @@ export const StepIndicator = ({ currentStep }: StepIndicatorProps) => {
             {index < TOTAL_STEPS - 1 && (
               <div
                 className={cn(
-                  "mx-2 h-0.5 w-10",
+                  "mx-2 h-0.5 max-w-10 min-w-4 flex-1",
                   index < currentStep ? "bg-primary" : "bg-muted-foreground"
                 )}
               />
