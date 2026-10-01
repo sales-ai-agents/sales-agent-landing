@@ -79,18 +79,16 @@ export const GoogleSheetsCard = ({
   return (
     <div className="border-border bg-background rounded-xl border p-5">
       <div className="flex items-start gap-4">
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-green-100">
-          <FileSpreadsheet className="h-10 w-10 text-green-600" />
+        <div className="bg-success/15 flex h-16 w-16 shrink-0 items-center justify-center rounded-full">
+          <FileSpreadsheet className="text-success h-8 w-8" />
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium">Google Sheets</p>
           {isError ? (
             <>
               <div className="mt-1 flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
-                <span className="text-xs font-medium text-red-600 dark:text-red-400">
-                  Помилка синхронізації
-                </span>
+                <span className="bg-destructive h-1.5 w-1.5 rounded-full" />
+                <span className="text-destructive text-xs font-medium">Помилка синхронізації</span>
               </div>
               <p className="text-muted-foreground mt-1 text-xs">
                 {error === "token_revoked"
@@ -103,7 +101,7 @@ export const GoogleSheetsCard = ({
           ) : connected ? (
             <>
               <div className="mt-1 flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                <span className="bg-success h-1.5 w-1.5 rounded-full" />
                 <span className="text-muted-foreground text-xs">
                   {email ? "Підключено як" : "Підключено"}
                 </span>
@@ -113,7 +111,7 @@ export const GoogleSheetsCard = ({
           ) : (
             <>
               <div className="mt-1 flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-gray-400" />
+                <span className="bg-muted-foreground h-1.5 w-1.5 rounded-full" />
                 <span className="text-muted-foreground text-xs">Не підключено</span>
               </div>
               <p className="text-muted-foreground mt-1 text-xs">

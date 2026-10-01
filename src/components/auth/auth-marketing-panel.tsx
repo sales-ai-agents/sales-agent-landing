@@ -103,7 +103,7 @@ export function AuthMarketingPanel({ variant = "sign-in" }: AuthMarketingPanelPr
           </>
         )}
 
-        <div className="border-border/50 mt-8 max-w-xs rounded-lg border bg-white px-5 py-9">
+        <div className="border-border/50 bg-card mt-8 max-w-xs rounded-lg border px-5 py-9">
           <div className="space-y-3">
             {BENEFITS.map(({ icon: Icon, title, description }) => (
               <div key={title} className="flex items-center gap-4">

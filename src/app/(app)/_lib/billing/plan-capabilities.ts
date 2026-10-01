@@ -89,15 +89,6 @@ const resolvePlanTier = (plan: BillingPlan | undefined): PlanTier => {
 export const getPlanCapabilities = (plan: BillingPlan | undefined): PlanCapabilities =>
   PLAN_CAPABILITIES[resolvePlanTier(plan)];
 
-const resolvePlanTierByKey = (planKey: string | undefined): PlanTier => {
-  const tier = planKey as PlanTier | undefined;
-
-  return tier && PLAN_TIERS.includes(tier) ? tier : "trial";
-};
-
-export const getPlanNumberAllowance = (planKey: string | undefined): number =>
-  PLAN_CAPABILITIES[resolvePlanTierByKey(planKey)].phoneNumbers;
-
 export const formatIntegrations = (level: IntegrationsLevel): string => INTEGRATIONS_LABELS[level];
 
 export const formatSupport = (level: SupportLevel): string => SUPPORT_LABELS[level];

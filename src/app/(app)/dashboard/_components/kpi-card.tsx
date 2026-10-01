@@ -21,7 +21,7 @@ export const KpiCard = ({
   periodLabel,
 }: KpiCardProps) => {
   return (
-    <div className="border-primary/35 rounded-xl border bg-white p-5">
+    <div className="border-primary/35 bg-card rounded-xl border p-5">
       <div className="flex items-center gap-2">
         <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${iconBg}`}>
           {icon}
@@ -50,7 +50,7 @@ const DeltaBadge = ({ value }: { value: number | null }) => {
   return (
     <span
       className={`inline-flex items-center gap-0.5 text-sm font-medium ${
-        isPositive ? "text-green-600" : "text-red-500"
+        isPositive ? "text-success" : "text-destructive"
       }`}
     >
       {isPositive ? <ArrowUp className="h-3.5 w-3.5" /> : <ArrowDown className="h-3.5 w-3.5" />}

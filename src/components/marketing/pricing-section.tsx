@@ -89,7 +89,10 @@ function PricingCard({ plan }: PricingCardProps) {
       <div className="flex items-baseline justify-center gap-2">
         <span className="text-5xl font-semibold">{plan.price}</span>
         <span
-          className={cn("text-4xl font-medium", isFeatured ? "text-white/60" : "text-gray-400")}
+          className={cn(
+            "text-4xl font-medium",
+            isFeatured ? "text-white/60" : "text-muted-foreground"
+          )}
         >
           {plan.period}
         </span>

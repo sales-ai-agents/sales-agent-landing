@@ -149,7 +149,7 @@ export const StepNumberConnect = ({ onConnected }: StepNumberConnectProps) => {
         <div className="flex items-center justify-between">
           <Label htmlFor="sip-address">SIP-адреса</Label>
           {isVerified && (
-            <span className="flex items-center gap-1 text-xs font-medium text-green-600">
+            <span className="text-success flex items-center gap-1 text-xs font-medium">
               <Check className="h-3.5 w-3.5" />
               Підключення успішне
             </span>

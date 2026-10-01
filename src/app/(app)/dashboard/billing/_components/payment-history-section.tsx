@@ -4,7 +4,15 @@ import { useState } from "react";
 import { AlertTriangle, Download, History, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui";
+import {
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui";
 import { ApiError, apiGet } from "@/lib/api-client";
 import { apiUrl } from "@/lib/api-config";
 import { formatDateShort, formatNumber } from "@/lib/utils";
@@ -62,27 +70,22 @@ export const PaymentHistorySection = ({
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b">
-                  {["Дата", "Опис", "Сума", "Статус", "Інвойс"].map((heading) => (
-                    <th
-                      key={heading}
-                      className="text-muted-foreground px-3 py-2 text-left text-sm font-medium"
-                    >
-                      {heading}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {visiblePayments.map((payment) => (
-                  <PaymentRow key={payment.id} payment={payment} />
+          <Table>
+            <TableHeader>
+              <TableRow>
+                {["Дата", "Опис", "Сума", "Статус", "Інвойс"].map((heading) => (
+                  <TableHead key={heading} className="px-3">
+                    {heading}
+                  </TableHead>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {visiblePayments.map((payment) => (
+                <PaymentRow key={payment.id} payment={payment} />
+              ))}
+            </TableBody>
+          </Table>
 
           {payments.length > INITIAL_PAYMENT_COUNT && (
             <div className="mt-3 text-center">
@@ -110,16 +113,16 @@ const PaymentRow = ({ payment }: PaymentRowProps) => {
   const paymentDate = payment.paid_at ?? payment.created_at;
 
   return (
-    <tr className="border-b last:border-0">
-      <td className="px-3 py-2.5">{formatDateShort(paymentDate)}</td>
-      <td className="px-3 py-2.5">
+    <TableRow>
+      <TableCell className="px-3 py-2.5">{formatDateShort(paymentDate)}</TableCell>
+      <TableCell className="px-3 py-2.5">
         Тариф {payment.plan.toUpperCase()} —{` `}
         {new Date(paymentDate).toLocaleString("uk-UA", {
           month: "long",
           year: "numeric",
         })}
-      </td>
-      <td className="px-3 py-2.5 font-medium">
+      </TableCell>
+      <TableCell className="px-3 py-2.5 font-medium">
         <div className="flex flex-col">
           <span>{displayUsd ?? `${formatNumber(payment.amount_uah)} грн`}</span>
           {displayUsd && (
@@ -129,14 +132,14 @@ const PaymentRow = ({ payment }: PaymentRowProps) => {
             </span>
           )}
         </div>
-      </td>
-      <td className="px-3 py-2.5">
+      </TableCell>
+      <TableCell className="px-3 py-2.5">
         <PaymentStatusLabel status={payment.status} />
-      </td>
-      <td className="px-3 py-2.5">
+      </TableCell>
+      <TableCell className="px-3 py-2.5">
         <ReceiptCell payment={payment} />
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   );
 };
 

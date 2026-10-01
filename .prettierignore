@@ -5,3 +5,4 @@ build/
 pnpm-lock.yaml
 *.md
 .ai-governance
+docs/api-types.generated.ts

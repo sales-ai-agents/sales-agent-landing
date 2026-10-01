@@ -3,8 +3,8 @@ import { formatNumber } from "@/lib/utils";
 
 const COLORS = [
   { bg: "bg-primary/10", bar: "bg-primary", text: "text-primary" },
-  { bg: "bg-green-100", bar: "bg-green-500", text: "text-green-500" },
-  { bg: "bg-orange-100", bar: "bg-orange-500", text: "text-orange-500" },
+  { bg: "bg-success/15", bar: "bg-success", text: "text-success" },
+  { bg: "bg-warning/15", bar: "bg-warning", text: "text-warning" },
 ] as const;
 
 export interface AgentEfficiencyRowProps {

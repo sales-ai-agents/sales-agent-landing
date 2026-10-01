@@ -294,12 +294,12 @@ function DemoPlayerCard({
       </div>
 
       {hasError && (
-        <p className="mb-4 text-sm text-red-500" role="alert">
+        <p className="text-destructive mb-4 text-sm" role="alert">
           Помилка завантаження аудіо
         </p>
       )}
 
-      <div className="mb-4 rounded-2xl bg-white px-4 py-4">
+      <div className="bg-card mb-4 rounded-2xl px-4 py-4">
         <div className="flex items-start gap-3">
           <Image
             src="/image/audio-tick.svg"
@@ -313,7 +313,7 @@ function DemoPlayerCard({
         </div>
       </div>
 
-      <div className="mt-auto flex items-center gap-3 rounded-2xl bg-white px-4 py-3">
+      <div className="bg-card mt-auto flex items-center gap-3 rounded-2xl px-4 py-3">
         <div className="bg-primary size-2.5 shrink-0 rounded-full" aria-hidden="true" />
         <p className="text-foreground text-sm font-light md:text-base">
           {demo.result} <span className="font-medium">{demo.resultBold}</span>

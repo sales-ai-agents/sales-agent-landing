@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
 
 const FIELD_CLASSES =
-  "text-foreground border-primary/40 focus-visible:border-primary rounded-xl border bg-white/70 px-4 text-base font-normal shadow-none transition-colors focus-visible:ring-0 focus-visible:ring-offset-0";
+  "text-foreground border-primary/40 focus-visible:border-primary bg-card/70 rounded-xl border px-4 text-base font-normal shadow-none transition-colors focus-visible:ring-0 focus-visible:ring-offset-0";
 
 interface FeedbackFormProps {
   sourcePage?: string;
@@ -74,7 +74,7 @@ export function FeedbackForm({ sourcePage, onSubmitted }: FeedbackFormProps) {
             {...register("message")}
           />
           {errors.message && (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-destructive text-sm">
               {errors.message.message}
             </p>
           )}
@@ -92,7 +92,7 @@ export function FeedbackForm({ sourcePage, onSubmitted }: FeedbackFormProps) {
             {...register("email")}
           />
           {errors.email && (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-destructive text-sm">
               {errors.email.message}
             </p>
           )}
@@ -109,7 +109,7 @@ export function FeedbackForm({ sourcePage, onSubmitted }: FeedbackFormProps) {
               render={({ field }) => (
                 <Checkbox
                   id="feedback-consent"
-                  className="border-primary/60 mt-0.5 size-5 border-2 bg-white"
+                  className="border-primary/60 bg-card mt-0.5 size-5 border-2"
                   checked={field.value}
                   onCheckedChange={(checked) => field.onChange(checked)}
                   aria-invalid={errors.marketingConsent ? true : undefined}
@@ -122,7 +122,7 @@ export function FeedbackForm({ sourcePage, onSubmitted }: FeedbackFormProps) {
             </span>
           </Label>
           {errors.marketingConsent && (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-destructive text-sm">
               {errors.marketingConsent.message}
             </p>
           )}
@@ -130,7 +130,7 @@ export function FeedbackForm({ sourcePage, onSubmitted }: FeedbackFormProps) {
       </div>
 
       {errorMessage && (
-        <p role="alert" className="mt-4 text-center text-sm text-red-600">
+        <p role="alert" className="text-destructive mt-4 text-center text-sm">
           {errorMessage}
         </p>
       )}
@@ -138,7 +138,7 @@ export function FeedbackForm({ sourcePage, onSubmitted }: FeedbackFormProps) {
       <Button
         type="submit"
         disabled={isSubmitting}
-        className="bg-primary hover:bg-primary/90 shadow-primary/30 mt-8 h-12 w-full rounded-full text-lg font-medium text-white disabled:opacity-50"
+        className="bg-primary hover:bg-primary/90 shadow-primary/30 text-primary-foreground mt-8 h-12 w-full rounded-full text-lg font-medium disabled:opacity-50"
       >
         {isSubmitting ? "Надсилаємо…" : "Надіслати"}
       </Button>

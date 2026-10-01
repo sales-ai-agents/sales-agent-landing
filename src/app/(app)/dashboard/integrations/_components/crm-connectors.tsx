@@ -83,7 +83,7 @@ export const CrmConnectors = () => {
                   <p className="text-sm font-medium">{crm.name}</p>
                   <div className="mt-0.5 flex items-center gap-1.5">
                     <span
-                      className={`h-1.5 w-1.5 rounded-full ${connected ? "bg-green-500" : "bg-gray-400"}`}
+                      className={`h-1.5 w-1.5 rounded-full ${connected ? "bg-success" : "bg-muted-foreground"}`}
                     />
                     <span className="text-muted-foreground text-xs">
                       {connected ? "Підключено" : "Не підключено"}

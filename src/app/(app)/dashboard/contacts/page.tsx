@@ -24,7 +24,7 @@ import { handleMutationError } from "@/lib/mutation-error";
 import { formatNumber, cn } from "@/lib/utils";
 import type { ContactFormData } from "@/lib/schemas";
 import { Table } from "./_components/table";
-import { KpiCard } from "./_components/kpi-card";
+import { ContactKpiCard } from "./_components/contact-kpi-card";
 
 const ContactsPage = () => {
   const { data, isLoading, error, refetch } = useContacts();
@@ -171,21 +171,21 @@ const ContactsPage = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <KpiCard
+        <ContactKpiCard
           icon={<Users className="text-primary h-6 w-6" />}
           iconBg="bg-primary/10"
           title="Усього контактів"
           value={formatNumber(totalContacts)}
           subtitle="Вся ваша база контактів"
         />
-        <KpiCard
-          icon={<Phone className="h-6 w-6 text-green-600" />}
-          iconBg="bg-green-100"
+        <ContactKpiCard
+          icon={<Phone className="text-success h-6 w-6" />}
+          iconBg="bg-success/15"
           title="Оброблено цього місяця"
           value={`${formatNumber(processedThisMonth)} / ${formatNumber(totalContacts)}`}
           subtitle={processedSubtitle}
         />
-        <KpiCard
+        <ContactKpiCard
           icon={<BarChart3 className="text-primary h-6 w-6" />}
           iconBg="bg-primary/10"
           title="Конверсія в цільову дію"
@@ -205,7 +205,7 @@ const ContactsPage = () => {
         />
       </div>
 
-      <div className="border-border flex flex-wrap gap-2 rounded-lg border bg-white px-4 py-2">
+      <div className="border-border bg-card flex flex-wrap gap-2 rounded-lg border px-4 py-2">
         <Button
           onClick={() => setActiveTag(null)}
           variant="outline"

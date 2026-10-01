@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { KeyRound, Trash2, Copy, Check } from "lucide-react";
+import { KeyRound, Trash2, Copy, Check, TriangleAlert } from "lucide-react";
 import { toast } from "sonner";
 
 import {
+  Alert,
+  AlertDescription,
   Button,
   Input,
   Label,
@@ -14,6 +16,12 @@ import {
   DialogTitle,
   DialogFooter,
   Badge,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui";
 import { useApiKeys, useCreateApiKey, useDeleteApiKey } from "@dashboard/hooks";
 import { handleMutationError } from "@/lib/mutation-error";
@@ -123,44 +131,46 @@ export const ApiKeysSection = () => {
               Ключів ще немає. Створіть перший API-ключ.
             </p>
           ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b">
-                  <th className="px-2 py-2 text-left font-medium">Назва</th>
-                  <th className="px-2 py-2 text-left font-medium">Префікс</th>
-                  <th className="px-2 py-2 text-left font-medium">Створено</th>
-                  <th className="px-2 py-2 text-left font-medium">Використано</th>
-                  <th className="w-10" />
-                </tr>
-              </thead>
-              <tbody>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="px-2">Назва</TableHead>
+                  <TableHead className="px-2">Префікс</TableHead>
+                  <TableHead className="px-2">Створено</TableHead>
+                  <TableHead className="px-2">Використано</TableHead>
+                  <TableHead className="w-10" />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {keys.map((k) => (
-                  <tr key={k.id} className="border-b last:border-0">
-                    <td className="px-2 py-2.5 font-medium">{k.name || "—"}</td>
-                    <td className="text-muted-foreground px-2 py-2.5">
+                  <TableRow key={k.id}>
+                    <TableCell className="px-2 py-2.5 font-medium">{k.name || "—"}</TableCell>
+                    <TableCell className="text-muted-foreground px-2 py-2.5">
                       <Badge variant="secondary" className="font-mono text-xs">
                         {k.prefix}…
                       </Badge>
-                    </td>
-                    <td className="text-muted-foreground px-2 py-2.5">
+                    </TableCell>
+                    <TableCell className="text-muted-foreground px-2 py-2.5">
                       {formatDate(k.created_at)}
-                    </td>
-                    <td className="text-muted-foreground px-2 py-2.5">
+                    </TableCell>
+                    <TableCell className="text-muted-foreground px-2 py-2.5">
                       {k.last_used_at ? formatDate(k.last_used_at) : "—"}
-                    </td>
-                    <td className="px-2 py-2.5">
-                      <button
+                    </TableCell>
+                    <TableCell className="px-2 py-2.5">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-muted-foreground hover:text-destructive h-7 w-7"
                         onClick={() => handleDelete(k.id)}
-                        className="text-muted-foreground transition-colors hover:text-red-600"
                         aria-label="Видалити ключ"
                       >
                         <Trash2 className="h-4 w-4" />
-                      </button>
-                    </td>
-                  </tr>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           )}
         </div>
       </div>
@@ -173,15 +183,18 @@ export const ApiKeysSection = () => {
 
           {createdKey ? (
             <div className="space-y-3 py-2">
-              <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-700">
-                Збережіть ключ зараз — він більше не буде показаний.
-              </p>
+              <Alert variant="warning">
+                <TriangleAlert />
+                <AlertDescription>
+                  Збережіть ключ зараз — він більше не буде показаний.
+                </AlertDescription>
+              </Alert>
               <Label>Ваш API-ключ</Label>
               <div className="flex gap-2">
                 <Input value={createdKey} readOnly className="font-mono text-xs" />
                 <Button variant="outline" size="sm" onClick={handleCopy}>
                   {copied ? (
-                    <Check className="h-4 w-4 text-green-600" />
+                    <Check className="text-success h-4 w-4" />
                   ) : (
                     <Copy className="h-4 w-4" />
                   )}

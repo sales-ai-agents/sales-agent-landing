@@ -11,6 +11,7 @@ import {
 } from "recharts";
 
 import type { DayStats } from "@dashboard/types";
+import { useThemeColors } from "@/lib/hooks";
 
 interface CallsChartProps {
   data?: DayStats[];
@@ -24,6 +25,8 @@ const formatDayLabel = (dateStr: string): string => {
 };
 
 export const CallsChart = ({ data }: CallsChartProps) => {
+  const colors = useThemeColors();
+
   const chartData = (data ?? []).map((item) => ({
     ...item,
     label: formatDayLabel(item.date),
@@ -45,14 +48,14 @@ export const CallsChart = ({ data }: CallsChartProps) => {
           <XAxis
             dataKey="label"
             className="text-xs"
-            tick={{ fontSize: 12, fill: "#868686" }}
+            tick={{ fontSize: 12, fill: colors.mutedForeground }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
             yAxisId="left"
             className="text-xs"
-            tick={{ fontSize: 12, fill: "#868686" }}
+            tick={{ fontSize: 12, fill: colors.mutedForeground }}
             axisLine={false}
             tickLine={false}
           />
@@ -60,14 +63,14 @@ export const CallsChart = ({ data }: CallsChartProps) => {
             yAxisId="right"
             orientation="right"
             className="text-xs"
-            tick={{ fontSize: 12, fill: "#868686" }}
+            tick={{ fontSize: 12, fill: colors.mutedForeground }}
             axisLine={false}
             tickLine={false}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: "white",
-              border: "1px solid #c0c0c0",
+              backgroundColor: colors.popover,
+              border: `1px solid ${colors.border}`,
               borderRadius: "6px",
               fontSize: "12px",
             }}
@@ -83,7 +86,7 @@ export const CallsChart = ({ data }: CallsChartProps) => {
             yAxisId="left"
             type="monotone"
             dataKey="calls"
-            stroke="#005bff"
+            stroke={colors.primary}
             strokeWidth={2}
             dot={false}
             name="calls"
@@ -92,7 +95,7 @@ export const CallsChart = ({ data }: CallsChartProps) => {
             yAxisId="left"
             type="monotone"
             dataKey="meetings"
-            stroke="#2cb151"
+            stroke={colors.success}
             strokeWidth={2}
             dot={false}
             name="meetings"

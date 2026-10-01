@@ -9,6 +9,7 @@
     "lint": "eslint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "types:api": "openapi-typescript docs/api.yaml -o docs/api-types.generated.ts",
     "prepare": "husky"
   },
   "lint-staged": {
@@ -36,12 +37,10 @@
     "@radix-ui/react-tabs": "^1.1.16",
     "@radix-ui/react-tooltip": "^1.2.11",
     "@react-oauth/google": "^0.13.5",
-    "@shadcn/react": "^0.3.0",
     "@tanstack/react-query": "^5.101.2",
     "@tanstack/react-table": "^8.21.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "cn": "^0.2.6",
     "date-fns": "^4.4.0",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.42.2",
@@ -73,6 +72,7 @@
     "eslint-config-next": "16.2.10",
     "husky": "^9.1.0",
     "lint-staged": "^16.0.0",
+    "openapi-typescript": "^7.13.0",
     "prettier": "^3.9.5",
     "prettier-plugin-tailwindcss": "^0.8.0",
     "tailwindcss": "^4.3.2",

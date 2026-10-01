@@ -51,13 +51,13 @@ export const DangerZone = () => {
   };
 
   return (
-    <section className="rounded-2xl border border-red-500/40 bg-red-500/5 p-5">
+    <section className="border-destructive/40 bg-destructive/5 rounded-2xl border p-5">
       <h2 className="text-destructive text-base font-semibold">Видалення акаунту</h2>
       <p className="text-muted-foreground mt-1 text-xs">
         Безповоротне видалення акаунту та всіх пов&apos;язаних даних
       </p>
 
-      <div className="mt-4 flex flex-col justify-between gap-4 border-t border-red-500/20 pt-4 sm:flex-row sm:items-center">
+      <div className="border-destructive/20 mt-4 flex flex-col justify-between gap-4 border-t pt-4 sm:flex-row sm:items-center">
         <div className="flex items-center gap-3">
           <AlertTriangle className="text-destructive mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
           <p className="text-muted-foreground text-xs">

@@ -1,3 +1,4 @@
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import type { Contact } from "@dashboard/types";
 import { formatConsentLabel, getTagColor } from "@/app/(app)/dashboard/contacts/_lib/utils";
@@ -9,24 +10,24 @@ interface ExportPreviewTableProps {
 export const ExportPreviewTable = ({ contacts }: ExportPreviewTableProps) => {
   return (
     <div className="border-border overflow-hidden rounded-lg border">
-      <table className="w-full text-sm">
-        <thead className="bg-muted/50 text-muted-foreground">
-          <tr className="text-left">
-            <th className="px-4 py-2.5 font-medium">Ім&apos;я</th>
-            <th className="px-4 py-2.5 font-medium">Телефон</th>
-            <th className="px-4 py-2.5 font-medium">Теги</th>
-            <th className="px-4 py-2.5 font-medium">Згода</th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table>
+        <TableHeader className="bg-muted/50">
+          <TableRow>
+            <TableHead>Ім&apos;я</TableHead>
+            <TableHead>Телефон</TableHead>
+            <TableHead>Теги</TableHead>
+            <TableHead>Згода</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {contacts.map((contact) => {
             const consent = formatConsentLabel(contact.consent);
             const tags = contact.tags ?? [];
             return (
-              <tr key={contact.id} className="border-border border-t">
-                <td className="px-4 py-2.5 font-medium">{contact.name || "—"}</td>
-                <td className="text-muted-foreground px-4 py-2.5">{contact.phone}</td>
-                <td className="px-4 py-2.5">
+              <TableRow key={contact.id}>
+                <TableCell className="font-medium">{contact.name || "—"}</TableCell>
+                <TableCell className="text-muted-foreground">{contact.phone}</TableCell>
+                <TableCell>
                   {tags.length === 0 ? (
                     <span className="text-muted-foreground">—</span>
                   ) : (
@@ -48,18 +49,18 @@ export const ExportPreviewTable = ({ contacts }: ExportPreviewTableProps) => {
                       })}
                     </div>
                   )}
-                </td>
-                <td className={cn("px-4 py-2.5", consent.color)}>
+                </TableCell>
+                <TableCell className={consent.color}>
                   <span className="flex items-center gap-1.5">
                     <span className={cn("h-1.5 w-1.5 rounded-full", consent.dot)} />
                     {consent.label}
                   </span>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             );
           })}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 };

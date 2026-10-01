@@ -11,6 +11,12 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui";
 import { CallsChart, PageError, PageLoading } from "@/components/dashboard";
 import { useStats, useAgents, useCallLogs } from "@dashboard/hooks";
@@ -67,7 +73,7 @@ const DashboardPage = () => {
 
       <div>
         <Select value={String(days)} onValueChange={(val) => setDays(Number(val))}>
-          <SelectTrigger className="w-auto bg-white px-10">
+          <SelectTrigger className="bg-card w-auto px-10">
             <SelectValue>{selectedLabel}</SelectValue>
           </SelectTrigger>
           <SelectContent>
@@ -84,13 +90,13 @@ const DashboardPage = () => {
         id="onboarding-stats-cards"
         className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
       >
-        <div className="border-primary/35 col-span-1 rounded-xl border bg-white p-5 sm:col-span-2 lg:col-span-1">
+        <div className="border-primary/35 bg-card col-span-1 rounded-xl border p-5 sm:col-span-2 lg:col-span-1">
           <p className="text-xs font-medium tracking-wide uppercase">Використання хвилин</p>
           <div className="mt-3 flex items-baseline gap-1">
             <span className="text-4xl font-semibold">{minutesUsed}</span>
             <span className="text-muted-foreground text-lg">/ {minutesLimit} хв</span>
           </div>
-          <Progress value={usagePercent} className="mt-3 rounded-full bg-gray-200" />
+          <Progress value={usagePercent} className="bg-muted mt-3 rounded-full" />
           <p className="text-muted-foreground mt-3 text-xs">Залишилось {minutesLeft} хв</p>
           <p className="text-muted-foreground text-xs">
             Вистачить ще на{" "}
@@ -106,8 +112,8 @@ const DashboardPage = () => {
         </div>
 
         <KpiCard
-          icon={<Phone className="h-4 w-4 text-green-600" />}
-          iconBg="bg-green-100"
+          icon={<Phone className="text-success h-4 w-4" />}
+          iconBg="bg-success/15"
           title="Усього дзвінків"
           value={formatNumber(totalCalls)}
           subtitle={`За останні ${days} днів`}
@@ -126,8 +132,8 @@ const DashboardPage = () => {
         />
 
         <KpiCard
-          icon={<Target className="h-4 w-4 text-orange-500" />}
-          iconBg="bg-orange-100"
+          icon={<Target className="text-warning h-4 w-4" />}
+          iconBg="bg-warning/15"
           title="Досягнуто цілі"
           value={formatNumber(successfulCalls)}
           subtitle={
@@ -167,7 +173,7 @@ const DashboardPage = () => {
           {agents.length > 0 && (
             <Link
               href="/dashboard/agents"
-              className="mt-8 flex items-center justify-center rounded-xl bg-black/5 py-2 text-sm text-black/80 transition-colors hover:bg-black/10"
+              className="bg-muted text-muted-foreground hover:bg-muted/70 mt-8 flex items-center justify-center rounded-xl py-2 text-sm transition-colors"
             >
               Перейти до всіх агентів
             </Link>
@@ -182,31 +188,31 @@ const DashboardPage = () => {
             Усі дзвінки →
           </Link>
         </div>
-        <div className="border-border bg-background overflow-hidden rounded-xl border">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b">
-                <th className="px-4 py-3 text-left font-medium">Клієнт</th>
-                <th className="px-4 py-3 text-left font-medium">Агент</th>
-                <th className="px-4 py-3 text-left font-medium">Тривалість</th>
-                <th className="px-4 py-3 text-left font-medium">Результат</th>
-                <th className="px-4 py-3 text-left font-medium">Час</th>
-                <th className="w-8 px-2" />
-              </tr>
-            </thead>
-            <tbody>
+        <div className="border-border bg-card overflow-hidden rounded-xl border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="px-4">Клієнт</TableHead>
+                <TableHead className="px-4">Агент</TableHead>
+                <TableHead className="px-4">Тривалість</TableHead>
+                <TableHead className="px-4">Результат</TableHead>
+                <TableHead className="px-4">Час</TableHead>
+                <TableHead className="w-8 px-2" />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {recentCalls.map((call) => (
                 <RecentCallRow key={call.id} call={call} agents={agents} />
               ))}
               {recentCalls.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="text-muted-foreground px-4 py-6 text-center">
+                <TableRow>
+                  <TableCell colSpan={6} className="text-muted-foreground px-4 py-6 text-center">
                     Дзвінків поки немає
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </div>
     </div>

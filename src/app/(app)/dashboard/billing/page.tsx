@@ -66,10 +66,10 @@ const BillingPage = () => {
   return (
     <div className="space-y-6">
       {isTrial && (
-        <div className="flex flex-col gap-3 rounded-xl border border-red-500 bg-red-500/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="border-destructive bg-destructive/5 flex flex-col gap-3 rounded-xl border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 shrink-0 text-red-500" />
-            <p className="text-sm text-red-500">
+            <AlertTriangle className="text-destructive h-5 w-5 shrink-0" />
+            <p className="text-destructive text-sm">
               Оберіть тариф, щоб не втратити доступ після завершення безкоштовного периоду Trial
             </p>
           </div>

@@ -32,7 +32,9 @@ export function FeedbackFormModal({ open, onClose, sourcePage }: FeedbackFormMod
       title="Залиште зворотній зв'язок"
       cta={
         <>
-          <p className="mb-3 text-center text-base text-gray-500">Готові почати вже зараз?</p>
+          <p className="text-muted-foreground mb-3 text-center text-base">
+            Готові почати вже зараз?
+          </p>
           <Link
             href={SIGN_UP_LINK}
             onClick={() => trackEvent("signup_click", { location: "feedback_modal" })}

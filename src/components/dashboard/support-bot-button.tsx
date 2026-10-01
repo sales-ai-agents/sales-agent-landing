@@ -11,7 +11,7 @@ export const SupportBotButton = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div id="onboarding-support-btn" className="fixed right-3 -bottom-6 z-50">
+    <div id="onboarding-support-btn" className="fixed right-3 bottom-0 z-50">
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -27,7 +27,7 @@ export const SupportBotButton = () => {
 
       <Button
         onClick={() => setIsOpen((prev) => !prev)}
-        className="h-30 w-30 hover:bg-transparent"
+        className="h-20 w-20 hover:bg-transparent"
         size="icon"
         variant="ghost"
         aria-label={isOpen ? "Закрити чат підтримки" : "Відкрити чат підтримки"}
@@ -40,9 +40,9 @@ export const SupportBotButton = () => {
           <Image
             src="/image/support-agent.svg"
             alt="AI-агент помічник-супорт"
-            width={100}
-            height={100}
-            className="h-30 w-30"
+            width={80}
+            height={80}
+            className="h-20 w-20"
             priority
           />
         </motion.div>

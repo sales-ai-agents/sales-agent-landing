@@ -7,13 +7,6 @@ export interface AgentStats {
   talk_minutes_saved: number;
 }
 
-export interface AgentIntegration {
-  id?: string;
-  name?: string;
-  type?: string;
-  connected?: boolean;
-}
-
 export type CallDirection = "" | "inbound" | "outbound";
 
 export interface Agent {
@@ -35,7 +28,6 @@ export interface Agent {
   number_id: number;
   number_phone: string;
   stats?: AgentStats;
-  integrations?: (string | AgentIntegration)[];
 }
 
 export interface AgentDetail extends Agent {

@@ -97,7 +97,7 @@ export default function SignUpPage() {
             {...register("name")}
           />
           {errors.name && (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-destructive text-sm">
               {errors.name.message}
             </p>
           )}
@@ -113,7 +113,7 @@ export default function SignUpPage() {
             {...register("email")}
           />
           {errors.email && (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-destructive text-sm">
               {errors.email.message}
             </p>
           )}
@@ -123,7 +123,7 @@ export default function SignUpPage() {
           <Label htmlFor="password">Пароль</Label>
           <PasswordInput id="password" placeholder="******************" {...register("password")} />
           {errors.password && (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-destructive text-sm">
               {errors.password.message}
             </p>
           )}
@@ -136,10 +136,12 @@ export default function SignUpPage() {
             return (
               <li key={label} className="flex items-center gap-6 text-sm">
                 <Check
-                  className={`h-4 w-4 ${passed ? "text-green-600" : "text-muted-foreground/40"}`}
+                  className={`h-4 w-4 ${passed ? "text-success" : "text-muted-foreground/40"}`}
                   aria-hidden="true"
                 />
-                <span className={passed ? "text-gray-500" : "text-gray-500/60"}>{label}</span>
+                <span className={passed ? "text-muted-foreground" : "text-muted-foreground/60"}>
+                  {label}
+                </span>
               </li>
             );
           })}
@@ -188,7 +190,7 @@ export default function SignUpPage() {
               </span>
             </Label>
             {errors.termsAccepted && (
-              <p role="alert" className="text-sm text-red-600">
+              <p role="alert" className="text-destructive text-sm">
                 {errors.termsAccepted.message}
               </p>
             )}

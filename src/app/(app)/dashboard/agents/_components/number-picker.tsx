@@ -18,16 +18,16 @@ interface StatusBadge {
 }
 
 const STATUS_BADGES: Record<NumberStatus, StatusBadge> = {
-  ready: { label: "Готовий", className: "bg-green-100 text-green-600" },
+  ready: { label: "Готовий", className: "bg-success/15 text-success" },
   verification_required: {
     label: "Потрібна перевірка",
-    className: "bg-gray-300 text-muted-foreground",
+    className: "bg-muted text-muted-foreground",
   },
-  disabled: { label: "Вимкнено", className: "bg-gray-300 text-muted-foreground" },
+  disabled: { label: "Вимкнено", className: "bg-muted text-muted-foreground" },
 };
 
 const resolveBadge = (number: AgentNumber): StatusBadge => {
-  if (number.is_active) return { label: "Основний", className: "bg-green-100 text-green-600" };
+  if (number.is_active) return { label: "Основний", className: "bg-success/15 text-success" };
   return STATUS_BADGES[number.status] ?? STATUS_BADGES.disabled;
 };
 

@@ -11,11 +11,11 @@ interface ConsentDisplay {
 export const formatConsentLabel = (consent: ConsentStatus): ConsentDisplay => {
   switch (consent) {
     case "granted":
-      return { label: "Згода отримана", color: "text-green-600", dot: "bg-green-500" };
+      return { label: "Згода отримана", color: "text-success", dot: "bg-success" };
     case "pending":
-      return { label: "Очікує", color: "text-orange-500", dot: "bg-orange-400" };
+      return { label: "Очікує", color: "text-warning", dot: "bg-warning" };
     default:
-      return { label: "—", color: "text-muted-foreground", dot: "bg-gray-300" };
+      return { label: "—", color: "text-muted-foreground", dot: "bg-muted" };
   }
 };
 

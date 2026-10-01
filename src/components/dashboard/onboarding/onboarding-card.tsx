@@ -53,7 +53,7 @@ export function OnboardingCard({
         />
       </motion.div>
 
-      <div className="relative w-200 max-w-100 rounded-2xl border bg-white p-5 shadow-xl">
+      <div className="bg-card relative w-200 max-w-100 rounded-2xl border p-5 shadow-xl">
         <button
           onClick={handleSkip}
           className="text-muted-foreground hover:text-foreground absolute top-3 right-3 rounded-md p-1 transition-colors"

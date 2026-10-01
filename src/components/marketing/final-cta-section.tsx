@@ -30,7 +30,7 @@ export function FinalCtaSection() {
               onClick={() => trackEvent("test_call_start_click", { location: "final_cta" })}
               className={cn(
                 buttonVariants(),
-                "font-body h-12 w-full rounded-xl bg-white px-7 text-lg font-normal text-black hover:bg-gray-100 sm:w-sm"
+                "font-body h-12 w-full rounded-xl bg-white px-7 text-lg font-normal text-black hover:bg-white/90 sm:w-sm"
               )}
             >
               Запустити тестовий дзвінок

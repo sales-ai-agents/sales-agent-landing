@@ -49,17 +49,17 @@ export const AddContactDialog = ({ onSubmit, onClose }: AddContactDialogProps) =
           <div className="space-y-2">
             <Label htmlFor="contact-name">Ім&apos;я</Label>
             <Input id="contact-name" placeholder="Повне ім'я" {...register("name")} />
-            {errors.name && <p className="text-sm text-red-600">{errors.name.message}</p>}
+            {errors.name && <p className="text-destructive text-sm">{errors.name.message}</p>}
           </div>
           <div className="space-y-2">
             <Label htmlFor="contact-phone">Телефон</Label>
             <Input id="contact-phone" placeholder="+380 XX XXX XXXX" {...register("phone")} />
-            {errors.phone && <p className="text-sm text-red-600">{errors.phone.message}</p>}
+            {errors.phone && <p className="text-destructive text-sm">{errors.phone.message}</p>}
           </div>
           <div className="space-y-2">
             <Label htmlFor="contact-email">Пошта</Label>
             <Input id="contact-email" placeholder="email@example.com" {...register("email")} />
-            {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
+            {errors.email && <p className="text-destructive text-sm">{errors.email.message}</p>}
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>

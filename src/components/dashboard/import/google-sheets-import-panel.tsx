@@ -102,8 +102,8 @@ export const GoogleSheetsImportPanel = ({
     return (
       <div className="space-y-4">
         <div className="border-border flex flex-col items-center rounded-lg border-2 border-dashed p-8 text-center">
-          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-            <Table2 className="h-5 w-5 text-green-600" />
+          <div className="bg-success/15 mb-3 flex h-12 w-12 items-center justify-center rounded-full">
+            <Table2 className="text-success h-5 w-5" />
           </div>
           <p className="text-sm font-medium">Google Sheets не підключено</p>
           <p className="text-muted-foreground mt-1 max-w-2xs text-xs">
@@ -126,7 +126,7 @@ export const GoogleSheetsImportPanel = ({
     <div className="space-y-4">
       <div className="bg-primary/5 flex items-center justify-between gap-3 rounded-lg p-4">
         <div className="flex min-w-0 items-center gap-3">
-          <CheckCircle2 className="h-5 w-5 shrink-0 text-green-600" aria-hidden="true" />
+          <CheckCircle2 className="text-success h-5 w-5 shrink-0" aria-hidden="true" />
           <div className="min-w-0">
             <p className="text-sm font-medium">Google Sheets підключено</p>
             {integration?.account_email && (
@@ -151,7 +151,7 @@ export const GoogleSheetsImportPanel = ({
           {isOpening ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
           ) : (
-            <FileSpreadsheet className="mr-2 h-4 w-4 text-green-600" aria-hidden="true" />
+            <FileSpreadsheet className="text-success mr-2 h-4 w-4" aria-hidden="true" />
           )}
           <span className="truncate">
             {spreadsheet?.name ??

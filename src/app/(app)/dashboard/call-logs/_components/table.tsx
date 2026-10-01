@@ -10,11 +10,19 @@ import {
 } from "@tanstack/react-table";
 import { ExternalLink } from "lucide-react";
 
-import { Badge } from "@/components/ui";
+import {
+  Badge,
+  Table as UiTable,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui";
 import { getOutcomeConfig } from "@/app/(app)/_lib/call-outcome";
 import { formatDuration, formatSlaMinutes, cn } from "@/lib/utils";
-import type { CallLog, Agent, SlaState, CrmSyncState } from "@dashboard/types";
-import { resolveAgentName, formatCrmStatus } from "../_lib/utils";
+import type { CallLog, Agent, SlaState } from "@dashboard/types";
+import { resolveAgentName } from "../_lib/utils";
 
 const columnHelper = createColumnHelper<CallLog>();
 
@@ -23,28 +31,7 @@ interface TableProps {
   agents: Agent[];
   pageCount: number;
   slaMinutes?: number;
-  crmConfigured?: boolean;
 }
-
-const CrmIndicator = ({
-  state,
-  synced,
-}: {
-  state?: CrmSyncState | null;
-  synced?: boolean | null;
-}) => {
-  const { label, color, dot } = formatCrmStatus(state, synced);
-  if (label === "—") {
-    return <span className="text-muted-foreground text-sm">—</span>;
-  }
-
-  return (
-    <span className={cn("inline-flex items-center gap-1.5 text-xs font-medium", color)}>
-      {dot && <span className={cn("inline-block h-1.5 w-1.5 rounded-full", dot)} />}
-      {label}
-    </span>
-  );
-};
 
 const SlaIndicator = ({
   state,
@@ -58,11 +45,11 @@ const SlaIndicator = ({
   switch (state) {
     case "breached": {
       const overdue = minutesLeft !== null ? formatSlaMinutes(minutesLeft) : "0 хв";
-      return <span className="text-xs font-medium text-red-500">⊘ Прострочено {overdue}</span>;
+      return <span className="text-destructive text-xs font-medium">⊘ Прострочено {overdue}</span>;
     }
     case "ok": {
       const left = minutesLeft !== null ? formatSlaMinutes(minutesLeft) : "0 хв";
-      return <span className="text-xs font-medium text-orange-500">⊘ Залишилось {left}</span>;
+      return <span className="text-warning text-xs font-medium">⊘ Залишилось {left}</span>;
     }
     case "handled":
       return null;
@@ -71,9 +58,8 @@ const SlaIndicator = ({
   }
 };
 
-export const Table = ({ data, agents, pageCount, slaMinutes, crmConfigured }: TableProps) => {
+export const Table = ({ data, agents, pageCount, slaMinutes }: TableProps) => {
   const showSla = slaMinutes !== undefined ? slaMinutes > 0 : true;
-  const showCrm = crmConfigured !== false;
 
   const columns = useMemo(() => {
     const cols = [
@@ -141,19 +127,6 @@ export const Table = ({ data, agents, pageCount, slaMinutes, crmConfigured }: Ta
       }),
     ];
 
-    if (showCrm) {
-      cols.push(
-        columnHelper.display({
-          id: "crm",
-          header: "CRM",
-          cell: ({ row }) => (
-            <CrmIndicator state={row.original.crm_state} synced={row.original.crm_synced} />
-          ),
-          meta: { className: "hidden xl:table-cell" },
-        })
-      );
-    }
-
     cols.push(
       columnHelper.display({
         id: "actions",
@@ -167,7 +140,7 @@ export const Table = ({ data, agents, pageCount, slaMinutes, crmConfigured }: Ta
     );
 
     return cols;
-  }, [agents, showSla, showCrm]);
+  }, [agents, showSla]);
 
   const table = useReactTable({
     data,
@@ -178,50 +151,50 @@ export const Table = ({ data, agents, pageCount, slaMinutes, crmConfigured }: Ta
   });
 
   return (
-    <div className="border-border bg-background overflow-hidden overflow-x-auto rounded-xl border">
-      <table className="w-full text-sm">
-        <thead>
+    <div className="border-border bg-card overflow-hidden rounded-xl border">
+      <UiTable>
+        <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id} className="bg-muted/50 border-b">
+            <TableRow key={headerGroup.id} className="bg-muted/50">
               {headerGroup.headers.map((header) => {
                 const meta = header.column.columnDef.meta as { className?: string } | undefined;
                 return (
-                  <th
-                    key={header.id}
-                    className={cn("px-4 py-3 text-left font-medium", meta?.className)}
-                  >
+                  <TableHead key={header.id} className={cn("px-4", meta?.className)}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(header.column.columnDef.header, header.getContext())}
-                  </th>
+                  </TableHead>
                 );
               })}
-            </tr>
+            </TableRow>
           ))}
-        </thead>
-        <tbody>
+        </TableHeader>
+        <TableBody>
           {data.length === 0 ? (
-            <tr>
-              <td colSpan={columns.length} className="text-muted-foreground px-4 py-12 text-center">
+            <TableRow>
+              <TableCell
+                colSpan={columns.length}
+                className="text-muted-foreground px-4 py-12 text-center"
+              >
                 Нічого не знайдено за обраними фільтрами
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ) : (
             table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className="hover:bg-muted/20 border-b last:border-0">
+              <TableRow key={row.id}>
                 {row.getVisibleCells().map((cell) => {
                   const meta = cell.column.columnDef.meta as { className?: string } | undefined;
                   return (
-                    <td key={cell.id} className={cn("px-4 py-3", meta?.className)}>
+                    <TableCell key={cell.id} className={cn("px-4 py-3", meta?.className)}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
+                    </TableCell>
                   );
                 })}
-              </tr>
+              </TableRow>
             ))
           )}
-        </tbody>
-      </table>
+        </TableBody>
+      </UiTable>
     </div>
   );
 };

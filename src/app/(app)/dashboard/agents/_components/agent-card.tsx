@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import type { LucideIcon } from "lucide-react";
-import { Bot, Info, Pause, Play, Plug, FileSpreadsheet, Table, Webhook } from "lucide-react";
+import { Bot, Info, Pause, Play } from "lucide-react";
 
 import {
   Badge,
@@ -14,41 +13,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui";
-import type { Agent, AgentIntegration } from "@dashboard/types";
+import type { Agent } from "@dashboard/types";
 import { cn, formatNumber, formatTimeSaved, formatMinutesUsed } from "@/lib/utils";
-
-const INTEGRATION_LABELS: Record<string, string> = {
-  google_sheets: "Google Sheets",
-  sheets: "Google Sheets",
-  bitrix24: "Bitrix24",
-  keycrm: "KeyCRM",
-  pipedrive: "Pipedrive",
-  webhook: "Webhook",
-  crm: "CRM",
-};
-
-const INTEGRATION_ICONS: Record<string, LucideIcon> = {
-  google_sheets: FileSpreadsheet,
-  sheets: FileSpreadsheet,
-  bitrix24: Table,
-  keycrm: Table,
-  pipedrive: Table,
-  webhook: Webhook,
-  crm: Table,
-};
-
-const resolveIntegrationKey = (item: string | AgentIntegration): string =>
-  (typeof item === "string" ? item : (item.type ?? item.id ?? "")).toLowerCase();
-
-const resolveIntegrationIcon = (item: string | AgentIntegration): LucideIcon =>
-  INTEGRATION_ICONS[resolveIntegrationKey(item)] ?? Plug;
-
-const resolveIntegrationName = (item: string | AgentIntegration): string => {
-  if (typeof item === "string") {
-    return INTEGRATION_LABELS[item.toLowerCase()] ?? item;
-  }
-  return item.name || INTEGRATION_LABELS[item.id?.toLowerCase() ?? ""] || item.id || "Інтеграція";
-};
 
 export interface AgentCardProps {
   agent: Agent;
@@ -67,52 +33,6 @@ const StatItem = ({ label, value, highlight = false }: StatItemProps) => {
     <div>
       <p className="text-muted-foreground text-xs">{label}</p>
       <p className={`text-lg font-semibold ${highlight ? "text-primary" : ""}`}>{value}</p>
-    </div>
-  );
-};
-
-const MAX_VISIBLE_INTEGRATIONS = 3;
-
-interface IntegrationIconsProps {
-  integrations?: (string | AgentIntegration)[];
-}
-
-const IntegrationIcons = ({ integrations }: IntegrationIconsProps) => {
-  const active = (integrations ?? []).filter((item) =>
-    typeof item === "string" ? true : item.connected !== false
-  );
-
-  if (active.length === 0) {
-    return <p className="text-muted-foreground mt-1 text-sm">—</p>;
-  }
-
-  const visible = active.slice(0, MAX_VISIBLE_INTEGRATIONS);
-  const hiddenCount = active.length - visible.length;
-
-  return (
-    <div className="mt-2 flex flex-wrap items-center gap-4">
-      {visible.map((item, index) => {
-        const Icon = resolveIntegrationIcon(item);
-        const name = resolveIntegrationName(item);
-
-        return (
-          <span
-            key={typeof item === "string" ? `${item}-${index}` : `${item.id ?? item.name}-${index}`}
-            title={name}
-            aria-label={name}
-            className="border-border bg-background relative flex size-9 items-center justify-center rounded-full border"
-          >
-            <Icon className="size-4" aria-hidden="true" />
-            <span className="absolute right-0 bottom-0 size-2 rounded-full border-white bg-green-500" />
-          </span>
-        );
-      })}
-
-      {hiddenCount > 0 && (
-        <span className="bg-primary/10 text-primary flex h-6 items-center rounded-full px-2.5 text-xs font-medium">
-          +{hiddenCount}
-        </span>
-      )}
     </div>
   );
 };
@@ -152,10 +72,10 @@ export const AgentCard = ({ agent, onToggle, onTest }: AgentCardProps) => {
           variant="outline"
           className={cn(
             "shrink-0",
-            isActive ? "bg-green-100 text-green-500" : "bg-red-100 text-red-500"
+            isActive ? "bg-success/15 text-success" : "bg-destructive text-destructive"
           )}
         >
-          <span className={cn("mr-1", isActive ? "text-green-500" : "text-red-500")}>●</span>
+          <span className={cn("mr-1", isActive ? "text-success" : "text-destructive")}>●</span>
           {isActive ? "Активний" : "Неактивний"}
         </Badge>
       </div>
@@ -173,11 +93,6 @@ export const AgentCard = ({ agent, onToggle, onTest }: AgentCardProps) => {
           <Progress value={minutesSharePct ?? 0} className="w-full" />
           <span className="text-muted-foreground shrink-0 text-xs">{minutesShareLabel}</span>
         </div>
-      </div>
-
-      <div className="mt-4">
-        <p className="text-muted-foreground text-xs">Інтеграції</p>
-        <IntegrationIcons integrations={agent.integrations} />
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">

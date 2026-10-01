@@ -30,12 +30,12 @@ export const PlanCard = ({ plan, isCurrent, cycle = "month", onSelect }: PlanCar
       <div className="flex items-center justify-between">
         <h3 className="text-3xl font-bold tracking-wide uppercase">{plan.title}</h3>
         {isCurrent && (
-          <span className="bg-primary rounded-full px-2.5 py-0.5 text-xs font-medium text-white">
+          <span className="bg-primary text-primary-foreground rounded-full px-2.5 py-0.5 text-xs font-medium">
             Поточний
           </span>
         )}
         {isAnnual && plan.year && (
-          <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700 dark:bg-green-950/60 dark:text-green-300">
+          <span className="bg-success/15 text-success rounded-full px-2.5 py-0.5 text-xs font-medium">
             {plan.year.months_free > 0
               ? `-${plan.year.months_free} міс`
               : plan.year.saving_usd > 0
@@ -51,7 +51,7 @@ export const PlanCard = ({ plan, isCurrent, cycle = "month", onSelect }: PlanCar
           <span className="text-muted-foreground text-lg">{isAnnual ? " / рік" : " / місяць"}</span>
         </div>
         {cycle === "year" && !plan.year && (
-          <p className="mt-0.5 text-xs text-amber-600 dark:text-amber-400">
+          <p className="text-warning mt-0.5 text-xs">
             Річний період недоступний для цього тарифу (оплата помісячно)
           </p>
         )}
@@ -86,7 +86,7 @@ export const PlanCard = ({ plan, isCurrent, cycle = "month", onSelect }: PlanCar
             className="pointer-events-none w-full rounded-full"
             onClick={onSelect}
           >
-            <Check className="h-3.5 w-3.5 text-green-600" />
+            <Check className="text-success h-3.5 w-3.5" />
             Поточний тариф
           </Button>
         ) : isPro ? (

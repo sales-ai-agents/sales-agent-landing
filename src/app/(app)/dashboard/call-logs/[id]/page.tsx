@@ -28,23 +28,23 @@ const SlaDisplay = ({
   switch (state) {
     case "breached": {
       const overdue = minutesLeft !== null ? formatSlaMinutes(minutesLeft) : "0 хв";
-      return <p className="mt-1 text-sm font-medium text-red-500">⊘ Прострочено {overdue}</p>;
+      return <p className="text-destructive mt-1 text-sm font-medium">⊘ Прострочено {overdue}</p>;
     }
     case "ok": {
       const left = minutesLeft !== null ? formatSlaMinutes(minutesLeft) : "0 хв";
-      return <p className="mt-1 text-sm font-medium text-orange-500">Залишилось {left}</p>;
+      return <p className="text-warning mt-1 text-sm font-medium">Залишилось {left}</p>;
     }
     case "handled":
-      return <p className="mt-1 text-sm font-medium text-green-600">Оброблено</p>;
+      return <p className="text-success mt-1 text-sm font-medium">Оброблено</p>;
     default:
       return <p className="mt-1 text-sm font-medium">—</p>;
   }
 };
 
 const CRM_STATE_MAP: Record<string, { label: string; color: string }> = {
-  synced: { label: "Синхронізовано", color: "text-green-600" },
-  pending: { label: "Очікується", color: "text-orange-500" },
-  failed: { label: "Не синхронізовано", color: "text-red-500" },
+  synced: { label: "Синхронізовано", color: "text-success" },
+  pending: { label: "Очікується", color: "text-warning" },
+  failed: { label: "Не синхронізовано", color: "text-destructive" },
   not_configured: { label: "CRM не підключено", color: "text-muted-foreground" },
 };
 
@@ -205,7 +205,7 @@ const CallDetailPage = () => {
                     <span
                       className={cn(
                         "text-xs font-semibold",
-                        msg.role === "assistant" ? "text-primary" : "text-green-600"
+                        msg.role === "assistant" ? "text-primary" : "text-success"
                       )}
                     >
                       {msg.role === "assistant" ? "ШІ-агент" : "Клієнт"}

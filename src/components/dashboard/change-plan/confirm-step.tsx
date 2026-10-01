@@ -134,7 +134,7 @@ const CycleSelector = ({ plan, cycle, onCycleChange }: CycleSelectorProps) => {
 };
 
 const SavingBadge = ({ children }: { children: ReactNode }) => (
-  <span className="rounded bg-green-100 px-1.5 py-0.5 text-xs font-semibold text-green-700 dark:bg-green-950/60 dark:text-green-300">
+  <span className="bg-success/15 text-success rounded px-1.5 py-0.5 text-xs font-semibold">
     {children}
   </span>
 );

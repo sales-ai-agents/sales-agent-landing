@@ -16,3 +16,6 @@ export {
 } from "./use-auth";
 
 export { useRequireAuth } from "./use-require-auth";
+
+export { useThemeColors } from "./use-theme-colors";
+export type { ThemeColors, ThemeColorKey } from "./use-theme-colors";

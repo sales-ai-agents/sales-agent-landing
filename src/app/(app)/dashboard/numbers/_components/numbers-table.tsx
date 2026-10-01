@@ -9,7 +9,19 @@ import {
 } from "@tanstack/react-table";
 import { toast } from "sonner";
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui";
 import { handleMutationError } from "@/lib/mutation-error";
 import { NUMBER_ERROR_MESSAGES } from "@/lib/error-messages";
 import { cn } from "@/lib/utils";
@@ -113,7 +125,7 @@ export const NumbersTable = ({ numbers, agents }: NumbersTableProps) => {
               <span
                 className={cn(
                   "inline-block h-2 w-2 rounded-full",
-                  isActive ? "bg-green-600" : "bg-orange-500"
+                  isActive ? "bg-success" : "bg-warning"
                 )}
               />
               <span>{isActive ? "Активна" : "Очікує підтвердження"}</span>
@@ -146,34 +158,31 @@ export const NumbersTable = ({ numbers, agents }: NumbersTableProps) => {
   });
 
   return (
-    <div className="border-border bg-background overflow-x-auto rounded-xl border">
-      <table className="w-full text-sm">
-        <thead>
+    <div className="border-border bg-card overflow-hidden rounded-xl border">
+      <Table>
+        <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id} className="border-b">
+            <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                <th
-                  key={header.id}
-                  className="text-muted-foreground px-4 py-3 text-left font-normal"
-                >
+                <TableHead key={header.id} className="px-4 font-normal">
                   {flexRender(header.column.columnDef.header, header.getContext())}
-                </th>
+                </TableHead>
               ))}
-            </tr>
+            </TableRow>
           ))}
-        </thead>
-        <tbody>
+        </TableHeader>
+        <TableBody>
           {table.getRowModel().rows.map((row) => (
-            <tr key={row.id} className="border-b last:border-0">
+            <TableRow key={row.id}>
               {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="px-4 py-3">
+                <TableCell key={cell.id} className="px-4 py-3">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
+                </TableCell>
               ))}
-            </tr>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 };

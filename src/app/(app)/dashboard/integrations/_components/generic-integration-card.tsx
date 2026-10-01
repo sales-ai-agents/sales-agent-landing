@@ -12,7 +12,7 @@ interface GenericIntegrationCardProps {
 const renderIntegrationLogo = (id: string) => {
   if (id === "bitrix24") {
     return (
-      <div className="border-primary flex h-16 w-16 shrink-0 items-center justify-center rounded-full border bg-blue-50 dark:bg-blue-950/40">
+      <div className="border-primary bg-primary/5 flex h-16 w-16 shrink-0 items-center justify-center rounded-full border">
         <span className="text-primary text-xl font-bold">24</span>
       </div>
     );
@@ -20,7 +20,7 @@ const renderIntegrationLogo = (id: string) => {
 
   if (id === "keycrm") {
     return (
-      <div className="bg-primary flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-white">
+      <div className="bg-primary text-primary-foreground flex h-16 w-16 shrink-0 items-center justify-center rounded-full">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="16"
@@ -73,8 +73,8 @@ export const GenericIntegrationCard = ({ integration }: GenericIntegrationCardPr
           {isError ? (
             <>
               <div className="mt-1 flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
-                <span className="text-xs font-medium text-red-600 dark:text-red-400">Помилка</span>
+                <span className="bg-destructive h-1.5 w-1.5 rounded-full" />
+                <span className="text-destructive text-xs font-medium">Помилка</span>
               </div>
               {integration.error && (
                 <p className="text-muted-foreground mt-1 text-xs">{integration.error}</p>
@@ -83,7 +83,7 @@ export const GenericIntegrationCard = ({ integration }: GenericIntegrationCardPr
           ) : integration.connected ? (
             <>
               <div className="mt-1 flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                <span className="bg-success h-1.5 w-1.5 rounded-full" />
                 <span className="text-muted-foreground text-xs">
                   {displayEmail ? "Підключено як" : "Підключено"}
                 </span>
@@ -98,7 +98,7 @@ export const GenericIntegrationCard = ({ integration }: GenericIntegrationCardPr
                 className={
                   integration.ready
                     ? "bg-primary h-1.5 w-1.5 rounded-full"
-                    : "h-1.5 w-1.5 rounded-full bg-gray-400"
+                    : "bg-muted-foreground h-1.5 w-1.5 rounded-full"
                 }
               />
               <span className="text-muted-foreground text-xs">

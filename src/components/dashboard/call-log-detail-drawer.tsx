@@ -2,7 +2,15 @@
 
 import { Play, Bot, User } from "lucide-react";
 
-import { Button, Badge, Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui";
+import {
+  Button,
+  Badge,
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  Skeleton,
+} from "@/components/ui";
 import { getOutcomeConfig } from "@/app/(app)/_lib/call-outcome";
 import { formatDuration, cn } from "@/lib/utils";
 import { useCallDetail } from "@dashboard/hooks";
@@ -35,8 +43,8 @@ export const CallLogDetailDrawer = ({ callId, onClose }: CallLogDetailDrawerProp
           <div className="mt-6 space-y-5">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="space-y-1">
-                <div className="bg-muted h-3 w-20 animate-pulse rounded" />
-                <div className="bg-muted h-5 w-48 animate-pulse rounded" />
+                <Skeleton className="h-3 w-20" />
+                <Skeleton className="h-5 w-48" />
               </div>
             ))}
           </div>

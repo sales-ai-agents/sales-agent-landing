@@ -3,7 +3,18 @@
 import { useMemo, useState } from "react";
 import { Search, Tag } from "lucide-react";
 
-import { Checkbox, Input, Toggle, ToggleGroup } from "@/components/ui";
+import {
+  Checkbox,
+  Input,
+  Toggle,
+  ToggleGroup,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { getTagColor } from "@/app/(app)/_lib/tag-colors";
 import { useContacts } from "@dashboard/hooks";
@@ -75,73 +86,71 @@ export const ContactPicker = ({ selectedIds, onChange }: ContactPickerProps) => 
         ))}
       </ToggleGroup>
 
-      <div className="border-border overflow-hidden rounded-xl border">
-        <div className="max-h-80 overflow-y-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-muted">
-              <tr className="border-b">
-                <th className="w-10 px-4 py-3">
-                  <Checkbox
-                    checked={allVisibleSelected}
-                    onCheckedChange={toggleAllVisible}
-                    aria-label="Обрати всі контакти"
-                    disabled={contacts.length === 0}
-                  />
-                </th>
-                <th className="px-2 py-3 text-left font-medium">Ім&apos;я</th>
-                <th className="px-2 py-3 text-left font-medium">Телефон</th>
-                <th className="px-2 py-3 text-left font-medium">Теги</th>
-              </tr>
-            </thead>
-            <tbody>
-              {contacts.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="text-muted-foreground px-4 py-10 text-center">
-                    {isFetching ? "Завантаження..." : "Контактів не знайдено"}
-                  </td>
-                </tr>
-              ) : (
-                contacts.map((contact) => (
-                  <tr
-                    key={contact.id}
-                    className="hover:bg-muted/20 cursor-pointer border-b last:border-0"
-                    onClick={() => toggleContact(contact.id)}
-                  >
-                    <td className="px-4 py-3">
-                      <Checkbox
-                        checked={selected.has(contact.id)}
-                        onCheckedChange={() => toggleContact(contact.id)}
-                        onClick={(event) => event.stopPropagation()}
-                        aria-label={`Обрати ${contact.name}`}
-                      />
-                    </td>
-                    <td className="px-2 py-3 font-medium">{contact.name}</td>
-                    <td className="text-muted-foreground px-2 py-3">{contact.phone}</td>
-                    <td className="px-2 py-3">
-                      <div className="flex flex-wrap gap-1">
-                        {(contact.tags ?? []).map((tagName) => {
-                          const color = getTagColor(tagName);
-                          return (
-                            <span
-                              key={tagName}
-                              className={cn(
-                                "inline-block rounded px-2 py-0.5 text-xs",
-                                color.bg,
-                                color.text
-                              )}
-                            >
-                              {tagName}
-                            </span>
-                          );
-                        })}
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+      <div className="border-border max-h-80 overflow-y-auto rounded-xl border">
+        <Table>
+          <TableHeader className="bg-muted">
+            <TableRow>
+              <TableHead className="w-10 px-4">
+                <Checkbox
+                  checked={allVisibleSelected}
+                  onCheckedChange={toggleAllVisible}
+                  aria-label="Обрати всі контакти"
+                  disabled={contacts.length === 0}
+                />
+              </TableHead>
+              <TableHead className="px-2">Ім&apos;я</TableHead>
+              <TableHead className="px-2">Телефон</TableHead>
+              <TableHead className="px-2">Теги</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {contacts.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} className="text-muted-foreground px-4 py-10 text-center">
+                  {isFetching ? "Завантаження..." : "Контактів не знайдено"}
+                </TableCell>
+              </TableRow>
+            ) : (
+              contacts.map((contact) => (
+                <TableRow
+                  key={contact.id}
+                  className="cursor-pointer"
+                  onClick={() => toggleContact(contact.id)}
+                >
+                  <TableCell className="px-4 py-3">
+                    <Checkbox
+                      checked={selected.has(contact.id)}
+                      onCheckedChange={() => toggleContact(contact.id)}
+                      onClick={(event) => event.stopPropagation()}
+                      aria-label={`Обрати ${contact.name}`}
+                    />
+                  </TableCell>
+                  <TableCell className="px-2 py-3 font-medium">{contact.name}</TableCell>
+                  <TableCell className="text-muted-foreground px-2 py-3">{contact.phone}</TableCell>
+                  <TableCell className="px-2 py-3">
+                    <div className="flex flex-wrap gap-1">
+                      {(contact.tags ?? []).map((tagName) => {
+                        const color = getTagColor(tagName);
+                        return (
+                          <span
+                            key={tagName}
+                            className={cn(
+                              "inline-block rounded px-2 py-0.5 text-xs",
+                              color.bg,
+                              color.text
+                            )}
+                          >
+                            {tagName}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </div>
 
       {selectedIds.length > 0 && (

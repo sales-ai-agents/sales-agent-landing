@@ -146,7 +146,7 @@ export const SupportBotChat = ({ onClose }: SupportBotChatProps) => {
   };
 
   return (
-    <div className="bg-background fixed right-6 bottom-32 z-50 flex h-130 w-95 flex-col overflow-hidden rounded-2xl border shadow-2xl">
+    <div className="bg-background fixed right-6 bottom-24 z-50 flex h-130 w-95 flex-col overflow-hidden rounded-2xl border shadow-2xl">
       <header className="flex items-center justify-between border-b px-4 py-3">
         <div className="flex items-center gap-2">
           <div className="bg-primary flex h-8 w-8 items-center justify-center rounded-full">
@@ -291,11 +291,29 @@ const ChatBubble = ({ role, content }: ChatBubbleProps) => {
   );
 };
 
+const escapeHtml = (text: string): string =>
+  text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+const sanitizeHref = (href: string): string | null => {
+  const trimmed = href.trim();
+  return /^(https?:|mailto:)/i.test(trimmed) ? trimmed : null;
+};
+
 const formatMarkdown = (text: string): string => {
-  return text
+  return escapeHtml(text)
     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
     .replace(/\*(.*?)\*/g, "<em>$1</em>")
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, label: string, href: string) => {
+      const safeHref = sanitizeHref(href);
+      return safeHref
+        ? `<a href="${safeHref}" target="_blank" rel="noopener noreferrer">${label}</a>`
+        : label;
+    })
     .replace(/^- (.+)$/gm, "<li>$1</li>")
     .replace(/((?:<li>[^]*?<\/li>\s*)+)/g, "<ul>$1</ul>")
     .replace(/\n/g, "<br>");

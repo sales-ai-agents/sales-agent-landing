@@ -73,20 +73,20 @@ export const ExportContactsDialog = ({ search, onClose }: ExportContactsDialogPr
                 value={data.total}
               />
               <ExportStatCard
-                icon={<CheckCircle2 className="h-4 w-4 text-green-600" />}
-                iconBg="bg-green-100"
+                icon={<CheckCircle2 className="text-success h-4 w-4" />}
+                iconBg="bg-success/15"
                 title="Готово до експорту"
                 value={data.exportable}
               />
               <ExportStatCard
-                icon={<AlertTriangle className="h-4 w-4 text-orange-500" />}
-                iconBg="bg-orange-100"
+                icon={<AlertTriangle className="text-warning h-4 w-4" />}
+                iconBg="bg-warning/15"
                 title="Дублікати знайдено"
                 value={data.duplicates}
               />
               <ExportStatCard
-                icon={<XCircle className="h-4 w-4 text-red-500" />}
-                iconBg="bg-red-100"
+                icon={<XCircle className="text-destructive h-4 w-4" />}
+                iconBg="bg-destructive"
                 title="Неправильних номерів"
                 value={data.invalid}
               />

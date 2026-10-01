@@ -49,7 +49,7 @@ export function TrustSection() {
               <div key={item.title} className="relative flex flex-col items-start">
                 {index < TRUST_ITEMS.length - 1 && (
                   <div
-                    className="absolute top-8 -right-10 left-16 h-px bg-gray-600"
+                    className="bg-muted-foreground absolute top-8 -right-10 left-16 h-px"
                     aria-hidden="true"
                   />
                 )}

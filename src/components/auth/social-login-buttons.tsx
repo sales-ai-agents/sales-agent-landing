@@ -110,7 +110,7 @@ export function SocialLoginButtons() {
             onClick={initiateGitHubLogin}
           >
             <GitHubIcon />
-            <span className="text-sm font-normal text-gray-600">Вхід через GitHub</span>
+            <span className="text-muted-foreground text-sm font-normal">Вхід через GitHub</span>
           </Button>
         )}
       </div>

@@ -45,7 +45,7 @@ export const DateRangePicker = ({ value, onChange }: DateRangePickerProps) => {
           <Button
             variant="ghost"
             data-empty={!displayRange?.from}
-            className="data-[empty=true]:text-muted-foreground h-6 justify-start gap-2 p-0! text-left text-sm font-normal aria-expanded:bg-white"
+            className="data-[empty=true]:text-muted-foreground aria-expanded:bg-card h-6 justify-start gap-2 p-0! text-left text-sm font-normal"
           />
         }
       >

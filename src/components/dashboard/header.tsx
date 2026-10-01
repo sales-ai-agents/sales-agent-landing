@@ -15,6 +15,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  Avatar,
+  AvatarFallback,
 } from "@/components/ui";
 import { cn, getInitials } from "@/lib/utils";
 import { DASHBOARD_NAV_ITEMS } from "@/lib/constants";
@@ -103,22 +105,16 @@ export const DashboardHeader = () => {
           </Button>
         </Link>
 
-        {/* TODO: real notifications will come from BE */}
-        {/*<Button*/}
-        {/*  variant="ghost"*/}
-        {/*  size="icon"*/}
-        {/*  className="text-muted-foreground h-9 w-9"*/}
-        {/*  aria-label="Сповіщення"*/}
-        {/*>*/}
-        {/*  <Bell className="h-5 w-5" />*/}
-        {/*</Button>*/}
-
         <DropdownMenu>
           <DropdownMenuTrigger
-            className="bg-primary flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-sm font-medium text-white focus:outline-none"
+            className="cursor-pointer rounded-full focus:outline-none"
             aria-label="Меню користувача"
           >
-            {initials}
+            <Avatar>
+              <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="min-w-50 rounded-xl p-4">
             <div className="mb-2 p-1">
@@ -126,19 +122,19 @@ export const DashboardHeader = () => {
               <p className="text-muted-foreground truncate text-xs">{displayEmail}</p>
             </div>
             <DropdownMenuItem
-              className="cursor-pointer text-gray-500"
+              className="text-muted-foreground cursor-pointer"
               onClick={() => router.push("/dashboard/settings")}
             >
               Профіль
             </DropdownMenuItem>
             <DropdownMenuItem
-              className="cursor-pointer text-gray-500"
+              className="text-muted-foreground cursor-pointer"
               onClick={() => router.push("/dashboard/billing")}
             >
               Тарифи і оплата
             </DropdownMenuItem>
             <DropdownMenuItem
-              className="cursor-pointer text-gray-500"
+              className="text-muted-foreground cursor-pointer"
               onClick={handleLogout}
               disabled={logout.isPending}
             >

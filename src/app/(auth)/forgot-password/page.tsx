@@ -190,7 +190,7 @@ export default function ForgotPasswordPage() {
               {...resetForm.register("password")}
             />
             {resetForm.formState.errors.password && (
-              <p role="alert" className="text-sm text-red-600">
+              <p role="alert" className="text-destructive text-sm">
                 {resetForm.formState.errors.password.message}
               </p>
             )}
@@ -204,10 +204,12 @@ export default function ForgotPasswordPage() {
                 return (
                   <li key={label} className="flex items-center gap-3 text-sm">
                     <Check
-                      className={`h-4 w-4 ${passed ? "text-green-600" : "text-muted-foreground/40"}`}
+                      className={`h-4 w-4 ${passed ? "text-success" : "text-muted-foreground/40"}`}
                       aria-hidden="true"
                     />
-                    <span className={passed ? "text-gray-500" : "text-gray-500/60"}>{label}</span>
+                    <span className={passed ? "text-muted-foreground" : "text-muted-foreground/60"}>
+                      {label}
+                    </span>
                   </li>
                 );
               })}
@@ -222,7 +224,7 @@ export default function ForgotPasswordPage() {
               {...resetForm.register("confirmPassword")}
             />
             {resetForm.formState.errors.confirmPassword && (
-              <p role="alert" className="text-sm text-red-600">
+              <p role="alert" className="text-destructive text-sm">
                 {resetForm.formState.errors.confirmPassword.message}
               </p>
             )}
@@ -300,7 +302,7 @@ export default function ForgotPasswordPage() {
             {...emailForm.register("email")}
           />
           {emailForm.formState.errors.email && (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-destructive text-sm">
               {emailForm.formState.errors.email.message}
             </p>
           )}

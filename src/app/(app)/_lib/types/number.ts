@@ -27,6 +27,9 @@ export interface AgentNumber {
 export interface NumbersResponse {
   ok: boolean;
   numbers: AgentNumber[];
+  limit: number;
+  used: number;
+  can_add: boolean;
 }
 
 export interface NumberPool {

@@ -1,0 +1,4665 @@
+openapi: 3.1.0
+info:
+  title: Calls4u — API кабінету
+  version: "1.0.0"
+  description: |
+    Кабінет клієнта: авторизація, агенти, контакти, обдзвони, журнал дзвінків.
+
+    ## Авторизація
+
+    Два способи, і вибір не довільний:
+
+    * **Кукі `cs_session`** — для браузера. Ставиться сервером при вході
+      (`HttpOnly; Secure; SameSite=Lax`), JS її не бачить. Від фронту
+      потрібне лише `credentials: "include"` на КОЖНОМУ запиті, включно з
+      логіном — інакше браузер її навіть не збереже.
+    * **`Authorization: Bearer <token>`** — для всього, що не браузер:
+      мобільний застосунок, curl, скрипти. І для локальної розробки, бо по
+      http браузер `Secure`-кукі не зберігає в принципі.
+
+    ## Коли в відповіді є `token`, а коли немає
+
+    Правило одне: **токен приходить лише тоді, коли кукі не спрацює.**
+
+    * запит із дозволеного https-домену (прод) → `token` НЕ віддається,
+      сесія вже в кукі;
+    * `localhost`, прев'ю-домен, або запит без `Origin` → `token` є.
+
+    Тобто перевірка на фронті проста: `token` у відповіді є — збережи й
+    шли в `Authorization`; немає — кукі вже стоїть, нічого не роби.
+    Один і той самий код працює в обох середовищах.
+
+    ## CSRF
+
+    Запити, що змінюють дані (POST) по кукі приймаються лише зі свого
+    `Origin` — браузер підставляє його сам, робити нічого не треба. Запит
+    із чужого сайту отримає 401, навіть якщо кукі в браузері є.
+
+    ## Помилки
+
+    Усі відповіді мають поле `ok`. При помилці — `{"ok": false, "error": "<код>"}`.
+    Коди перелічені в кожному ендпоінті; вони стабільні й призначені для
+    коду, а не для показу користувачу.
+
+    ## Вивантаження назовні (вебхуки)
+
+    Рідних конекторів до CRM поки немає. Замість них — вебхук: після кожного
+    завершеного дзвінка ми шлемо `POST` із його підсумком на адресу клієнта.
+    Далі він сам заводить це куди треба — Zapier, Make, n8n або власний
+    скрипт, а через них у Bitrix24, KeyCRM, Pipedrive, Google Sheets.
+
+    Що приходить на його бік:
+
+    ```
+    POST <його URL>
+    Content-Type: application/json; charset=utf-8
+    X-Calls4U-Event: call.completed
+    X-Calls4U-Signature: sha256=<hmac тіла запиту>
+
+    {
+      "event": "call.completed",
+      "account_id": 5,
+      "call": {
+        "id": "...", "phone": "+380931112233",
+        "started_at": "...", "ended_at": "...", "duration_sec": 142,
+        "outcome": "нейтрально", "meeting_scheduled": true,
+        "summary": "...", "manager_note": "",
+        "transcript": [{"role": "assistant", "content": "..."}]
+      }
+    }
+    ```
+
+    Підпис рахується від **сирого тіла** запиту:
+    `HMAC-SHA256(body, secret)`. Клієнт звіряє його й через це знає, що
+    запит справді від нас, а не від того, хто вгадав URL.
+
+    Ми чекаємо будь-яку відповідь із кодом < 400. На `5xx`, `429` і
+    мовчання пробуємо ще: 1 хв, 5 хв, 30 хв, 2 год, 6 год. На `4xx` не
+    повторюємо — приймач сказав, що сам запит поганий.
+
+servers:
+  - url: https://api.calls4u.ai/webhook
+    description: прод
+
+tags:
+  - name: auth
+    description: Вхід, реєстрація, сесія
+  - name: dashboard
+    description: Цифри для головного екрана
+  - name: calls
+    description: Журнал дзвінків — що вже відбулось
+  - name: agents
+    description: Агенти — хто і що говорить
+  - name: contacts
+    description: Контакти — кому дзвонити
+  - name: campaigns
+    description: Обдзвони — запуск дзвінків по контактах
+  - name: webhooks
+    description: Вивантаження дзвінків назовні — у CRM, таблиці, будь-куди
+  - name: billing
+    description: >
+      Баланс і оплата. Окремої ручки «баланс» немає — це чотири:
+      `GET /app/stats` (використано / ліміт / лишилось / бонусні),
+      `GET /app/billing/plans` (тариф, строк, пакети, автосписання),
+      `GET /app/billing/history`, `GET /app/billing/payment-method`.
+  - name: landing
+    description: >
+      Форми лендінгу. Без токена, з браузера, CORS відкритий.
+      Це не кабінет: захист — троттлінг по IP, не авторизація.
+
+paths:
+  /auth/providers:
+    get:
+      tags: [auth]
+      summary: Які способи входу доступні
+      description: Викликати перед показом форми — якщо `google:false`, кнопку не малювати.
+      security: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  password: { type: boolean }
+                  google: { type: boolean }
+                  apple: { type: boolean }
+                  github: { type: boolean }
+          description: OK
+
+  /auth/register:
+    post:
+      tags: [auth]
+      summary: Реєстрація
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, minLength: 8 }
+                name: { type: string, maxLength: 120 }
+                company: { type: string, maxLength: 160 }
+                marketing_consent:
+                  type: boolean
+                  description: >
+                    Окремий необов'язковий чекбокс, за замовчуванням
+                    ПОРОЖНІЙ. Пишеться лише явне true; відсутнє поле =
+                    не погодився.
+      responses:
+        "200":
+          description: Створено; кукі поставлено
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthSuccess" }
+        "400":
+          description: "`invalid_email` · `weak_password` (з полем `detail`) · `invalid_json`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "409":
+          description: "`email_taken`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "429":
+          $ref: "#/components/responses/TooMany"
+
+  /auth/login:
+    post:
+      tags: [auth]
+      summary: Вхід поштою і паролем
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        "200":
+          content: { application/json: { schema: { $ref: "#/components/schemas/AuthSuccess" } } }
+          description: OK
+        "400":
+          description: "`invalid_json` — тіло не розібралось як JSON"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401":
+          description: "`bad_credentials` — одна відповідь і на невірний пароль, і на неіснуючу пошту, щоб форму не можна було використати як перевірку, чи зареєстрований email"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "429":
+          $ref: "#/components/responses/TooMany"
+
+  /auth/social:
+    post:
+      tags: [auth]
+      summary: Вхід через Google, Apple або GitHub
+      description: |
+        Один ендпоінт на три провайдери, але поле різне.
+
+        **Google і Apple** віддають підписаний токен — шли його в `id_token`.
+        Google: `response.credential`. Apple: `response.authorization.id_token`.
+
+        **GitHub** токена не віддає взагалі — лише одноразовий `code` з
+        редіректу. Шли його в `code`, а не в `id_token`: обмін коду на
+        доступ робить сервер своїм секретом.
+
+        Apple присилає ім'я лише при ПЕРШОМУ вході і не в токені — якщо воно
+        є, передай його полем `name`, вдруге його вже не буде.
+
+        ### Шлях GitHub у браузері
+
+        Цей ендпоінт — лише ОСТАННІЙ крок. До нього браузер проходить два,
+        і саме там усе ламалось: GitHub повертав код на сторінку, якої на
+        фронті не існувало, і користувач бачив 404 замість входу.
+
+        ```
+        1. фронт веде на https://github.com/login/oauth/authorize
+           ?client_id=…&redirect_uri=…&scope=read:user%20user:email
+        2. GitHub повертає на redirect_uri з ?code=…&state=…
+           ← сторінка за цим шляхом МАЄ існувати на фронті
+        3. сторінка бере code і шле його СЮДИ
+        ```
+
+        Зареєстровані `redirect_uri` (збіг у GitHub ТОЧНИЙ, символ у символ —
+        ні зайвого слеша в кінці, ні заміни www):
+
+        - `https://calls4u.ai/auth/github/callback`
+        - `https://www.calls4u.ai/auth/github/callback`
+        - `http://localhost:3000/auth/github/callback`
+
+        Код **одноразовий** і живе близько 10 хвилин. Обмінюй одразу і рівно
+        раз: у dev-режимі React монтує компонент двічі, і друга спроба
+        поверне `401 invalid_token` на цілком справному коді — заведи
+        прапорець, інакше шукатимеш помилку не там.
+
+        Запит слати з `credentials: "include"` — інакше сесійна кука не
+        збережеться, і після редіректу користувач знову буде розлогінений.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [provider]
+              properties:
+                provider: { type: string, enum: [google, apple, github] }
+                id_token: { type: string, description: "Google і Apple" }
+                code: { type: string, description: "лише GitHub — код із редіректу" }
+                name: { type: string, maxLength: 120 }
+      responses:
+        "200":
+          content: { application/json: { schema: { $ref: "#/components/schemas/AuthSuccess" } } }
+          description: OK
+        "400":
+          description: "`invalid_json` — тіло не розібралось як JSON"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401":
+          description: >
+            `invalid_token` · `email_not_verified` · `unknown_provider`.
+
+
+            Для GitHub найчастіша причина — код уже використаний або
+            протух: він одноразовий і живе ~10 хвилин.
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "409":
+          description: >
+            `email_taken` — на цю пошту вже є акаунт, створений іншим
+            способом. Запропонуй увійти тим способом, а не реєструватись
+            повторно.
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "501":
+          description: "`provider_not_configured` — ключі провайдера ще не задані на сервері"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "429":
+          $ref: "#/components/responses/TooMany"
+
+  /auth/me:
+    get:
+      tags: [auth]
+      summary: Поточний акаунт
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  account: { $ref: "#/components/schemas/Account" }
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+    patch:
+      tags: [auth]
+      summary: Редагувати профіль
+      description: Передавати лише ті поля, що змінюються.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string, maxLength: 120 }
+                company: { type: string, maxLength: 160 }
+                email: { type: string, format: email }
+                sla_minutes:
+                  type: integer
+                  minimum: 0
+                  maximum: 1440
+                  description: >
+                    Строк реакції на дзвінок без результату. `0` вимикає SLA.
+                    Більше за добу не приймаємо: це вже не строк реакції, а
+                    нагадування, і колонка в журналі перестає щось означати.
+                timezone:
+                  type: string
+                  examples: ["Europe/Kyiv"]
+                  description: >
+                    Назва поясу з бази IANA. Вигаданий рядок відхиляється
+                    (`invalid_timezone`): прийнявши його, ми мовчки зіпсували
+                    б усі звіти — дати рахувались би не в тому дні.
+                short_name: { type: string, maxLength: 80 }
+                website: { type: string, maxLength: 200 }
+                agent_language: { type: string, enum: [uk, ru, en] }
+                require_consent: { type: boolean }
+                ai_disclosure_upfront: { type: boolean }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  account: { $ref: "#/components/schemas/Account" }
+          description: OK
+        "400":
+          description: >
+            `invalid_email` · `nothing_to_update` · `invalid_json` ·
+            `invalid_sla_minutes` · `invalid_timezone` — пояс не з бази
+            IANA · `invalid_language` — мова не з переліку
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "409":
+          description: "`email_taken` — така пошта вже в іншого акаунта"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /auth/password:
+    post:
+      tags: [auth]
+      summary: Змінити пароль
+      description: |
+        Поточний пароль обов'язковий: без нього вкрадена сесія дозволяла б
+        просто змінити пароль і забрати акаунт назовсім.
+
+        Після зміни решта пристроїв виходить — `sessions_closed` показує
+        скільки. Поточна сесія лишається живою.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [current_password, new_password]
+              properties:
+                current_password: { type: string }
+                new_password: { type: string, minLength: 8 }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  sessions_closed: { type: integer }
+          description: OK
+        "400":
+          description: "`weak_password` (з полем `detail`) · `invalid_json`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401":
+          description: "`bad_current_password`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "409":
+          description: "`no_password_login` — акаунт через Google/Apple, пароля немає"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/account:
+    delete:
+      tags: [auth]
+      summary: Видалити акаунт назавжди
+      description: |
+        «Право бути забутим» з п. 7 Політики конфіденційності. Це справжнє
+        видалення, не прапорець: акаунт, агенти, контакти, номери,
+        кампанії, журнал дзвінків, платежі, вебхуки, сесії — і аудіозаписи
+        розмов з диска.
+
+        Пароль вимагається ПОВТОРНО, хоч сесія й авторизована: вкрадена
+        сесія чи відкритий ноутбук не мають дати стерти чужий бізнес одним
+        запитом. Плюс явне `confirm: "DELETE"` — щоб кнопку не можна було
+        натиснути випадково.
+
+        Після успіху сесія завершена: кукі стерта, токен недійсний. Веди
+        людину на головну, не в кабінет.
+
+        Це найнезворотніша дія в продукті. Діалог підтвердження має
+        сказати прямо: «записи розмов і журнал зникнуть, відновити
+        неможливо».
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password, confirm]
+              properties:
+                password: { type: string }
+                confirm: { type: string, enum: [DELETE] }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  deleted: { type: boolean }
+          description: Видалено. Сесія завершена.
+        "400":
+          description: "`confirm_required` · `invalid_json`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401":
+          description: "`bad_credentials` — невірний пароль, або `unauthorized`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/account/marketing-consent:
+    post:
+      tags: [auth]
+      summary: Згода на маркетингові листи
+      description: |
+        Окремий перемикач у налаштуваннях і окремий необов'язковий чекбокс
+        при реєстрації (поле `marketing_consent: true` у `POST
+        /auth/register`). **За замовчуванням порожній** — так вимагає
+        Політика конфіденційності і закон про рекламу. Не об'єднуй його зі
+        згодою з офертою в один чекбокс.
+
+        Поточний стан — у `GET /auth/me` → `account.marketing_consent`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [granted]
+              properties:
+                granted: { type: boolean }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  granted: { type: boolean }
+          description: OK
+        "400":
+          description: "`granted_required` · `invalid_json`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /auth/logout:
+    post:
+      tags: [auth]
+      summary: Вихід
+      description: >
+        Гасить кукі й видаляє сесію на сервері.
+
+
+        Завжди 200, навіть без діючої сесії. Так і задумано: вихід не може
+        «не вдатись», а 401 у відповідь на logout лише збиває з пантелику —
+        інтерфейсу все одно робити те саме, вести на екран входу.
+      responses:
+        "200":
+          content: { application/json: { schema: { $ref: "#/components/schemas/Ok" } } }
+          description: OK
+
+  /app/stats:
+    get:
+      tags: [dashboard]
+      summary: Цифри для головного екрана
+      description: >
+        Новий акаунт отримує нулі, а не помилку.
+
+
+        `total_calls` / `successful_calls` / `missed_calls` — за ВЕСЬ час.
+        Для плиток із «+12%» беріть `period` і `previous`: це два рівні
+        відрізки завдовжки `days`, поточний і той, що просто перед ним.
+      parameters:
+        - in: query
+          name: days
+          required: false
+          schema: { type: integer, default: 7, minimum: 1, maximum: 365 }
+          description: >
+            Довжина періоду для `period`, `previous`, `delta_pct` і `by_day`.
+            Перемикач 7 / 30 / 90 на екрані. Значення поза межами
+            підтягуються до найближчої.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  minutes_used:
+                    type: number
+                    description: >
+                      Витрачено хвилин у поточному оплаченому періоді.
+                      Рахується з тривалостей дзвінків, секунди округлюються
+                      вгору до хвилини — як в операторів.
+                  minutes_limit:
+                    type: integer
+                    description: >
+                      Скільки дає тариф. У неоплаченого акаунта це пробні
+                      хвилини, а не нуль: нуль означав би «без обмеження».
+                  minutes_left:
+                    { type: number, description: "0 = ліміт вичерпано, дзвінки блокуються" }
+                  plan: { type: string }
+                  plan_expires_at: { type: string, nullable: true }
+                  trial:
+                    type: boolean
+                    description: >
+                      Тариф жодного разу не оплачувався. Хвилини є, строку
+                      немає — показуй «пробний період», а не «тариф trial».
+                  can_call:
+                    type: boolean
+                    description: >
+                      Чи поставиться дзвінок просто зараз. Та сама перевірка,
+                      що відбиває `POST /app/agents/test-call` і
+                      `POST /app/campaigns` кодом 402 — тож кнопку «подзвонити»
+                      можна гасити заздалегідь, а не після відмови.
+                  blocked_reason:
+                    type: string
+                    nullable: true
+                    description: "`minutes_exhausted` · `plan_expired` · null, якщо дзвонити можна"
+                  total_calls: { type: integer }
+                  successful_calls:
+                    type: integer
+                    description: дзвінки, де домовились про зустріч
+                  missed_calls:
+                    type: integer
+                    description: не взяли слухавку
+                  avg_call_usd:
+                    type: number
+                    nullable: true
+                    description: >
+                      «Середня вартість дзвінка» з макета. Рахується як
+                      ціна хвилини за тарифом × середня тривалість дзвінка.
+
+
+                      **null означає, що рахувати нема з чого** — тариф не
+                      оплачений або дзвінків ще не було. Показуй «—», а не
+                      нуль: нуль читається як «дзвінки безкоштовні».
+                  talk_minutes_saved:
+                    type: number
+                    description: >
+                      Плитка «Заощаджено часу»: ФАКТИЧНІ хвилини розмов —
+                      час, який людина провела б у слухавці замість агента.
+
+
+                      Не рахуй це як `дзвінки × 2 хвилини`: при такій
+                      оцінці дзвінок на 15 секунд і на шість хвилин важать
+                      однаково, і число не означає нічого.
+
+
+                      Це саме час РОЗМОВ. Набір номера, очікування гудків і
+                      записування нотаток ми не міряємо, тож ширшої
+                      «економії» чесно порахувати не можемо.
+
+
+                      Є і в `period`/`previous`/`delta_pct` — плитка з
+                      «+12%» працює так само, як решта.
+                  period_days: { type: integer, description: "довжина періоду, з якою рахували" }
+                  period:
+                    type: object
+                    description: підсумки за поточні `period_days` днів
+                    properties:
+                      total_calls: { type: integer }
+                      successful_calls: { type: integer }
+                      missed_calls: { type: integer }
+                      talk_minutes_saved: { type: number }
+                  previous:
+                    type: object
+                    description: рівний за довжиною відрізок одразу перед поточним
+                    properties:
+                      total_calls: { type: integer }
+                      successful_calls: { type: integer }
+                      missed_calls: { type: integer }
+                      talk_minutes_saved: { type: number }
+                  delta_pct:
+                    type: object
+                    description: >
+                      Зміна проти `previous`, у відсотках. **null означає, що
+                      відсотка не існує**: раніше було нуль, ділити нема на
+                      що. Малюйте «—», а не «+100%», інакше перший тиждень
+                      роботи виглядає як шалене зростання.
+                    properties:
+                      total_calls: { type: number, nullable: true }
+                      successful_calls: { type: number, nullable: true }
+                      missed_calls: { type: number, nullable: true }
+                      talk_minutes_saved: { type: number, nullable: true }
+                  by_day:
+                    type: array
+                    description: >
+                      Рівно `period_days` елементів, по порядку, останній —
+                      сьогодні. Дні без дзвінків приходять нулями, а не
+                      пропускаються: інакше графік бреше про форму тижня.
+                      Дати рахуються в UTC.
+                    items:
+                      type: object
+                      properties:
+                        date: { type: string, format: date }
+                        calls: { type: integer }
+                        meetings: { type: integer, description: "з них із домовленою зустріччю" }
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /app/calls:
+    get:
+      tags: [calls]
+      summary: Журнал дзвінків
+      description: |
+        Транскрипту тут немає навмисно — сторінка на 50 дзвінків важила б
+        мегабайти. Розмова доступна в `/app/calls/{id}`.
+
+        **Порожній список — це нормально.** Дзвінок прив'язується до
+        акаунта лише коли клієнт запускає СВІЙ обдзвін своїм агентом.
+      parameters:
+        - { name: limit, in: query, schema: { type: integer, default: 50, maximum: 200 } }
+        - { name: offset, in: query, schema: { type: integer, default: 0 } }
+        - name: date_from
+          in: query
+          schema: { type: string }
+          description: "з якої дати, YYYY-MM-DD"
+        - name: date_to
+          in: query
+          schema: { type: string }
+          description: "по яку дату включно, YYYY-MM-DD"
+        - name: agent_id
+          in: query
+          schema: { type: integer }
+        - name: phone
+          in: query
+          schema: { type: string }
+          description: "пошук за хвостом номера — «8468» знайде +380 93 588 84 68"
+        - name: status
+          in: query
+          schema: { type: string, enum: [success, failed, attention] }
+          description: >
+            Таби над таблицею. success — зустріч домовлено; failed — не
+            додзвонились або відмова; attention — розмова була, а результату
+            немає, такі варто послухати. Порожнє = всі дзвінки.
+            `total` у відповіді рахується З ФІЛЬТРАМИ.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  total: { type: integer, description: усього дзвінків — для пагінації }
+                  limit: { type: integer }
+                  offset: { type: integer }
+                  sla_minutes:
+                    type: integer
+                    description: "0 = SLA вимкнено, колонку строку не малювати"
+                  crm_configured:
+                    type: boolean
+                    description: >
+                      Чи підключена CRM. **false → колонку синхронізації не
+                      малювати взагалі.** Питається один раз на сторінку, а
+                      не по рядку: журнал показує сотню рядків, і сотня
+                      запитів на їх статуси була б безглуздям.
+                  calls:
+                    type: array
+                    items: { $ref: "#/components/schemas/CallListItem" }
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /app/calls/{call_id}/audio:
+    get:
+      tags: [calls]
+      summary: Аудіозапис дзвінка
+      description: >
+        Віддає сам файл (ogg/mp3/wav), не JSON. Підходить і для плеєра, і
+        для кнопки «Завантажити аудіо». `Accept-Ranges: bytes` — без нього
+        перемотування по хвилі не працює.
+
+
+        404 `no_recording` означає, що дзвінок був, а запису немає: надто
+        короткий або не відбувся. Це не помилка, показуйте плеєр вимкненим.
+      parameters:
+        - in: path
+          name: call_id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: файл запису
+          content:
+            audio/ogg: { schema: { type: string, format: binary } }
+        "401": { description: не авторизований }
+        "404":
+          { description: "not_found — чужий або неіснуючий дзвінок; no_recording — запису немає" }
+
+  /app/calls/{call_id}:
+    get:
+      tags: [calls]
+      summary: Один дзвінок разом із розмовою
+      parameters:
+        - { name: call_id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  call: { $ref: "#/components/schemas/CallDetail" }
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`not_found` — і для неіснуючого, і для чужого дзвінка (щоб не можна було перебирати id)"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/audit:
+    get:
+      tags: [auth]
+      summary: Журнал дій
+      description: >
+        Хто що змінив у кабінеті: тариф, агента, склад команди, інтеграції,
+        експорт.
+
+
+        Пишуться ЛИШЕ зміни стану. Перегляди не пишемо навмисно: інакше
+        журнал заллється рядками «відкрив дзвінки», і знайти в ньому «хто
+        змінив тариф» стане неможливо — тобто він перестане працювати саме
+        тоді, коли потрібен.
+      parameters:
+        - { name: limit, in: query, schema: { type: integer, default: 50, maximum: 200 } }
+        - { name: offset, in: query, schema: { type: integer, default: 0 } }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  total: { type: integer }
+                  events:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: integer }
+                        actor: { type: string, description: пошта того, хто зробив }
+                        action:
+                          type: string
+                          examples:
+                            [
+                              settings.updated,
+                              team.invited,
+                              apikey.created,
+                              webhook.created,
+                              calls.exported,
+                              contacts.exported,
+                            ]
+                        details: { type: string }
+                        created_at: { type: string }
+          description: Найновіші першими
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /app/calls/export:
+    get:
+      tags: [calls]
+      summary: Вивантажити журнал дзвінків у CSV
+      description: >
+        Віддає **файл**, не JSON.
+
+
+        Приймає ТІ САМІ фільтри, що й `/app/calls`: людина відфільтрувала
+        екран і тисне «Експорт» — вона очікує саме те, що бачить, а не всю
+        базу. Стеля 5000 рядків.
+
+
+        Файл починається з BOM — інакше Excel читає UTF-8 як однобайтове
+        кодування, і замість «Іван» виходить «Ð†Ð²Ð°Ð½». Роздільник — крапка
+        з комою: так Excel з українською локаллю розкладає по колонках без
+        майстра імпорту.
+      parameters:
+        - { name: date_from, in: query, schema: { type: string, format: date } }
+        - { name: date_to, in: query, schema: { type: string, format: date } }
+        - { name: agent_id, in: query, schema: { type: integer } }
+        - { name: phone, in: query, schema: { type: string } }
+        - { name: status, in: query, schema: { type: string, enum: [success, failed, attention] } }
+      responses:
+        "200":
+          description: файл CSV
+          content:
+            text/csv: { schema: { type: string, format: binary } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /app/contacts/export/preview:
+    get:
+      tags: [contacts]
+      summary: Що піде у файл експорту
+      description: |
+        Екран «Перевірте дані перед експортом». Приймає ті самі фільтри, що
+        й сам експорт — інакше прев'ю показувало б одне, а файл містив би
+        інше.
+
+        На кнопку став `exportable`, а не `total`: це рядки, що справді
+        потраплять у файл, без порожніх номерів і повторів. `truncated:
+        true` означає, що навіть розширена стеля вичерпана й файл буде
+        неповний — про це варто сказати ДО завантаження.
+      parameters:
+        - { name: search, in: query, required: false, schema: { type: string } }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  total: { type: integer, description: рядків під фільтром }
+                  exportable: { type: integer, description: скільки піде у файл }
+                  duplicates: { type: integer }
+                  invalid: { type: integer, description: рядки без придатного номера }
+                  truncated: { type: boolean }
+                  sample:
+                    type: array
+                    description: перші двадцять рядків для показу
+                    items: { $ref: "#/components/schemas/Contact" }
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /app/contacts/upload/preview:
+    post:
+      tags: [contacts]
+      summary: Що в CSV-файлі — перед імпортом
+      description: |
+        Екран «Імпорт» зі зіставленням колонок. Той самий крок, що й у
+        Google Sheets: віддаємо шапку, перші рядки й `guess` — де телефон,
+        ім'я, пошта. Здогад підставляй у форму, але дай людині виправити.
+
+        Потім шли той самий файл у `POST /app/contacts/upload` разом із
+        `phone_column` (обов'язково після прев'ю), `name_column`,
+        `email_column` і `base_title` — усе полями того ж multipart.
+        Без `phone_column` імпорт працює по-старому, автовизначенням.
+
+        Файл без шапки: `has_header: false`, у `header` умовні
+        «Колонка 1», «Колонка 2» — щоб форма мала що показати.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file: { type: string, format: binary }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  header: { type: array, items: { type: string } }
+                  has_header: { type: boolean }
+                  sample: { type: array, items: { type: array, items: { type: string } } }
+                  total_rows: { type: integer }
+                  guess:
+                    type: object
+                    description: "індекси; -1 = не вгадали"
+                    properties:
+                      phone: { type: integer }
+                      name: { type: integer }
+                      email: { type: integer }
+          description: OK
+        "400":
+          description: "`unreadable_file` · `empty_file`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /app/contacts/export:
+    get:
+      tags: [contacts]
+      summary: Вивантажити контакти у CSV
+      description: Разом із мітками, згодою й позначкою «не дзвонити». Стеля 1000 рядків.
+      parameters:
+        - { name: search, in: query, schema: { type: string } }
+      responses:
+        "200":
+          description: файл CSV
+          content:
+            text/csv: { schema: { type: string, format: binary } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /app/integrations:
+    get:
+      tags: [webhooks]
+      summary: Уся сторінка «Інтеграції» одним запитом
+      description: >
+        Зведення, а не окрема сутність: вебхуки й ключі живуть своїм життям,
+        тут вони просто зібрані разом із тим, що ще не підключено.
+
+
+        `available` — це ДАНІ, а не підказка. Малюй картки «Не підключено» за
+        цим списком, а не за власним переліком у коді фронту: інакше він
+        розійдеться з правдою при першій же зміні на нашому боці.
+        `ready: false` означає, що конектора ще не існує — кнопку
+        «Підключити» тримай неактивною.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  webhooks: { type: array, items: { type: object } }
+                  api_keys: { type: array, items: { type: object } }
+                  available:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string, examples: [google_sheets, bitrix24] }
+                        name: { type: string }
+                        ready:
+                          type: boolean
+                          description: >
+                            Чи існує конектор узагалі. `false` — кнопку
+                            «Підключити» тримай неактивною: натиснути можна,
+                            а станеться нічого, і це читається як поломка.
+                        connected: { type: boolean, description: чи ним скористався цей клієнт }
+                        contact_source:
+                          type: boolean
+                          description: >
+                            Чи можна брати з нього контакти для обдзвону —
+                            саме за цим прапорцем збирай варіанти «Бази
+                            контактів» у майстрі агента, а не за списком у
+                            коді.
+
+
+                            **Зараз false у всіх, Google Sheets включно.**
+                            Наша інтеграція з Sheets односпрямована: scope
+                            `drive.file` дає доступ лише до файлів, які
+                            створили ми, тож ми пишемо результати дзвінків
+                            у свою таблицю, а прочитати таблицю клієнта не
+                            можемо. Тому єдине джерело контактів поки —
+                            імпорт файлом і бази з `/app/contact-bases`.
+                        status: { type: string, description: "`connected` або `error`" }
+                        error:
+                          type: string
+                          description: >
+                            Чому інтеграція відвалилась: `token_revoked` —
+                            клієнт відкликав доступ у Google,
+                            `spreadsheet_gone` — видалив таблицю. Обидва
+                            лікуються повторним підключенням.
+                        account_email: { type: string, description: "«Підключено як …»" }
+                        spreadsheet_url: { type: string, description: посилання на таблицю }
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /app/integrations/google-sheets/preview:
+    get:
+      tags: [contacts]
+      summary: Що лежить у таблиці клієнта
+      description: |
+        Крок ПЕРЕД імпортом, і він обовʼязковий: показуємо шапку, перші
+        рядки і свій здогад про колонки, щоб клієнт підтвердив або
+        виправив. Імпортувати наосліп не можна — переплутана колонка
+        означає обдзвін не тих людей, а помітиться це вже після дзвінків.
+
+        `spreadsheet_id` бери з **Google Picker**. Саме Picker відкриває
+        нам доступ до файлу клієнта в межах scope `drive.file` — списку
+        його таблиць ми не бачимо й побачити не можемо. Без Picker
+        прийде `403 no_access`, і це не збій, а «нам цю таблицю не
+        давали».
+
+        `guess` — підказка для форми, а не рішення. Підстав її у
+        випадайки колонок, але лиши можливість змінити.
+      parameters:
+        - { name: spreadsheet_id, in: query, required: true, schema: { type: string } }
+        - {
+            name: sheet,
+            in: query,
+            required: false,
+            schema: { type: string },
+            description: назва вкладки; порожньо = перша,
+          }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  sheets:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        title: { type: string }
+                        rows: { type: integer }
+                        columns: { type: integer }
+                  header: { type: array, items: { type: string } }
+                  sample:
+                    type: array
+                    description: до десяти рядків для показу
+                    items: { type: array, items: { type: string } }
+                  guess:
+                    type: object
+                    description: "індекси колонок; -1 = не вгадали"
+                    properties:
+                      phone: { type: integer }
+                      name: { type: integer }
+                      email: { type: integer }
+                      note: { type: integer }
+          description: OK
+        "400":
+          description: "`spreadsheet_required`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: "`no_access` — таблицю не обирали через Picker"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "409":
+          description: "`not_connected` — Google Sheets не підключені"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "502":
+          description: "`read_failed` — Google не відповів"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/integrations/google-sheets/import:
+    post:
+      tags: [contacts]
+      summary: Забрати контакти з таблиці в базу
+      description: |
+        Створює іменовану базу й наповнює її. `phone_column` обовʼязковий і
+        приходить від клієнта — після того, як він підтвердив колонку в
+        прев'ю. Вгадувати за нього тут не будемо: здогад помиляється на
+        таблицях із двома номерами в рядку.
+
+        У відповіді розділено, ЧОМУ рядок не потрапив: `duplicates` — номер
+        уже є в акаунті, це нормально й очікувано при повторному імпорті;
+        `invalid` — у клітинці не номер, і якщо їх багато, значить обрана
+        не та колонка. Покажи обидва числа окремо, не сумою.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [spreadsheet_id, phone_column]
+              properties:
+                spreadsheet_id: { type: string }
+                sheet: { type: string, description: назва вкладки }
+                phone_column: { type: integer }
+                name_column: { type: integer, description: "-1 = не брати" }
+                email_column: { type: integer }
+                note_column: { type: integer }
+                has_header: { type: boolean, default: true }
+                base_title: { type: string, maxLength: 120 }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  base_id: { type: integer }
+                  base_title: { type: string }
+                  added: { type: integer }
+                  duplicates: { type: integer }
+                  invalid: { type: integer }
+                  total_rows: { type: integer }
+          description: Імпортовано
+        "400":
+          description: "`spreadsheet_required` · `phone_column_required` · `empty_sheet` · `invalid_json`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: "`no_access`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "409":
+          description: "`not_connected`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "502":
+          description: "`read_failed`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/integrations/google-sheets/auth-url:
+    get:
+      tags: [webhooks]
+      summary: Посилання на згоду Google
+      parameters:
+        - in: query
+          name: state
+          schema: { type: string, maxLength: 256 }
+          description: >
+            **Твій CSRF-токен.** Передавай сюди випадковий рядок, який
+            сторінка запам'ятала, — ми вкладемо його в посилання без змін,
+            і Google поверне його тобі назад для звірки.
+
+
+            Раніше ми підставляли туди своє значення, і сторінка чесно
+            казала «невідповідність параметра state»: вона не впізнавала
+            те, чого не ставила. Нам цей параметр не потрібен — акаунт ми
+            беремо із сесії, а не з нього.
+      description: >
+        **Google не пускає до API за логіном і паролем — узагалі.** Єдиний
+        шлях: клієнт сам натискає «дозволити» на екрані Google.
+
+
+        Фронт бере це посилання й веде на нього користувача. Google
+        повертає його на наш `redirect_uri` з параметром `code` — цей код
+        треба надіслати в `POST /app/integrations/google-sheets`.
+
+
+        Ми просимо `drive.file` — доступ ЛИШЕ до файлів, які створили самі.
+        Чужі таблиці клієнта нам не видно в принципі; так і слід казати
+        людині на екрані підключення.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  url: { type: string, description: сюди вести користувача }
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "501":
+          description: "`google_not_configured` — ключі Google ще не задані на сервері; кнопку тримай неактивною"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/integrations/google-sheets:
+    post:
+      tags: [webhooks]
+      summary: Підключити Google Sheets
+      description: >
+        Обмінює `code` зі згоди на токен, СТВОРЮЄ нову таблицю з шапкою і
+        запам'ятовує підключення. Далі кожен завершений дзвінок дописується
+        в неї окремим рядком.
+
+
+        Таблицю створюємо ми, а не просимо посилання від клієнта: так воно
+        працює з першого кліку, і саме тому вузького дозволу `drive.file`
+        достатньо.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code: { type: string, description: "з редіректу Google" }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  email: { type: string, description: акаунт Google, який дав згоду }
+                  spreadsheet_id: { type: string }
+                  spreadsheet_url: { type: string, description: покажи посиланням на картці }
+          description: Підключено
+        "400":
+          description: >
+            `invalid_code` — код протух або вже використаний ·
+            `no_refresh_token` — Google не дав постійного доступу, потрібна
+            повторна згода · `create_failed` — таблицю не вдалося створити ·
+            `invalid_json`
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "501":
+          description: "`google_not_configured`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+    delete:
+      tags: [webhooks]
+      summary: Відключити Google Sheets
+      description: >
+        Таблицю НЕ видаляємо — вона належить клієнту й лишається в нього
+        з усіма записаними дзвінками. Прибираємо лише наш доступ.
+      responses:
+        "200":
+          content: { application/json: { schema: { $ref: "#/components/schemas/Ok" } } }
+          description: Відключено
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`not_connected`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/numbers:
+    get:
+      tags: [telephony]
+      summary: Номери клієнта
+      description: |
+        Одна таблиця на всі три способи підключення. `source` каже, яким
+        саме способом номер потрапив до нас:
+
+        `sip` — клієнт спрямував власну АТС на нашу SIP-адресу.
+        `forward` — клієнт поставив переадресацію свого номера на наш.
+        `assigned` — номер видали ми.
+
+        `direction` каже, для чого номер використовується: `inbound`,
+        `outbound` або `both`. Вхідний дзвінок маршрутизується за номером,
+        на який подзвонили; вихідний — дозволений лише з номера цього
+        акаунта.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  limit:
+                    type: integer
+                    description: >
+                      Скільки номерів дозволяє тариф; **0 = без обмеження**
+                      (PRO). Звідси бери банер «у вашому тарифі включено N
+                      номерів» — не зашивай число у фронт: на тріалі 1,
+                      START 1, BUSINESS 3, PRO без ліміту.
+                  used: { type: integer, description: скільки вже підключено }
+                  can_add:
+                    type: boolean
+                    description: >
+                      Чи можна підключити ще один. false — показуй «оберіть
+                      вищий тариф» замість кнопки; інакше клієнт отримає
+                      `409 number_limit` уже після заповнення форми.
+                  numbers:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: integer }
+                        phone: { type: string, description: "завжди у вигляді +380XXXXXXXXX" }
+                        agent_id: { type: integer, description: "0 = агент не призначений" }
+                        agent_name: { type: string, nullable: true }
+                        source: { type: string, enum: [sip, forward, assigned] }
+                        direction: { type: string, enum: [inbound, outbound, both] }
+                        provider: { type: string }
+                        is_active: { type: boolean }
+                        note: { type: string }
+                        created_at: { type: string }
+                        hour_from:
+                          type: integer
+                          description: >
+                            Робочі години САМОГО номера, 0–24. `0/0` —
+                            власних немає, діють загальні години акаунта.
+                        hour_to: { type: integer }
+                        daily_cap:
+                          type: integer
+                          description: >
+                            Стеля дзвінків на добу з цього номера. `0` —
+                            обмежень понад рівень довіри акаунта немає.
+                        working_days:
+                          type: string
+                          description: >
+                            "mon,tue,wed,thu,fri" у тижневому порядку.
+                            Порожньо = дні не обмежені.
+                        verified_at:
+                          type: string
+                          description: >
+                            Коли на номер уперше прийшов справжній вхідний.
+                            Порожньо = підключення ще не підтверджене.
+                        status:
+                          type: string
+                          enum: [disabled, verification_required, ready]
+                          description: >
+                            Готовий рядок стану для картки номера. Рахуємо
+                            його НА СЕРВЕРІ, бо правило залежить від
+                            способу підключення: продубльоване в
+                            інтерфейсі, воно розійдеться з беком при першій
+                            же зміні.
+
+
+                            `disabled` — тумблер вимкнено ·
+                            `verification_required` — своя АТС, вхідного ще
+                            не бачили ·
+                            `ready` — номер працює.
+                        registered:
+                          type: boolean
+                          description: >
+                            Чи виданий номеру власний SIP-транк. Потрібно
+                            лише для `source: sip`.
+                        sip_username:
+                          type: string
+                          description: >
+                            Логін для АТС клієнта. Пароля тут немає й не
+                            буде — він показується один раз при видачі
+                            транку і в нас не зберігається.
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [telephony]
+      summary: Прив'язати номер
+      description: |
+        Три способи з модалки «Підключити номер» — різниця в `source`:
+
+        * `forward` — «Поставлю переадресацію»: клієнт вводить СВІЙ номер,
+          з якого переадресовує на наш;
+        * `sip` — «У мене є АТС»: свій номер + транк (далі
+          `POST /app/numbers/sip`);
+        * `assigned` — «Дайте мені номер»: `phone` **не передається**,
+          номер береться з нашого пулу. Те саме, що
+          `POST /app/numbers/claim`; відповідь така ж, з `phone`.
+
+        Номер нормалізується до `+380XXXXXXXXX`, тож «0914810542»,
+        «380914810542» і «+380914810542» — це один номер.
+
+        Номер належить рівно одному акаунту. Якщо він уже за кимось,
+        приходить 409 — без пояснень, чий саме: інакше через цю ручку
+        можна було б перевіряти, хто з наших клієнтів яким номером
+        користується.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone:
+                  {
+                    type: string,
+                    description: "обовʼязково для sip і forward; для assigned ігнорується",
+                  }
+                kind:
+                  {
+                    type: string,
+                    enum: [city, mobile, tollfree],
+                    description: "лише для assigned: який тип номера з пулу",
+                  }
+                agent_id: { type: integer, description: "хто відповідає на вхідні" }
+                source: { type: string, enum: [sip, forward, assigned], default: assigned }
+                direction: { type: string, enum: [inbound, outbound, both], default: both }
+                provider: { type: string, maxLength: 60 }
+                note: { type: string, maxLength: 200 }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  id: { type: integer }
+          description: Прив'язано
+        "400":
+          description: "`bad_source` · `bad_direction` · `invalid_json`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`agent_not_found`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "409":
+          description: >
+            `number_unavailable` — номер не схожий на номер або вже
+            прив'язаний. Пропонуй перевірити написання й звернутись до
+            підтримки, а не «спробувати ще раз» ·
+            `number_limit` — тариф більше номерів не дає (у відповіді
+            `limit` і `have`). Веди на вибір тарифу, не на підтримку ·
+            `pool_empty` — лише для `assigned`: вільних номерів зараз
+            немає (адмінам уже пішло сповіщення). Запропонуй
+            переадресацію свого номера.
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/numbers/pool:
+    get:
+      tags: [telephony]
+      summary: Чи є вільні номери в пулі
+      description: >
+        Для модалки «Підключити номер»: якщо `available` = 0 — кнопку
+        «Дайте мені номер» показуй як «зараз немає, замовляємо» замість
+        того, щоб дати натиснути й отримати `pool_empty`.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  available: { type: integer, description: вільних усього }
+                  available_by_kind:
+                    type: object
+                    additionalProperties: { type: integer }
+                    examples: [{ city: 7 }]
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /app/numbers/claim:
+    post:
+      tags: [telephony]
+      summary: Дайте мені номер — узяти з пулу
+      description: |
+        Видає клієнту наш міський номер. Номер **готовий одразу**
+        (`status: ready`): це наш номер на нашому транку, перевіряти
+        вхідний, як у чужої АТС, нема чого. Далі його можна прив'язати
+        до агента як будь-який інший (`PATCH /app/numbers/{id}`).
+
+        Звідки беруться номери: оператор виділяє їх пачками за нашим
+        зверненням, ми тримаємо запас. Коли запас закінчується —
+        `409 pool_empty`, а адмінам іде сповіщення замовити ще.
+
+        Ліміт тарифу той самий, що й для своїх номерів (`number_limit`).
+
+        Видалення такого номера (`DELETE /app/numbers/{id}`) повертає
+        його в пул — але не одразу наступному клієнту: 30 днів
+        «охолодження», бо попередньому власнику ще дзвонять його клієнти.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                kind:
+                  {
+                    type: string,
+                    enum: [city, mobile, tollfree],
+                    description: "без поля — будь-який вільний",
+                  }
+                agent_id: { type: integer }
+                direction: { type: string, enum: [inbound, outbound, both], default: both }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  id: { type: integer, description: "id у /app/numbers" }
+                  phone: { type: string, examples: ["+380441234567"] }
+                  kind: { type: string }
+                  status: { type: string, enum: [ready] }
+                  trunk_synced:
+                    type: boolean
+                    nullable: true
+                    description: >
+                      true — номер дописано в транк оператора; false —
+                      не вдалось (ми полагодимо руками, клієнту нічого
+                      робити не треба); null — транк ще не налаштований.
+          description: Номер виданий
+        "400":
+          description: "`bad_kind`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`agent_not_found`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "409":
+          description: "`pool_empty` (у відповіді `available` за типами) · `number_limit` · `number_unavailable`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /admin/number-pool:
+    get:
+      tags: [admin]
+      summary: Пул номерів — стан і список
+      description: Під `X-Admin-Token`.
+      responses:
+        "200": { description: "`stats` (free/taken/cooling) і `numbers` з власниками" }
+        "403": { description: forbidden }
+        "503": { description: "`admin_api_disabled` — ADMIN_API_TOKEN не задано" }
+    post:
+      tags: [admin]
+      summary: Додати пачку номерів від оператора
+      description: >
+        Під `X-Admin-Token`. Номери нормалізуються, дублікати
+        пропускаються. Якщо `LIVEKIT_POOL_TRUNK_ID` задано — усі додані
+        одразу дописуються в транк оператора (в обох формах: `+38044…`
+        і `044…`), щоб дзвінок на ще не виданий номер доходив до нас.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phones]
+              properties:
+                phones:
+                  oneOf:
+                    - type: array
+                      items: { type: string }
+                    - type: string
+                  description: "масив або рядок через кому / крапку з комою / новий рядок"
+                kind: { type: string, enum: [city, mobile, tollfree], default: city }
+                operator: { type: string, maxLength: 60 }
+                note: { type: string, maxLength: 200 }
+      responses:
+        "200": { description: "`added` (список), `skipped`, `trunk_synced`, `stats`" }
+        "400": { description: "`phones_required` · `invalid_json`" }
+        "403": { description: forbidden }
+        "503": { description: "`admin_api_disabled` — ADMIN_API_TOKEN не задано" }
+
+  /app/numbers/sip:
+    get:
+      tags: [telephony]
+      summary: SIP-адреса для АТС клієнта
+      description: |
+        Адреса, яку клієнт вставляє у свою АТС як напрямок для вхідних.
+
+        **Хост у нас один на всіх** — окремої адреси на клієнта LiveKit не
+        видає. Розрізняє клієнта user-part: `sip:+380XXXXXXXXX@<host>`.
+        Саме цей номер приходить у `sip.trunkPhoneNumber`, і за ним ми
+        знаходимо власника дзвінка.
+
+        Тому поки в акаунта немає жодного номера з `direction` `inbound`
+        або `both`, адреси не існує — приходить `409 number_required`.
+        Показуй у цьому випадку крок «додайте номер», а не порожнє поле
+        для копіювання.
+
+
+        **Сценарій «У мене вже є АТС» — повний шлях (4 кроки):**
+
+        1. `POST /app/numbers {source: "sip", phone}` — свій номер;
+        2. `POST /app/numbers/sip {number_id}` — **окремий транк** для
+           цього номера з логіном і паролем (приймає з будь-якого IP,
+           захист — SIP digest-автентифікація, не список адрес). Це
+           обовʼязковий крок: без нього АТС клієнта не пройде;
+        3. клієнт вписує в АТС `sip_uri` + `username`/`password`
+           і робить пробний дзвінок;
+        4. `POST /app/numbers/sip/verify {phone}` — `verified: true`,
+           щойно перший вхідний дійшов. До того `false / no_calls_yet` —
+           це не помилка, а «ще не бачили дзвінка»; статус номера
+           `verification_required` каже те саме.
+
+        `verified` у цій відповіді — той самий факт, що й у verify.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  host: { type: string }
+                  addresses:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        number_id: { type: integer }
+                        phone: { type: string }
+                        sip_uri:
+                          { type: string, description: "готовий рядок для кнопки «Скопіювати»" }
+                        verified:
+                          type: boolean
+                          description: >
+                            true лише після того, як на номер справді
+                            прийшов вхідний дзвінок.
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "409":
+          description: "`number_required` — спершу треба додати номер"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "503":
+          description: "`sip_not_configured` — на сервері не заданий SIP-хост"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    post:
+      tags: [telephony]
+      summary: Видати номеру власний SIP-транк
+      description: |
+        Логін і пароль, які клієнт вставляє у свою АТС.
+
+        **Пароль повертається РІВНО ОДИН РАЗ — у цій відповіді.** Ми його
+        не зберігаємо: він живе в LiveKit і в АТС клієнта. Попередь про це
+        в інтерфейсі ДО того, як людина закриє вікно, і дай кнопку
+        «Скопіювати» — іншого способу дізнатись пароль не існує.
+
+        Повторний виклик на тому самому номері не створює другий транк, а
+        ЗАМІНЮЄ пароль у наявному: клієнту, що загубив пароль, потрібен
+        новий, а не ще один вхід. Старий після цього не діє.
+
+        Навіщо це взагалі: наш основний транк приймає SIP лише з
+        діапазонів оператора, тож АТС клієнта без власного транку була б
+        відкинута ще до нашого коду. Власний транк з логіном/паролем
+        приймає з будь-якої адреси — саме тому цей крок обовʼязковий.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [number_id]
+              properties:
+                number_id: { type: integer }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  number_id: { type: integer }
+                  phone: { type: string }
+                  sip_uri: { type: string }
+                  sip_host: { type: string }
+                  username: { type: string }
+                  password:
+                    type: string
+                    description: "більше нізвідки не отримати — показати одразу"
+                  password_shown_once: { type: boolean }
+          description: Транк виданий
+        "400":
+          description: "`inbound_required` — номер не приймає вхідних · `invalid_json`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`not_found` — чужий або неіснуючий номер"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "502":
+          description: "`trunk_failed` — LiveKit не створив транк"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "503":
+          description: "`sip_not_configured`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/numbers/sip/verify:
+    post:
+      tags: [telephony]
+      summary: Перевірити SIP-підключення
+      description: |
+        Кнопка «Перевірити» під адресою.
+
+        Перевіряємо ФАКТ, а не налаштування: чи приходив на цей номер хоч
+        один вхідний дзвінок. Заповнене поле в АТС ще нічого не доводить.
+
+        `200 verified:false` — це НЕ помилка, а «ще не бачили дзвінка».
+        Показуй підказку з `hint` і лишай кнопку активною.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone]
+              properties:
+                phone: { type: string }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  verified: { type: boolean }
+                  reason: { type: string, description: "`no_calls_yet`, коли verified=false" }
+                  hint: { type: string }
+                  last_call_at: { type: string }
+          description: OK
+        "400":
+          description: "`phone_required` · `invalid_json`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /app/contact-bases:
+    get:
+      tags: [contacts]
+      summary: Бази контактів
+      description: |
+        Випадний список у майстрі агента.
+
+        Перший рядок ЗАВЖДИ `id: 0` — «Всі контакти». Це не рядок у
+        таблиці, а весь список акаунта: клієнт, який нічого не
+        імпортував, інакше побачив би порожній список і не пройшов би крок
+        далі. Кількість рахується запитом, тож вона завжди збігається з
+        фактом.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  bases:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: integer, description: "0 = всі контакти акаунта" }
+                        title: { type: string }
+                        source: { type: string, enum: [all, manual, csv, google_sheets] }
+                        contacts: { type: integer }
+                        created_at: { type: string }
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [contacts]
+      summary: Створити базу
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title: { type: string, maxLength: 120 }
+                source: { type: string, enum: [manual, csv, google_sheets], default: manual }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  id: { type: integer }
+          description: Створено
+        "400":
+          description: "`title_required` · `bad_source` · `invalid_json`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /app/contact-bases/{base_id}:
+    parameters:
+      - { name: base_id, in: path, required: true, schema: { type: integer } }
+    delete:
+      tags: [contacts]
+      summary: Видалити базу
+      description: >
+        Контакти ЛИШАЮТЬСЯ — повертаються у «Всі контакти». Людина прибирає
+        групу, а не номери, які збирала місяцями. Попереджай про це в
+        діалозі підтвердження, щоб видалення не виглядало страшнішим, ніж є.
+      responses:
+        "200":
+          content: { application/json: { schema: { $ref: "#/components/schemas/Ok" } } }
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`not_found`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/numbers/{number_id}:
+    parameters:
+      - { name: number_id, in: path, required: true, schema: { type: integer } }
+    patch:
+      tags: [telephony]
+      summary: Змінити номер
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                agent_id: { type: integer }
+                direction: { type: string, enum: [inbound, outbound, both] }
+                is_active:
+                  { type: boolean, description: "false = номер не приймає й не робить дзвінків" }
+                note: { type: string, maxLength: 200 }
+                hour_from:
+                  type: integer
+                  minimum: 0
+                  maximum: 24
+                  description: >
+                    Розклад цього номера. Початок має бути раніший за
+                    кінець, інакше `400 bad_hours`: проміжок «з 18 до 9»
+                    тихо вимкнув би номер назавжди. Звіряємо з підсумковим
+                    станом, а не лише з надісланим полем — тож правку
+                    двома запитами перевірка теж упіймає.
+                hour_to: { type: integer, minimum: 0, maximum: 24 }
+                daily_cap:
+                  type: integer
+                  minimum: 0
+                  description: "0 = без власної стелі"
+                working_days:
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items: { type: string, enum: [mon, tue, wed, thu, fri, sat, sun] }
+                  description: >
+                    Робочі дні номера — галочки Пн–Нд на макеті. Приймаємо
+                    і масив, і рядок через кому; у відповіді GET завжди
+                    рядок у тижневому порядку.
+
+
+                    ПОРОЖНІЙ масив = зняти обмеження по днях, а не
+                    «не дзвонити ніколи». А от набір, у якому немає
+                    жодного відомого дня («monday», «пн»), — це
+                    `400 bad_working_days`: інакше друкарська помилка тихо
+                    вимкнула б обдзвін.
+      responses:
+        "200":
+          content: { application/json: { schema: { $ref: "#/components/schemas/Ok" } } }
+          description: OK
+        "400":
+          description: "`bad_direction` · `bad_hours` · `bad_daily_cap` · `nothing_to_update` · `invalid_json`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`not_found`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    delete:
+      tags: [telephony]
+      summary: Відв'язати номер
+      responses:
+        "200":
+          content: { application/json: { schema: { $ref: "#/components/schemas/Ok" } } }
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`not_found`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /auth/password-reset:
+    post:
+      tags: [auth]
+      summary: Забули пароль — надіслати код на пошту
+      description: |
+        Шестизначний код на пошту, як і підтвердження адреси (не
+        посилання: людина лишається у формі й переписує код).
+
+        **Відповідь завжди однакова — `200 {ok: true, sent: true}`.** Немає
+        такої пошти; є, але акаунт через Google; щойно надсилали — назовні
+        це не розрізняється. Інакше формою можна перевіряти, хто наш
+        клієнт. Показуй текст із `hint` і веди на крок «введіть код».
+
+        Той, хто заходить через Google/Apple, отримує лист «пароля немає,
+        увійдіть кнопкою Google» — теж мовчки для форми.
+
+        Повторний лист — не частіше ніж раз на 60 секунд (мовчки
+        ігнорується). Ліміт на IP спільний з логіном: 10 спроб/годину,
+        далі `429` з `retry_after`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  sent: { type: boolean, const: true }
+                  hint: { type: string, description: текст для екрана }
+          description: Прийнято (це НЕ означає, що така пошта існує)
+        "400":
+          description: "`invalid_json` — зіпсоване тіло запиту (відсутня пошта помилкою НЕ є)"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "429":
+          description: "`too_many_requests` — поле `retry_after` у секундах"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /auth/password-reset/confirm:
+    post:
+      tags: [auth]
+      summary: Код із листа + новий пароль
+      description: |
+        Код живе 15 хвилин і згорає після 5 невдалих спроб — тоді
+        потрібен новий лист.
+
+        **Після зміни виходять УСІ пристрої** (і той, з якого міняли):
+        пароль відновлюють саме тоді, коли підозрюють чужий доступ. Після
+        `200` веди на сторінку входу, стару сесію не використовуй.
+
+        Вимоги до пароля ті самі, що при реєстрації; невдалий пароль
+        перевіряється ДО коду — щоб не спалити спробу через «закороткий».
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, code, password]
+              properties:
+                email: { type: string, format: email }
+                code: { type: string, examples: ["481027"] }
+                password:
+                  { type: string, description: "новий пароль (можна слати як `new_password`)" }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  sessions_closed: { type: integer, description: скільки сесій знято }
+          description: Пароль змінено — веди на вхід
+        "400":
+          description: >
+            `invalid_code` — невірний або застарілий код; поле
+            `attempts_left` каже, скільки спроб лишилось (0 = код згорів,
+            запитуй новий лист) · `weak_password` з полем `detail` ·
+            `email_and_code_required` · `invalid_json`
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "429":
+          description: "`too_many_requests`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /auth/email-code:
+    post:
+      tags: [auth]
+      summary: Надіслати код підтвердження пошти
+      description: |
+        Шестизначний код на 15 хвилин. Не посилання: людина реєструється
+        в кабінеті й лишається в ньому, а перехід за посиланням із пошти
+        викидає її в новий таб і губить сесію.
+
+        Повторний запит частіше ніж раз на хвилину — 429. Без цієї паузи
+        ендпоїнт стає безкоштовним спамером із нашого домену.
+
+        Стан підтвердження видно в `GET /auth/me` полем `email_verified`.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  already_verified:
+                    { type: boolean, description: "пошта вже підтверджена, лист не надсилали" }
+          description: Надіслано
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "429":
+          description: >
+            `too_soon` — не минула хвилина від попереднього листа. Поле
+            `retry_after` каже, скільки чекати; гасіть кнопку на цей час.
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "502":
+          description: >
+            `mail_failed` — пошта не пішла. Кажіть це прямо: мовчазний
+            збій змусить людину чекати листа, якого ніхто не надсилав.
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /auth/email-confirm:
+    post:
+      tags: [auth]
+      summary: Підтвердити пошту кодом
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code: { type: string, description: "шість цифр із листа" }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  verified: { type: boolean }
+                  already_verified: { type: boolean }
+          description: Підтверджено
+        "400":
+          description: >
+            `bad_code` (з полем `attempts_left` — показуйте його людині) ·
+            `code_expired` · `no_code` · `invalid_json`
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "429":
+          description: >
+            `too_many_attempts` — код згорів. Запросіть новий через
+            `/auth/email-code`.
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/verification:
+    get:
+      tags: [telephony]
+      summary: Рівень довіри до акаунта
+      description: |
+        Окрема межа від тарифу. Тариф каже, СКІЛЬКИ хвилин можна
+        говорити; рівень каже, що взагалі можна робити.
+
+        `unverified` — щойно зареєструвався. Вхідні працюють повністю,
+        вихідних кілька на добу (щоб почути свого агента), обдзвону немає.
+        `pending` — дані подані, чекають на розгляд; права ті самі.
+        `verified` — юрособу підтверджено: обдзвін відкрито.
+        `trusted` — історія без інцидентів: денні стелі зняті.
+
+        Обдзвін закритий до `verified` не з обережності: масові дзвінки
+        незнайомим людям — саме та дія, за яку оператор відключає номери.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  verification:
+                    type: object
+                    properties:
+                      level: { type: string, enum: [unverified, pending, verified, trusted] }
+                      legal_name: { type: string }
+                      legal_code: { type: string }
+                      note:
+                        { type: string, description: "коментар при відмові — показуй його людині" }
+                      can_run_campaigns: { type: boolean }
+                      daily_outbound_limit: { type: integer, description: "0 = без стелі" }
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [telephony]
+      summary: Подати дані юрособи
+      description: |
+        Рівень стає `pending`, а НЕ `verified`: підтверджує людина.
+        Автоматично приймати введене поле — це не перевірка, а поле для
+        введення тексту, і саме на ній тримається доступ до обдзвону.
+
+        Код перевіряємо за формою, не за існуванням: ЄДРПОУ 8 цифр,
+        ІПН 10. У реєстр ми не ходимо й вдавати цього не будемо.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [legal_name, legal_code]
+              properties:
+                legal_name: { type: string, minLength: 3, maxLength: 200 }
+                legal_code: { type: string, description: "ЄДРПОУ (8 цифр) або ІПН (10)" }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  verification: { type: object }
+          description: Подано, чекає на розгляд
+        "400":
+          description: "`legal_name_required` · `invalid_legal_code` (з полем `hint`) · `invalid_json`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "409":
+          description: >
+            `already_verified` — акаунт уже підтверджено. Змінити дані
+            самостійно не можна: інакше перевірку проходять один раз, а
+            потім підміняють папери.
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/voices/{voice_key}/sample:
+    get:
+      tags: [agents]
+      summary: Зразок голосу (mp3)
+      description: |
+        Кнопка «послухати» на екрані вибору голосу. Посилання приходить
+        у `GET /app/voices` полем `sample_url`, текст фрази — `sample_text`.
+
+        Файл синтезується один раз і лежить на диску: голосів два, фраза
+        одна, тож наступні кліки безкоштовні.
+      parameters:
+        - { name: voice_key, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: mp3
+          content:
+            audio/mpeg: { schema: { type: string, format: binary } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: >
+            `sample_unavailable` — синтез не вдався. Кнопку прослуховування
+            не малюйте: мовчазний зламаний плеєр гірший за її відсутність.
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/knowledge:
+    get:
+      tags: [support]
+      summary: База знань бота на сайті
+      description: |
+        Наші відповіді про наш продукт — спільні, не по акаунтах: питає їх
+        відвідувач, у якого ще немає жодного акаунта.
+
+        Читати може будь-хто з кабінету — це те саме, що бот і так каже
+        вголос. Редагування лише під службовим токеном: інакше один клієнт
+        переписав би те, що бот розповідає іншим.
+
+        Під питання підмішуються кілька найдотичніших записів, а не вся
+        база: на сотні записів промпт роздувся б і втопив самі інструкції.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  entries:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: integer }
+                        question: { type: string }
+                        answer: { type: string }
+                        tags: { type: string, description: "через пробіл, для пошуку" }
+                        is_active: { type: boolean }
+                        updated_at: { type: string }
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /admin/knowledge:
+    post:
+      tags: [admin]
+      summary: Додати або змінити запис бази знань
+      description: Під `X-Admin-Token`. Без `id` — новий запис, з `id` — правка.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [question, answer]
+              properties:
+                id: { type: integer, description: "не задано = новий запис" }
+                question: { type: string, maxLength: 300 }
+                answer: { type: string, maxLength: 4000 }
+                tags: { type: string, maxLength: 200 }
+                is_active: { type: boolean, default: true }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { ok: { type: boolean }, id: { type: integer } }
+          description: Збережено
+        "400":
+          description: "`empty_or_not_found` · `invalid_json`"
+        "403":
+          description: "`forbidden` — невірний або відсутній X-Admin-Token"
+        "503":
+          description: "`admin_api_disabled`"
+
+  /admin/knowledge/{entry_id}:
+    delete:
+      tags: [admin]
+      summary: Видалити запис бази знань
+      parameters:
+        - { name: entry_id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          content: { application/json: { schema: { $ref: "#/components/schemas/Ok" } } }
+          description: OK
+        "403":
+          description: "`forbidden`"
+        "404":
+          description: "`not_found`"
+        "503":
+          description: "`admin_api_disabled`"
+
+  /admin/verification:
+    post:
+      tags: [admin]
+      summary: Підтвердити або зняти рівень
+      description: |
+        Службова ручка під `X-Admin-Token`, як і `/admin/calls-block`.
+        Зняття рівня в акаунта, що зараз дзвонить, одразу ставить його
+        обдзвони на паузу — інакше рішення набирало б чинності лише на
+        наступній кампанії.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [account_id, level]
+              properties:
+                account_id: { type: integer }
+                level: { type: string, enum: [unverified, pending, verified, trusted] }
+                note: { type: string, maxLength: 300, description: "причина — її побачить клієнт" }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  account_id: { type: integer }
+                  verification: { type: object }
+                  campaigns_paused: { type: integer }
+          description: OK
+        "400":
+          description: "`account_id_required` · `bad_level_or_account` · `invalid_json`"
+        "403":
+          description: "`forbidden` — невірний або відсутній X-Admin-Token"
+        "503":
+          description: "`admin_api_disabled` — ADMIN_API_TOKEN не заданий на сервері"
+
+  /admin/calls-block:
+    post:
+      tags: [admin]
+      summary: Зупинити дзвінки акаунта
+      description: |
+        Службова ручка, не для кабінету. Потрібна, коли приходить скарга
+        від оператора й дзвінки треба зупинити швидше, ніж шукати, під ким
+        залогінитись.
+
+        Захищена заголовком `X-Admin-Token`, а не сесією. Без
+        `ADMIN_API_TOKEN` в оточенні сервера ручка вимкнена.
+
+        Зупинка гасить і активні обдзвони: інакше вона зупинила б лише
+        наступні дзвінки, а поточний обдзвін дійшов би до кінця списку.
+        Кабінет при цьому лишається доступним — акаунт не вимикається,
+        людина бачить свої дані й може пояснитись.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [account_id]
+              properties:
+                account_id: { type: integer }
+                blocked: { type: boolean, default: true }
+                reason: { type: string, maxLength: 200 }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  account_id: { type: integer }
+                  blocked: { type: boolean }
+                  campaigns_paused: { type: integer }
+          description: OK
+        "400":
+          description: "`account_id_required` · `invalid_json`"
+        "403":
+          description: "`forbidden` — невірний або відсутній X-Admin-Token"
+        "404":
+          description: "`not_found`"
+        "503":
+          description: "`admin_api_disabled` — ADMIN_API_TOKEN не заданий на сервері"
+
+  /app/api-keys:
+    get:
+      tags: [webhooks]
+      summary: Ключі до API
+      description: >
+        Повертається лише `prefix` — перші символи, щоб клієнт упізнав свій
+        ключ у списку. Самого ключа в базі немає: там хеш.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  keys:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: integer }
+                        name: { type: string }
+                        prefix: { type: string }
+                        created_at: { type: string }
+                        last_used_at:
+                          type: string
+                          nullable: true
+                          description: null — ключем ще жодного разу не користувались
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+    post:
+      tags: [webhooks]
+      summary: Створити ключ
+      description: >
+        **`key` у відповіді показується ЄДИНИЙ раз.** У базі лежить лише
+        хеш, тож відновити ключ ми не зможемо навіть за бажання — якщо
+        клієнт його загубив, лишається створити новий.
+
+
+        Покажи його одразу й попередь про це, інакше людина закриє вікно і
+        прийде в підтримку.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string, maxLength: 80, description: підпис для себе }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  id: { type: integer }
+                  key: { type: string, description: показується лише тут і більше ніде }
+                  prefix: { type: string }
+          description: Створено
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /app/api-keys/{key_id}:
+    delete:
+      tags: [webhooks]
+      summary: Відкликати ключ
+      parameters:
+        - { name: key_id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          content: { application/json: { schema: { $ref: "#/components/schemas/Ok" } } }
+          description: Відкликано
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`not_found`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/team:
+    get:
+      tags: [auth]
+      summary: Команда й ролі
+      description: >
+        Першим у списку йде ВЛАСНИК кабінету з роллю `owner` та `id: 0` —
+        його немає в таблиці учасників, і видалити чи змінити його не можна.
+        Решта — запрошені.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  members:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: integer, description: "0 — власник кабінету" }
+                        email: { type: string }
+                        name: { type: string }
+                        role: { type: string, enum: [owner, admin, viewer] }
+                        status: { type: string, enum: [active, invited] }
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+    post:
+      tags: [auth]
+      summary: Запросити користувача
+      description: >
+        Листа поки не шлемо: запрошення зʼявляється у списку, а вхід іде
+        через звичайну реєстрацію на цю саму пошту.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+                name: { type: string, maxLength: 120 }
+                role: { type: string, enum: [admin, viewer], default: viewer }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  id: { type: integer }
+                  email: { type: string }
+                  role: { type: string }
+          description: Запрошено
+        "400":
+          description: "`invalid_email` · `invalid_role` · `invalid_json`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "409":
+          description: >
+            `already_invited` — така пошта вже в команді ·
+            `already_owner` — це пошта власника кабінету
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/team/{member_id}:
+    patch:
+      tags: [auth]
+      summary: Змінити роль
+      parameters:
+        - { name: member_id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties:
+                role: { type: string, enum: [admin, viewer] }
+      responses:
+        "200":
+          content: { application/json: { schema: { $ref: "#/components/schemas/Ok" } } }
+          description: Збережено
+        "400":
+          description: "`invalid_role` · `invalid_json`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`not_found`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+    delete:
+      tags: [auth]
+      summary: Прибрати з команди
+      parameters:
+        - { name: member_id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          content: { application/json: { schema: { $ref: "#/components/schemas/Ok" } } }
+          description: Прибрано
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`not_found`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/notifications:
+    get:
+      tags: [auth]
+      summary: Налаштування сповіщень
+      description: >
+        Повертаються ВСІ типи, навіть ті, яких клієнт ще не чіпав — зі
+        значеннями за замовчуванням. Так екран при першому відкритті не
+        порожній.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  notifications:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        kind:
+                          type: string
+                          enum: [escalation, limit_exhausted]
+                          description: >
+                            `limit_exhausted` — **працює**: лист на 80 %
+                            витрачених хвилин і ще один, коли вони
+                            скінчились (на тріалі це 10 хвилин, тож
+                            приходить швидко). Поріг і частота перевірки —
+                            на сервері.
+
+
+                            `escalation` — агент не встиг зреагувати в межах
+                            SLA. Перемикач зберігається, але подій поки
+                            немає: не обіцяй цей лист у тексті екрана.
+
+
+                            `telegram` має бути ЧИСЛОВИЙ chat_id і бот має
+                            бути запущений людиною — «@нік» ботом не
+                            розвʼязати, такі сповіщення мовчки не підуть.
+                            `email` порожній = пишемо на пошту акаунта.
+                        email_enabled: { type: boolean }
+                        telegram_enabled: { type: boolean }
+                        email: { type: string }
+                        telegram: { type: string }
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+    patch:
+      tags: [auth]
+      summary: Зберегти налаштування сповіщень
+      description: >
+        Приймає кілька типів одразу: на екрані перемикачів багато, і людина
+        клацає кілька перш ніж зберегти. По одному — це кілька запитів і
+        половинчастий стан, якщо один із них не пройде.
+
+
+        Передавай лише ті поля, що змінились: решта лишиться як була.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [notifications]
+              properties:
+                notifications:
+                  type: array
+                  items:
+                    type: object
+                    required: [kind]
+                    properties:
+                      kind: { type: string, enum: [escalation, limit_exhausted] }
+                      email_enabled: { type: boolean }
+                      telegram_enabled: { type: boolean }
+                      email: { type: string, maxLength: 160 }
+                      telegram: { type: string, maxLength: 120 }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  notifications: { type: array, items: { type: object } }
+          description: Збережено; повертається повний стан після правки
+        "400":
+          description: "`nothing_to_update` · `unknown_kind` (з полем `kind`) · `invalid_json`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /app/webhooks:
+    get:
+      tags: [webhooks]
+      summary: Приймачі акаунта
+      description: >
+        Після кожного завершеного дзвінка ми шлемо його підсумок на вказану
+        адресу. Клієнт заводить це в Zapier, Make, n8n чи власний скрипт — і
+        далі кладе куди йому треба: Bitrix, KeyCRM, Pipedrive, Google Sheets.
+
+
+        **Секрет у списку не повертається.** Він показується рівно раз — у
+        відповіді на створення. Далі лише перевипуск.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  webhooks:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: integer }
+                        url: { type: string }
+                        is_active: { type: boolean }
+                        created_at: { type: string }
+                        failed:
+                          type: integer
+                          description: скільки доставок зрештою не вдалось
+                        last_delivered_at: { type: string, nullable: true }
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+    post:
+      tags: [webhooks]
+      summary: Додати приймач
+      description: >
+        **`secret` у відповіді показується ЄДИНИЙ раз.** Покажи його клієнту
+        одразу й попередь, що вдруге його не буде — далі лише перевипуск.
+
+
+        Адреса перевіряється: лише `https`, лише зовнішні адреси. Запит іде з
+        нашого сервера, тож приймач на `localhost` або в приватній мережі ми
+        не приймаємо — це був би спосіб достукатись через нас туди, куди
+        ззовні ходу немає.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url]
+              properties:
+                url: { type: string, format: uri, maxLength: 500 }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  id: { type: integer }
+                  url: { type: string }
+                  secret:
+                    type: string
+                    description: показується лише тут і більше ніде
+          description: Створено
+        "400":
+          description: >
+            `https_required` — лише https · `private_address` — адреса веде у
+            внутрішню мережу · `host_not_resolved` — домен не існує ·
+            `port_not_allowed` · `invalid_url` · `invalid_json`
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /app/webhooks/{webhook_id}:
+    patch:
+      tags: [webhooks]
+      summary: Змінити адресу або вимкнути
+      parameters:
+        - { name: webhook_id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                url: { type: string, format: uri }
+                is_active: { type: boolean }
+      responses:
+        "200":
+          content: { application/json: { schema: { $ref: "#/components/schemas/Ok" } } }
+          description: Збережено
+        "400":
+          description: "`nothing_to_update` · помилки адреси, як у POST"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`not_found`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+    delete:
+      tags: [webhooks]
+      summary: Видалити приймач
+      parameters:
+        - { name: webhook_id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          content: { application/json: { schema: { $ref: "#/components/schemas/Ok" } } }
+          description: Видалено
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`not_found`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/webhooks/{webhook_id}/test:
+    post:
+      tags: [webhooks]
+      summary: Пробний запит просто зараз
+      description: >
+        Шлеться синхронно, не через чергу: людина щойно натиснула кнопку й
+        дивиться на екран — вона має побачити результат, а не «поставлено в
+        чергу».
+
+
+        Відповідь `200` з `ok: false` означає, що ми достукались, а приймач
+        відповів помилкою: дивись `response_code` і `error`.
+      parameters:
+        - { name: webhook_id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean, description: "приймач відповів кодом < 400" }
+                  response_code:
+                    { type: integer, nullable: true, description: "null — не достукались зовсім" }
+                  error: { type: string }
+          description: Спробували
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`not_found`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/webhooks/{webhook_id}/secret:
+    post:
+      tags: [webhooks]
+      summary: Перевипустити секрет
+      description: Старий одразу перестає діяти. Новий показується лише в цій відповіді.
+      parameters:
+        - { name: webhook_id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  secret: { type: string }
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`not_found`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/webhooks/deliveries:
+    get:
+      tags: [webhooks]
+      summary: Журнал доставок
+      description: >
+        Потрібен рівно для однієї розмови: клієнт каже «нічого не приходить».
+        Тут видно, чи ми слали і що відповів його приймач.
+
+
+        Саме тіло запиту сюди НЕ входить — у ньому телефон і транскрипт, а
+        журнал відкривається як звичайна таблиця.
+      parameters:
+        - {
+            name: webhook_id,
+            in: query,
+            schema: { type: integer },
+            description: лише цього приймача,
+          }
+        - { name: limit, in: query, schema: { type: integer, default: 50, maximum: 200 } }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  deliveries:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: integer }
+                        webhook_id: { type: integer }
+                        event: { type: string }
+                        call_id: { type: string, nullable: true }
+                        status:
+                          type: string
+                          enum: [pending, delivered, failed, cancelled]
+                          description: >
+                            `pending` — ще пробуємо (до 5 спроб: 1 хв, 5 хв,
+                            30 хв, 2 год, 6 год) · `failed` — здались або
+                            приймач відповів 4xx · `cancelled` — вебхук
+                            вимкнули, поки доставка чекала
+                        attempts: { type: integer }
+                        response_code: { type: integer, nullable: true }
+                        error: { type: string, nullable: true }
+                        created_at: { type: string }
+                        delivered_at: { type: string, nullable: true }
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /app/calls/{call_id}/crm-status:
+    get:
+      tags: [calls]
+      summary: Стан синхронізації дзвінка з CRM
+      description: >
+        **Конекторів CRM поки немає. Цей ендпоінт існує саме тому.**
+
+
+        Без нього фронт малює «Не синхронізовано» проти кожного рядка — а
+        це неправда: не «не вийшло», а «CRM не підключена». Клієнт читає
+        це як поломку і йде в підтримку.
+
+
+        Тому `configured` і `state` розділені. Поки `configured: false` —
+        колонку синхронізації в журналі не показувати взагалі, а панель у
+        картці дзвінка згорнути.
+      parameters:
+        - { name: call_id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  crm:
+                    type: object
+                    properties:
+                      configured:
+                        type: boolean
+                        description: чи підключено хоч якусь CRM до акаунта
+                      provider: { type: string, nullable: true }
+                      state:
+                        type: string
+                        enum: [not_configured, pending, synced, failed]
+                        description: "`not_configured` — стан акаунта, а не цього дзвінка"
+                      synced_at: { type: string, nullable: true }
+                      error: { type: string, nullable: true }
+                      can_retry:
+                        type: boolean
+                        description: чи має сенс показувати кнопку «Повторити»
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`not_found` — і для неіснуючого, і для чужого дзвінка"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/calls/{call_id}/crm-retry:
+    post:
+      tags: [calls]
+      summary: Повторити синхронізацію з CRM
+      description: >
+        Поки CRM не підключена, повторювати нема чого — повертається
+        `501 crm_not_configured`, а не `ok`. Кнопка не має вдавати
+        успішну роботу.
+      parameters:
+        - { name: call_id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          content: { application/json: { schema: { $ref: "#/components/schemas/Ok" } } }
+          description: Поставлено в чергу
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`not_found`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "501":
+          description: "`crm_not_configured` — жодного конектора до акаунта не підключено"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/calls/{call_id}/note:
+    put:
+      tags: [calls]
+      summary: Нотатка менеджера на картці дзвінка
+      description: >
+        Те, що пише людина: «передзвонити після 15-го», «просив прайс на
+        пошту». Це не `outcome` — той ставить система за підсумком розмови.
+
+
+        Порожній текст не помилка, а спосіб стерти нотатку: разом із нею
+        зникає і `manager_note_at`, інакше під порожнім полем лишалось би
+        «змінено о 14:20». Довші за 2000 символів обрізаються.
+      parameters:
+        - { name: call_id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                note: { type: string, maxLength: 2000 }
+      responses:
+        "200":
+          description: збережено
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+        "400":
+          description: >
+            `invalid_json` · `nothing_to_update` — у тілі немає поля `note`.
+
+
+            Зіпсований запит НЕ стирає нотатку: щоб її прибрати, надішли
+            `note` з порожнім рядком свідомо.
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`not_found` — і для неіснуючого, і для чужого дзвінка (щоб не можна було перебирати id)"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/agents:
+    get:
+      tags: [agents]
+      summary: Список агентів
+      description: >
+        `?stats=1` додає до кожного агента блок `stats` — це те, чим
+        заповнюються картки на екрані агентів.
+
+
+        Прапорцем, а не завжди: список смикають і там, де цифри не
+        потрібні (випадайка вибору агента), а рахувати їх дарма — зайвий
+        обхід усіх дзвінків акаунта.
+      parameters:
+        - in: query
+          name: stats
+          schema: { type: string, enum: ["1", "true", "yes"] }
+          description: додати блок `stats` до кожного агента
+        - in: query
+          name: days
+          schema: { type: integer, minimum: 0, maximum: 365, default: 0 }
+          description: "період для `stats`; 0 — за весь час"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  agents:
+                    type: array
+                    items: { $ref: "#/components/schemas/Agent" }
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [agents]
+      summary: Створити агента
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string, maxLength: 120 }
+                voice: { type: string, maxLength: 64 }
+                instructions:
+                  type: string
+                  maxLength: 4000
+                  description: Що агент говорить. Без цього він не зможе дзвонити.
+                call_direction:
+                  type: string
+                  enum: [inbound, outbound]
+                  description: >
+                    Що агент робить. Це НЕ замінює маршрутизацію вхідних:
+                    вона й далі йде за набраним номером, бо іншого ключа
+                    в SIP-запиті немає.
+                contact_ids:
+                  type: array
+                  items: { type: integer }
+                  description: >
+                    Галочки з кроку «База контактів» майстра — кого цей
+                    агент обдзвонює. Список зберігається на агенті й
+                    береться обдзвоном за замовчуванням. Чужі id мовчки
+                    відсіюються — дивись `contacts_count` у відповіді.
+                    Порожній масив або поле відсутнє — нікого (можна
+                    створити агента до імпорту контактів, як на макеті
+                    «Контактів ще немає → Далі»).
+                contact_base_id:
+                  type: integer
+                  description: >
+                    Необовʼязково: «дзвони всій базі» без галочок; `0` =
+                    без прив'язки. Якщо є `contact_ids` — вони важливіші.
+                schedule_start:
+                  type: string
+                  description: >
+                    "HH:MM" у часовому поясі акаунта. Обидві межі або
+                    жодної: сама лише «з 09:00» не каже, коли зупинитись.
+                schedule_end: { type: string }
+                working_days:
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items: { type: string, enum: [mon, tue, wed, thu, fri, sat, sun] }
+                  description: >
+                    Галочки Пн–Нд. Порожній масив = зняти обмеження, а не
+                    «не дзвонити ніколи».
+                calls_per_day:
+                  type: integer
+                  minimum: 0
+                  description: "0 = без стелі. Рахується окремо для кожного агента."
+                number_id:
+                  type: integer
+                  description: >
+                    З якого номера дзвонить цей агент; `0` = перший
+                    вихідний номер акаунта. Номер має належати акаунту —
+                    інакше `number_not_connected`.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  id: { type: integer }
+                  contacts_count:
+                    type: integer
+                    description: скільки з `contact_ids` справді записано (свої і наявні)
+          description: Створено
+        "400":
+          description: "`name_required` · `invalid_json` · `invalid_call_direction` · `contact_base_required` (лише якщо передано id неіснуючої бази) · `invalid_contact_ids` · `invalid_schedule` · `invalid_working_days` · `invalid_calls_per_day` · `number_not_connected`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /app/agents/test-call:
+    post:
+      tags: [agents]
+      summary: Тестовий дзвінок цим агентом
+      description: Один дзвінок на хвилину на акаунт — це справжній дзвінок і він коштує грошей.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone]
+              properties:
+                phone: { type: string, examples: ["+380961112233"] }
+                agent_id:
+                  type: integer
+                  description: Наявний агент. Без нього передай поля нижче.
+                name: { type: string, description: "для тесту ДО створення агента" }
+                voice: { type: string, description: "для тесту ДО створення агента" }
+                instructions:
+                  type: string
+                  description: |
+                    Для тесту ДО створення агента: у майстрі останній крок —
+                    «послухайте агента», але агента ще немає і agent_id взяти
+                    нізвідки. Нічого не зберігається — просто дзвінок із цими
+                    інструкціями.
+      responses:
+        "200":
+          content: { application/json: { schema: { $ref: "#/components/schemas/Ok" } } }
+          description: Дзвінок поставлено
+        "400":
+          description: "`invalid_phone` · `agent_has_no_instructions` · `invalid_json`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`agent_not_found`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "403":
+          description: >
+            `do_not_call` — цей номер просив більше не дзвонити.
+
+
+            Не пропонуй «спробувати ще раз»: зняти це можна лише свідомо,
+            через картку контакту.
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "402":
+          description: >
+            Дзвінок НЕ поставлено — вичерпано ліміт. Дві різні причини, і
+            ведуть вони на різні екрани:
+
+
+            `minutes_exhausted` — хвилини скінчились. Пропонуй БІЛЬШИЙ тариф.
+
+
+            `plan_expired` — строк оплаченого періоду вийшов, хвилини тут ні
+            до чого. Пропонуй ПРОДОВЖИТИ той самий тариф.
+
+
+            Плутати їх не можна: людину відправить купувати не те, що їй
+            потрібно. У відповіді є `trial`, `minutes_limit`, `minutes_left`
+            і `expires_at`, щоб було з чого зібрати текст.
+
+
+            Це не аварія, а нормальний стан: показуй не червону помилку, а
+            пропозицію з посиланням на `/dashboard/billing`. Обидва стани
+            видно заздалегідь у `/app/stats` (`can_call`, `blocked_reason`) —
+            кнопку варто гасити ще до натискання.
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "429":
+          description: "`too_soon` — не минула хвилина від попереднього тестового дзвінка"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "502":
+          description: >
+            `call_failed` — телефонія не прийняла дзвінок. Проблема на
+            нашому боці, не в даних: пропонуй спробувати ще раз.
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/contacts:
+    get:
+      tags: [contacts]
+      summary: Список контактів
+      description: >
+        Разом зі списком приходить `stats` — плитки над ним.
+
+
+        Плитки рахуються по ВСІЙ базі контактів, а не по відфільтрованій
+        видачі: «оброблено цього місяця» не має мінятись від того, що
+        людина щось шукає в пошуку.
+      parameters:
+        - in: query
+          name: search
+          schema: { type: string }
+          description: пошук за іменем або номером
+        - in: query
+          name: tag
+          schema: { type: string }
+          description: >
+            Одна мітка цілком. Підрядок не шукається: «клієнт» не знайде
+            «постійний_клієнт».
+        - in: query
+          name: consent
+          schema: { type: string, enum: [granted, pending, ""] }
+          description: фільтр за станом згоди
+        - in: query
+          name: callable
+          schema: { type: string, enum: ["1"] }
+          description: >
+            Лише ті, кого обдзвін СПРАВДІ набере: зі згодою і не в списку
+            «не дзвонити». Головний фільтр екрана «кому дзвонимо» — без
+            нього людина бачить сто номерів, запускає обдзвін, а половину
+            він мовчки пропускає.
+        - in: query
+          name: base_id
+          schema: { type: integer }
+          description: >
+            Контакти однієї бази (`GET /app/contact-bases`). `0` — це
+            справжній фільтр «поза базами», а не «всі»: щоб отримати всі,
+            параметр не передавай.
+
+
+            Крок «Контакти» в майстрі агента — це той самий список із
+            тими самими фільтрами (`search`, `tag`, `base_id`), просто
+            з трьома колонками: ім'я, номер, мітки. Окремої ручки для
+            майстра немає й не треба; обрані галочками id віддаються в
+            `POST /app/campaigns` як `contact_ids`.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  contacts:
+                    type: array
+                    items: { $ref: "#/components/schemas/Contact" }
+                  total:
+                    {
+                      type: integer,
+                      description: "скільки повернуто в цій видачі (стеля 1000 — для сторінки; обдзвін і експорт стелі не мають)",
+                    }
+                  tags:
+                    type: array
+                    description: >
+                      Чіпи над списком («VIP 39», «Новий 6») — по всій базі
+                      акаунта, не по видачі, як і `stats`. Відсортовано за
+                      кількістю. «Всі контакти N» бери зі `stats.total_contacts`.
+                    items:
+                      type: object
+                      properties:
+                        tag: { type: string }
+                        count: { type: integer }
+                  stats:
+                    type: object
+                    properties:
+                      total_contacts: { type: integer }
+                      processed_this_month:
+                        type: integer
+                        description: >
+                          Скільки РІЗНИХ контактів обдзвонили цього місяця.
+                          Три спроби додзвонитись одній людині — один
+                          оброблений контакт, не три.
+                      converted_this_month:
+                        type: integer
+                        description: з них ті, з ким домовились про зустріч
+                      conversion_pct:
+                        type: number
+                        nullable: true
+                        description: >
+                          **null = цього місяця ще нікому не дзвонили** —
+                          конверсії не існує. Малюй «—», а не 0%: нуль
+                          читається як «дзвонили і не вийшло».
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [contacts]
+      summary: Додати контакт
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone]
+              properties:
+                phone: { type: string }
+                name: { type: string, maxLength: 120 }
+                email: { type: string, maxLength: 160 }
+                tags:
+                  oneOf:
+                    - type: array
+                      items: { type: string }
+                    - type: string
+                  description: >
+                    Мітки одразу при створенні — «Додати контакт» у майстрі
+                    має поле міток. Масив або рядок через кому; дублікати
+                    прибираються.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  id: { type: integer, description: "id створеного контакту" }
+          description: Контакт створено
+        "400":
+          description: "`invalid_phone` · `invalid_json`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "409":
+          description: >
+            `duplicate_phone` — такий номер в акаунті вже є.
+
+
+            Раніше тут було написано, що дублікат приходить як 200 з
+            `id: null` — це неправда, код так ніколи не відповідав.
+            Обробляй саме 409, інакше повторне додавання виглядатиме
+            як несподівана поломка.
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /app/support-chat:
+    post:
+      tags: [support]
+      summary: Чат підтримки в кабінеті
+      description: |
+        Ключ OpenAI лишається на сервері й у браузер не потрапляє ніколи.
+
+        Відповідь іде **потоком звичайного тексту**, не JSON. На фронті це
+        `useChat({ streamProtocol: "text" })` — найпростіший контракт, який
+        не ламається від зміни версії бібліотеки.
+
+        Приймаються обидва формати AI SDK: `content` рядком і `parts` зі
+        шматків. Повідомлення з роллю `system` із браузера **відкидаються** —
+        інакше клієнт перепише асистенту правила.
+
+        Тариф і залишок хвилин підставляються в промпт автоматично, з
+        акаунта — питати їх у фронтенду не треба.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [messages]
+              properties:
+                messages:
+                  type: array
+                  description: історія у форматі AI SDK; беремо останні 20
+                  items:
+                    type: object
+                    properties:
+                      role: { type: string, enum: [user, assistant] }
+                      content: { type: string }
+                      parts:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            type: { type: string, enum: [text] }
+                            text: { type: string }
+      responses:
+        "200":
+          description: потік тексту відповіді
+          content:
+            text/plain:
+              schema: { type: string }
+        "400": { description: "invalid_json або no_messages" }
+        "401": { description: не авторизований }
+        "429": { description: "too_many_requests — понад 20 повідомлень за хвилину" }
+        "503": { description: "support_unavailable — ключ не налаштований" }
+
+  /website/feedback:
+    post:
+      tags: [landing]
+      summary: Модалка «Залиште зворотній зв'язок та отримайте знижку»
+      description: |
+        Межі — ті самі, що у `feedbackSchema` фронта: текст 10…1000
+        символів, пошта обовʼязкова, згода обовʼязкова (обіцяно знижку —
+        без згоди писати на пошту не маємо права).
+
+        Летить адмінам у Telegram (гілка «Заявки с сайта») з поміткою, що
+        людині обіцяно знижку. У заявки (`/website/lead`) не потрапляє —
+        це не лід, тут немає телефону.
+
+        Троттлінг: один запит на IP раз на 20 секунд → інакше `429`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [message, email, marketingConsent]
+              properties:
+                message: { type: string, minLength: 10, maxLength: 1000 }
+                email: { type: string, format: email }
+                marketingConsent:
+                  type: boolean
+                  description: "має бути true; `marketing_consent` теж приймається"
+                source_page: { type: string, examples: ["/pricing"] }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  id: { type: integer }
+          description: Збережено, адмінів сповіщено
+        "400":
+          description: "`message_too_short` · `invalid_email` · `consent_required` · `invalid_json`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "429":
+          description: "`too_many_requests` — раз на 20 с з однієї IP"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /website/lead:
+    post:
+      tags: [landing]
+      summary: Заявка з форми лендінгу («Залишити заявку», «Отримайте розрахунок»)
+      description: |
+        Імʼя й телефон обовʼязкові — по заявці дзвонять. Решта полів за
+        наявності. Йде адмінам у Telegram; якщо потім з цього номера
+        подзвонять на демо, агент знає, що заявка вже була.
+
+        Троттлінг як у `/website/feedback`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, phone]
+              properties:
+                name: { type: string, maxLength: 500 }
+                phone: { type: string, maxLength: 500 }
+                email: { type: string }
+                company: { type: string }
+                message: { type: string }
+                niche: { type: string, description: "або `sphere` — форма «Отримайте розрахунок»" }
+                telegram: { type: string }
+                contact:
+                  type: string
+                  description: "одне поле «Telegram / email» — розбираємо самі"
+                source_page: { type: string }
+                utm_source: { type: string }
+                utm_medium: { type: string }
+                utm_campaign: { type: string }
+                utm:
+                  type: string
+                  description: "альтернатива окремим полям: `utm_source=google&utm_medium=cpc`"
+                referrer: { type: string }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  id: { type: integer }
+          description: Збережено
+        "400":
+          description: "`name_and_phone_required` · `invalid_json`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "429":
+          description: "`too_many_requests`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/billing/plans:
+    get:
+      tags: [billing]
+      summary: Каталог тарифів і поточний стан
+      description: >
+        Ціни живуть на сервері — не зашивати у фронт. Тут же поточний тариф
+        акаунта, дата наступного списання й ліміт хвилин.
+
+
+        **Ціна доларова, списання гривневе.** Приймаємо ми лише гривню,
+        тож `price_uah` рахується курсом НБУ на момент запиту. Показуй
+        `price_usd` як ціну, а `price_uah` — поруч, як «≈ 3 520 грн»:
+        сама лише ціна здивує людину на платіжній сторінці, сама лише
+        гривня розійдеться з прайсом на сайті.
+
+
+        Курс НБУ офіційний і міняється раз на добу — сума не стрибне,
+        поки людина роздумує.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  packs:
+                    type: array
+                    description: пакети хвилин для «Купити хвилини»
+                    items:
+                      type: object
+                      properties:
+                        key: { type: string }
+                        minutes: { type: integer }
+                        price_uah: { type: number }
+                        currency: { type: string, enum: [UAH] }
+                        per_minute_uah: { type: number }
+                  bonus_minutes:
+                    type: integer
+                    description: куплені хвилини, що лишились; не згоряють при продовженні
+                  current: { type: string, description: "ключ поточного тарифу або trial" }
+                  expires_at:
+                    type: string
+                    nullable: true
+                    description: >
+                      Коли закінчується оплачений період. Якщо `auto_charge`
+                      true — за добу до цієї дати спишемо зі збереженої
+                      картки й продовжимо; інакше після неї дзвінки
+                      блокуються, поки людина не оплатить сама.
+                  days_left:
+                    type: integer
+                    nullable: true
+                    description: >
+                      Скільки днів лишилось. Відʼємне = тариф уже не діє.
+                      null — строку немає (пробний акаунт). Показуй саме
+                      цю цифру: у дату ніхто не вдивляється.
+                  expired: { type: boolean, description: "строк вийшов, дзвінки заблоковані" }
+                  minutes: { type: integer, description: "ліміт хвилин за оплаченим тарифом" }
+                  auto_renew: { $ref: "#/components/schemas/AutoRenew/properties/auto_renew" }
+                  auto_charge: { $ref: "#/components/schemas/AutoRenew/properties/auto_charge" }
+                  next_charge_at:
+                    { $ref: "#/components/schemas/AutoRenew/properties/next_charge_at" }
+                  auto_renew_period:
+                    { $ref: "#/components/schemas/AutoRenew/properties/auto_renew_period" }
+                  auto_renew_consent_at:
+                    { $ref: "#/components/schemas/AutoRenew/properties/auto_renew_consent_at" }
+                  plans:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        key: { type: string, description: "передавати в /app/billing/checkout" }
+                        title: { type: string }
+                        price_usd:
+                          { type: number, description: "ціна тарифу; її й показуй головною" }
+                        currency: { type: string, enum: [USD] }
+                        price_uah:
+                          type: number
+                          nullable: true
+                          description: >
+                            Скільки спишеться з картки. **null означає, що
+                            курс НБУ зараз недоступний** — покажи самі
+                            долари, а не вигадану гривню.
+                        usd_rate:
+                          type: number
+                          nullable: true
+                          description: курс, яким рахували; можна показати дрібним шрифтом
+                        year:
+                          type: object
+                          description: >
+                            Річна оплата — той самий рахунок, просто більший
+                            і на довший строк. Автопродовження потім бере
+                            той самий період (`auto_renew_period`).
+
+
+                            Знижку рахуємо ми, не фронт: якщо умови колись
+                            зміняться, переписувати доведеться в одному
+                            місці, а не в двох.
+                          properties:
+                            price_usd: { type: number, examples: [790] }
+                            price_uah: { type: number, nullable: true }
+                            months_free: { type: integer, examples: [2] }
+                            saving_usd:
+                              type: number
+                              description: "скільки економить проти 12 місячних платежів"
+                        minutes: { type: integer }
+                        agents: { type: integer, description: "0 = без обмеження" }
+                        numbers:
+                          {
+                            type: integer,
+                            description: "скільки номерів можна підключити; 0 = без обмеження",
+                          }
+        "401": { description: не авторизований }
+
+  /app/billing/receipt:
+    get:
+      tags: [billing]
+      summary: Квитанція про оплату
+      description: >
+        Іконка завантаження в історії платежів. Сам документ формує
+        платіжна система — ми лише перевіряємо, що рахунок належить цьому
+        акаунту, і передаємо запит далі.
+
+
+        ЗАРАЗ КВИТАНЦІЙ НЕМАЄ: у WayForPay такого ендпоїнта немає, тож
+        ручка завжди віддає `404 receipt_not_available`. Кнопку малювати
+        не треба — в історії платежів `has_receipt` уже false, орієнтуйся
+        на нього, а не на спробу завантажити.
+      parameters:
+        - { name: invoice_id, in: query, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: >
+            Посилання на квитанцію. Поки не повертається — лишається в
+            контракті, щоб фронт не переписувати, коли квитанції зʼявляться.
+          content: { application/json: { schema: { type: object } } }
+        "400":
+          description: "`invoice_required`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: >
+            `not_found` — чужий або неіснуючий рахунок ·
+            `receipt_not_available` — провайдер квитанцій не віддає
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/billing/payment-method:
+    get:
+      tags: [billing]
+      summary: Збережена картка клієнта
+      description: >
+        Блок «Спосіб оплати» на екрані тарифів.
+
+
+        Справжнього номера картки в нас **немає й не буде** — банк повертає
+        лише маску й токен, дійсний тільки для нашого мерчанта. Тут те, що
+        можна показати людині, аби вона впізнала свою картку.
+
+
+        Картка зберігається автоматично при першій оплаті. До неї
+        `saved: false` — і це НЕ помилка: покажи «Спосіб оплати не додано»,
+        як на макеті.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  card:
+                    type: object
+                    properties:
+                      saved: { type: boolean, description: чи є збережена картка }
+                      masked: { type: string, examples: ["424242******4242"] }
+                      brand: { type: string, examples: ["Visa", "Mastercard"] }
+                      saved_at: { type: string, nullable: true }
+                  auto_renew: { $ref: "#/components/schemas/AutoRenew/properties/auto_renew" }
+                  auto_charge: { $ref: "#/components/schemas/AutoRenew/properties/auto_charge" }
+                  next_charge_at:
+                    { $ref: "#/components/schemas/AutoRenew/properties/next_charge_at" }
+                  auto_renew_period:
+                    { $ref: "#/components/schemas/AutoRenew/properties/auto_renew_period" }
+                  auto_renew_consent_at:
+                    { $ref: "#/components/schemas/AutoRenew/properties/auto_renew_consent_at" }
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+    delete:
+      tags: [billing]
+      summary: Відвʼязати картку
+      description: >
+        Наступна оплата — знову вручну. Прапорець `auto_renew` лишається як
+        був, але без картки списувати нема з чого: `auto_charge` стане
+        false, і після наступної оплати картка збережеться знову.
+      responses:
+        "200":
+          content: { application/json: { schema: { $ref: "#/components/schemas/Ok" } } }
+          description: Відвʼязано
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`no_card` — збереженої картки не було"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/billing/auto-renew:
+    post:
+      tags: [billing]
+      summary: Дати або відкликати згоду на автопродовження
+      description: |
+        Тумблер «Автопродовження» на екрані оплати: `enabled: true` =
+        згода, `false` = відмова від подальших списань.
+
+        **Як це працює.** Картка зберігається при першій оплаті (WayForPay
+        повертає токен у вебхуку; номера картки в нас немає). За добу до
+        кінця оплаченого періоду списуємо суму того самого тарифу на той
+        самий строк і продовжуємо. За три дні до цього людина отримує
+        лист із сумою й карткою.
+
+        Автопродовження **вимкнене, доки клієнт сам не погодиться** —
+        галочкою при оплаті (`auto_renew: true` у `POST /app/billing/checkout`)
+        або цим тумблером. Дата згоди — `auto_renew_consent_at`. Так
+        вимагає WayForPay для токенізації, і так виглядає чесно: людина
+        бачить, на що погоджується, до того, як ввела картку.
+
+        **Що має бути на екрані (вимога платіжки):**
+        1. на кроці оплати — чекбокс «Продовжувати підписку автоматично:
+           картку буде збережено, а {сума} спишеться {дата}. Відмовитись
+           можна будь-коли в кабінеті» + посилання на Оферту (п. 6, 9);
+        2. у кабінеті — блок «Автопродовження: увімкнено · наступне
+           списання {next_charge_at}» і кнопка «Скасувати автосписання».
+
+        Без збереженої картки згода просто чекає першої оплати —
+        відповідь скаже `auto_charge: false`, і «спишемо …» малювати не
+        треба.
+
+        Після трьох невдалих списань поспіль (прострочена картка, брак
+        коштів) ми зупиняємось і пишемо лист; людина оновлює картку
+        оплатою вручну — і лічильник скидається.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [enabled]
+              properties:
+                enabled: { type: boolean }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Ok"
+                  - $ref: "#/components/schemas/AutoRenew"
+          description: Стан після зміни
+        "400":
+          description: "`enabled_required` — поле має бути boolean · `invalid_json`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /app/billing/topup:
+    post:
+      tags: [billing]
+      summary: Купити пакет хвилин
+      description: |
+        Екран «Купити хвилини». Пакети — у `GET /app/billing/plans` → `packs`.
+        Той самий шлях, що й тариф: віддаємо `payment_url`, ведеш людину
+        на WayForPay, вебхук зараховує.
+
+        **Куплені хвилини не згоряють при продовженні тарифу.** Вони лежать
+        окремо (`bonus_minutes` у `GET /app/billing/plans` і `GET
+        /app/stats`) і витрачаються ПІСЛЯ тарифних. Пакет, куплений на
+        28-й день, не зникає на 30-й.
+
+        Ціна в гривнях, без курсу — пакети на макеті гривневі й круглі.
+        В історії платежів `price_usd` у такого рядка `null`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [pack]
+              properties:
+                pack: { type: string, enum: ["100", "250", "500", "1000", "2500"] }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  invoice_id: { type: string }
+                  payment_url: { type: string }
+                  amount_uah: { type: number }
+                  minutes: { type: integer }
+                  pack: { type: string }
+          description: Рахунок створено
+        "400":
+          description: "`unknown_pack` · `invalid_json`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "502":
+          description: "`payment_provider_error`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "503":
+          description: "`payments_unavailable`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/billing/checkout:
+    post:
+      tags: [billing]
+      summary: Створити рахунок на оплату тарифу
+      description: >
+        Повертає посилання на платіжну сторінку — фронт веде туди людину.
+        Тариф вмикається НЕ тут, а вебхуком від банку після оплати.
+
+
+        Гривнева сума рахується САМЕ ТУТ, курсом НБУ на цю мить, і разом
+        із курсом лягає в платіж. Тому `amount_uah` у відповіді — це те,
+        що людина побачить на сторінці банку; показуй його перед
+        переходом, щоб сума не стала несподіванкою.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [plan]
+              properties:
+                plan: { type: string, description: "ключ із /app/billing/plans" }
+                period:
+                  type: string
+                  enum: [month, year]
+                  default: month
+                  description: >
+                    Що обрано перемикачем «Щомісячна / Річна». Невідоме
+                    значення трактується як `month` — дешевший варіант,
+                    щоб випадково не списати з людини річну суму.
+                save_card:
+                  type: boolean
+                  default: true
+                  description: >
+                    Чекбокс «Зберегти картку для майбутніх платежів».
+                    `false` — токен картки з цієї оплати не зберігаємо,
+                    навіть якщо платіжка його прислала; автосписання тоді
+                    неможливе незалежно від `auto_renew`.
+                auto_renew:
+                  type: boolean
+                  description: >
+                    Чекбокс «Даю згоду на автоматичне списання». `true` =
+                    згода на списання зі збереженої картки (пишеться з
+                    датою і в журнал дій). Без поля прапорець не чіпаємо;
+                    за замовчуванням згоди немає. Має сенс лише разом із
+                    `save_card: true`.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  invoice_id: { type: string, description: "передавати в /app/billing/status" }
+                  payment_url: { type: string, description: "куди редіректити людину" }
+                  amount_uah: { type: number, description: "саме ця сума спишеться" }
+                  price_usd: { type: number, description: "ціна тарифу в доларах" }
+                  usd_rate: { type: number, description: "курс НБУ, яким рахували" }
+                  plan: { type: string }
+                  period:
+                    { type: string, enum: [month, year], description: "за що виставлено рахунок" }
+        "400": { description: "unknown_plan — невідомий тариф" }
+        "401": { description: не авторизований }
+        "502": { description: "payment_provider_error — рахунок не створився" }
+        "503":
+          description: >
+            `payments_unavailable` — оплата не налаштована ·
+            `rate_unavailable` — курс НБУ недоступний і свіжого запасу
+            немає. Рахунок свідомо НЕ створюється: виставити його за
+            вигаданим курсом гірше, ніж не виставити зовсім.
+
+  /app/billing/status:
+    get:
+      tags: [billing]
+      summary: Чи пройшла оплата
+      description: >
+        Фронт опитує це після повернення з оплати. Показувати екран
+        успіху лише коли paid=true — редірект сам по собі нічого не доводить.
+      parameters:
+        - in: query
+          name: invoice_id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  paid: { type: boolean, description: "єдине, на що можна дивитись" }
+                  status:
+                    {
+                      type: string,
+                      enum: [created, processing, hold, success, failure, reversed, expired],
+                    }
+                  plan: { type: string }
+                  amount_uah: { type: number }
+                  current_plan: { type: string, description: "тариф акаунта вже після оплати" }
+                  expires_at: { type: string, nullable: true }
+                  days_left: { type: integer, nullable: true, description: "днів до кінця періоду" }
+                  minutes: { type: integer }
+                  auto_renew: { $ref: "#/components/schemas/AutoRenew/properties/auto_renew" }
+                  auto_charge: { $ref: "#/components/schemas/AutoRenew/properties/auto_charge" }
+                  next_charge_at:
+                    { $ref: "#/components/schemas/AutoRenew/properties/next_charge_at" }
+                  auto_renew_period:
+                    { $ref: "#/components/schemas/AutoRenew/properties/auto_renew_period" }
+                  auto_renew_consent_at:
+                    { $ref: "#/components/schemas/AutoRenew/properties/auto_renew_consent_at" }
+        "400": { description: "invoice_id_required" }
+        "401": { description: не авторизований }
+        "404": { description: рахунок не знайдено або чужий }
+
+  /app/billing/history:
+    get:
+      tags: [billing]
+      summary: Історія платежів акаунта
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  payments:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: integer }
+                        plan: { type: string }
+                        amount_uah: { type: number, description: "скільки списано" }
+                        price_usd:
+                          type: number
+                          nullable: true
+                          description: >
+                            Ціна в доларах на момент оплати. Без неї сума в
+                            історії нічим не пояснюється: прайс у нас
+                            доларовий, а списано гривні за курсом того дня.
+                        usd_rate: { type: number, nullable: true, description: курс того дня }
+                        status:
+                          { type: string, enum: [created, success, failure, reversed, expired] }
+                        created_at: { type: string }
+                        paid_at: { type: string, nullable: true }
+                        invoice_id:
+                          type: string
+                          description: "передавати в /app/billing/receipt"
+                        has_receipt:
+                          type: boolean
+                          description: >
+                            Квитанція існує лише в оплачених рахунків.
+                            false → кнопку завантаження не малювати: вона
+                            дасть 404.
+        "401": { description: не авторизований }
+
+  /billing/wfp:
+    post:
+      tags: [billing]
+      summary: Вебхук WayForPay про статус оплати
+      description: |
+        Викликає платіжна система, не браузер. Справжність підтверджує
+        HMAC-MD5 підпис у полі `merchantSignature` — тим самим секретом,
+        яким ми підписуємо свої запити. Саме цей запит вмикає тариф.
+
+        Відповідь ОБОВʼЯЗКОВА і має бути підписана: `{orderReference,
+        status: "accept", time, signature}`. Не отримавши її, WayForPay
+        повторює запит чотири доби. Тому `accept` віддається навіть на
+        чужий або вже проведений рахунок — повторювати нам нема чого.
+
+        `orderReference` тут і є номером рахунку: свого WayForPay не
+        видає. Формат наш — `acc{id}:{plan}:{period}:{ts}`, з нього ж
+        береться період, на який вмикати тариф.
+
+        Повторні вебхуки безпечні: тариф продовжується один раз.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                merchantAccount: { type: string }
+                orderReference: { type: string }
+                merchantSignature: { type: string, description: "HMAC-MD5 по 8 полях через ;" }
+                amount: { type: number, description: "гривні з копійками" }
+                currency: { type: string }
+                transactionStatus:
+                  {
+                    type: string,
+                    enum: [Approved, Declined, Refunded, Expired, InProcessing, Pending],
+                  }
+                reasonCode: { type: integer }
+                authCode: { type: string }
+                cardPan: { type: string, description: "маска картки" }
+                cardType: { type: string }
+                recToken: { type: string, description: "токен для повторних списань" }
+      responses:
+        "200":
+          description: Підписане підтвердження
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orderReference: { type: string }
+                  status: { type: string, enum: [accept] }
+                  time: { type: integer }
+                  signature: { type: string }
+        "400":
+          description: тіло не розібрати
+        "401":
+          description: "`bad_signature` — підпис не зійшовся, запит відхилено"
+
+  /app/voices:
+    get:
+      tags: [agents]
+      summary: Доступні голоси
+      description: Для форми створення агента. Не зашивати у фронт — список живе на сервері.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  voices:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        key: { type: string, description: "значення для поля voice агента" }
+                        name: { type: string }
+                        gender: { type: string, enum: [male, female] }
+                        lang: { type: string }
+                        label: { type: string, description: "готовий підпис для списку" }
+                        sample_url:
+                          type: string
+                          description: >
+                            Готова адреса для кнопки «прослухати» — саме її
+                            став у <audio src>. Не збирай її з key руками.
+                        sample_text:
+                          type: string
+                          description: >
+                            Фраза, яку голос вимовляє у зразку. Мовою САМОГО
+                            голосу: англійський голос читає англійську фразу.
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /app/agents/{agent_id}:
+    parameters:
+      - { name: agent_id, in: path, required: true, schema: { type: integer } }
+    get:
+      tags: [agents]
+      summary: Один агент — з повним списком його контактів
+      description: >
+        Для відкриття майстра на редагування: `contact_ids` — щоб
+        проставити галочки, які вже стоять. У переліку (`GET /app/agents`)
+        цього списку немає, там лише `contacts_count`.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  agent:
+                    allOf:
+                      - $ref: "#/components/schemas/Agent"
+                      - type: object
+                        properties:
+                          contact_ids:
+                            type: array
+                            items: { type: integer }
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`agent_not_found` — і для неіснуючого, і для чужого"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    patch:
+      tags: [agents]
+      summary: Редагувати агента
+      description: |
+        Передавати лише ті поля, що змінюються.
+
+        Перевіряються теж ЛИШЕ надіслані: форма шле те, що відредагували,
+        і зміна одного імені не має падати через порожній розклад.
+
+        `contact_ids` **замінює список цілком** — галочки в майстрі є весь
+        список, а не «додати до». `[]` = нікому.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string, maxLength: 120 }
+                voice: { type: string, maxLength: 64 }
+                instructions: { type: string, maxLength: 4000 }
+                is_active: { type: boolean, description: "false = агент на паузі" }
+                call_direction: { type: string, enum: [inbound, outbound] }
+                contact_ids:
+                  type: array
+                  items: { type: integer }
+                  description: замінює список агента цілком
+                contact_base_id: { type: integer, description: "0 = зняти прив'язку" }
+                schedule_start: { type: string, description: '"HH:MM"' }
+                schedule_end: { type: string }
+                working_days:
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items: { type: string, enum: [mon, tue, wed, thu, fri, sat, sun] }
+                calls_per_day: { type: integer, minimum: 0 }
+                number_id: { type: integer }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  agent: { $ref: "#/components/schemas/Agent" }
+          description: OK
+        "400":
+          description: "`name_required` · `nothing_to_update` · `invalid_json` · `invalid_call_direction` · `contact_base_required` (id неіснуючої бази) · `invalid_contact_ids` · `invalid_schedule` · `invalid_working_days` · `invalid_calls_per_day` · `number_not_connected`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`agent_not_found` — і для неіснуючого, і для чужого"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    delete:
+      tags: [agents]
+      summary: Видалити агента
+      responses:
+        "200":
+          content: { application/json: { schema: { $ref: "#/components/schemas/Ok" } } }
+          description: Видалено
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`agent_not_found`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "409":
+          description: |
+            `agent_in_use` — агента тримає активний обдзвін, його назва в полі
+            `campaign`. Видалити посеред обдзвону означає, що решта номерів
+            впаде, тож спершу треба зупинити кампанію.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Error"
+                  - type: object
+                    properties:
+                      campaign: { type: string }
+
+  /app/contacts/{contact_id}:
+    patch:
+      tags: [contacts]
+      summary: Правка контакту — мітки, згода, «не дзвонити»
+      description: >
+        Передавай лише ті поля, що змінюються.
+
+
+        `do_not_call: true` — не позначка для ока: після неї дзвінки на
+        цей номер відсікаються і в тестовому дзвінку, і в кампанії.
+      parameters:
+        - { name: contact_id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string, maxLength: 300 }
+                email: { type: string, maxLength: 300 }
+                note: { type: string, maxLength: 300 }
+                tags:
+                  type: array
+                  items: { type: string }
+                  description: "разом не довші за 300 символів"
+                consent: { type: string, enum: ["", granted, pending] }
+                do_not_call: { type: boolean }
+      responses:
+        "200":
+          content: { application/json: { schema: { $ref: "#/components/schemas/Ok" } } }
+          description: Збережено
+        "400":
+          description: "`invalid_json` · `nothing_to_update` — жодного відомого поля в тілі"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`not_found` — і для неіснуючого, і для чужого контакту"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+    delete:
+      tags: [contacts]
+      summary: Видалити контакт
+      parameters:
+        - { name: contact_id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          content: { application/json: { schema: { $ref: "#/components/schemas/Ok" } } }
+          description: Видалено
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`not_found`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/contacts/upload:
+    post:
+      tags: [contacts]
+      summary: Завантажити контакти файлом CSV
+      description: |
+        Приймається і `multipart/form-data` (поле `file`), і просто тіло
+        запиту з вмістом файлу — як зручніше фронту.
+
+        Розбір терпимий: кома або крапка з комою, BOM, заголовки
+        українською/російською/англійською, або взагалі без заголовків.
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file: { type: string, format: binary }
+                phone_column:
+                  type: integer
+                  description: >
+                    Індекс колонки з телефоном — з екрана прев'ю, після
+                    підтвердження людиною. Якщо передано, беремо саме його,
+                    а не здогад. Без нього — автовизначення, як раніше.
+                name_column: { type: integer, description: "-1 = не брати" }
+                email_column: { type: integer }
+                base_title:
+                  type: string
+                  maxLength: 120
+                  description: >
+                    Назва бази, у яку лягають контакти (з'явиться в
+                    `GET /app/contact-bases`). Без назви — у «Всі контакти».
+          text/csv:
+            schema: { type: string }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  added: { type: integer }
+                  duplicates: { type: integer, description: номери, які вже були }
+          description: OK
+        "400":
+          description: "`empty_file` · `unreadable_file` · `no_valid_phones`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /app/campaigns:
+    get:
+      tags: [campaigns]
+      summary: Список обдзвонів із прогресом
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  campaigns:
+                    type: array
+                    items: { $ref: "#/components/schemas/Campaign" }
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [campaigns]
+      summary: Запустити обдзвін
+      description: |
+        Кому дзвонити — три рівні, від точного до широкого:
+
+        1. `contact_ids` — галочки з кроку «Контакти»: рівно ці люди;
+        2. `base_id` / `tag` / `search` — фільтр, як на сторінці контактів:
+           «усі з міткою "вересень"» без тисячі галочок;
+        3. нічого не передано — список агента (галочки з майстра,
+           `contact_ids` агента); якщо він порожній — база агента
+           (`contact_base_id`); якщо й її немає — всі контакти акаунта.
+
+        Чужі контакти підставити не можна: і id, і фільтр завжди
+        обмежені своїм акаунтом. Стелі на кількість немає — база на 1 247
+        контактів дає 1 247 номерів у черзі, не 1 000.
+
+        Обдзвін іде 9:00–20:00 за Києвом у будні, з паузою 20 секунд між
+        дзвінками. Поза цим часом сам стає на паузу. На вхідні дзвінки це
+        не впливає — вони приймаються цілодобово.
+
+        Ліміт перевіряється не лише тут, а перед КОЖНИМ номером. Якщо
+        хвилини скінчаться посеред обдзвону, кампанія сама стане на
+        `paused`, а ненабрані номери лишаться в черзі: після оплати вона
+        продовжиться з того самого місця. Окремої дії для цього не треба —
+        досить перевести статус назад у `running`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [agent_id]
+              properties:
+                agent_id: { type: integer }
+                name:
+                  { type: string, maxLength: 120, description: без назви візьметься ім'я агента }
+                contact_ids:
+                  type: array
+                  items: { type: integer }
+                  description: обрані галочками; мають пріоритет над базою агента
+                base_id:
+                  type: integer
+                  nullable: true
+                  description: >
+                    Контакти однієї бази. Передано — перекриває базу
+                    агента; `0` — «поза базами»; `null` — по всьому
+                    акаунту (базу агента теж знято).
+                tag: { type: string, description: "одна мітка цілком, як у GET /app/contacts" }
+                search: { type: string, description: "за іменем або номером" }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  id: { type: integer }
+                  targets: { type: integer, description: скільки номерів у черзі }
+          description: Створено
+        "400":
+          description: "`agent_has_no_instructions` · `no_contacts` · `invalid_json`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "402":
+          description: >
+            `minutes_exhausted` · `plan_expired` · `calls_blocked` ·
+            `daily_limit` — обдзвін не створено. Поля й логіка ті самі, що
+            в `POST /app/agents/test-call`.
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "403":
+          description: >
+            `verification_required` — юрособу не підтверджено, обдзвін
+            закритий (поле `level` каже, на якому кроці акаунт).
+            Не показуй це як поломку: вхідні дзвінки й тестові працюють,
+            веди на форму верифікації.
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "404":
+          description: "`agent_not_found`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/campaigns/control:
+    post:
+      tags: [campaigns]
+      summary: Пауза, продовження, зупинка
+      description: |
+        `stop` — остаточно: продовжити зупинений обдзвін не можна, треба
+        створювати новий.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [campaign_id, action]
+              properties:
+                campaign_id: { type: integer }
+                action: { type: string, enum: [pause, resume, stop] }
+      responses:
+        "200":
+          content: { application/json: { schema: { $ref: "#/components/schemas/Ok" } } }
+          description: OK
+        "400":
+          description: "`bad_action` · `invalid_json`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "402":
+          description: >
+            `minutes_exhausted` · `plan_expired` · `calls_blocked` ·
+            `daily_limit` — стосується лише `action: resume`. Продовжити
+            обдзвін без хвилин не можна: він однаково став би на паузу на
+            першому ж номері.
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "403":
+          description: >
+            `verification_required` — рівень зняли, поки обдзвін стояв на
+            паузі. Ввімкнути назад можна лише після нового підтвердження.
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "404":
+          description: "`not_found` — немає такого обдзвону в цього акаунта"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: cs_session
+    bearerAuth:
+      type: http
+      scheme: bearer
+
+  responses:
+    Unauthorized:
+      description: "`unauthorized` — немає сесії, вона протухла, або POST по кукі прийшов із чужого Origin"
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    TooMany:
+      description: |
+        `too_many_requests` — 10 невдалих спроб на годину з одного IP.
+        Вдалий вхід ліміту не витрачає. У відповіді `Retry-After` і поле
+        `retry_after` — скільки секунд лишилось. **Не ретраїти по таймеру**:
+        поки запити йдуть, лічильник не спадає.
+      headers:
+        Retry-After:
+          schema: { type: integer }
+          description: секунд до розблокування
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/Error"
+              - type: object
+                properties:
+                  retry_after: { type: integer }
+
+  schemas:
+    Ok:
+      type: object
+      properties:
+        ok: { type: boolean, const: true }
+
+    Error:
+      type: object
+      properties:
+        ok: { type: boolean, const: false }
+        error: { type: string, description: стабільний код для коду, не текст для користувача }
+
+    AutoRenew:
+      type: object
+      description: >
+        Стан автопродовження — однакові поля в `plans`, `status`,
+        `payment-method` і відповіді `auto-renew`. Два прапорці, бо вони
+        про різне: `auto_renew` — чого хоче клієнт (кнопка «скасувати»
+        дивиться сюди), `auto_charge` — чи справді спишеться (напис
+        «спишемо … числа» дивиться сюди).
+      properties:
+        auto_renew:
+          type: boolean
+          description: >
+            згода клієнта на автопродовження; за замовчуванням false —
+            дається чекбоксом при оплаті або тумблером у кабінеті
+        auto_renew_consent_at:
+          type: string
+          nullable: true
+          description: коли клієнт погодився (UTC); null — згоди немає
+        auto_charge:
+          type: boolean
+          description: >
+            true = є згода І є збережена картка І тариф оплачений.
+            Тільки тоді щось спишеться. Без картки або на тріалі —
+            false, і «спишемо …» малювати не треба.
+        next_charge_at:
+          type: string
+          nullable: true
+          description: >
+            Коли спишемо (UTC, `YYYY-MM-DD HH:MM:SS`) — за добу до
+            `expires_at`. null, якщо `auto_charge` false.
+        auto_renew_period:
+          type: string
+          enum: [month, year]
+          description: на який строк продовжимо — той самий, що й оплачений
+
+    Account:
+      type: object
+      properties:
+        id: { type: integer }
+        email: { type: string }
+        name: { type: string }
+        company: { type: string }
+        plan: { type: string, examples: ["trial"] }
+        marketing_consent:
+          type: boolean
+          description: згода на маркетингові листи; за замовчуванням false
+        sla_minutes:
+          type: integer
+          description: >
+            Строк реакції на дзвінок без результату, у хвилинах.
+            **0 = SLA вимкнено** — колонку строку в журналі не малювати
+            взагалі. Міняється через `PATCH /auth/me`, стеля — доба.
+        timezone:
+          type: string
+          examples: ["Europe/Kyiv"]
+          description: >
+            Пояс клієнта. Ми зберігаємо все в UTC і цього не міняємо — пояс
+            потрібен, щоб показати години так, як їх бачить клієнт.
+        short_name:
+          type: string
+          description: >
+            Коротка назва, яку агент вимовляє ВГОЛОС. Окремо від `company`
+            навмисно: «ТОВ Бовсанка Плюс» у розмові звучить безглуздо.
+        website: { type: string }
+        agent_language:
+          type: string
+          enum: [uk, ru, en]
+          description: мова, якою агент починає розмову
+        require_consent:
+          type: boolean
+          description: >
+            Вимагати згоду контакту перед обдзвоном. Умовчання — так:
+            ст. 14-3 Закону «Про рекламу» вимагає попередньої згоди на
+            масові рекламні дзвінки. Контакти без згоди обдзвін просто
+            пропускає, тож у списку варто показувати, скільки їх.
+        ai_disclosure_upfront:
+          type: boolean
+          description: >
+            Оголошувати «я віртуальний помічник» першою фразою, не чекаючи
+            питання. Умовчання — ні: попередження на старті помітно псує
+            розмову. Це НЕ вимикач чесності — на пряме «ви робот?» агент
+            відповідає правдиво завжди, і зняти це неможливо.
+        calls_blocked:
+          type: boolean
+          description: >
+            Дзвінки зупинені нами (скарга оператора, розбір інциденту).
+            Кабінет працює, дані доступні, але дзвінки віддають 402
+            `calls_blocked`. Показуй смугу з причиною, а не мовчазну
+            неробочу кнопку.
+        calls_blocked_reason: { type: string, nullable: true }
+
+    AuthSuccess:
+      type: object
+      properties:
+        ok: { type: boolean }
+        account: { $ref: "#/components/schemas/Account" }
+        token:
+          type: string
+          description: |
+            Є ЛИШЕ там, де кукі не спрацює: localhost, прев'ю-домен, запит
+            без Origin. На проді поля немає — сесія в кукі.
+
+    CallListItem:
+      type: object
+      properties:
+        id: { type: string }
+        phone: { type: string }
+        company_name: { type: string }
+        niche: { type: string }
+        outcome:
+          type: string
+          nullable: true
+          enum:
+            - ""
+            - зустріч
+            - відмова
+            - нейтрально
+            - не відповів
+            - немає часу
+            - не цікаво
+            - скинув
+            - передзвонити
+            - погано чути
+            - не дійшли до людини
+          description: >
+            Підсумок дзвінка. Завжди в одній формі: мала літера, слова
+            через пробіл, українською. Порожній рядок — результат ще не
+            визначений (дзвінок триває або не відбувся).
+
+
+            Раніше приходило впереміш — `не_відповів` з підкресленням,
+            `відмова` без, і `meeting` англійською — так їх пише агент, і
+            в базі вони лишились такими. Вирівнюємо на виході, тому в
+            API форма одна. Матчити стилі можна за цими рядками; нові
+            значення зʼявляться тут раніше, ніж у відповіді.
+
+
+            Те саме поле й у тій самій формі — `last_call_result` у
+            контактах.
+        analysis_text: { type: string, nullable: true, description: короткий розбір розмови }
+        meeting_scheduled: { type: boolean }
+        agent_id: { type: integer, nullable: true }
+        turn_count: { type: integer, description: скільки реплік було в розмові }
+        manager_note: { type: string, nullable: true, description: нотатка людини }
+        sla_state:
+          type: string
+          nullable: true
+          enum: [ok, breached, handled, null]
+          description: >
+            Строк реакції на цей дзвінок.
+
+
+            `ok` — час ще є, `breached` — прострочено, `handled` — менеджер
+            уже написав нотатку, відлік зупинено.
+
+
+            **null означає, що строк сюди не застосовується** — SLA вимкнено
+            в акаунті (`sla_minutes: 0`), або домовлено зустріч, або розмови
+            не було взагалі. Не малюй у цих рядках нічого: «прострочено» на
+            дзвінку з домовленою зустріччю — це шум, а не сигнал.
+        sla_minutes_left:
+          type: number
+          nullable: true
+          description: >
+            Хвилин до кінця строку. Відʼємне — прострочено на стільки:
+            `-5` це «Прострочено 5 хв», `25` це «Залишилось 25 хв».
+        duration_sec:
+          type: integer
+          nullable: true
+          description: null, поки дзвінок не завершився
+        created_at: { type: string }
+        ended_at: { type: string, nullable: true }
+
+    CallDetail:
+      allOf:
+        - $ref: "#/components/schemas/CallListItem"
+        - type: object
+          properties:
+            transcript:
+              type: array
+              description: розмова по репліках, у порядку
+              items:
+                type: object
+                properties:
+                  role: { type: string, enum: [assistant, user] }
+                  content: { type: string }
+            manager_note:
+              type: string
+              nullable: true
+              description: >
+                Нотатка людини. null = нотатки немає. Пишеться через
+                `PUT /app/calls/{call_id}/note`.
+            manager_note_at:
+              type: string
+              nullable: true
+              description: коли нотатку востаннє правили; null, якщо нотатки немає
+
+    Agent:
+      type: object
+      properties:
+        id: { type: integer }
+        account_id: { type: integer }
+        name: { type: string }
+        voice: { type: string }
+        instructions: { type: string }
+        is_active: { type: boolean }
+        created_at: { type: string }
+        updated_at: { type: string }
+        call_direction: { type: string, enum: ["", inbound, outbound] }
+        contact_base_id: { type: integer, description: "0 = без прив'язки до бази" }
+        contacts_count:
+          type: integer
+          description: скільки контактів відмічено для цього агента (галочки в майстрі)
+        schedule_start: { type: string, description: '"HH:MM"; порожньо = загальні години' }
+        schedule_end: { type: string }
+        working_days: { type: string, description: '"mon,tue,wed" у тижневому порядку' }
+        calls_per_day: { type: integer, description: "0 = без стелі" }
+        number_id: { type: integer, description: "0 = перший вихідний номер акаунта" }
+        number_phone:
+          type: string
+          description: >
+            Сам номер агента — щоб форма редагування показувала
+            «+380 67 214 88 03», а не число. Порожньо, якщо номер не
+            прив'язаний.
+        instructions_expanded:
+          type: string
+          description: >
+            **Не показуй це в формі.** Наше машинне розгортання інструкції
+            клієнта — те, що насправді йде в дзвінок. Підставивши його в
+            поле «Інструкція», ти покажеш людині згенерований текст
+            замість трьох рядків, які вона написала. Форму заповнюй з
+            `instructions`.
+        stats:
+          type: object
+          description: "лише при `?stats=1`"
+          properties:
+            total_calls: { type: integer }
+            meetings: { type: integer, description: "з них із домовленою зустріччю" }
+            efficiency_pct:
+              type: number
+              nullable: true
+              description: >
+                Частка дзвінків, що дали зустріч. **null = агент ще не
+                дзвонив** — відсотка не існує. Малюй «—», а не 0%:
+                нуль читається як «працює погано», хоча він просто
+                не працював.
+            minutes_used: { type: number, description: "хвилини розмов цього агента" }
+            minutes_share_pct:
+              type: number
+              nullable: true
+              description: "частка від усіх хвилин акаунта; null, якщо дзвінків не було взагалі"
+            talk_minutes_saved:
+              type: number
+              description: >
+                «Заощаджено часу» — це РЕАЛЬНИЙ час у слухавці, а не
+                оцінка. Не множ дзвінки на середню тривалість: набір
+                номера й нотатки ми не міряємо, тож ширшої «економії»
+                чесно порахувати не можемо.
+
+    Contact:
+      type: object
+      properties:
+        id: { type: integer }
+        account_id: { type: integer }
+        name: { type: string }
+        phone: { type: string }
+        email: { type: string }
+        note: { type: string }
+        created_at: { type: string }
+        tags:
+          type: array
+          items: { type: string }
+          description: "мітки з макета: VIP, Новий, Прострочена оплата, Постійний клієнт"
+        consent:
+          type: string
+          enum: ["", granted, pending]
+          description: "згода на дзвінки; порожньо — ще не питали"
+        do_not_call:
+          type: boolean
+          description: >
+            Прохання більше не дзвонити. Це не позначка для ока: дзвінки
+            на такий номер відсікаються і в тестовому дзвінку (403
+            `do_not_call`), і в кампанії — ціль тихо пропускається зі
+            статусом `skipped`.
+
+
+            Тримається ОКРЕМО від `consent` навмисно: людина може мати
+            загальну згоду і все одно попросити її не турбувати, і це
+            прохання сильніше за будь-який дозвіл.
+        last_call_at:
+          type: string
+          nullable: true
+          description: "коли востаннє дзвонили на цей номер; null — не дзвонили"
+        last_call_result:
+          type: string
+          nullable: true
+          description: >
+            Результат останнього дзвінка — те саме поле й той самий набір
+            значень, що `outcome` у CallListItem: мала літера, слова через
+            пробіл. Домовленість про зустріч приходить як `зустріч`, а не
+            `meeting`.
+
+    Campaign:
+      type: object
+      properties:
+        id: { type: integer }
+        account_id: { type: integer }
+        agent_id: { type: integer }
+        name: { type: string }
+        status: { type: string, enum: [running, paused, stopped] }
+        total: { type: integer, description: скільки номерів у обдзвоні }
+        done: { type: integer, description: скільки вже обдзвонено }
+        created_at: { type: string }
+        finished_at: { type: string, nullable: true }
+
+security:
+  - cookieAuth: []
+  - bearerAuth: []

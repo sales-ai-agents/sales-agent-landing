@@ -2,7 +2,7 @@
 
 import { Info } from "lucide-react";
 
-import { Button, Progress, Separator } from "@/components/ui";
+import { Button, Progress, Separator, Skeleton } from "@/components/ui";
 import { formatDateShort, formatNumber, pluralizeDays } from "@/lib/utils";
 import type { BillingPlan } from "@dashboard/types";
 
@@ -131,7 +131,7 @@ const PlanColumn = ({
         {currentPlan?.title ?? (isTrial ? "TRIAL" : "—")}
       </p>
       {isTrial && daysLeft != null && daysLeft >= 0 && (
-        <span className="rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-medium text-orange-600 dark:bg-orange-950/60 dark:text-orange-300">
+        <span className="bg-warning/15 text-warning rounded-full px-2.5 py-0.5 text-xs font-medium">
           {daysLeft} {pluralizeDays(daysLeft)} залишилось
         </span>
       )}
@@ -248,9 +248,9 @@ const AvgCostColumn = ({
 
 const StatsSkeleton = ({ compact = false }: { compact?: boolean }) => (
   <div className="mt-2 space-y-2">
-    <div className="bg-muted h-8 w-32 animate-pulse rounded" />
-    {!compact && <div className="bg-muted h-2 w-full animate-pulse rounded" />}
-    <div className="bg-muted h-3 w-40 animate-pulse rounded" />
+    <Skeleton className="h-8 w-32" />
+    {!compact && <Skeleton className="h-2 w-full" />}
+    <Skeleton className="h-3 w-40" />
   </div>
 );
 

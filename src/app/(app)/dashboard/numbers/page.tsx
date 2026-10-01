@@ -4,8 +4,7 @@ import { Plus } from "lucide-react";
 
 import { Button } from "@/components/ui";
 import { PageError, PageLoading } from "@/components/dashboard";
-import { useNumbers, useAgents, useStats } from "@dashboard/hooks";
-import { getPlanNumberAllowance } from "@/app/(app)/_lib/billing/plan-capabilities";
+import { useNumbers, useNumbersMeta, useAgents } from "@dashboard/hooks";
 
 import { ConnectNumberDialog } from "../agents/_components/connect-number";
 import { NumbersTable } from "./_components/numbers-table";
@@ -14,10 +13,8 @@ import { ConnectMethods } from "./_components/connect-methods";
 
 const NumbersPage = () => {
   const { data: numbers = [], isLoading, error, refetch } = useNumbers();
+  const { data: allowance } = useNumbersMeta();
   const { data: agents = [] } = useAgents();
-  const { data: stats } = useStats();
-
-  const allowance = getPlanNumberAllowance(stats?.plan);
 
   if (isLoading) return <PageLoading />;
   if (error) return <PageError message={error.message} onRetry={refetch} />;
@@ -44,7 +41,9 @@ const NumbersPage = () => {
 
       {numbers.length > 0 && <NumbersTable numbers={numbers} agents={agents} />}
 
-      <TariffBanner allowance={allowance} />
+      {allowance && (
+        <TariffBanner limit={allowance.limit} used={allowance.used} canAdd={allowance.can_add} />
+      )}
 
       <ConnectMethods onConnected={() => refetch()} />
     </div>

@@ -39,7 +39,7 @@ export function HowItWorksSection() {
 
                 <div className="relative">
                   <span
-                    className="font-gilroy pointer-events-none absolute -top-10 left-0 text-8xl leading-tight font-semibold tracking-wide text-transparent uppercase [-webkit-text-stroke-color:#E6E6E6] [-webkit-text-stroke-width:2px]"
+                    className="font-gilroy pointer-events-none absolute -top-10 left-0 text-8xl leading-tight font-semibold tracking-wide text-transparent uppercase [-webkit-text-stroke-color:var(--color-stroke-muted)] [-webkit-text-stroke-width:2px]"
                     aria-hidden="true"
                   >
                     {step.number}

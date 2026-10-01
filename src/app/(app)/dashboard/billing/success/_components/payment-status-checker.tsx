@@ -84,7 +84,7 @@ const PaymentStatusChecker = ({ invoiceId, onTerminalStatus }: PaymentStatusChec
   if (outcome === "paid") {
     return (
       <StatusLayout>
-        <CheckCircle className="h-12 w-12 text-green-600" />
+        <CheckCircle className="text-success h-12 w-12" />
         <div className="space-y-1">
           <h1 className="font-display text-2xl font-bold">Оплата успішна!</h1>
           <p className="text-muted-foreground">Ваш тариф змінено</p>

@@ -127,7 +127,7 @@ const PackOption = ({ pack, isSelected, isPopular, onSelect }: PackOptionProps) 
     )}
   >
     {isPopular && (
-      <span className="bg-primary absolute -top-2 left-1/2 -translate-x-1/2 rounded-full px-2 py-0.5 text-[10px] font-medium whitespace-nowrap text-white">
+      <span className="bg-primary text-primary-foreground absolute -top-2 left-1/2 -translate-x-1/2 rounded-full px-2 py-0.5 text-sm font-medium whitespace-nowrap">
         Популярний
       </span>
     )}

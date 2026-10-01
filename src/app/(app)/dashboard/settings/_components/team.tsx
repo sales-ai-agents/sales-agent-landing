@@ -5,7 +5,15 @@ import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import {
+  Avatar,
+  AvatarFallback,
   Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
   Input,
   Select,
   SelectContent,
@@ -107,74 +115,72 @@ export const Team = () => {
         </Button>
       </div>
 
-      <div className="mt-4 overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b">
-              <th className="px-2 py-2 text-left font-medium">Користувач</th>
-              <th className="px-2 py-2 text-left font-medium">Email</th>
-              <th className="px-2 py-2 text-left font-medium">Роль</th>
-              <th className="w-10" />
-            </tr>
-          </thead>
-          <tbody>
-            {members.map((member) => (
-              <tr key={member.id} className="border-b last:border-0">
-                <td className="px-2 py-3">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-medium text-white">
+      <Table className="mt-4">
+        <TableHeader>
+          <TableRow>
+            <TableHead className="px-2">Користувач</TableHead>
+            <TableHead className="px-2">Email</TableHead>
+            <TableHead className="px-2">Роль</TableHead>
+            <TableHead className="w-10" />
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {members.map((member) => (
+            <TableRow key={member.id}>
+              <TableCell className="px-2 py-3">
+                <div className="flex items-center gap-2">
+                  <Avatar className="size-8">
+                    <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
                       {(member.name || member.email).slice(0, 2).toUpperCase()}
-                    </div>
-                    <span className="font-medium">{member.name || member.email}</span>
-                    {member.role === "owner" && (
-                      <Badge variant="secondary" className="text-xs">
-                        Ви
-                      </Badge>
-                    )}
-                  </div>
-                </td>
-                <td className="text-muted-foreground px-2 py-3">{member.email}</td>
-                <td className="px-2 py-3">
-                  {member.role === "owner" ? (
-                    <span className="text-sm">{ROLE_LABELS.owner}</span>
-                  ) : (
-                    <Select
-                      value={member.role}
-                      onValueChange={(val) =>
-                        handleRoleChange(member.id, val as "admin" | "viewer")
-                      }
-                    >
-                      <SelectTrigger className="w-auto text-sm">
-                        <SelectValue>{ROLE_LABELS[member.role]}</SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {ROLE_OPTIONS.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="font-medium">{member.name || member.email}</span>
+                  {member.role === "owner" && (
+                    <Badge variant="secondary" className="text-xs">
+                      Ви
+                    </Badge>
                   )}
-                </td>
-                <td className="px-2 py-3">
-                  {member.role !== "owner" && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 text-red-500"
-                      onClick={() => handleRemove(member.id)}
-                      aria-label="Видалити"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                </div>
+              </TableCell>
+              <TableCell className="text-muted-foreground px-2 py-3">{member.email}</TableCell>
+              <TableCell className="px-2 py-3">
+                {member.role === "owner" ? (
+                  <span className="text-sm">{ROLE_LABELS.owner}</span>
+                ) : (
+                  <Select
+                    value={member.role}
+                    onValueChange={(val) => handleRoleChange(member.id, val as "admin" | "viewer")}
+                  >
+                    <SelectTrigger className="w-auto text-sm">
+                      <SelectValue>{ROLE_LABELS[member.role]}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ROLE_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              </TableCell>
+              <TableCell className="px-2 py-3">
+                {member.role !== "owner" && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-destructive h-7 w-7"
+                    onClick={() => handleRemove(member.id)}
+                    aria-label="Видалити"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                )}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
 
       <p className="text-muted-foreground mt-3 text-xs">
         Роль &quot;Адмін&quot; має повний доступ до налаштувань та управління командою

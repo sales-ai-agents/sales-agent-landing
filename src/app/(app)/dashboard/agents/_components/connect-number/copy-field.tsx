@@ -42,10 +42,10 @@ export const CopyField = ({ label, value, mono = true, warning }: CopyFieldProps
           onClick={handleCopy}
           aria-label={`Скопіювати: ${label}`}
         >
-          {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+          {copied ? <Check className="text-success h-4 w-4" /> : <Copy className="h-4 w-4" />}
         </Button>
       </div>
-      {warning && <p className="text-xs text-amber-600">{warning}</p>}
+      {warning && <p className="text-warning text-xs">{warning}</p>}
     </div>
   );
 };

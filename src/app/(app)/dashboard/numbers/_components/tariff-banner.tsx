@@ -4,29 +4,37 @@ import Link from "next/link";
 import { Info } from "lucide-react";
 
 import { Button } from "@/components/ui";
+import { pluralizeUk } from "@/lib/utils";
 
 interface TariffBannerProps {
-  allowance: number;
+  limit: number;
+  used: number;
+  canAdd: boolean;
 }
 
-const formatAllowance = (count: number): string => {
-  if (count === 1) return "1 номер";
-  if (count >= 2 && count <= 4) return `${count} номери`;
-  return `${count} номерів`;
-};
+const formatCount = (count: number): string =>
+  `${count} ${pluralizeUk(count, ["номер", "номери", "номерів"])}`;
 
-export const TariffBanner = ({ allowance }: TariffBannerProps) => {
+export const TariffBanner = ({ limit, used, canAdd }: TariffBannerProps) => {
+  const isUnlimited = limit === 0;
+
+  const title = isUnlimited
+    ? "Ваш тариф не обмежує кількість номерів"
+    : `У вашому тарифі включено ${formatCount(limit)}`;
+
+  const subtitle = isUnlimited
+    ? `Підключено ${formatCount(used)}`
+    : canAdd
+      ? `Підключено ${used} з ${limit}. Ви можете додати ще`
+      : `Підключено ${used} з ${limit}. Щоб додати більше, оберіть вищий тариф`;
+
   return (
     <div className="bg-primary/10 flex items-center justify-between gap-4 rounded-lg p-4">
       <div className="flex items-start gap-3">
         <Info className="text-primary mt-0.5 h-5 w-5 shrink-0" />
         <div>
-          <p className="text-sm font-medium">
-            У вашому тарифі включено {formatAllowance(allowance)}
-          </p>
-          <p className="text-muted-foreground text-xs">
-            Ви можете використовувати цей номер або додати додаткові
-          </p>
+          <p className="text-sm font-medium">{title}</p>
+          <p className="text-muted-foreground text-xs">{subtitle}</p>
         </div>
       </div>
       <Button variant="outline" size="sm" render={<Link href="/dashboard/billing" />}>

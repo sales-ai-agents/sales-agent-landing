@@ -143,7 +143,7 @@ const CallLogsPage = () => {
       <Tabs
         value={statusTab}
         onValueChange={handleStatusTabChange}
-        className="border-border w-full rounded-lg border bg-white px-4 pt-1"
+        className="border-border bg-card w-full rounded-lg border px-4 pt-1"
       >
         <TabsList variant="line" aria-label="Фільтр статусу дзвінків">
           {STATUS_TABS.map((tab) => (
@@ -158,13 +158,7 @@ const CallLogsPage = () => {
         </TabsList>
       </Tabs>
 
-      <Table
-        data={callLogs}
-        agents={agents}
-        pageCount={pageCount}
-        slaMinutes={data?.sla_minutes}
-        crmConfigured={data?.crm_configured}
-      />
+      <Table data={callLogs} agents={agents} pageCount={pageCount} slaMinutes={data?.sla_minutes} />
       <Pagination
         total={total}
         pageSize={PAGE_SIZE}

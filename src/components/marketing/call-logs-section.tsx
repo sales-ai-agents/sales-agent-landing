@@ -6,9 +6,9 @@ import { ScrollReveal, ScaleReveal } from "@/components/marketing/scroll-reveal"
 import type { BadgeVariant } from "@marketing/types";
 
 const STATUS_STYLES: Record<BadgeVariant, string> = {
-  success: "bg-green-100 text-green-800",
-  secondary: "bg-yellow-100 text-yellow-800",
-  warning: "bg-red-100 text-red-800",
+  success: "bg-success/15 text-success",
+  secondary: "bg-warning/15 text-warning",
+  warning: "bg-destructive/15 text-destructive",
 } as const;
 
 export function CallLogsSection() {
@@ -38,7 +38,7 @@ export function CallLogsSection() {
         </div>
 
         <ScaleReveal delay={0.15} duration={0.7}>
-          <div className="border-border relative rounded-2xl border bg-white shadow-sm">
+          <div className="border-border bg-card relative rounded-2xl border shadow-sm">
             <div className="scrollbar-none overflow-x-auto">
               <table className="w-full min-w-2xl text-left text-base">
                 <caption className="text-foreground px-4 pt-6 pb-4 text-left text-lg font-semibold">

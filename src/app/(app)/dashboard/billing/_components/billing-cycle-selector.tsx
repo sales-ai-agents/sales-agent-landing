@@ -60,12 +60,12 @@ export const BillingCycleSelector = ({
           <CycleLabel selected={cycle === "year"}>
             Річна оплата
             {annualPlan && annualPlan.months_free > 0 && (
-              <span className="ml-2 rounded-md bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-950/60 dark:text-green-300">
+              <span className="bg-success/15 text-success ml-2 rounded-md px-2 py-0.5 text-xs font-medium">
                 Економія {annualPlan.months_free} {pluralizeMonths(annualPlan.months_free)}
               </span>
             )}
             {annualPlan && annualPlan.months_free === 0 && annualPlan.saving_usd > 0 && (
-              <span className="ml-2 rounded-md bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-950/60 dark:text-green-300">
+              <span className="bg-success/15 text-success ml-2 rounded-md px-2 py-0.5 text-xs font-medium">
                 Економія ${annualPlan.saving_usd}
               </span>
             )}

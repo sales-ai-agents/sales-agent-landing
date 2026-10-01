@@ -104,7 +104,7 @@ export const PlanComparison = ({ currentPlan, newPlan, isSamePlan }: PlanCompari
             <div className="flex items-center justify-end gap-2 sm:min-w-28">
               <ComparisonValue value={row.next} tone="next" />
               {showCurrent && row.diff && (
-                <span className="rounded bg-green-100 px-1.5 py-0.5 text-xs font-medium text-green-700 dark:bg-green-950/60 dark:text-green-300">
+                <span className="bg-success/15 text-success rounded px-1.5 py-0.5 text-xs font-medium">
                   {row.diff}
                 </span>
               )}

@@ -25,10 +25,10 @@ export const AgentHeader = ({ name, id, isActive }: AgentHeaderProps) => {
         variant="outline"
         className={cn(
           "shrink-0 border-transparent",
-          isActive ? "bg-green-100 text-green-600" : "bg-red-100 text-red-500"
+          isActive ? "bg-success/15 text-success" : "bg-destructive text-destructive"
         )}
       >
-        <span className={cn("mr-1", isActive ? "text-green-600" : "text-red-500")}>●</span>
+        <span className={cn("mr-1", isActive ? "text-success" : "text-destructive")}>●</span>
         {isActive ? "Активний" : "Неактивний"}
       </Badge>
     </div>

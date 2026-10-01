@@ -1,6 +1,6 @@
 import React from "react";
 
-interface ContactsKpiCardProps {
+interface ContactKpiCardProps {
   icon: React.ReactNode;
   iconBg: string;
   title: string;
@@ -8,9 +8,9 @@ interface ContactsKpiCardProps {
   subtitle: string;
 }
 
-export const KpiCard = ({ icon, iconBg, title, value, subtitle }: ContactsKpiCardProps) => {
+export const ContactKpiCard = ({ icon, iconBg, title, value, subtitle }: ContactKpiCardProps) => {
   return (
-    <div className="border-border bg-background flex items-center gap-4 rounded-2xl border p-5">
+    <div className="border-border bg-card flex items-center gap-4 rounded-2xl border p-5">
       <div className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full ${iconBg}`}>
         {icon}
       </div>

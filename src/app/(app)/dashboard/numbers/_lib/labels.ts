@@ -12,13 +12,13 @@ interface SourceBadge {
 }
 
 const READY_SOURCE_BADGES: Record<NumberSource, SourceBadge> = {
-  sip: { label: "АТС", className: "bg-[#15a326]/10 text-[#15a326]" },
-  forward: { label: "Переадресація", className: "bg-[#ff680a]/10 text-[#ff680a]" },
+  sip: { label: "АТС", className: "bg-success/10 text-success" },
+  forward: { label: "Переадресація", className: "bg-warning/10 text-warning" },
   assigned: { label: "Включено в тариф", className: "text-muted-foreground" },
 };
 
 const STATUS_BADGES: Partial<Record<NumberStatus, SourceBadge>> = {
-  verification_required: { label: "Не налаштовано", className: "bg-[#ff680a]/10 text-[#ff680a]" },
+  verification_required: { label: "Не налаштовано", className: "bg-warning/10 text-warning" },
   disabled: { label: "Вимкнено", className: "bg-muted text-muted-foreground" },
 };
 

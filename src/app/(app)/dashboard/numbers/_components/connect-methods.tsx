@@ -78,8 +78,8 @@ export const ConnectMethods = ({ onConnected }: ConnectMethodsProps) => {
             <ul className="space-y-3">
               {card.features.map((feature) => (
                 <li key={feature} className="flex items-center gap-3 text-sm">
-                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-green-600">
-                    <Check className="h-2.5 w-2.5 text-white" />
+                  <span className="bg-success flex h-4 w-4 shrink-0 items-center justify-center rounded-full">
+                    <Check className="text-primary-foreground h-2.5 w-2.5" />
                   </span>
                   <span className="text-muted-foreground">{feature}</span>
                 </li>

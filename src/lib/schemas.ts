@@ -120,6 +120,9 @@ export const contactSelectionIsValid = (data: {
   contactIds?: number[];
 }): boolean => data.callDirection === "inbound" || (data.contactIds?.length ?? 0) > 0;
 
+export const numberSelectionIsValid = (data: { numberId?: number }): boolean =>
+  (data.numberId ?? 0) > 0;
+
 const isWeekday = (value: string): value is Weekday =>
   (WEEKDAYS as readonly string[]).includes(value);
 
@@ -134,19 +137,29 @@ export const createAgentBaseSchema = z.object({
   testPhone: z.string(),
 });
 
-export const createAgentSchema = createAgentBaseSchema.refine(contactSelectionIsValid, {
-  path: ["contactIds"],
-  message: "Оберіть щонайменше один контакт",
-});
+export const createAgentSchema = createAgentBaseSchema
+  .refine(contactSelectionIsValid, {
+    path: ["contactIds"],
+    message: "Оберіть щонайменше один контакт",
+  })
+  .refine(numberSelectionIsValid, {
+    path: ["numberId"],
+    message: "Оберіть номер для агента",
+  });
 
 export type CreateAgentFormData = z.infer<typeof createAgentBaseSchema>;
 
 export const editAgentBaseSchema = z.object(agentConfigShape);
 
-export const editAgentSchema = editAgentBaseSchema.refine(contactSelectionIsValid, {
-  path: ["contactIds"],
-  message: "Оберіть щонайменше один контакт",
-});
+export const editAgentSchema = editAgentBaseSchema
+  .refine(contactSelectionIsValid, {
+    path: ["contactIds"],
+    message: "Оберіть щонайменше один контакт",
+  })
+  .refine(numberSelectionIsValid, {
+    path: ["numberId"],
+    message: "Оберіть номер для агента",
+  });
 
 export type EditAgentFormData = z.infer<typeof editAgentBaseSchema>;
 

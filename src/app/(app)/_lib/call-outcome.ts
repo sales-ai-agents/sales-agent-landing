@@ -33,7 +33,7 @@ export const getOutcomeConfig = (outcome: CallOutcome | null): OutcomeConfig => 
 
 export const getOutcomeDisplay = (call: CallLog): OutcomeDisplay => {
   if (call.meeting_scheduled) {
-    return { label: "Ціль досягнута", badgeClass: "bg-green-100/80 text-green-900", icon: "✓" };
+    return { label: "Ціль досягнута", badgeClass: "bg-success/15/80 text-success", icon: "✓" };
   }
 
   switch (call.outcome) {
@@ -42,16 +42,16 @@ export const getOutcomeDisplay = (call: CallLog): OutcomeDisplay => {
     case "скинув":
     case "погано чути":
     case "не дійшли до людини":
-      return { label: "Без відповіді", badgeClass: "bg-gray-100 text-gray-700", icon: "–" };
+      return { label: "Без відповіді", badgeClass: "bg-muted text-muted-foreground", icon: "–" };
     case "передзвонити":
-      return { label: "Передано", badgeClass: "bg-amber-100/80 text-amber-900", icon: "↗" };
+      return { label: "Передано", badgeClass: "bg-warning/10 text-warning", icon: "↗" };
     case "відмова":
     case "не цікаво":
-      return { label: "Помилка", badgeClass: "bg-red-100/80 text-red-900", icon: "!" };
+      return { label: "Помилка", badgeClass: "bg-destructive/80 text-destructive", icon: "!" };
     default:
       return {
         label: call.outcome ?? "В процесі",
-        badgeClass: "bg-gray-100 text-gray-700",
+        badgeClass: "bg-muted text-muted-foreground",
         icon: "–",
       };
   }

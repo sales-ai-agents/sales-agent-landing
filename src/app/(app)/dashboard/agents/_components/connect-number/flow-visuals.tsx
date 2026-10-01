@@ -20,9 +20,9 @@ export const PhonePulse = ({ animated = false }: { animated?: boolean }) => {
 
 export const SuccessMark = () => {
   return (
-    <div className="mx-auto my-14 flex h-24 w-24 items-center justify-center rounded-full bg-green-100 dark:bg-green-950/60">
-      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-green-600">
-        <Check className="h-6 w-6 text-white" />
+    <div className="bg-success/15 mx-auto my-14 flex h-24 w-24 items-center justify-center rounded-full">
+      <span className="bg-success flex h-12 w-12 items-center justify-center rounded-full">
+        <Check className="text-primary-foreground h-6 w-6" />
       </span>
     </div>
   );

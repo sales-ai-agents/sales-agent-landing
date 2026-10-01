@@ -5,7 +5,7 @@ import { Check, Headset } from "lucide-react";
 
 import { useWebAgent, usePresets, useBuilderForm, VOICE_OPTIONS } from "@marketing/hooks";
 import { LiveCallPanel } from "@/components/marketing/live-call-panel";
-import { Button, Input, Textarea } from "@/components/ui";
+import { Button, Input, Textarea, Skeleton } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
 import { ScrollReveal, ScaleReveal } from "@/components/marketing/scroll-reveal";
@@ -178,10 +178,7 @@ export function BuilderSection() {
                   {presetsLoading ? (
                     <div className="flex gap-3">
                       {[1, 2, 3].map((i) => (
-                        <div
-                          key={i}
-                          className="border-input-border h-10 flex-1 animate-pulse rounded-lg border bg-gray-100"
-                        />
+                        <Skeleton key={i} className="h-10 flex-1 rounded-lg" />
                       ))}
                     </div>
                   ) : presets.length > 0 ? (
@@ -225,7 +222,7 @@ export function BuilderSection() {
                 ) : (
                   <>
                     {errorMessage && (
-                      <p role="alert" className="text-center text-sm text-red-600">
+                      <p role="alert" className="text-destructive text-center text-sm">
                         {errorMessage}
                       </p>
                     )}

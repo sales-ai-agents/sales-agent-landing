@@ -69,7 +69,7 @@ export default function SignInPage() {
             {...register("email")}
           />
           {errors.email && (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-destructive text-sm">
               {errors.email.message}
             </p>
           )}
@@ -79,17 +79,17 @@ export default function SignInPage() {
           <Label htmlFor="password">Пароль</Label>
           <PasswordInput id="password" placeholder="******************" {...register("password")} />
           {errors.password && (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-destructive text-sm">
               {errors.password.message}
             </p>
           )}
         </div>
 
         <div className="flex items-center justify-between">
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-400 select-none">
+          <label className="text-muted-foreground flex cursor-pointer items-center gap-2 text-sm select-none">
             <input
               type="checkbox"
-              className="text-primary focus:ring-primary h-4 w-4 rounded border-gray-300"
+              className="text-primary focus:ring-primary border-border h-4 w-4 rounded"
               defaultChecked
             />
             <span>Запам&apos;ятати мене</span>

@@ -36,7 +36,7 @@ export default function DemoCallCard() {
   return (
     <div className="border-border shadow-primary/30 relative rounded-2xl border p-8 shadow-lg backdrop-blur-lg">
       <div className="mb-4 flex items-center gap-6">
-        <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-white shadow-sm">
+        <div className="bg-card flex size-14 shrink-0 items-center justify-center rounded-full shadow-sm">
           <Phone className="text-primary size-6" aria-hidden="true" />
         </div>
         <div className="flex max-w-xs flex-col gap-2">
@@ -93,7 +93,7 @@ function DemoCallForm({
       <div
         className={cn(
           "border-input-border mx-auto mb-4 flex h-12 w-full max-w-xs items-center rounded-2xl border px-4",
-          errorMessage && "border-red-500"
+          errorMessage && "border-destructive"
         )}
       >
         <span className="text-foreground shrink-0 text-lg font-light">+380&nbsp;</span>
@@ -115,7 +115,7 @@ function DemoCallForm({
         <p
           id="demo-call-error"
           role="alert"
-          className="mx-auto mb-4 max-w-sm text-center text-sm text-red-600"
+          className="text-destructive mx-auto mb-4 max-w-sm text-center text-sm"
         >
           {errorMessage}
         </p>
@@ -126,7 +126,7 @@ function DemoCallForm({
         onClick={onSubmit}
         disabled={!isComplete || isLoading}
         aria-label="Запустити тестовий дзвінок"
-        className="bg-primary hover:bg-primary/90 mx-auto flex h-12 w-full max-w-xs items-center justify-center gap-2 rounded-full text-lg font-normal text-white shadow-md disabled:opacity-50"
+        className="bg-primary hover:bg-primary/90 text-primary-foreground mx-auto flex h-12 w-full max-w-xs items-center justify-center gap-2 rounded-full text-lg font-normal shadow-md disabled:opacity-50"
       >
         {isLoading ? "Надсилаємо…" : "Запустити тестовий дзвінок"}
       </Button>
@@ -162,7 +162,7 @@ function DemoCallSuccess({
       <Button
         type="button"
         onClick={onShowForm}
-        className="bg-primary hover:bg-primary/90 mt-3 h-11 rounded-full px-6 text-base font-normal text-white"
+        className="bg-primary hover:bg-primary/90 text-primary-foreground mt-3 h-11 rounded-full px-6 text-base font-normal"
       >
         Отримати розрахунок
       </Button>

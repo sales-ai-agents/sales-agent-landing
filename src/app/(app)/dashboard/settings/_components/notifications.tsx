@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Info } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button, Input, Switch } from "@/components/ui";
+import { Alert, AlertDescription, Button, Input, Switch } from "@/components/ui";
 import { useNotifications, useUpdateNotifications } from "@dashboard/hooks";
 import { handleMutationError } from "@/lib/mutation-error";
 import type { NotificationSetting } from "@dashboard/types";
@@ -112,12 +112,12 @@ export const Notifications = () => {
           />
         ))}
       </div>
-      <div className="mt-4 flex items-center gap-2 rounded-lg bg-blue-50 p-3">
-        <Info className="text-primary h-4 w-4 shrink-0" />
-        <p className="text-muted-foreground text-xs">
+      <Alert variant="info" className="mt-4">
+        <Info />
+        <AlertDescription className="text-xs">
           Сповіщення про пропущені дзвінки не буде. Ми фокусуємось на важливих подіях
-        </p>
-      </div>
+        </AlertDescription>
+      </Alert>
       <Button
         size="sm"
         className="mt-4"

@@ -7,18 +7,18 @@ export const PaymentStatusLabel = ({
 }) => {
   switch (status) {
     case "success":
-      return <span className="text-xs font-medium text-green-600">Оплачено</span>;
+      return <span className="text-success text-xs font-medium">Оплачено</span>;
     case "processing":
     case "hold":
     case "created":
-      return <span className="text-xs font-medium text-amber-600">В процесі</span>;
+      return <span className="text-warning text-xs font-medium">В процесі</span>;
     case "reversed":
-      return <span className="text-xs font-medium text-blue-600">Повернено</span>;
+      return <span className="text-primary text-xs font-medium">Повернено</span>;
     case "expired":
       return <span className="text-muted-foreground text-xs font-medium">Термін минув</span>;
     case "failure":
-      return <span className="text-xs font-medium text-red-600">Невдалий</span>;
+      return <span className="text-destructive text-xs font-medium">Невдалий</span>;
     default:
-      return <span className="text-xs font-medium text-red-600">Невдалий</span>;
+      return <span className="text-destructive text-xs font-medium">Невдалий</span>;
   }
 };

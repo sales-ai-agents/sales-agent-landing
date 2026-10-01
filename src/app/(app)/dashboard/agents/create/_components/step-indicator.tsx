@@ -30,7 +30,7 @@ export const StepIndicator = ({ currentStep }: StepIndicatorProps) => {
               <div
                 className={cn(
                   "mx-2 h-0.5 w-10",
-                  index < currentStep ? "bg-primary" : "bg-gray-400"
+                  index < currentStep ? "bg-primary" : "bg-muted-foreground"
                 )}
               />
             )}

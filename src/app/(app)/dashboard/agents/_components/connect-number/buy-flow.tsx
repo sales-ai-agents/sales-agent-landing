@@ -149,8 +149,8 @@ export const BuyFlow = ({ agentId, onDone, onCancel }: BuyFlowProps) => {
 
           <CopyField label="Ваш номер" value={claimed.phone} />
 
-          <div className="flex items-center gap-2 rounded-lg bg-green-100 p-3 text-sm dark:bg-green-950/60">
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
+          <div className="bg-success/15 flex items-center gap-2 rounded-lg p-3 text-sm">
+            <CheckCircle2 className="text-success h-4 w-4" />
             <p className="text-muted-foreground text-xs">
               Номер працює одразу. Ви можете призначити агента та напрямок у таблиці «Номери».
             </p>

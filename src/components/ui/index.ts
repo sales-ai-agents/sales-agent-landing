@@ -126,3 +126,16 @@ export { RadioGroup, RadioGroupItem } from "./radio-group";
 export { Checkbox } from "./checkbox";
 export { Separator } from "./separator";
 export { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from "./input-otp";
+export { Skeleton } from "./skeleton";
+export { Avatar, AvatarImage, AvatarFallback } from "./avatar";
+export { Alert, AlertTitle, AlertDescription, alertVariants } from "./alert";
+export {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableCaption,
+} from "./table";

@@ -39,11 +39,12 @@ export interface CreateContactParams {
   phone: string;
   name?: string;
   email?: string;
+  tags?: string[] | string;
 }
 
 export interface CreateContactResponse {
   ok: boolean;
-  id: number | null;
+  id: number;
 }
 
 export interface UpdateContactParams {
@@ -59,6 +60,10 @@ export interface UploadContactsResponse {
   ok: boolean;
   added: number;
   duplicates: number;
+  invalid: number;
+  total_rows: number;
+  base_id?: number;
+  base_title?: string;
 }
 
 export interface ContactsExportPreviewResponse {

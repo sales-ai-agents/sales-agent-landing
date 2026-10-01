@@ -25,9 +25,9 @@ import { handleMutationError } from "@/lib/mutation-error";
 import type { WebhookDelivery } from "@dashboard/types";
 
 const statusDot = (status: WebhookDelivery["status"]) => {
-  if (status === "delivered") return "bg-green-500";
-  if (status === "failed") return "bg-red-500";
-  return "bg-gray-400";
+  if (status === "delivered") return "bg-success";
+  if (status === "failed") return "bg-destructive";
+  return "bg-muted-foreground";
 };
 
 const statusLabel = (status: WebhookDelivery["status"]) => {
@@ -93,7 +93,7 @@ export const WebhookCard = () => {
     <>
       <div className="border-border bg-background rounded-xl border p-5">
         <div className="flex items-start gap-4">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-green-100">
+          <div className="bg-success/15 flex h-16 w-16 shrink-0 items-center justify-center rounded-full">
             <Webhook className="h-8 w-8" />
           </div>
 
@@ -104,7 +104,7 @@ export const WebhookCard = () => {
                 {webhook ? (
                   <>
                     <div className="mt-1 flex items-center gap-1.5">
-                      <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                      <span className="bg-success h-1.5 w-1.5 rounded-full" />
                       <span className="text-muted-foreground text-xs">Підключено</span>
                     </div>
                     <p className="text-muted-foreground mt-0.5 text-xs">URL</p>
@@ -112,7 +112,7 @@ export const WebhookCard = () => {
                   </>
                 ) : (
                   <div className="mt-1 flex items-center gap-1.5">
-                    <span className="h-1.5 w-1.5 rounded-full bg-gray-400" />
+                    <span className="bg-muted-foreground h-1.5 w-1.5 rounded-full" />
                     <span className="text-muted-foreground text-xs">Не підключено</span>
                   </div>
                 )}
@@ -131,7 +131,7 @@ export const WebhookCard = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="text-red-600 hover:text-red-700"
+                    className="text-destructive"
                     onClick={handleDisconnect}
                   >
                     Відключити

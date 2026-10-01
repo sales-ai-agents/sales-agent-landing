@@ -3,7 +3,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api-client";
 import { API_ENDPOINTS, apiUrl } from "@/lib/api-config";
 import type {
-  AgentNumber,
   NumbersResponse,
   NumberPool,
   NumberPoolResponse,
@@ -24,14 +23,39 @@ const NUMBERS_KEY = ["numbers"] as const;
 const NUMBERS_POOL_KEY = ["numbers", "pool"] as const;
 const SIP_ADDRESSES_KEY = ["numbers", "sip"] as const;
 
+const fetchNumbers = () => apiGet<NumbersResponse>(API_ENDPOINTS.APP_NUMBERS);
+
+const NUMBERS_QUERY = {
+  queryKey: NUMBERS_KEY,
+  queryFn: fetchNumbers,
+  staleTime: 5 * 60 * 1000,
+} as const;
+
 export const useNumbers = () => {
-  return useQuery<AgentNumber[]>({
-    queryKey: NUMBERS_KEY,
-    queryFn: async () => {
-      const data = await apiGet<NumbersResponse>(API_ENDPOINTS.APP_NUMBERS);
-      return data.numbers;
+  return useQuery({
+    ...NUMBERS_QUERY,
+    select: (data: NumbersResponse) => data.numbers,
+  });
+};
+
+export interface NumbersAllowance {
+  limit: number;
+  used: number;
+  can_add: boolean;
+}
+
+export const useNumbersMeta = () => {
+  return useQuery({
+    ...NUMBERS_QUERY,
+    select: (data: NumbersResponse): NumbersAllowance | null => {
+      if (typeof data.limit !== "number") return null;
+
+      const used = typeof data.used === "number" ? data.used : data.numbers.length;
+      const can_add =
+        typeof data.can_add === "boolean" ? data.can_add : data.limit === 0 || used < data.limit;
+
+      return { limit: data.limit, used, can_add };
     },
-    staleTime: 5 * 60 * 1000,
   });
 };
 
@@ -126,10 +150,17 @@ export const useDeleteNumber = () => {
     },
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: NUMBERS_KEY });
-      const previousNumbers = queryClient.getQueryData<AgentNumber[]>(NUMBERS_KEY);
+      const previousNumbers = queryClient.getQueryData<NumbersResponse>(NUMBERS_KEY);
 
-      queryClient.setQueryData<AgentNumber[]>(NUMBERS_KEY, (old) =>
-        old?.filter((number) => number.id !== id)
+      queryClient.setQueryData<NumbersResponse>(NUMBERS_KEY, (old) =>
+        old
+          ? {
+              ...old,
+              numbers: old.numbers.filter((number) => number.id !== id),
+              used: Math.max(0, old.used - 1),
+              can_add: true,
+            }
+          : old
       );
 
       return { previousNumbers };

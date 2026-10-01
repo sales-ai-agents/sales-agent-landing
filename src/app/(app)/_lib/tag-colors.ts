@@ -4,13 +4,13 @@ export interface TagColor {
 }
 
 const TAG_COLORS: Record<string, TagColor> = {
-  VIP: { bg: "bg-orange-100", text: "text-orange-600" },
-  Новий: { bg: "bg-green-100", text: "text-green-700" },
-  "Прострочена оплата": { bg: "bg-red-100", text: "text-red-600" },
-  "Постійний клієнт": { bg: "bg-blue-100", text: "text-blue-600" },
+  VIP: { bg: "bg-warning/15", text: "text-warning" },
+  Новий: { bg: "bg-success/15", text: "text-success" },
+  "Прострочена оплата": { bg: "bg-destructive/15", text: "text-destructive" },
+  "Постійний клієнт": { bg: "bg-primary/10", text: "text-primary" },
 };
 
-const DEFAULT_TAG_COLOR: TagColor = { bg: "bg-gray-100", text: "text-gray-700" };
+const DEFAULT_TAG_COLOR: TagColor = { bg: "bg-muted", text: "text-muted-foreground" };
 
 export const getTagColor = (tag: string): TagColor => {
   return TAG_COLORS[tag] ?? DEFAULT_TAG_COLOR;

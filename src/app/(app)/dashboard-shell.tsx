@@ -20,7 +20,7 @@ const DashboardShell = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <OnboardingWrapper>
-      <div className="flex h-screen px-5 pt-8 pb-15">
+      <div className="flex h-screen px-5 py-8">
         <Sidebar />
         <div className="ml-5 flex flex-1 flex-col">
           <DashboardHeader />

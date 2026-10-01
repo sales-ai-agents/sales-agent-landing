@@ -26,7 +26,7 @@ export default function EmailConfirmedPage() {
           <div className="bg-primary/10 flex h-20 w-20 items-center justify-center rounded-full">
             <Mail className="text-primary h-10 w-10" />
           </div>
-          <div className="absolute -right-1 -bottom-1 flex h-7 w-7 items-center justify-center rounded-full bg-green-500 text-white">
+          <div className="bg-success text-success-foreground absolute -right-1 -bottom-1 flex h-7 w-7 items-center justify-center rounded-full">
             <CheckCircle className="h-4 w-4" />
           </div>
         </div>
@@ -38,7 +38,7 @@ export default function EmailConfirmedPage() {
       </p>
 
       <Button
-        className="bg-primary hover:bg-primary/90 mt-8 h-11 w-full rounded-lg text-base font-semibold text-white"
+        className="bg-primary hover:bg-primary/90 text-primary-foreground mt-8 h-11 w-full rounded-lg text-base font-semibold"
         onClick={() => router.replace("/dashboard")}
       >
         Увійти в акаунт →

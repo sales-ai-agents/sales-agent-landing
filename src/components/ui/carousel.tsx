@@ -185,7 +185,7 @@ function CarouselPrevious({
       onClick={scrollPrev}
       {...props}
     >
-      <ChevronLeftIcon className="size-6 text-gray-400" />
+      <ChevronLeftIcon className="text-muted-foreground size-6" />
       <span className="sr-only">Previous slide</span>
     </Button>
   );
@@ -215,7 +215,7 @@ function CarouselNext({
       onClick={scrollNext}
       {...props}
     >
-      <ChevronRightIcon className="size-6 text-gray-400" />
+      <ChevronRightIcon className="text-muted-foreground size-6" />
       <span className="sr-only">Next slide</span>
     </Button>
   );
@@ -263,7 +263,7 @@ function CarouselDots({ className, ...props }: React.ComponentProps<"div">) {
           <span
             className={cn(
               "block size-3 rounded-full transition-colors",
-              selectedIndex === index ? "bg-primary" : "bg-gray-300"
+              selectedIndex === index ? "bg-primary" : "bg-muted"
             )}
           />
         </button>

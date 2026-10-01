@@ -81,7 +81,7 @@ export function LeadForm({ sourcePage, onSuccess }: LeadFormProps) {
           {...register("name")}
         />
         {errors.name && (
-          <p role="alert" className="text-sm text-red-600">
+          <p role="alert" className="text-destructive text-sm">
             {errors.name.message}
           </p>
         )}
@@ -111,7 +111,7 @@ export function LeadForm({ sourcePage, onSuccess }: LeadFormProps) {
           />
         </div>
         {errors.phone && (
-          <p role="alert" className="text-sm text-red-600">
+          <p role="alert" className="text-destructive text-sm">
             {errors.phone.message}
           </p>
         )}
@@ -135,7 +135,7 @@ export function LeadForm({ sourcePage, onSuccess }: LeadFormProps) {
       </div>
 
       {errorMessage && (
-        <p role="alert" className="mt-4 text-center text-sm text-red-600">
+        <p role="alert" className="text-destructive mt-4 text-center text-sm">
           {errorMessage}
         </p>
       )}
@@ -143,7 +143,7 @@ export function LeadForm({ sourcePage, onSuccess }: LeadFormProps) {
       <Button
         type="submit"
         disabled={isSubmitting}
-        className="bg-primary hover:bg-primary/90 shadow-primary/30 mt-8 h-12 w-full rounded-full text-lg font-medium text-white disabled:opacity-50"
+        className="bg-primary hover:bg-primary/90 shadow-primary/30 text-primary-foreground mt-8 h-12 w-full rounded-full text-lg font-medium disabled:opacity-50"
       >
         {isSubmitting ? "Надсилаємо…" : "Отримати розрахунок"}
       </Button>

@@ -156,7 +156,7 @@ export const ImportContactsDialog = ({ onClose }: ImportContactsDialogProps) => 
               value="google_sheets"
               className="border-border data-active:border-primary data-active:bg-primary/5 h-12 border"
             >
-              <FileSpreadsheet className="h-4 w-4 text-green-600" />
+              <FileSpreadsheet className="text-success h-4 w-4" />
               Google Sheets
             </TabsTrigger>
           </TabsList>

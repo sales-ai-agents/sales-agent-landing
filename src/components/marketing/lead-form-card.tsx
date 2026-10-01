@@ -31,7 +31,9 @@ export function LeadFormModal({ open, onClose, sourcePage }: LeadFormModalProps)
       title="Отримайте розрахунок ШІ-агента"
       cta={
         <>
-          <p className="mb-3 text-center text-base text-gray-500">Не хочете чекати на відповідь?</p>
+          <p className="text-muted-foreground mb-3 text-center text-base">
+            Не хочете чекати на відповідь?
+          </p>
           <a
             href={TELEGRAM_LINK}
             target="_blank"

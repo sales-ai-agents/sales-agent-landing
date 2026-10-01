@@ -14,7 +14,16 @@ import {
 } from "@tanstack/react-table";
 import { ArrowUpDown, Trash2 } from "lucide-react";
 
-import { Button, Switch } from "@/components/ui";
+import {
+  Button,
+  Switch,
+  Table as UiTable,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui";
 import { cn } from "@/lib/utils";
 import type { Contact } from "@dashboard/types";
 import { getTagColor, formatConsentLabel, formatLastCallResult } from "../_lib/utils";
@@ -127,7 +136,7 @@ export const Table = ({
             checked={info.getValue()}
             onCheckedChange={() => onToggleDoNotCall(info.row.original.id, info.getValue())}
             aria-label="Не дзвонити"
-            className="bg-gray-300"
+            className="bg-muted"
           />
         ),
         enableSorting: false,
@@ -141,7 +150,7 @@ export const Table = ({
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-red-600"
+              className="text-destructive h-8 w-8"
               onClick={() => onDelete(row.original.id)}
               aria-label="Видалити контакт"
             >
@@ -168,55 +177,48 @@ export const Table = ({
   });
 
   return (
-    <>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} className="bg-muted/50 border-b">
-                {headerGroup.headers.map((header) => {
-                  const meta = header.column.columnDef.meta as { className?: string } | undefined;
-                  return (
-                    <th
-                      key={header.id}
-                      className={cn("px-4 py-3 text-left font-medium", meta?.className)}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
-                    </th>
-                  );
-                })}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={columns.length}
-                  className="text-muted-foreground px-4 py-12 text-center"
-                >
-                  Нічого не знайдено
-                </td>
-              </tr>
-            ) : (
-              table.getRowModel().rows.map((row) => (
-                <tr key={row.id} className="hover:bg-muted/20 border-b last:border-0">
-                  {row.getVisibleCells().map((cell) => {
-                    const meta = cell.column.columnDef.meta as { className?: string } | undefined;
-                    return (
-                      <td key={cell.id} className={cn("px-4 py-3", meta?.className)}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-    </>
+    <UiTable>
+      <TableHeader>
+        {table.getHeaderGroups().map((headerGroup) => (
+          <TableRow key={headerGroup.id} className="bg-muted/50">
+            {headerGroup.headers.map((header) => {
+              const meta = header.column.columnDef.meta as { className?: string } | undefined;
+              return (
+                <TableHead key={header.id} className={cn("px-4", meta?.className)}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(header.column.columnDef.header, header.getContext())}
+                </TableHead>
+              );
+            })}
+          </TableRow>
+        ))}
+      </TableHeader>
+      <TableBody>
+        {table.getRowModel().rows.length === 0 ? (
+          <TableRow>
+            <TableCell
+              colSpan={columns.length}
+              className="text-muted-foreground px-4 py-12 text-center"
+            >
+              Нічого не знайдено
+            </TableCell>
+          </TableRow>
+        ) : (
+          table.getRowModel().rows.map((row) => (
+            <TableRow key={row.id}>
+              {row.getVisibleCells().map((cell) => {
+                const meta = cell.column.columnDef.meta as { className?: string } | undefined;
+                return (
+                  <TableCell key={cell.id} className={cn("px-4 py-3", meta?.className)}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                );
+              })}
+            </TableRow>
+          ))
+        )}
+      </TableBody>
+    </UiTable>
   );
 };

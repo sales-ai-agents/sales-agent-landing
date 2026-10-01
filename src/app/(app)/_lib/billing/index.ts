@@ -3,7 +3,6 @@ export { getPlanComparisonRows, isDifferentComparisonRow } from "./plan-comparis
 export type { PlanComparisonIcon, PlanComparisonRow, PlanComparisonValue } from "./plan-comparison";
 export {
   getPlanCapabilities,
-  getPlanNumberAllowance,
   formatIntegrations,
   formatSupport,
   POPULAR_PLAN_KEY,
