@@ -15,6 +15,9 @@ interface StepNumberProps {
 }
 
 export const StepNumber = ({ form, numbers }: StepNumberProps) => {
+  const selectedNumberId = form.watch("numberId");
+  const showRequiredHint = numbers.length > 0 && !selectedNumberId;
+
   const handleConnected = (numberId: number): void => {
     form.setValue("numberId", numberId, { shouldValidate: true, shouldDirty: true });
   };
@@ -51,6 +54,11 @@ export const StepNumber = ({ form, numbers }: StepNumberProps) => {
                 <NumberPicker numbers={numbers} value={field.value} onChange={field.onChange} />
               )}
             />
+          )}
+          {showRequiredHint && (
+            <p className="text-muted-foreground mt-3 text-sm">
+              Оберіть щонайменше один номер, щоб продовжити.
+            </p>
           )}
         </TabsContent>
 

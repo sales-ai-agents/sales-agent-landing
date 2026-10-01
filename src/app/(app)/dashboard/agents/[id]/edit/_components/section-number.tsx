@@ -16,7 +16,11 @@ interface SectionNumberProps {
 }
 
 export const SectionNumber = ({ form, numbers }: SectionNumberProps) => {
-  const { control, setValue } = form;
+  const {
+    control,
+    setValue,
+    formState: { errors },
+  } = form;
 
   const handleConnected = (numberId: number): void => {
     setValue("numberId", numberId, { shouldValidate: true, shouldDirty: true });
@@ -50,6 +54,7 @@ export const SectionNumber = ({ form, numbers }: SectionNumberProps) => {
             />
           )}
         />
+        {errors.numberId && <p className="text-destructive text-sm">{errors.numberId.message}</p>}
       </div>
     </section>
   );

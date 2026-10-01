@@ -1,6 +1,7 @@
 import {
   createAgentBaseSchema,
   contactSelectionIsValid,
+  numberSelectionIsValid,
   type CreateAgentFormData,
 } from "@/lib/schemas";
 
@@ -10,7 +11,7 @@ export const STEP_FIELDS: (keyof CreateAgentFormData)[][] = [
   ["name", "voice"],
   ["contactIds"],
   [],
-  [],
+  ["numberId"],
   ["instructions"],
 ];
 
@@ -30,7 +31,8 @@ export const isStepValid = (step: number, values: Partial<CreateAgentFormData>):
   if (!schema) return true;
 
   if (!schema.safeParse(values).success) return false;
-  if (STEP_FIELDS[step].includes("contactIds")) return contactSelectionIsValid(values);
+  if (STEP_FIELDS[step].includes("contactIds") && !contactSelectionIsValid(values)) return false;
+  if (STEP_FIELDS[step].includes("numberId") && !numberSelectionIsValid(values)) return false;
 
   return true;
 };
