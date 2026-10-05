@@ -72,7 +72,7 @@ export const AgentCard = ({ agent, onToggle, onTest }: AgentCardProps) => {
           variant="outline"
           className={cn(
             "shrink-0",
-            isActive ? "bg-success/15 text-success" : "bg-destructive text-destructive"
+            isActive ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive"
           )}
         >
           <span className={cn("mr-1", isActive ? "text-success" : "text-destructive")}>●</span>
