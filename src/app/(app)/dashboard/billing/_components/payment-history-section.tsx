@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, Download, History, Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import { AlertTriangle, History, Loader2 } from "lucide-react";
 
 import {
   Button,
@@ -13,12 +12,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui";
-import { ApiError, apiGet } from "@/lib/api-client";
-import { apiUrl } from "@/lib/api-config";
 import { formatDateShort, formatNumber } from "@/lib/utils";
-import type { PaymentHistoryItem, ReceiptResponse } from "@dashboard/types";
+import type { PaymentHistoryItem } from "@dashboard/types";
 
 import { PaymentStatusLabel } from "./payment-status-label";
+
+const isPaidPayment = (payment: PaymentHistoryItem): boolean => payment.status === "success";
 
 const INITIAL_PAYMENT_COUNT = 3;
 
@@ -65,7 +64,7 @@ export const PaymentHistorySection = ({
           <History className="text-muted-foreground h-10 w-10" />
           <p className="text-sm font-semibold">Платежів ще немає</p>
           <p className="text-muted-foreground text-xs">
-            Тут відображатиметься історія платежів та офіційні квитанції
+            Тут відображатиметься історія ваших платежів
           </p>
         </div>
       ) : (
@@ -81,7 +80,7 @@ export const PaymentHistorySection = ({
               <TableHeader>
                 <TableRow>
                   {["Дата", "Опис", "Сума", "Статус", "Інвойс"].map((heading) => (
-                    <TableHead key={heading} className="px-3">
+                    <TableHead key={heading} className="px-3 whitespace-nowrap">
                       {heading}
                     </TableHead>
                   ))}
@@ -145,16 +144,18 @@ const PaymentAmount = ({ payment }: { payment: PaymentHistoryItem }) => {
 
 const PaymentRow = ({ payment }: PaymentRowProps) => (
   <TableRow>
-    <TableCell className="px-3 py-2.5">{formatDateShort(getPaymentDate(payment))}</TableCell>
+    <TableCell className="px-3 py-2.5 whitespace-nowrap">
+      {formatDateShort(getPaymentDate(payment))}
+    </TableCell>
     <TableCell className="px-3 py-2.5">{formatPaymentDescription(payment)}</TableCell>
     <TableCell className="px-3 py-2.5 font-medium">
       <PaymentAmount payment={payment} />
     </TableCell>
     <TableCell className="px-3 py-2.5">
-      <PaymentStatusLabel status={payment.status} />
+      <PaymentStatusLabel status={payment.status} paid={isPaidPayment(payment)} />
     </TableCell>
-    <TableCell className="px-3 py-2.5">
-      <ReceiptCell payment={payment} />
+    <TableCell className="text-muted-foreground px-3 py-2.5 font-mono text-xs">
+      {payment.invoice_id}
     </TableCell>
   </TableRow>
 );
@@ -166,53 +167,13 @@ const PaymentCard = ({ payment }: PaymentRowProps) => (
         <p className="truncate text-sm font-medium">{formatPaymentDescription(payment)}</p>
         <p className="text-muted-foreground text-xs">{formatDateShort(getPaymentDate(payment))}</p>
       </div>
-      <PaymentStatusLabel status={payment.status} />
+      <PaymentStatusLabel status={payment.status} paid={isPaidPayment(payment)} />
     </div>
     <div className="flex items-end justify-between gap-3 text-sm font-medium">
       <PaymentAmount payment={payment} />
-      <ReceiptCell payment={payment} />
+      <span className="text-muted-foreground font-mono text-xs font-normal">
+        {payment.invoice_id}
+      </span>
     </div>
   </div>
 );
-
-const ReceiptCell = ({ payment }: { payment: PaymentHistoryItem }) => {
-  const [isDownloading, setIsDownloading] = useState(false);
-
-  if (!payment.has_receipt) {
-    return <span className="text-muted-foreground text-xs">—</span>;
-  }
-
-  const handleDownload = async () => {
-    setIsDownloading(true);
-    try {
-      const receipt = await apiGet<ReceiptResponse>(apiUrl.billingReceipt(payment.invoice_id));
-      if (receipt.url) {
-        window.open(receipt.url, "_blank", "noopener,noreferrer");
-        return;
-      }
-      toast.info("Квитанція недоступна для завантаження.");
-    } catch (error) {
-      const isMissing = error instanceof ApiError && error.code === "receipt_not_available";
-      toast.error(isMissing ? "Квитанція наразі недоступна." : "Не вдалося завантажити квитанцію.");
-    } finally {
-      setIsDownloading(false);
-    }
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={handleDownload}
-      disabled={isDownloading}
-      aria-busy={isDownloading}
-      className="text-primary flex cursor-pointer items-center gap-1.5 text-xs hover:underline disabled:opacity-60"
-    >
-      <span>{payment.invoice_id}</span>
-      {isDownloading ? (
-        <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
-      ) : (
-        <Download className="h-3.5 w-3.5" aria-hidden="true" />
-      )}
-    </button>
-  );
-};

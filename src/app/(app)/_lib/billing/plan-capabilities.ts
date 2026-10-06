@@ -7,6 +7,7 @@ export const DEFAULT_AUTO_RENEW: AutoRenewState = {
   auto_charge: false,
   next_charge_at: null,
   auto_renew_period: "month",
+  auto_renew_consent_at: null,
 };
 
 const PLAN_TIERS = ["trial", "start", "business", "pro"] as const;

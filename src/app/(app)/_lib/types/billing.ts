@@ -5,6 +5,7 @@ export interface AutoRenewState {
   auto_charge: boolean;
   next_charge_at: string | null;
   auto_renew_period: BillingPeriod;
+  auto_renew_consent_at: string | null;
 }
 
 export interface BillingPlanYear {
@@ -62,6 +63,7 @@ export interface CheckoutResponse {
   ok: boolean;
   invoice_id: string;
   payment_url: string;
+  return_url: string;
   amount_uah: number;
   price_usd: number;
   usd_rate: number;
@@ -91,7 +93,16 @@ export interface AutoRenewResponse extends AutoRenewState {
 }
 
 export type PaymentStatus =
-  "created" | "processing" | "hold" | "success" | "failure" | "reversed" | "expired";
+  | "created"
+  | "success"
+  | "Declined"
+  | "Expired"
+  | "Refunded"
+  | "InProcessing"
+  | "Pending"
+  | "RefundInProcessing"
+  | "WaitingAuthComplete"
+  | (string & {});
 
 export interface PaymentStatusResponse extends Partial<AutoRenewState> {
   ok: boolean;
@@ -100,6 +111,7 @@ export interface PaymentStatusResponse extends Partial<AutoRenewState> {
   plan: string;
   amount_uah: number;
   current_plan: string;
+  current_plan_title?: string;
   expires_at: string | null;
   days_left: number | null;
   minutes: number;
@@ -117,15 +129,13 @@ export interface BillingPaymentMethodResponse extends AutoRenewState {
   card: PaymentMethodCard;
 }
 
-export type PaymentHistoryStatus = "created" | "success" | "failure" | "reversed" | "expired";
-
 export interface PaymentHistoryItem {
   id: number;
   plan: string;
   amount_uah: number;
   price_usd: number | null;
   usd_rate: number | null;
-  status: PaymentHistoryStatus;
+  status: PaymentStatus;
   created_at: string;
   paid_at: string | null;
   invoice_id: string;
@@ -135,8 +145,4 @@ export interface PaymentHistoryItem {
 export interface PaymentHistoryResponse {
   ok: boolean;
   payments: PaymentHistoryItem[];
-}
-
-export interface ReceiptResponse {
-  url?: string;
 }

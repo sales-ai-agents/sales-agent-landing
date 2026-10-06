@@ -72,20 +72,18 @@ const DashboardPage = () => {
         </div>
       </div>
 
-      <div>
-        <Select value={String(days)} onValueChange={(val) => setDays(Number(val))}>
-          <SelectTrigger className="bg-card w-auto px-10">
-            <SelectValue>{selectedLabel}</SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {PERIOD_OPTIONS.map((opt) => (
-              <SelectItem key={opt.value} value={String(opt.value)}>
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <Select value={String(days)} onValueChange={(val) => setDays(Number(val))}>
+        <SelectTrigger className="bg-card">
+          <SelectValue className="px-10">{selectedLabel}</SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          {PERIOD_OPTIONS.map((opt) => (
+            <SelectItem key={opt.value} value={String(opt.value)}>
+              {opt.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
       <div
         id="onboarding-stats-cards"

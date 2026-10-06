@@ -1,4 +1,5 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { QueryKey, UseQueryResult } from "@tanstack/react-query";
 
 import { apiGet, apiPost, apiDelete } from "@/lib/api-client";
 import { API_ENDPOINTS, apiUrl } from "@/lib/api-config";
@@ -16,7 +17,8 @@ import type {
   TopUpResponse,
 } from "@dashboard/types";
 
-const POLL_INTERVAL_MS = 3000;
+const STATUS_POLL_INTERVAL_MS = 2000;
+const STATUS_POLL_MAX_ATTEMPTS = 15;
 
 export const useBillingPlans = () => {
   return useQuery<BillingPlansResponse>({
@@ -75,17 +77,35 @@ export const useTopUp = () => {
   });
 };
 
-export const usePaymentStatus = (invoiceId: string | null) => {
-  return useQuery<PaymentStatusResponse>({
-    queryKey: ["billing", "status", invoiceId],
+export type UsePaymentStatusResult = UseQueryResult<PaymentStatusResponse, Error> & {
+  hasTimedOut: boolean;
+};
+
+const attemptsSpent = (state: { dataUpdateCount: number; errorUpdateCount: number }): number =>
+  state.dataUpdateCount + state.errorUpdateCount;
+
+export const usePaymentStatus = (invoiceId: string | null): UsePaymentStatusResult => {
+  const queryClient = useQueryClient();
+  const queryKey: QueryKey = ["billing", "status", invoiceId];
+
+  const query = useQuery<PaymentStatusResponse, Error>({
+    queryKey,
     queryFn: () => apiGet<PaymentStatusResponse>(apiUrl.billingStatus(invoiceId!)),
-    enabled: !!invoiceId,
-    refetchInterval: (query) => {
-      const data = query.state.data;
-      if (!data) return POLL_INTERVAL_MS;
-      return resolvePaymentOutcome(data) === "pending" ? POLL_INTERVAL_MS : false;
+    enabled: Boolean(invoiceId),
+    retry: false,
+    refetchInterval: ({ state }) => {
+      if (state.data && resolvePaymentOutcome(state.data) !== "pending") return false;
+      if (attemptsSpent(state) >= STATUS_POLL_MAX_ATTEMPTS) return false;
+      return STATUS_POLL_INTERVAL_MS;
     },
   });
+
+  const state = queryClient.getQueryState<PaymentStatusResponse, Error>(queryKey);
+  const budgetSpent = state ? attemptsSpent(state) >= STATUS_POLL_MAX_ATTEMPTS : false;
+  const isPending = query.data ? resolvePaymentOutcome(query.data) === "pending" : false;
+  const hasTimedOut = isPending && budgetSpent;
+
+  return { ...query, hasTimedOut };
 };
 
 export const useBillingHistory = () => {

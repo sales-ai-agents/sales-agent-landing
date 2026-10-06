@@ -3756,6 +3756,16 @@ paths:
                   plan: { type: string }
                   period:
                     { type: string, enum: [month, year], description: "за що виставлено рахунок" }
+                  return_url:
+                    type: string
+                    description: >
+                      Куди WayForPay поверне людину після оплати. Адресу
+                      задає сервер (приймати її від браузера означало б
+                      відкритий редірект), але ми додаємо в неї
+                      `?invoice_id=<invoice_id>` — щоб сторінка повернення
+                      одразу знала, який рахунок опитувати в
+                      `GET /app/billing/status`. Сам редірект робить
+                      WayForPay, не ми.
         "400": { description: "unknown_plan — невідомий тариф" }
         "401": { description: не авторизований }
         "502": { description: "payment_provider_error — рахунок не створився" }
@@ -3788,16 +3798,41 @@ paths:
                   ok: { type: boolean }
                   paid: { type: boolean, description: "єдине, на що можна дивитись" }
                   status:
-                    {
-                      type: string,
-                      enum: [created, processing, hold, success, failure, reversed, expired],
-                    }
+                    type: string
+                    description: >
+                      `created` — рахунок виставлено, відповіді ще не було;
+                      `success` — оплачено. Решта — це статус **від
+                      WayForPay як є**: `Declined`, `Expired`, `Refunded`,
+                      `InProcessing`, `Pending`, `RefundInProcessing`,
+                      `WaitingAuthComplete`. Список у них може
+                      поповнитись, тому НЕ роби switch по рядку.
+
+
+                      Дивись на `paid` — це єдине поле з гарантованим
+                      значенням. У історії платежів те саме: `status ==
+                      "success"` або нічого.
+                    examples: ["created", "success", "Declined"]
                   plan: { type: string }
                   amount_uah: { type: number }
-                  current_plan: { type: string, description: "тариф акаунта вже після оплати" }
-                  expires_at: { type: string, nullable: true }
+                  current_plan: { type: string, description: "ключ тарифу вже після оплати" }
+                  current_plan_title:
+                    type: string
+                    examples: ["PRO"]
+                    description: >
+                      Назва для екрана «Оплата успішна» — щоб не смикати
+                      каталог тарифів другим запитом і не вигадувати
+                      підпис із ключа.
+                  expires_at:
+                    type: string
+                    nullable: true
+                    description: >
+                      До якої дати діє тариф. На екрані успіху підписуй
+                      це «Тариф діє до», а «Наступне списання» — лише
+                      коли `auto_charge` true; тоді дата списання в
+                      `next_charge_at` (за добу до `expires_at`), і це
+                      РІЗНІ дати.
                   days_left: { type: integer, nullable: true, description: "днів до кінця періоду" }
-                  minutes: { type: integer }
+                  minutes: { type: integer, description: "ліміт хвилин за новим тарифом" }
                   auto_renew: { $ref: "#/components/schemas/AutoRenew/properties/auto_renew" }
                   auto_charge: { $ref: "#/components/schemas/AutoRenew/properties/auto_charge" }
                   next_charge_at:
@@ -3839,7 +3874,13 @@ paths:
                             доларовий, а списано гривні за курсом того дня.
                         usd_rate: { type: number, nullable: true, description: курс того дня }
                         status:
-                          { type: string, enum: [created, success, failure, reversed, expired] }
+                          type: string
+                          description: >
+                            `created` · `success` · або статус WayForPay як
+                            є (`Declined`, `Expired`, `Refunded`,
+                            `InProcessing`…). Оплаченим вважай лише
+                            `success`.
+                          examples: ["success", "Declined"]
                         created_at: { type: string }
                         paid_at: { type: string, nullable: true }
                         invoice_id:
@@ -3916,6 +3957,16 @@ paths:
       tags: [agents]
       summary: Доступні голоси
       description: Для форми створення агента. Не зашивати у фронт — список живе на сервері.
+      parameters:
+        - in: query
+          name: lang
+          schema: { type: string, examples: ["uk", "en", "all"] }
+          description: >
+            Без параметра віддаються голоси МОВИ АКАУНТА
+            (`agent_language`) — щоб українському агенту не пропонувати
+            Friedrich і Marcus. `all` — усі; невідома мова теж дає всі
+            (краще показати зайве, ніж порожній екран). Обрану мову
+            відповідь повертає полем `lang`.
       responses:
         "200":
           content:

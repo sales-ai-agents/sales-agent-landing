@@ -1,11 +1,18 @@
-import type { PaymentStatusResponse } from "@dashboard/types";
+import type { PaymentStatus, PaymentStatusResponse } from "@dashboard/types";
 
 export type PaymentOutcome = "paid" | "pending" | "failed";
 
-const PENDING_PAYMENT_STATUSES = new Set(["created", "processing", "hold"]);
+const FAILED_PAYMENT_STATUSES: ReadonlySet<string> = new Set<PaymentStatus>([
+  "Declined",
+  "Expired",
+  "Refunded",
+]);
+
+export const isFailedPaymentStatus = (status: string): boolean =>
+  FAILED_PAYMENT_STATUSES.has(status);
 
 export const resolvePaymentOutcome = (data: PaymentStatusResponse): PaymentOutcome => {
-  if (data.paid || data.status === "success") return "paid";
-  if (PENDING_PAYMENT_STATUSES.has(data.status)) return "pending";
-  return "failed";
+  if (data.paid === true) return "paid";
+  if (isFailedPaymentStatus(data.status)) return "failed";
+  return "pending";
 };

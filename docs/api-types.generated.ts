@@ -5715,6 +5715,8 @@ export interface paths {
                              * @enum {string}
                              */
                             period?: "month" | "year";
+                            /** @description Куди WayForPay поверне людину після оплати. Адресу задає сервер (приймати її від браузера означало б відкритий редірект), але ми додаємо в неї `?invoice_id=<invoice_id>` — щоб сторінка повернення одразу знала, який рахунок опитувати в `GET /app/billing/status`. Сам редірект робить WayForPay, не ми. */
+                            return_url?: string;
                         };
                     };
                 };
@@ -5785,15 +5787,29 @@ export interface paths {
                             ok?: boolean;
                             /** @description єдине, на що можна дивитись */
                             paid?: boolean;
-                            /** @enum {string} */
-                            status?: "created" | "processing" | "hold" | "success" | "failure" | "reversed" | "expired";
+                            /**
+                             * @description `created` — рахунок виставлено, відповіді ще не було; `success` — оплачено. Решта — це статус **від WayForPay як є**: `Declined`, `Expired`, `Refunded`, `InProcessing`, `Pending`, `RefundInProcessing`, `WaitingAuthComplete`. Список у них може поповнитись, тому НЕ роби switch по рядку.
+                             *
+                             *     Дивись на `paid` — це єдине поле з гарантованим значенням. У історії платежів те саме: `status == "success"` або нічого.
+                             * @example created
+                             * @example success
+                             * @example Declined
+                             */
+                            status?: string;
                             plan?: string;
                             amount_uah?: number;
-                            /** @description тариф акаунта вже після оплати */
+                            /** @description ключ тарифу вже після оплати */
                             current_plan?: string;
+                            /**
+                             * @description Назва для екрана «Оплата успішна» — щоб не смикати каталог тарифів другим запитом і не вигадувати підпис із ключа.
+                             * @example PRO
+                             */
+                            current_plan_title?: string;
+                            /** @description До якої дати діє тариф. На екрані успіху підписуй це «Тариф діє до», а «Наступне списання» — лише коли `auto_charge` true; тоді дата списання в `next_charge_at` (за добу до `expires_at`), і це РІЗНІ дати. */
                             expires_at?: string | null;
                             /** @description днів до кінця періоду */
                             days_left?: number | null;
+                            /** @description ліміт хвилин за новим тарифом */
                             minutes?: number;
                             auto_renew?: components["schemas"]["AutoRenew"]["auto_renew"];
                             auto_charge?: components["schemas"]["AutoRenew"]["auto_charge"];
@@ -5867,8 +5883,12 @@ export interface paths {
                                 price_usd?: number | null;
                                 /** @description курс того дня */
                                 usd_rate?: number | null;
-                                /** @enum {string} */
-                                status?: "created" | "success" | "failure" | "reversed" | "expired";
+                                /**
+                                 * @description `created` · `success` · або статус WayForPay як є (`Declined`, `Expired`, `Refunded`, `InProcessing`…). Оплаченим вважай лише `success`.
+                                 * @example success
+                                 * @example Declined
+                                 */
+                                status?: string;
                                 created_at?: string;
                                 paid_at?: string | null;
                                 /** @description передавати в /app/billing/receipt */
@@ -6002,7 +6022,10 @@ export interface paths {
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    /** @description Без параметра віддаються голоси МОВИ АКАУНТА (`agent_language`) — щоб українському агенту не пропонувати Friedrich і Marcus. `all` — усі; невідома мова теж дає всі (краще показати зайве, ніж порожній екран). Обрану мову відповідь повертає полем `lang`. */
+                    lang?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;

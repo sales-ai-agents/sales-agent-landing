@@ -61,6 +61,8 @@ const BillingPage = () => {
     auto_charge: billing.auto_charge ?? DEFAULT_AUTO_RENEW.auto_charge,
     next_charge_at: billing.next_charge_at ?? DEFAULT_AUTO_RENEW.next_charge_at,
     auto_renew_period: billing.auto_renew_period ?? DEFAULT_AUTO_RENEW.auto_renew_period,
+    auto_renew_consent_at:
+      billing.auto_renew_consent_at ?? DEFAULT_AUTO_RENEW.auto_renew_consent_at,
   };
 
   return (

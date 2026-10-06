@@ -34,9 +34,9 @@ export const MarketingConsent = ({ initialGranted }: MarketingConsentSectionProp
       <p className="text-muted-foreground mt-1 text-xs">
         Керуйте згодою на інформаційні та рекламні повідомлення
       </p>
-      <div className="mt-4 flex items-center justify-between gap-4 border-t pt-4">
+      <div className="mt-3 flex items-center justify-between gap-4">
         <div>
-          <p className="text-sm font-medium">Отримувати розсилки від calls4u.ai</p>
+          <p className="text-xs font-medium">Отримувати розсилки від calls4u.ai</p>
           <p className="text-muted-foreground text-xs">
             Новини, поради та спеціальні пропозиції. Згоду можна відкликати будь-коли.
           </p>
