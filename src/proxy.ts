@@ -5,14 +5,21 @@ const PROTECTED_ROUTES = ["/dashboard"];
 const AUTH_ROUTES = ["/sign-in", "/sign-up", "/forgot-password", "email-confirm"];
 const SESSION_COOKIE = "cs_session";
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "0.0.0.0", "[::1]"]);
+const BILLING_RETURN_ROUTE = "/dashboard/billing/success";
+const SEE_OTHER = 303;
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (request.method === "POST" && pathname === BILLING_RETURN_ROUTE) {
+    return NextResponse.redirect(request.nextUrl, SEE_OTHER);
+  }
+
   const hasSession = request.cookies.has(SESSION_COOKIE);
 
-  const isProtectedRoute = PROTECTED_ROUTES.some(
-    (route) => pathname === route || pathname.startsWith(route + "/")
-  );
+  const isProtectedRoute =
+    pathname !== BILLING_RETURN_ROUTE &&
+    PROTECTED_ROUTES.some((route) => pathname === route || pathname.startsWith(route + "/"));
 
   const isAuthRoute = AUTH_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(route + "/")
