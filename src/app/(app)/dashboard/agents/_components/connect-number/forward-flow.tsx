@@ -67,6 +67,7 @@ export const ForwardFlow = ({ agentId, onDone, onCancel }: ForwardFlowProps) => 
         },
         onError: (error) => {
           if (error instanceof ApiError && error.code === "number_limit") {
+            toast.error(NUMBER_ERROR_MESSAGES.number_limit ?? error.hint);
             router.push("/dashboard/billing");
             return;
           }

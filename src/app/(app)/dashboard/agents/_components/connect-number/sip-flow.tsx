@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Info, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui";
 import { ApiError } from "@/lib/api-client";
@@ -77,6 +78,7 @@ export const SipFlow = ({ agentId, onDone, onCancel }: SipFlowProps) => {
         },
         onError: (error) => {
           if (error instanceof ApiError && error.code === "number_limit") {
+            toast.error(NUMBER_ERROR_MESSAGES.number_limit ?? error.hint);
             router.push("/dashboard/billing");
             return;
           }

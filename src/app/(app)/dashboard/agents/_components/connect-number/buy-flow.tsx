@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Info, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui";
 import { ApiError } from "@/lib/api-client";
@@ -56,6 +57,7 @@ export const BuyFlow = ({ agentId, onDone, onCancel }: BuyFlowProps) => {
         },
         onError: (error) => {
           if (error instanceof ApiError && error.code === "number_limit") {
+            toast.error(NUMBER_ERROR_MESSAGES.number_limit ?? error.hint);
             router.push("/dashboard/billing");
             return;
           }

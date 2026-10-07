@@ -32,13 +32,15 @@ export class ApiError extends Error {
   readonly code: string;
   readonly retryAfter?: number;
   readonly attemptsLeft?: number;
+  readonly hint?: string;
 
   constructor(
     status: number,
     code: string,
     message: string,
     retryAfter?: number,
-    attemptsLeft?: number
+    attemptsLeft?: number,
+    hint?: string
   ) {
     super(message);
     this.name = "ApiError";
@@ -46,6 +48,7 @@ export class ApiError extends Error {
     this.code = code;
     this.retryAfter = retryAfter;
     this.attemptsLeft = attemptsLeft;
+    this.hint = hint;
   }
 }
 
@@ -54,6 +57,7 @@ interface ApiErrorBody {
   message?: string;
   retry_after?: number;
   attempts_left?: number;
+  hint?: string;
 }
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -103,7 +107,7 @@ async function request<T>(url: string, method: HttpMethod, options?: RequestOpti
     if (response.status === 429) {
       const retryAfter =
         body?.retry_after ?? (Number(response.headers.get("Retry-After")) || undefined);
-      throw new ApiError(429, code, message, retryAfter);
+      throw new ApiError(429, code, message, retryAfter, undefined, body?.hint);
     }
 
     if (response.status === 401 && !AUTH_FLOW_CODES.has(code)) {
@@ -111,7 +115,7 @@ async function request<T>(url: string, method: HttpMethod, options?: RequestOpti
       throw new ApiError(401, "session_expired", "Сесія закінчилася. Увійдіть знову.");
     }
 
-    throw new ApiError(response.status, code, message, undefined, body?.attempts_left);
+    throw new ApiError(response.status, code, message, undefined, body?.attempts_left, body?.hint);
   }
 
   return response.json();

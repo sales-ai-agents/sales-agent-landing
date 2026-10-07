@@ -7,7 +7,7 @@ const DEFAULT_MESSAGE = "Щось пішло не так.";
 
 export const handleMutationError = (error: unknown, domainMap?: ErrorMessageMap): void => {
   if (error instanceof ApiError) {
-    toast.error(resolveErrorMessage(error.code, domainMap));
+    toast.error(resolveErrorMessage(error.code, domainMap) ?? error.hint);
   } else {
     toast.error(DEFAULT_MESSAGE);
   }

@@ -29,6 +29,7 @@ import { useUpdateNumber } from "@dashboard/hooks";
 import type { Agent, AgentNumber } from "@dashboard/types";
 
 import { DIRECTION_LABELS, formatDailyCap, resolveDisplayBadge } from "../_lib/labels";
+import { DeleteNumberDialog } from "./delete-number-dialog";
 
 interface NumbersTableProps {
   numbers: AgentNumber[];
@@ -97,7 +98,7 @@ export const NumbersTable = ({ numbers, agents }: NumbersTableProps) => {
             value={row.original.agent_id ? String(row.original.agent_id) : UNASSIGNED_VALUE}
             onValueChange={(value) => handleAssign(row.original.id, value)}
           >
-            <SelectTrigger className="w-[190px]">
+            <SelectTrigger className="w-46">
               <SelectValue>{(value) => renderAgentLabel(value, agents)}</SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -146,6 +147,11 @@ export const NumbersTable = ({ numbers, agents }: NumbersTableProps) => {
           );
         },
       }),
+      columnHelper.display({
+        id: "actions",
+        header: "Дії",
+        cell: ({ row }) => <DeleteNumberDialog id={row.original.id} phone={row.original.phone} />,
+      }),
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [agents]
@@ -162,7 +168,7 @@ export const NumbersTable = ({ numbers, agents }: NumbersTableProps) => {
       value={number.agent_id ? String(number.agent_id) : UNASSIGNED_VALUE}
       onValueChange={(value) => handleAssign(number.id, value)}
     >
-      <SelectTrigger className="w-full sm:w-[190px]">
+      <SelectTrigger className="w-full sm:w-46">
         <SelectValue>{(value) => renderAgentLabel(value, agents)}</SelectValue>
       </SelectTrigger>
       <SelectContent>
@@ -192,14 +198,17 @@ export const NumbersTable = ({ numbers, agents }: NumbersTableProps) => {
                     <p className="text-muted-foreground truncate text-xs">{number.provider}</p>
                   )}
                 </div>
-                <span
-                  className={cn(
-                    "inline-flex shrink-0 items-center rounded-md px-2 py-0.5 text-xs font-medium",
-                    badge.className
-                  )}
-                >
-                  {badge.label}
-                </span>
+                <div className="flex shrink-0 items-center gap-1">
+                  <span
+                    className={cn(
+                      "inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium",
+                      badge.className
+                    )}
+                  >
+                    {badge.label}
+                  </span>
+                  <DeleteNumberDialog id={number.id} phone={number.phone} />
+                </div>
               </div>
               <div>
                 <p className="text-muted-foreground mb-1 text-xs">Призначений агент</p>
