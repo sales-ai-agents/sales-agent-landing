@@ -135,7 +135,7 @@ const PaymentAmount = ({ payment }: { payment: PaymentHistoryItem }) => {
       {displayUsd && (
         <span className="text-muted-foreground text-xs font-normal">
           {formatNumber(payment.amount_uah)} грн
-          {payment.usd_rate ? ` (${payment.usd_rate.toFixed(2)} ₴/$)` : ""}
+          {payment.usd_rate ? ` (${payment.usd_rate.toFixed(2)}$)` : ""}
         </span>
       )}
     </div>

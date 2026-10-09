@@ -11,7 +11,7 @@ interface PageLoadingProps {
 
 export const PageLoading = ({ message }: PageLoadingProps) => {
   return (
-    <div className="flex h-full min-h-[50vh] flex-col items-center justify-center gap-3">
+    <div className="flex h-screen flex-col items-center justify-center gap-3">
       <Loader2 className="text-primary h-8 w-8 animate-spin" />
       {message && <p className="text-muted-foreground text-sm">{message}</p>}
     </div>

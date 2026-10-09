@@ -64,7 +64,7 @@ export const PlanCard = ({ plan, isCurrent, cycle = "month", onSelect }: PlanCar
         {displayPriceUah != null && (
           <p className="text-muted-foreground mt-1 text-xs">
             ≈ {formatNumber(displayPriceUah)} грн
-            {plan.usd_rate ? ` (${plan.usd_rate.toFixed(2)} ₴/$)` : ""}
+            {plan.usd_rate ? ` (${plan.usd_rate.toFixed(2)}$)` : ""}
           </p>
         )}
       </div>

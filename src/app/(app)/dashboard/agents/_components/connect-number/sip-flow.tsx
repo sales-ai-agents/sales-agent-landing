@@ -130,34 +130,17 @@ export const SipFlow = ({ agentId, onDone, onCancel }: SipFlowProps) => {
 
       <Stepper steps={STEPS} current={step} />
 
-      {step === 0 && credentials && (
+      {step === 0 && (
         <SipSetupStep
           credentials={credentials}
           phone={phone}
           onPhoneChange={setPhone}
+          onProvision={handleProvision}
+          isProvisioning={isProvisioning}
           canVerify={isValidUaPhone(phone)}
           onVerify={startVerify}
           onCancel={onCancel}
         />
-      )}
-
-      {step === 0 && !credentials && (
-        <div className="space-y-4">
-          <PhoneField id="sip-phone" label="Ваш номер" value={phone} onChange={setPhone} />
-          <div className="flex justify-between">
-            <Button type="button" variant="outline" onClick={onCancel}>
-              Скасувати
-            </Button>
-            <Button
-              type="button"
-              onClick={handleProvision}
-              disabled={!isValidUaPhone(phone) || isProvisioning}
-            >
-              {isProvisioning && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Отримати дані для АТС
-            </Button>
-          </div>
-        </div>
       )}
 
       {step === 1 && (
@@ -189,7 +172,7 @@ export const SipFlow = ({ agentId, onDone, onCancel }: SipFlowProps) => {
         <div className="space-y-4 text-center">
           <SuccessMark />
           <p className="font-medium">Номер {credentials?.phone} підключено!</p>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground mx-auto max-w-sm text-sm">
             Дзвінки з цього номера успішно надходять до Calls4U. Тепер ви можете призначити агента
             та налаштувати напрямок дзвінків у таблиці «Номери»
           </p>
@@ -205,9 +188,11 @@ export const SipFlow = ({ agentId, onDone, onCancel }: SipFlowProps) => {
 };
 
 interface SipSetupStepProps {
-  credentials: SipTrunkCredentials;
+  credentials: SipTrunkCredentials | null;
   phone: string;
   onPhoneChange: (value: string) => void;
+  onProvision: () => void;
+  isProvisioning: boolean;
   canVerify: boolean;
   onVerify: () => void;
   onCancel: () => void;
@@ -217,6 +202,8 @@ const SipSetupStep = ({
   credentials,
   phone,
   onPhoneChange,
+  onProvision,
+  isProvisioning,
   canVerify,
   onVerify,
   onCancel,
@@ -229,7 +216,7 @@ const SipSetupStep = ({
           Скопіюйте адресу та використайте її в налаштуваннях вашої телефонної системи як напрямок
           для вхідних дзвінків
         </p>
-        <CopyField label="SIP-адреса" value={credentials.sip_uri} />
+        <CopyField label="SIP-адреса" value={credentials?.sip_uri ?? ""} />
         <p className="text-muted-foreground text-xs">
           Інструкції для популярних АТС (Binotel, Ringostat, 3CX, Asterisk)
         </p>
@@ -247,6 +234,17 @@ const SipSetupStep = ({
           onChange={onPhoneChange}
         />
         <p className="text-muted-foreground text-xs">Вводіть у форматі +380 ХХ ХХХ ХХ ХХ</p>
+        {!credentials && (
+          <Button
+            type="button"
+            className="w-full"
+            onClick={onProvision}
+            disabled={!canVerify || isProvisioning}
+          >
+            {isProvisioning && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Отримати дані для АТС
+          </Button>
+        )}
       </section>
 
       <section className="border-border space-y-3 rounded-lg border p-4">
@@ -255,7 +253,12 @@ const SipSetupStep = ({
           Після того як налаштуєте АТС, натисніть кнопку нижче. Ми перевіримо, чи надходять дзвінки
           з вашого номера.
         </p>
-        <Button type="button" className="w-full" onClick={onVerify} disabled={!canVerify}>
+        <Button
+          type="button"
+          className="w-full"
+          onClick={onVerify}
+          disabled={!canVerify || !credentials}
+        >
           Перевірити підключення
         </Button>
         <div className="bg-primary/5 text-muted-foreground flex gap-2 rounded-lg p-3 text-xs">
