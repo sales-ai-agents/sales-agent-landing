@@ -11,6 +11,7 @@ export interface AgentNumber {
   source: NumberSource;
   direction: NumberDirection;
   provider: string;
+  caller_id: boolean;
   is_active: boolean;
   note: string;
   created_at: string;
@@ -27,6 +28,8 @@ export interface AgentNumber {
 export interface NumbersResponse {
   ok: boolean;
   numbers: AgentNumber[];
+  outbound_caller_id: string;
+  outbound_caller_id_is_own: boolean;
   limit: number;
   used: number;
   can_add: boolean;

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { CheckCircle2, Info, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -10,12 +11,17 @@ import { ApiError } from "@/lib/api-client";
 import { NUMBER_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/mutation-error";
 import { cn } from "@/lib/utils";
-import { useClaimNumber, useNumberPool } from "@dashboard/hooks";
+import { useClaimNumber, useNumberPool, useNumbersMeta } from "@dashboard/hooks";
 import type { NumberKind } from "@dashboard/types";
 
 import { CopyField } from "./copy-field";
 import { SuccessMark } from "./flow-visuals";
 import { Stepper } from "./stepper";
+
+const POOL_EMPTY_TEXT =
+  "Вільних номерів зараз немає — ми вже замовляємо. Поки можна підключити свій номер через переадресацію.";
+
+const LIMIT_REACHED_TEXT = "У вашому тарифі більше номерів немає";
 
 interface BuyFlowProps {
   agentId?: number;
@@ -43,9 +49,14 @@ export const BuyFlow = ({ agentId, onDone, onCancel }: BuyFlowProps) => {
   const [claimed, setClaimed] = useState<{ id: number; phone: string } | null>(null);
 
   const { data: pool } = useNumberPool();
+  const { data: allowance } = useNumbersMeta();
   const claimNumber = useClaimNumber();
 
+  const [poolEmpty, setPoolEmpty] = useState(false);
+
   const availableForKind = pool?.available_by_kind?.[selected.kind] ?? pool?.available ?? 0;
+  const isPoolEmpty = poolEmpty || pool?.available === 0;
+  const isLimitReached = allowance?.can_add === false;
 
   const handleClaim = (): void => {
     claimNumber.mutate(
@@ -59,6 +70,11 @@ export const BuyFlow = ({ agentId, onDone, onCancel }: BuyFlowProps) => {
           if (error instanceof ApiError && error.code === "number_limit") {
             toast.error(NUMBER_ERROR_MESSAGES.number_limit ?? error.hint);
             router.push("/dashboard/billing");
+            return;
+          }
+          if (error instanceof ApiError && error.code === "pool_empty") {
+            setPoolEmpty(true);
+            toast.error(NUMBER_ERROR_MESSAGES.pool_empty ?? error.hint);
             return;
           }
           handleMutationError(error, NUMBER_ERROR_MESSAGES);
@@ -76,7 +92,34 @@ export const BuyFlow = ({ agentId, onDone, onCancel }: BuyFlowProps) => {
 
       <Stepper steps={STEPS} current={step} />
 
-      {step === 0 && (
+      {step === 0 && isLimitReached && (
+        <div className="space-y-4">
+          <InfoNote>
+            {LIMIT_REACHED_TEXT}.{" "}
+            <Link href="/dashboard/billing" className="text-primary underline">
+              Переглянути тарифи
+            </Link>
+          </InfoNote>
+          <div className="flex justify-start">
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Скасувати
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {step === 0 && !isLimitReached && isPoolEmpty && (
+        <div className="space-y-4">
+          <InfoNote>{POOL_EMPTY_TEXT}</InfoNote>
+          <div className="flex justify-start">
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Скасувати
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {step === 0 && !isLimitReached && !isPoolEmpty && (
         <div className="space-y-4">
           <p className="text-sm font-medium">Оберіть тип номера</p>
           <div className="space-y-2">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Phone, PhoneForwarded, Server } from "lucide-react";
+import { type LucideIcon, LucideShoppingCart, PhoneForwarded, Server } from "lucide-react";
 
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui";
 
@@ -21,7 +21,7 @@ interface MethodCard {
   method: ConnectMethod;
   title: string;
   description: string;
-  icon: typeof Phone;
+  icon: LucideIcon;
 }
 
 const METHOD_CARDS: MethodCard[] = [
@@ -39,9 +39,10 @@ const METHOD_CARDS: MethodCard[] = [
   },
   {
     method: "buy",
-    title: "Купити номер у Calls4U",
-    description: "Отримайте новий номер для вихідних і вхідних дзвінків.",
-    icon: Phone,
+    title: "Отримати номер у Calls4U",
+    description:
+      "Входить у ваш тариф. Працює одразу на вхідні й вихідні, і клієнти бачать саме його.",
+    icon: LucideShoppingCart,
   },
 ];
 

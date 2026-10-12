@@ -23,6 +23,17 @@ export function formatUaPhoneDigits(digits: string): string {
   return `${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5, 7)} ${cleaned.slice(7)}`;
 }
 
+export function formatUaPhone(phone: string): string {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length < 12) return phone;
+  const cc = digits.slice(0, 3);
+  const area = digits.slice(3, 5);
+  const part1 = digits.slice(5, 8);
+  const part2 = digits.slice(8, 10);
+  const part3 = digits.slice(10, 12);
+  return `+${cc} ${area} ${part1} ${part2} ${part3}`;
+}
+
 export function formatNumber(n: number): string {
   return n.toLocaleString("uk-UA");
 }

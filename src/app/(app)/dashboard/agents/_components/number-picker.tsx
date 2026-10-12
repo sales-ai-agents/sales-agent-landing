@@ -10,7 +10,11 @@ interface NumberPickerProps {
   numbers: AgentNumber[];
   value: number;
   onChange: (value: number) => void;
+  showCallerId?: boolean;
 }
+
+const resolveCallerIdCaption = (callerId: boolean): string =>
+  callerId ? "Клієнти бачитимуть цей номер" : "Клієнти бачитимуть номер Calls4U";
 
 interface StatusBadge {
   label: string;
@@ -31,7 +35,7 @@ const resolveBadge = (number: AgentNumber): StatusBadge => {
   return STATUS_BADGES[number.status] ?? STATUS_BADGES.disabled;
 };
 
-export const NumberPicker = ({ numbers, value, onChange }: NumberPickerProps) => {
+export const NumberPicker = ({ numbers, value, onChange, showCallerId }: NumberPickerProps) => {
   return (
     <div role="radiogroup" aria-label="Номер для дзвінків" className="space-y-2.5">
       {numbers.map((number) => {
@@ -52,7 +56,14 @@ export const NumberPicker = ({ numbers, value, onChange }: NumberPickerProps) =>
               aria-label={number.phone}
             />
             <Image src="/image/ua-flag.svg" alt="" width={24} height={16} aria-hidden="true" />
-            <span className="text-sm font-medium">{number.phone}</span>
+            <div className="min-w-0">
+              <span className="text-sm font-medium">{number.phone}</span>
+              {showCallerId && (
+                <p className="text-muted-foreground text-xs">
+                  {resolveCallerIdCaption(number.caller_id)}
+                </p>
+              )}
+            </div>
             <span
               className={cn(
                 "ml-auto rounded-md px-2.5 py-0.5 text-xs font-medium",

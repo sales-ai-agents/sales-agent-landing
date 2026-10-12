@@ -1,4 +1,4 @@
-import type { NumberDirection, NumberSource, NumberStatus } from "@dashboard/types";
+import type { AgentNumber, NumberDirection, NumberStatus } from "@dashboard/types";
 
 export const DIRECTION_LABELS: Record<NumberDirection, string> = {
   inbound: "Вхідні",
@@ -6,25 +6,44 @@ export const DIRECTION_LABELS: Record<NumberDirection, string> = {
   both: "Обидва",
 };
 
-interface SourceBadge {
+export const STATUS_LABELS: Record<NumberStatus, string> = {
+  ready: "Працює",
+  verification_required: "Очікує першого дзвінка",
+  disabled: "Вимкнено",
+};
+
+export const resolveNumberTypeLabel = (number: AgentNumber): string => {
+  switch (number.source) {
+    case "assigned":
+      return number.provider ? `Номер Calls4U · ${number.provider}` : "Номер Calls4U";
+    case "sip":
+      return "Ваша АТС";
+    case "forward":
+      return "Переадресація з вашого номера";
+    default:
+      return "";
+  }
+};
+
+interface CallerIdBadge {
   label: string;
   className: string;
+  hint?: string;
 }
 
-const READY_SOURCE_BADGES: Record<NumberSource, SourceBadge> = {
-  sip: { label: "АТС", className: "bg-success/10 text-success" },
-  forward: { label: "Переадресація", className: "bg-warning/10 text-warning" },
-  assigned: { label: "Включено в тариф", className: "text-muted-foreground" },
+const CALLER_ID_VISIBLE: CallerIdBadge = {
+  label: "Видно при дзвінках агента",
+  className: "bg-success/10 text-success",
 };
 
-const STATUS_BADGES: Partial<Record<NumberStatus, SourceBadge>> = {
-  verification_required: { label: "Не налаштовано", className: "bg-warning/10 text-warning" },
-  disabled: { label: "Вимкнено", className: "bg-muted text-muted-foreground" },
+const CALLER_ID_INBOUND_ONLY: CallerIdBadge = {
+  label: "Лише вхідні",
+  className: "bg-muted text-muted-foreground",
+  hint: "Коли агент дзвонить, людина бачить номер Calls4U, а не цей: оператор не пропускає номер, який не належить Calls4U.",
 };
 
-export const resolveDisplayBadge = (source: NumberSource, status: NumberStatus): SourceBadge => {
-  return STATUS_BADGES[status] ?? READY_SOURCE_BADGES[source];
-};
+export const resolveCallerIdBadge = (callerId: boolean): CallerIdBadge =>
+  callerId ? CALLER_ID_VISIBLE : CALLER_ID_INBOUND_ONLY;
 
 export const formatDailyCap = (dailyCap: number): string | null =>
   dailyCap > 0 ? `${dailyCap} дзвінків/день` : null;

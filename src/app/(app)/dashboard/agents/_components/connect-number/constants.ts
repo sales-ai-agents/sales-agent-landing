@@ -1,5 +1,3 @@
-export const FORWARDING_NUMBER = "+380 91 481 05 42";
-
 export const UA_SUBSCRIBER_DIGITS = 9;
 export const UA_COUNTRY_CODE = "+380";
 

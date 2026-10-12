@@ -93,25 +93,29 @@ export function SocialLoginButtons() {
 
       <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-between">
         {showGoogle && (
-          <GoogleLogin
-            text="signin_with"
-            width={200}
-            logo_alignment="center"
-            onSuccess={handleGoogleSuccess}
-            onError={() => toast.error("Не вдалося увійти через Google.")}
-          />
+          <div className="flex-1">
+            <GoogleLogin
+              text="continue_with"
+              width="100%"
+              logo_alignment="center"
+              onSuccess={handleGoogleSuccess}
+              onError={() => toast.error("Не вдалося увійти через Google.")}
+            />
+          </div>
         )}
         {showGitHub && (
-          <Button
-            type="button"
-            variant="outline"
-            className="hover:bg-primary/5 hover:border-primary/20 h-10 w-50 rounded-[0.25rem] px-3"
-            disabled={socialLogin.isPending}
-            onClick={initiateGitHubLogin}
-          >
-            <GitHubIcon />
-            <span className="text-muted-foreground text-sm font-normal">Вхід через GitHub</span>
-          </Button>
+          <div className="flex-1">
+            <Button
+              type="button"
+              variant="outline"
+              className="hover:bg-primary/5 hover:border-primary/20 h-10 w-full rounded-[0.25rem] px-3"
+              disabled={socialLogin.isPending}
+              onClick={initiateGitHubLogin}
+            >
+              <GitHubIcon />
+              <span className="text-muted-foreground text-sm font-normal">Продовжити з GitHub</span>
+            </Button>
+          </div>
         )}
       </div>
     </div>

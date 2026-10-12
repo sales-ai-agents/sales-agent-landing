@@ -59,6 +59,23 @@ export const useNumbersMeta = () => {
   });
 };
 
+export interface OutboundCallerId {
+  phone: string;
+  isOwn: boolean;
+  used: number;
+}
+
+export const useOutboundCallerId = () => {
+  return useQuery({
+    ...NUMBERS_QUERY,
+    select: (data: NumbersResponse): OutboundCallerId => ({
+      phone: data.outbound_caller_id ?? "",
+      isOwn: Boolean(data.outbound_caller_id_is_own),
+      used: typeof data.used === "number" ? data.used : data.numbers.length,
+    }),
+  });
+};
+
 export const useNumberPool = (enabled = true) => {
   return useQuery<NumberPool>({
     queryKey: NUMBERS_POOL_KEY,

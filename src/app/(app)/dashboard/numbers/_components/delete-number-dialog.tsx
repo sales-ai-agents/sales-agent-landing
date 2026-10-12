@@ -19,16 +19,26 @@ import { NUMBER_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/mutation-error";
 import { cn } from "@/lib/utils";
 import { useDeleteNumber } from "@dashboard/hooks";
+import type { NumberSource } from "@dashboard/types";
 
 interface DeleteNumberDialogProps {
   id: number;
   phone: string;
+  source: NumberSource;
   className?: string;
 }
 
-export const DeleteNumberDialog = ({ id, phone, className }: DeleteNumberDialogProps) => {
+const ASSIGNED_CONFIRMATION =
+  'Номер повернеться до Calls4U. Дзвінки на нього більше не прийматимуться, людина почує "номер не обслуговується". Отримати саме цей номер знову не вийде.';
+
+const CONNECTED_CONFIRMATION =
+  "Відключити номер? Дзвінки з вашої АТС чи переадресації перестануть доходити до агента.";
+
+export const DeleteNumberDialog = ({ id, phone, source, className }: DeleteNumberDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const deleteNumber = useDeleteNumber();
+
+  const confirmation = source === "assigned" ? ASSIGNED_CONFIRMATION : CONNECTED_CONFIRMATION;
 
   const handleDelete = (): void => {
     deleteNumber.mutate(id, {
@@ -57,11 +67,8 @@ export const DeleteNumberDialog = ({ id, phone, className }: DeleteNumberDialogP
       />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Відв&apos;язати номер?</DialogTitle>
-          <DialogDescription>
-            {`Номер ${phone} буде відвʼязано від акаунта. Вхідні та вихідні дзвінки через нього
-            припиняться. Цю дію неможливо скасувати.`}
-          </DialogDescription>
+          <DialogTitle>Відв&apos;язати номер {phone}?</DialogTitle>
+          <DialogDescription>{confirmation}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <DialogClose render={<Button variant="outline" />}>Скасувати</DialogClose>

@@ -4,9 +4,10 @@ import { Plus } from "lucide-react";
 
 import { Button } from "@/components/ui";
 import { PageError, PageLoading } from "@/components/dashboard";
-import { useNumbers, useNumbersMeta, useAgents } from "@dashboard/hooks";
+import { useNumbers, useNumbersMeta, useOutboundCallerId, useAgents } from "@dashboard/hooks";
 
 import { ConnectNumberDialog } from "../agents/_components/connect-number";
+import { CallerIdBanner } from "./_components/caller-id-banner";
 import { NumbersTable } from "./_components/numbers-table";
 import { TariffBanner } from "./_components/tariff-banner";
 import { ConnectMethods } from "./_components/connect-methods";
@@ -14,6 +15,7 @@ import { ConnectMethods } from "./_components/connect-methods";
 const NumbersPage = () => {
   const { data: numbers = [], isLoading, error, refetch } = useNumbers();
   const { data: allowance } = useNumbersMeta();
+  const { data: callerId } = useOutboundCallerId();
   const { data: agents = [] } = useAgents();
 
   if (isLoading) return <PageLoading />;
@@ -38,6 +40,15 @@ const NumbersPage = () => {
           }
         />
       </header>
+
+      {callerId && (
+        <CallerIdBanner
+          phone={callerId.phone}
+          isOwn={callerId.isOwn}
+          used={callerId.used}
+          onConnected={() => refetch()}
+        />
+      )}
 
       {numbers.length > 0 && <NumbersTable numbers={numbers} agents={agents} />}
 

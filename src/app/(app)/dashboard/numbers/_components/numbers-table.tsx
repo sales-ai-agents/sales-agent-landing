@@ -7,6 +7,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { AlertTriangle, Info } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -21,6 +22,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
 } from "@/components/ui";
 import { handleMutationError } from "@/lib/mutation-error";
 import { NUMBER_ERROR_MESSAGES } from "@/lib/error-messages";
@@ -28,7 +33,13 @@ import { cn } from "@/lib/utils";
 import { useUpdateNumber } from "@dashboard/hooks";
 import type { Agent, AgentNumber } from "@dashboard/types";
 
-import { DIRECTION_LABELS, formatDailyCap, resolveDisplayBadge } from "../_lib/labels";
+import {
+  DIRECTION_LABELS,
+  STATUS_LABELS,
+  formatDailyCap,
+  resolveCallerIdBadge,
+  resolveNumberTypeLabel,
+} from "../_lib/labels";
 import { DeleteNumberDialog } from "./delete-number-dialog";
 
 interface NumbersTableProps {
@@ -45,6 +56,39 @@ const renderAgentLabel = (value: string | null, agents: Agent[]): string => {
   return agent?.name ?? UNASSIGNED_LABEL;
 };
 
+const CallerIdBadge = ({ callerId }: { callerId: boolean }) => {
+  const badge = resolveCallerIdBadge(callerId);
+  const label = (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium",
+        badge.className
+      )}
+    >
+      {badge.label}
+      {badge.hint && <Info className="h-3 w-3" />}
+    </span>
+  );
+
+  if (!badge.hint) return label;
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger render={<span className="cursor-help">{label}</span>} />
+        <TooltipContent side="top">{badge.hint}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};
+
+const UnassignedWarning = () => (
+  <p className="text-destructive flex items-center gap-1.5 text-xs font-medium">
+    <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+    Агента не призначено. Дзвінки на цей номер не прийматимуться.
+  </p>
+);
+
 export const NumbersTable = ({ numbers, agents }: NumbersTableProps) => {
   const updateNumber = useUpdateNumber();
 
@@ -60,6 +104,25 @@ export const NumbersTable = ({ numbers, agents }: NumbersTableProps) => {
     );
   };
 
+  const renderAgentSelect = (number: AgentNumber, className?: string) => (
+    <Select
+      value={number.agent_id ? String(number.agent_id) : UNASSIGNED_VALUE}
+      onValueChange={(value) => handleAssign(number.id, value)}
+    >
+      <SelectTrigger className={cn("w-full sm:w-46", className)}>
+        <SelectValue>{(value) => renderAgentLabel(value, agents)}</SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value={UNASSIGNED_VALUE}>{UNASSIGNED_LABEL}</SelectItem>
+        {agents.map((agent) => (
+          <SelectItem key={agent.id} value={String(agent.id)}>
+            {agent.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+
   const columns = useMemo(
     () => [
       columnHelper.accessor("phone", {
@@ -67,72 +130,31 @@ export const NumbersTable = ({ numbers, agents }: NumbersTableProps) => {
         cell: ({ row }) => (
           <div>
             <div className="font-medium">{row.original.phone}</div>
-            {row.original.provider && (
-              <div className="text-muted-foreground text-xs">{row.original.provider}</div>
-            )}
+            <div className="text-muted-foreground text-xs">
+              {resolveNumberTypeLabel(row.original)}
+            </div>
           </div>
         ),
       }),
       columnHelper.display({
-        id: "display",
+        id: "caller-id",
         header: "Відображення",
-        cell: ({ row }) => {
-          const badge = resolveDisplayBadge(row.original.source, row.original.status);
-          return (
-            <span
-              className={cn(
-                "inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium",
-                badge.className
-              )}
-            >
-              {badge.label}
-            </span>
-          );
-        },
+        cell: ({ row }) => <CallerIdBadge callerId={row.original.caller_id} />,
       }),
       columnHelper.display({
         id: "agent",
         header: "Призначений агент",
         cell: ({ row }) => (
-          <Select
-            value={row.original.agent_id ? String(row.original.agent_id) : UNASSIGNED_VALUE}
-            onValueChange={(value) => handleAssign(row.original.id, value)}
-          >
-            <SelectTrigger className="w-46">
-              <SelectValue>{(value) => renderAgentLabel(value, agents)}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={UNASSIGNED_VALUE}>Вибрати агента</SelectItem>
-              {agents.map((agent) => (
-                <SelectItem key={agent.id} value={String(agent.id)}>
-                  {agent.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="space-y-1.5">
+            {row.original.agent_name && (
+              <p className="text-sm">
+                Відповідає: <span className="font-medium">{row.original.agent_name}</span>
+              </p>
+            )}
+            {renderAgentSelect(row.original)}
+            {row.original.agent_id === 0 && <UnassignedWarning />}
+          </div>
         ),
-      }),
-      columnHelper.display({
-        id: "forwarding",
-        header: "Переадресація",
-        cell: ({ row }) => {
-          if (row.original.source !== "forward") {
-            return <span className="text-muted-foreground">-</span>;
-          }
-
-          const isActive = row.original.status === "ready";
-          return (
-            <div className="flex items-center gap-2">
-              <span
-                className={cn(
-                  "inline-block h-2 w-2 rounded-full",
-                  isActive ? "bg-success" : "bg-warning"
-                )}
-              />
-              <span>{isActive ? "Активна" : "Очікує підтвердження"}</span>
-            </div>
-          );
-        },
       }),
       columnHelper.display({
         id: "direction",
@@ -147,10 +169,20 @@ export const NumbersTable = ({ numbers, agents }: NumbersTableProps) => {
           );
         },
       }),
+      columnHelper.accessor("status", {
+        header: "Статус",
+        cell: ({ row }) => <span className="text-sm">{STATUS_LABELS[row.original.status]}</span>,
+      }),
       columnHelper.display({
         id: "actions",
         header: "Дії",
-        cell: ({ row }) => <DeleteNumberDialog id={row.original.id} phone={row.original.phone} />,
+        cell: ({ row }) => (
+          <DeleteNumberDialog
+            id={row.original.id}
+            phone={row.original.phone}
+            source={row.original.source}
+          />
+        ),
       }),
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -163,30 +195,10 @@ export const NumbersTable = ({ numbers, agents }: NumbersTableProps) => {
     getCoreRowModel: getCoreRowModel(),
   });
 
-  const renderAgentSelect = (number: AgentNumber) => (
-    <Select
-      value={number.agent_id ? String(number.agent_id) : UNASSIGNED_VALUE}
-      onValueChange={(value) => handleAssign(number.id, value)}
-    >
-      <SelectTrigger className="w-full sm:w-46">
-        <SelectValue>{(value) => renderAgentLabel(value, agents)}</SelectValue>
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value={UNASSIGNED_VALUE}>Вибрати агента</SelectItem>
-        {agents.map((agent) => (
-          <SelectItem key={agent.id} value={String(agent.id)}>
-            {agent.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-
   return (
     <div className="border-border bg-card overflow-hidden rounded-xl border">
       <div className="divide-border divide-y md:hidden">
         {numbers.map((number) => {
-          const badge = resolveDisplayBadge(number.source, number.status);
           const dailyCap = formatDailyCap(number.daily_cap);
 
           return (
@@ -194,42 +206,26 @@ export const NumbersTable = ({ numbers, agents }: NumbersTableProps) => {
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="truncate font-medium">{number.phone}</p>
-                  {number.provider && (
-                    <p className="text-muted-foreground truncate text-xs">{number.provider}</p>
-                  )}
+                  <p className="text-muted-foreground truncate text-xs">
+                    {resolveNumberTypeLabel(number)}
+                  </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
-                  <span
-                    className={cn(
-                      "inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium",
-                      badge.className
-                    )}
-                  >
-                    {badge.label}
-                  </span>
-                  <DeleteNumberDialog id={number.id} phone={number.phone} />
+                  <CallerIdBadge callerId={number.caller_id} />
+                  <DeleteNumberDialog id={number.id} phone={number.phone} source={number.source} />
                 </div>
               </div>
-              <div>
-                <p className="text-muted-foreground mb-1 text-xs">Призначений агент</p>
+              <div className="space-y-1.5">
+                <p className="text-muted-foreground text-xs">Призначений агент</p>
                 {renderAgentSelect(number)}
+                {number.agent_id === 0 && <UnassignedWarning />}
               </div>
               <div className="text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 text-xs">
                 <span>
                   Напрямок: {DIRECTION_LABELS[number.direction]}
                   {dailyCap ? ` · ${dailyCap}` : ""}
                 </span>
-                {number.source === "forward" && (
-                  <span className="flex items-center gap-1.5">
-                    <span
-                      className={cn(
-                        "inline-block h-2 w-2 rounded-full",
-                        number.status === "ready" ? "bg-success" : "bg-warning"
-                      )}
-                    />
-                    {number.status === "ready" ? "Активна" : "Очікує підтвердження"}
-                  </span>
-                )}
+                <span>Статус: {STATUS_LABELS[number.status]}</span>
               </div>
             </div>
           );
@@ -253,7 +249,7 @@ export const NumbersTable = ({ numbers, agents }: NumbersTableProps) => {
             {table.getRowModel().rows.map((row) => (
               <TableRow key={row.id}>
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className="px-4 py-3">
+                  <TableCell key={cell.id} className="px-4 py-3 align-top">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
