@@ -18,7 +18,7 @@ const NumbersPage = () => {
   const { data: callerId } = useOutboundCallerId();
   const { data: agents = [] } = useAgents();
 
-  if (isLoading) return <PageLoading />;
+  if (isLoading) return <PageLoading message="Завантажуємо номери..." />;
   if (error) return <PageError message={error.message} onRetry={refetch} />;
 
   return (

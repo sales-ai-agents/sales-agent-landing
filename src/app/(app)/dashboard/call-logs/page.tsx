@@ -100,7 +100,7 @@ const CallLogsPage = () => {
     }
   }, [phoneInput, phoneSearch, resetPage]);
 
-  if (isLoading && !data) return <PageLoading />;
+  if (isLoading && !data) return <PageLoading message="Завантажуємо дзвінки..." />;
   if (error) return <PageError message={error.message} onRetry={refetch} />;
   if (!total && !hasActiveFilters) {
     return (

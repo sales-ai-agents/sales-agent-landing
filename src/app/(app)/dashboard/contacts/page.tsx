@@ -96,7 +96,7 @@ const ContactsPage = () => {
     [updateContact]
   );
 
-  if (isLoading) return <PageLoading />;
+  if (isLoading) return <PageLoading message="Завантажуємо контакти..." />;
   if (error) return <PageError message={error.message} onRetry={refetch} />;
   if (!contacts.length) {
     return (

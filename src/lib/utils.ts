@@ -1,4 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
+import { formatDistanceToNow } from "date-fns";
+import { uk } from "date-fns/locale";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -68,9 +70,10 @@ export function formatSlaMinutes(minutes: number): string {
   return parts.join(" ");
 }
 
-export function formatTime(dateStr: string): string {
-  const d = new Date(dateStr);
-  return d.toLocaleTimeString("uk-UA", { hour: "2-digit", minute: "2-digit" });
+export function formatRelativeTime(dateStr: string): string {
+  const date = new Date(dateStr);
+  if (Number.isNaN(date.getTime())) return "—";
+  return formatDistanceToNow(date, { addSuffix: true, locale: uk });
 }
 
 export function formatDateShort(iso: string): string {

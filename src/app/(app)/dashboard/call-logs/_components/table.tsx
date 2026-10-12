@@ -2,13 +2,14 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   useReactTable,
   getCoreRowModel,
   flexRender,
   createColumnHelper,
 } from "@tanstack/react-table";
-import { ExternalLink } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 import {
   Badge,
@@ -100,6 +101,7 @@ const CallCard = ({ call, agents, showSla }: CallCardProps) => {
 };
 
 export const Table = ({ data, agents, pageCount, slaMinutes }: TableProps) => {
+  const router = useRouter();
   const showSla = slaMinutes !== undefined ? slaMinutes > 0 : true;
 
   const columns = useMemo(() => {
@@ -171,12 +173,8 @@ export const Table = ({ data, agents, pageCount, slaMinutes }: TableProps) => {
     cols.push(
       columnHelper.display({
         id: "actions",
-        header: "Дії",
-        cell: ({ row }) => (
-          <Link href={`/dashboard/call-logs/${row.original.id}`}>
-            <ExternalLink className="text-muted-foreground hover:text-foreground size-4" />
-          </Link>
-        ),
+        header: "",
+        cell: () => <ChevronRight className="text-muted-foreground size-4" />,
       })
     );
 
@@ -233,18 +231,37 @@ export const Table = ({ data, agents, pageCount, slaMinutes }: TableProps) => {
                 </TableCell>
               </TableRow>
             ) : (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => {
-                    const meta = cell.column.columnDef.meta as { className?: string } | undefined;
-                    return (
-                      <TableCell key={cell.id} className={cn("px-4 py-3", meta?.className)}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              ))
+              table.getRowModel().rows.map((row) => {
+                const navigate = (): void => {
+                  router.push(`/dashboard/call-logs/${row.original.id}`);
+                };
+
+                return (
+                  <TableRow
+                    key={row.id}
+                    className="cursor-pointer"
+                    onClick={navigate}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        navigate();
+                      }
+                    }}
+                    tabIndex={0}
+                    role="link"
+                    aria-label={`Деталі дзвінка ${row.original.phone}`}
+                  >
+                    {row.getVisibleCells().map((cell) => {
+                      const meta = cell.column.columnDef.meta as { className?: string } | undefined;
+                      return (
+                        <TableCell key={cell.id} className={cn("px-4 py-3", meta?.className)}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </UiTable>

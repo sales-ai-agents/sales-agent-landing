@@ -40,7 +40,7 @@ const DashboardPage = () => {
   const { data: agents = [] } = useAgents({ stats: true });
   const { data: callsData } = useCallLogs({ limit: 4 });
 
-  if (statsLoading) return <PageLoading />;
+  if (statsLoading) return <PageLoading message="Завантажуємо статистику..." />;
   if (error) return <PageError message={error.message} onRetry={refetch} />;
 
   const minutesUsed = stats?.minutes_used ?? 0;

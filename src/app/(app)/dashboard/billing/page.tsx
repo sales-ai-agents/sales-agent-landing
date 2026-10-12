@@ -45,7 +45,7 @@ const BillingPage = () => {
     [billing]
   );
 
-  if (billingQuery.isLoading) return <PageLoading />;
+  if (billingQuery.isLoading) return <PageLoading message="Завантажуємо тарифи..." />;
   if (billingQuery.isError || !billing) {
     return (
       <PageError message="Не вдалося завантажити тарифи" onRetry={() => billingQuery.refetch()} />

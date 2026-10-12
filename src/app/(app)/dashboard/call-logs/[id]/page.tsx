@@ -104,7 +104,7 @@ const CallDetailPage = () => {
     });
   }, [saveNote, note]);
 
-  if (isLoading) return <PageLoading />;
+  if (isLoading) return <PageLoading message="Завантажуємо дзвінок..." />;
   if (error) return <PageError message={error.message} onRetry={refetch} />;
   if (!call) return <PageError message="Дзвінок не знайдено" />;
 

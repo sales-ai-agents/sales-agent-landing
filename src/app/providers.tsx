@@ -2,6 +2,7 @@
 
 import { QueryClient, QueryClientProvider, QueryCache, MutationCache } from "@tanstack/react-query";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { MotionConfig } from "framer-motion";
 import React, { useState } from "react";
 import { toast } from "sonner";
 
@@ -57,7 +58,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        <MotionConfig reducedMotion="user">{children}</MotionConfig>
+      </QueryClientProvider>
     </GoogleOAuthProvider>
   );
 }

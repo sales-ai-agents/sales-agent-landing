@@ -65,7 +65,7 @@ const AgentsPage = () => {
     );
   }, [testDialog, testPhone, testCall]);
 
-  if (isLoading) return <PageLoading />;
+  if (isLoading) return <PageLoading message="Завантажуємо агентів..." />;
   if (error) return <PageError message={error.message} onRetry={refetch} />;
   if (agents.length === 0)
     return (

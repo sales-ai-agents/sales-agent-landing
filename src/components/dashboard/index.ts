@@ -2,6 +2,7 @@ export { AddContactDialog } from "./add-contact-dialog";
 export { AudioPlayer } from "./audio-player";
 export { CallsChart } from "./calls-chart";
 export { ChangePlanDialog } from "./change-plan-dialog";
+export { PageTransition } from "./motion";
 export { DashboardHeader } from "./header";
 export { ExportContactsDialog } from "./export-contacts-dialog";
 export { ImportContactsDialog } from "./import-contacts-dialog";

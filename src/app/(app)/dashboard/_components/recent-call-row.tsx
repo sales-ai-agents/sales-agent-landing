@@ -1,10 +1,12 @@
-import Link from "next/link";
+"use client";
+
+import { useRouter } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 
 import { TableCell, TableRow } from "@/components/ui";
 import type { CallLog, Agent } from "@dashboard/types";
 import { getOutcomeDisplay } from "@/app/(app)/_lib/call-outcome";
-import { formatDuration, formatTime, maskPhone } from "@/lib/utils";
+import { formatDuration, formatRelativeTime, maskPhone } from "@/lib/utils";
 
 export interface RecentCallRowProps {
   call: CallLog;
@@ -12,13 +14,30 @@ export interface RecentCallRowProps {
 }
 
 export const RecentCallRow = ({ call, agents }: RecentCallRowProps) => {
+  const router = useRouter();
   const agentName = agents.find((a) => a.id === call.agent_id)?.name ?? "—";
   const duration = call.duration_sec ? formatDuration(call.duration_sec) : "—";
-  const time = formatTime(call.created_at);
+  const time = formatRelativeTime(call.created_at);
   const { label, badgeClass, icon } = getOutcomeDisplay(call);
 
+  const navigate = (): void => {
+    router.push(`/dashboard/call-logs/${call.id}`);
+  };
+
   return (
-    <TableRow>
+    <TableRow
+      className="cursor-pointer"
+      onClick={navigate}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          navigate();
+        }
+      }}
+      tabIndex={0}
+      role="link"
+      aria-label={`Деталі дзвінка ${maskPhone(call.phone)}`}
+    >
       <TableCell className="text-muted-foreground px-4 py-2.5 text-sm">
         {maskPhone(call.phone)}
       </TableCell>
@@ -34,9 +53,7 @@ export const RecentCallRow = ({ call, agents }: RecentCallRowProps) => {
       </TableCell>
       <TableCell className="text-muted-foreground px-4 py-2.5 text-sm">{time}</TableCell>
       <TableCell className="px-2 py-2.5">
-        <Link href={`/dashboard/call-logs/${call.id}`}>
-          <ChevronRight className="text-muted-foreground h-4 w-4" />
-        </Link>
+        <ChevronRight className="text-muted-foreground h-4 w-4" />
       </TableCell>
     </TableRow>
   );

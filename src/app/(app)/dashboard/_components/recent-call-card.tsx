@@ -3,7 +3,7 @@ import { ChevronRight } from "lucide-react";
 
 import type { CallLog, Agent } from "@dashboard/types";
 import { getOutcomeDisplay } from "@/app/(app)/_lib/call-outcome";
-import { formatDuration, formatTime, maskPhone } from "@/lib/utils";
+import { formatDuration, formatRelativeTime, maskPhone } from "@/lib/utils";
 
 export interface RecentCallCardProps {
   call: CallLog;
@@ -13,7 +13,7 @@ export interface RecentCallCardProps {
 export const RecentCallCard = ({ call, agents }: RecentCallCardProps) => {
   const agentName = agents.find((a) => a.id === call.agent_id)?.name ?? "—";
   const duration = call.duration_sec ? formatDuration(call.duration_sec) : "—";
-  const time = formatTime(call.created_at);
+  const time = formatRelativeTime(call.created_at);
   const { label, badgeClass, icon } = getOutcomeDisplay(call);
 
   return (

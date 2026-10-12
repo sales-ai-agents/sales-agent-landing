@@ -13,7 +13,7 @@ import { Timezone } from "./_components/timezone";
 const SettingsPage = () => {
   const { data: account, isLoading, error, refetch } = useMe();
 
-  if (isLoading) return <PageLoading />;
+  if (isLoading) return <PageLoading message="Завантажуємо налаштування..." />;
   if (error) return <PageError message={error.message} onRetry={refetch} />;
 
   return (
