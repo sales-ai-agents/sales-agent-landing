@@ -37,9 +37,13 @@ const StatItem = ({ label, value, highlight = false }: StatItemProps) => {
   );
 };
 
+const TEST_TOOLTIP_READY = "Дзвінок надійде на ваш номер - клієнтам ми не телефонуватимемо";
+const TEST_TOOLTIP_NO_NUMBER = "Призначте агенту номер телефону, щоб здійснити тестовий дзвінок";
+
 export const AgentCard = ({ agent, onToggle, onTest }: AgentCardProps) => {
   const isActive = agent.is_active;
   const stats = agent.stats;
+  const hasNumber = Boolean(agent.number_id);
 
   const totalCalls = stats?.total_calls ?? 0;
   const efficiencyPct = stats?.efficiency_pct;
@@ -108,14 +112,20 @@ export const AgentCard = ({ agent, onToggle, onTest }: AgentCardProps) => {
           <Tooltip>
             <TooltipTrigger
               render={
-                <Button variant="outline" size="sm" onClick={onTest}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  aria-disabled={!hasNumber}
+                  onClick={hasNumber ? onTest : undefined}
+                  className={cn(!hasNumber && "opacity-50")}
+                >
                   Тестувати
                   <Info className="text-muted-foreground ml-1 size-3.5" aria-hidden="true" />
                 </Button>
               }
             />
             <TooltipContent side="bottom">
-              Дзвінок надійде на ваш номер - клієнтам ми не телефонуватимемо
+              {hasNumber ? TEST_TOOLTIP_READY : TEST_TOOLTIP_NO_NUMBER}
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

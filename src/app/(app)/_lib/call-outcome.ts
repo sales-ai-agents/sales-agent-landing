@@ -24,7 +24,7 @@ const OUTCOME_MAP: Record<string, OutcomeConfig> = {
   "не дійшли до людини": { label: "Не дійшли до людини", variant: "warning" },
 };
 
-const DEFAULT_CONFIG: OutcomeConfig = { label: "", variant: "secondary" };
+const DEFAULT_CONFIG: OutcomeConfig = { label: "Немає", variant: "secondary" };
 
 export const getOutcomeConfig = (outcome: CallOutcome | null): OutcomeConfig => {
   if (!outcome) return DEFAULT_CONFIG;

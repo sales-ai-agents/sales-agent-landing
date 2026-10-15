@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui";
-import { formatDateShort, formatNumber } from "@/lib/utils";
+import { formatDateShort, formatMonthYear, formatNumber } from "@/lib/utils";
 import type { PaymentHistoryItem } from "@dashboard/types";
 
 import { PaymentStatusLabel } from "./payment-status-label";
@@ -119,10 +119,7 @@ const getPaymentDate = (payment: PaymentHistoryItem): string =>
   payment.paid_at ?? payment.created_at;
 
 const formatPaymentDescription = (payment: PaymentHistoryItem): string => {
-  const period = new Date(getPaymentDate(payment)).toLocaleString("uk-UA", {
-    month: "long",
-    year: "numeric",
-  });
+  const period = formatMonthYear(getPaymentDate(payment));
   return `Тариф ${payment.plan.toUpperCase()} — ${period}`;
 };
 

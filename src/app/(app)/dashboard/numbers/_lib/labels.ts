@@ -15,7 +15,7 @@ export const STATUS_LABELS: Record<NumberStatus, string> = {
 export const resolveNumberTypeLabel = (number: AgentNumber): string => {
   switch (number.source) {
     case "assigned":
-      return number.provider ? `Номер Calls4U · ${number.provider}` : "Номер Calls4U";
+      return "Номер Calls4U";
     case "sip":
       return "Ваша АТС";
     case "forward":

@@ -24,7 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui";
-import { cn } from "@/lib/utils";
+import { cn, formatDateShort } from "@/lib/utils";
 import type { Contact } from "@dashboard/types";
 import { getTagColor, formatConsentLabel, formatLastCallResult } from "../_lib/utils";
 import { ContactCard } from "./contact-card";
@@ -119,7 +119,7 @@ export const Table = ({
           const date = info.getValue();
           const result = info.row.original.last_call_result;
           if (!date) return <span className="text-muted-foreground">—</span>;
-          const formatted = new Date(date).toLocaleDateString("uk-UA");
+          const formatted = formatDateShort(date);
           const resultLabel = formatLastCallResult(result);
           return (
             <div className="text-xs leading-relaxed">

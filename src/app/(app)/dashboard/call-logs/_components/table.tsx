@@ -21,7 +21,7 @@ import {
   TableRow,
 } from "@/components/ui";
 import { getOutcomeConfig } from "@/app/(app)/_lib/call-outcome";
-import { formatDuration, formatSlaMinutes, cn } from "@/lib/utils";
+import { formatDuration, formatSlaMinutes, formatDateShort, formatTime, cn } from "@/lib/utils";
 import type { CallLog, Agent, SlaState } from "@dashboard/types";
 import { resolveAgentName } from "../_lib/utils";
 
@@ -68,7 +68,6 @@ interface CallCardProps {
 const CallCard = ({ call, agents, showSla }: CallCardProps) => {
   const config = getOutcomeConfig(call.outcome);
   const agentName = resolveAgentName(call.agent_id, agents);
-  const createdAt = new Date(call.created_at);
   const minutes = call.duration_sec ? `${(call.duration_sec / 60).toFixed(1)} хв` : "—";
 
   return (
@@ -90,8 +89,7 @@ const CallCard = ({ call, agents, showSla }: CallCardProps) => {
       </div>
       <div className="text-muted-foreground mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
         <span>
-          {createdAt.toLocaleDateString("uk-UA")}{" "}
-          {createdAt.toLocaleTimeString("uk-UA", { hour: "2-digit", minute: "2-digit" })}
+          {formatDateShort(call.created_at)} {formatTime(call.created_at)}
         </span>
         <span>Тривалість: {call.duration_sec ? formatDuration(call.duration_sec) : "—"}</span>
         <span>Витрачено: {minutes}</span>
@@ -109,13 +107,11 @@ export const Table = ({ data, agents, pageCount, slaMinutes }: TableProps) => {
       columnHelper.accessor("created_at", {
         header: "Дата і час",
         cell: (info) => {
-          const dt = new Date(info.getValue());
+          const value = info.getValue();
           return (
             <div className="text-sm">
-              <div>{dt.toLocaleDateString("uk-UA")}</div>
-              <div className="text-muted-foreground text-xs">
-                {dt.toLocaleTimeString("uk-UA", { hour: "2-digit", minute: "2-digit" })}
-              </div>
+              <div>{formatDateShort(value)}</div>
+              <div className="text-muted-foreground text-xs">{formatTime(value)}</div>
             </div>
           );
         },

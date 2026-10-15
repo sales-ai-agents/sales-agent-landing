@@ -1,7 +1,7 @@
 import { Trash2 } from "lucide-react";
 
 import { Button, Switch } from "@/components/ui";
-import { cn } from "@/lib/utils";
+import { cn, formatDateShort } from "@/lib/utils";
 import type { Contact } from "@dashboard/types";
 import { getTagColor, formatConsentLabel, formatLastCallResult } from "../_lib/utils";
 
@@ -14,9 +14,7 @@ interface ContactCardProps {
 export const ContactCard = ({ contact, onDelete, onToggleDoNotCall }: ContactCardProps) => {
   const tags = contact.tags ?? [];
   const consent = formatConsentLabel(contact.consent);
-  const lastCallDate = contact.last_call_at
-    ? new Date(contact.last_call_at).toLocaleDateString("uk-UA")
-    : null;
+  const lastCallDate = contact.last_call_at ? formatDateShort(contact.last_call_at) : null;
   const lastCallResult = formatLastCallResult(contact.last_call_result);
 
   return (

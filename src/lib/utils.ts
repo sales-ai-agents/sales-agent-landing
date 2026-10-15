@@ -70,22 +70,57 @@ export function formatSlaMinutes(minutes: number): string {
   return parts.join(" ");
 }
 
+const DATE_LOCALE = "uk-UA";
+const UTC_OFFSET_PATTERN = /([zZ]|[+-]\d{2}:?\d{2})$/;
+
+export function parseServerDate(value: string | null | undefined): Date | null {
+  if (!value) return null;
+
+  const normalized = value.includes("T") ? value : value.replace(" ", "T");
+  const withZone = UTC_OFFSET_PATTERN.test(normalized) ? normalized : `${normalized}Z`;
+
+  const date = new Date(withZone);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
 export function formatRelativeTime(dateStr: string): string {
-  const date = new Date(dateStr);
-  if (Number.isNaN(date.getTime())) return "—";
+  const date = parseServerDate(dateStr);
+  if (!date) return "—";
   return formatDistanceToNow(date, { addSuffix: true, locale: uk });
 }
 
 export function formatDateShort(iso: string): string {
-  return new Date(iso).toLocaleDateString("uk-UA");
+  const date = parseServerDate(iso);
+  if (!date) return "—";
+  return date.toLocaleDateString(DATE_LOCALE);
 }
 
 export function formatDateLong(iso: string): string {
-  return new Date(iso).toLocaleDateString("uk-UA", {
+  const date = parseServerDate(iso);
+  if (!date) return "—";
+  return date.toLocaleDateString(DATE_LOCALE, {
     day: "numeric",
     month: "long",
     year: "numeric",
   });
+}
+
+export function formatTime(iso: string): string {
+  const date = parseServerDate(iso);
+  if (!date) return "—";
+  return date.toLocaleTimeString(DATE_LOCALE, { hour: "2-digit", minute: "2-digit" });
+}
+
+export function formatDateTime(iso: string): string {
+  const date = parseServerDate(iso);
+  if (!date) return "—";
+  return date.toLocaleString(DATE_LOCALE);
+}
+
+export function formatMonthYear(iso: string): string {
+  const date = parseServerDate(iso);
+  if (!date) return "—";
+  return date.toLocaleString(DATE_LOCALE, { month: "long", year: "numeric" });
 }
 
 export function maskPhone(phone: string): string {

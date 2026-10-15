@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Bot, PhoneCall, Plus } from "lucide-react";
+import { Bot, Loader2, PhoneCall, Plus } from "lucide-react";
 import { toast } from "sonner";
+
+import Link from "next/link";
 
 import {
   Button,
-  Input,
   Dialog,
   DialogContent,
   DialogHeader,
@@ -18,8 +19,9 @@ import { useAgents, useToggleAgentStatus, useTestCall } from "@dashboard/hooks";
 import { AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/mutation-error";
 import { AgentCard } from "./_components/agent-card";
+import { PhoneField } from "./_components/connect-number/phone-field";
+import { isValidUaPhone, normalizeUaPhone } from "./_components/connect-number/constants";
 import type { Agent } from "@dashboard/types";
-import Link from "next/link";
 
 const AgentsPage = () => {
   const { data: agents = [], isLoading, error, refetch } = useAgents({ stats: true });
@@ -49,11 +51,20 @@ const AgentsPage = () => {
     [toggleStatus]
   );
 
+  const handleDialogOpenChange = useCallback(
+    (open: boolean) => {
+      if (open || testCall.isPending) return;
+      setTestDialog(null);
+      setTestPhone("");
+    },
+    [testCall.isPending]
+  );
+
   const handleTestCall = useCallback(() => {
-    if (!testDialog || !testPhone) return;
+    if (!testDialog || !isValidUaPhone(testPhone)) return;
 
     testCall.mutate(
-      { agent_id: testDialog.agentId, phone: testPhone },
+      { agent_id: testDialog.agentId, phone: normalizeUaPhone(testPhone) },
       {
         onSuccess: () => {
           toast.success("Дзвінок ініційовано — очікуйте виклик");
@@ -126,31 +137,50 @@ const AgentsPage = () => {
         Показано 1-{agents.length} з {agents.length} агентів
       </p>
 
-      <Dialog open={!!testDialog} onOpenChange={() => setTestDialog(null)}>
-        <DialogContent>
+      <Dialog
+        open={!!testDialog}
+        onOpenChange={handleDialogOpenChange}
+        disablePointerDismissal={testCall.isPending}
+      >
+        <DialogContent showCloseButton={!testCall.isPending}>
           <DialogHeader>
             <DialogTitle>Тестовий дзвінок — {testDialog?.agentName}</DialogTitle>
           </DialogHeader>
-          <p className="text-muted-foreground text-sm">
-            Дзвінок надійде на ваш номер — клієнтам ми не телефонуватимемо
-          </p>
-          <div className="my-3">
-            <Input
-              aria-label="Номер телефону для тестового дзвінка"
-              placeholder="+380 XX XXX XXXX"
-              value={testPhone}
-              onChange={(e) => setTestPhone(e.target.value)}
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setTestDialog(null)}>
-              Скасувати
-            </Button>
-            <Button onClick={handleTestCall} disabled={testCall.isPending || !testPhone}>
-              <PhoneCall className="mr-2 h-4 w-4" />
-              {testCall.isPending ? "Дзвінок..." : "Зателефонувати"}
-            </Button>
-          </DialogFooter>
+
+          {testCall.isPending ? (
+            <div
+              className="flex flex-col items-center justify-center gap-3 py-10 text-center"
+              aria-live="polite"
+              aria-busy="true"
+            >
+              <Loader2 className="text-primary h-8 w-8 animate-spin" aria-hidden="true" />
+              <p className="text-sm font-medium">Ініціюємо дзвінок...</p>
+              <p className="text-muted-foreground text-sm">Зачекайте, це займе кілька секунд</p>
+            </div>
+          ) : (
+            <>
+              <p className="text-muted-foreground text-sm">
+                Дзвінок надійде на ваш номер — клієнтам ми не телефонуватимемо
+              </p>
+              <div className="my-3">
+                <PhoneField
+                  id="test-call-phone"
+                  label="Номер телефону для тестового дзвінка"
+                  value={testPhone}
+                  onChange={setTestPhone}
+                />
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setTestDialog(null)}>
+                  Скасувати
+                </Button>
+                <Button onClick={handleTestCall} disabled={!isValidUaPhone(testPhone)}>
+                  <PhoneCall className="mr-2 h-4 w-4" />
+                  Зателефонувати
+                </Button>
+              </DialogFooter>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>

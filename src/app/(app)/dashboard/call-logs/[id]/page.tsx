@@ -11,7 +11,14 @@ import { PageLoading, PageError, AudioPlayer } from "@/components/dashboard";
 import { useCallDetail, useSaveNote, useAgents, useCrmStatus, useCrmRetry } from "@dashboard/hooks";
 import { handleMutationError } from "@/lib/mutation-error";
 import { getOutcomeConfig } from "@/app/(app)/_lib/call-outcome";
-import { formatDuration, formatSlaMinutes, cn } from "@/lib/utils";
+import {
+  formatDuration,
+  formatSlaMinutes,
+  formatDateShort,
+  formatTime,
+  formatDateTime,
+  cn,
+} from "@/lib/utils";
 import { formatTranscriptTime } from "@/app/(app)/dashboard/call-logs/_lib/utils";
 import { InfoField } from "@/app/(app)/dashboard/call-logs/_components/info-field";
 import type { CrmStatus, SlaState } from "@dashboard/types";
@@ -110,7 +117,6 @@ const CallDetailPage = () => {
 
   const outcomeConfig = getOutcomeConfig(call.outcome);
   const duration = formatDuration(call.duration_sec);
-  const createdAt = new Date(call.created_at);
   const agentName = agents.find((a) => a.id === call.agent_id)?.name ?? "—";
   const minutesUsed = call.duration_sec ? (call.duration_sec / 60).toFixed(1) : "0";
 
@@ -128,8 +134,7 @@ const CallDetailPage = () => {
         <div>
           <h1 className="text-2xl font-bold">Деталі дзвінка</h1>
           <p className="text-muted-foreground text-sm">
-            {createdAt.toLocaleDateString("uk-UA")} -{" "}
-            {createdAt.toLocaleTimeString("uk-UA", { hour: "2-digit", minute: "2-digit" })}
+            {formatDateShort(call.created_at)} - {formatTime(call.created_at)}
           </p>
         </div>
         <a
@@ -155,7 +160,7 @@ const CallDetailPage = () => {
 
         <div>
           <p className="text-muted-foreground text-xs">Результат дзвінка</p>
-          <Badge variant={outcomeConfig.variant} className="mt-1 p-0">
+          <Badge variant={outcomeConfig.variant} className="mt-1 px-4">
             {outcomeConfig.label}
           </Badge>
         </div>
@@ -178,13 +183,7 @@ const CallDetailPage = () => {
           <AudioPlayer src={`/api/app/calls/${callId}/audio`} />
 
           <div className="border-border bg-background rounded-2xl border p-5">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-sm font-semibold">Транскрипція</h2>
-              <Button variant="outline" className="gap-1.5">
-                <Download className="h-3.5 w-3.5" />
-                Завантажити .txt
-              </Button>
-            </div>
+            <h2 className="mb-4 text-sm font-semibold">Транскрипція</h2>
             {call.transcript?.length ? (
               <div className="space-y-4">
                 {call.transcript.map((msg, i) => (
@@ -238,7 +237,7 @@ const CallDetailPage = () => {
             />
             {call.manager_note_at && (
               <p className="text-muted-foreground mt-1 text-xs">
-                Останнє оновлення: {new Date(call.manager_note_at).toLocaleString("uk-UA")}
+                Останнє оновлення: {formatDateTime(call.manager_note_at)}
               </p>
             )}
             <Button
