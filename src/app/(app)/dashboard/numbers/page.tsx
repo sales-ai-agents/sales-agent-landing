@@ -4,7 +4,13 @@ import { Plus } from "lucide-react";
 
 import { Button } from "@/components/ui";
 import { PageError, PageLoading } from "@/components/dashboard";
-import { useNumbers, useNumbersMeta, useOutboundCallerId, useAgents } from "@dashboard/hooks";
+import {
+  useNumbers,
+  useNumbersMeta,
+  useNumbersClaimMeta,
+  useOutboundCallerId,
+  useAgents,
+} from "@dashboard/hooks";
 
 import { ConnectNumberDialog } from "../agents/_components/connect-number";
 import { CallerIdBanner } from "./_components/caller-id-banner";
@@ -15,6 +21,7 @@ import { ConnectMethods } from "./_components/connect-methods";
 const NumbersPage = () => {
   const { data: numbers = [], isLoading, error, refetch } = useNumbers();
   const { data: allowance } = useNumbersMeta();
+  const { data: claimMeta } = useNumbersClaimMeta();
   const { data: callerId } = useOutboundCallerId();
   const { data: agents = [] } = useAgents();
 
@@ -53,7 +60,14 @@ const NumbersPage = () => {
       {numbers.length > 0 && <NumbersTable numbers={numbers} agents={agents} />}
 
       {allowance && (
-        <TariffBanner limit={allowance.limit} used={allowance.used} canAdd={allowance.can_add} />
+        <TariffBanner
+          limit={allowance.limit}
+          used={allowance.used}
+          canAdd={allowance.can_add}
+          poolLimit={claimMeta?.pool_limit}
+          poolUsed={claimMeta?.pool_used}
+          canClaim={claimMeta?.can_claim}
+        />
       )}
 
       <ConnectMethods onConnected={() => refetch()} />

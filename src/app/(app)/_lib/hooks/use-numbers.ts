@@ -44,6 +44,12 @@ export interface NumbersAllowance {
   can_add: boolean;
 }
 
+export interface NumbersClaimMeta {
+  can_claim: boolean;
+  pool_limit: number;
+  pool_used: number;
+}
+
 export const useNumbersMeta = () => {
   return useQuery({
     ...NUMBERS_QUERY,
@@ -59,6 +65,17 @@ export const useNumbersMeta = () => {
   });
 };
 
+export const useNumbersClaimMeta = () => {
+  return useQuery({
+    ...NUMBERS_QUERY,
+    select: (data: NumbersResponse): NumbersClaimMeta => ({
+      can_claim: typeof data.can_claim === "boolean" ? data.can_claim : true,
+      pool_limit: typeof data.pool_limit === "number" ? data.pool_limit : 0,
+      pool_used: typeof data.pool_used === "number" ? data.pool_used : 0,
+    }),
+  });
+};
+
 export interface OutboundCallerId {
   phone: string;
   isOwn: boolean;
@@ -68,11 +85,14 @@ export interface OutboundCallerId {
 export const useOutboundCallerId = () => {
   return useQuery({
     ...NUMBERS_QUERY,
-    select: (data: NumbersResponse): OutboundCallerId => ({
-      phone: data.outbound_caller_id ?? "",
-      isOwn: Boolean(data.outbound_caller_id_is_own),
-      used: typeof data.used === "number" ? data.used : data.numbers.length,
-    }),
+    select: (data: NumbersResponse): OutboundCallerId | null => {
+      if (!data.outbound_caller_id) return null;
+      return {
+        phone: data.outbound_caller_id,
+        isOwn: Boolean(data.outbound_caller_id_is_own),
+        used: typeof data.used === "number" ? data.used : data.numbers.length,
+      };
+    },
   });
 };
 

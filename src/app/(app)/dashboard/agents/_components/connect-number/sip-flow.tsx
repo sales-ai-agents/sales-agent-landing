@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Info, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui";
@@ -14,6 +14,7 @@ import type { SipTrunkCredentials } from "@dashboard/types";
 
 import { isValidUaPhone, normalizeUaPhone } from "./constants";
 import { CopyField } from "./copy-field";
+import { InfoNote } from "./info-note";
 import { PhoneField } from "./phone-field";
 import { PhonePulse, SuccessMark } from "./flow-visuals";
 import { Stepper } from "./stepper";
@@ -46,6 +47,7 @@ export const SipFlow = ({ agentId, onDone, onCancel }: SipFlowProps) => {
 
   const pollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollDeadline = useRef(0);
+  const verifySince = useRef<string | undefined>(undefined);
 
   const normalizedPhone = normalizeUaPhone(phone);
   const isProvisioning = connectNumber.isPending || provisionTrunk.isPending;
@@ -90,7 +92,7 @@ export const SipFlow = ({ agentId, onDone, onCancel }: SipFlowProps) => {
 
   const runVerifyOnce = (): void => {
     verifySip.mutate(
-      { phone: normalizedPhone },
+      { phone: normalizedPhone, since: verifySince.current },
       {
         onSuccess: (result) => {
           if (result.verified) {
@@ -115,8 +117,27 @@ export const SipFlow = ({ agentId, onDone, onCancel }: SipFlowProps) => {
     setStep(1);
     setIsPolling(true);
     pollDeadline.current = Date.now() + POLL_TIMEOUT_MS;
-    runVerifyOnce();
-    pollTimer.current = setInterval(runVerifyOnce, POLL_INTERVAL_MS);
+    verifySince.current = undefined;
+
+    verifySip.mutate(
+      { phone: normalizedPhone, start: true },
+      {
+        onSuccess: (result) => {
+          verifySince.current = result.since;
+          if (result.verified) {
+            stopPolling();
+            setStep(2);
+            return;
+          }
+          setVerifyHint(result.hint ?? DEFAULT_HINT);
+          pollTimer.current = setInterval(runVerifyOnce, POLL_INTERVAL_MS);
+        },
+        onError: (error) => {
+          stopPolling();
+          handleMutationError(error, NUMBER_ERROR_MESSAGES);
+        },
+      }
+    );
   };
 
   return (
@@ -150,13 +171,10 @@ export const SipFlow = ({ agentId, onDone, onCancel }: SipFlowProps) => {
             {isPolling ? "Перевіряємо підключення..." : "Ще не бачили дзвінка"}
           </p>
           <p className="text-muted-foreground text-sm">{verifyHint}</p>
-          <div className="bg-primary/5 text-muted-foreground flex gap-2 rounded-lg p-3 text-left text-xs">
-            <Info className="text-primary h-4 w-4 shrink-0" />
-            <p>
-              <b>Важливо:</b> телефонуйте з того номера, який ви вказали на попередньому кроці.
-              Дзвінок буде автоматично завантажено після перевірки.
-            </p>
-          </div>
+          <InfoNote>
+            <b>Важливо:</b> телефонуйте з того номера, який ви вказали на попередньому кроці.
+            Дзвінок буде автоматично зараховано після перевірки.
+          </InfoNote>
           <div className="flex justify-between">
             <Button type="button" variant="outline" onClick={onCancel}>
               Скасувати
@@ -261,13 +279,10 @@ const SipSetupStep = ({
         >
           Перевірити підключення
         </Button>
-        <div className="bg-primary/5 text-muted-foreground flex gap-2 rounded-lg p-3 text-xs">
-          <Info className="text-primary h-4 w-4 shrink-0" />
-          <p>
-            Для перевірки ми будемо чекати вхідний дзвінок з вашого номера. Це може зайняти до 1
-            хвилини.
-          </p>
-        </div>
+        <InfoNote>
+          Для перевірки ми будемо чекати вхідний дзвінок з вашого номера. Це може зайняти до 1
+          хвилини.
+        </InfoNote>
       </section>
 
       <div className="flex justify-start">

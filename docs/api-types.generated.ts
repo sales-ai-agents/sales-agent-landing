@@ -378,6 +378,7 @@ export interface paths {
                         agent_language?: "uk" | "ru" | "en";
                         require_consent?: boolean;
                         ai_disclosure_upfront?: boolean;
+                        record_notice?: boolean;
                     };
                 };
             };
@@ -1491,6 +1492,13 @@ export interface paths {
                         /** @default true */
                         has_header?: boolean;
                         base_title?: string;
+                        /**
+                         * @description як в імпорті файлом
+                         * @enum {string}
+                         */
+                        consent?: "granted";
+                        /** @description обов'язково з consent */
+                        consent_source?: string;
                     };
                 };
             };
@@ -1512,7 +1520,7 @@ export interface paths {
                         };
                     };
                 };
-                /** @description `spreadsheet_required` · `phone_column_required` · `empty_sheet` · `invalid_json` */
+                /** @description `spreadsheet_required` · `phone_column_required` · `empty_sheet` · `invalid_json` · `consent_source_required` */
                 400: {
                     headers: {
                         [name: string]: unknown;
@@ -1788,6 +1796,12 @@ export interface paths {
                             used?: number;
                             /** @description Чи можна підключити ще один. false — показуй «оберіть вищий тариф» замість кнопки; інакше клієнт отримає `409 number_limit` уже після заповнення форми. */
                             can_add?: boolean;
+                            /** @description Скільки з них можна взяти в нас («Отримати номер»); 0 = без обмеження. Відрізняється від `limit` лише на PRO: власних номерів без обмеження, від Calls4U — до 5. */
+                            pool_limit?: number;
+                            /** @description скільки номерів від Calls4U уже є */
+                            pool_used?: number;
+                            /** @description Чи активна кнопка «Отримати номер». false при `can_add: true` — це PRO з п'ятьма нашими номерами: свій номер підключити можна, ще один наш — ні. */
+                            can_claim?: boolean;
                             numbers?: {
                                 id?: number;
                                 /** @description завжди у вигляді +380XXXXXXXXX */
@@ -1838,8 +1852,14 @@ export interface paths {
          * Прив'язати номер
          * @description Три способи з модалки «Підключити номер» — різниця в `source`:
          *
-         *     * `forward` — «Поставлю переадресацію»: клієнт вводить СВІЙ номер,
-         *       з якого переадресовує на наш;
+         *     * `forward` — «Поставлю переадресацію»: НЕ створює окремий номер
+         *       із `source=forward` — це з'їдає ліміт тарифу і не проходить
+         *       верифікацію. Переадресація — це наш номер (`assigned`) плюс
+         *       інструкція для клієнта: **21*<номер Calls4U># для Київстар,
+         *       Vodafone і lifecell. Поля в формі: «Номер Calls4U, на який
+         *       переадресовуєте» і «Ваш номер, з якого переадресовуєте».
+         *       Верифікацію виконуй через `POST /app/numbers/sip/verify` з двома
+         *       кроками (start → since), де `phone` — наш номер Calls4U.
          *     * `sip` — «У мене є АТС»: свій номер + транк (далі
          *       `POST /app/numbers/sip`);
          *     * `assigned` — «Дайте мені номер»: `phone` **не передається**,
@@ -1920,13 +1940,18 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description `number_unavailable` — номер не схожий на номер або вже прив'язаний. Пропонуй перевірити написання й звернутись до підтримки, а не «спробувати ще раз» · `number_limit` — тариф більше номерів не дає (у відповіді `limit` і `have`). Веди на вибір тарифу, не на підтримку · `pool_empty` — лише для `assigned`: вільних номерів зараз немає (адмінам уже пішло сповіщення). Запропонуй переадресацію свого номера. */
+                /** @description `number_unavailable` — номер не схожий на номер або вже прив'язаний. Пропонуй перевірити написання й звернутись до підтримки, а не «спробувати ще раз» · `number_limit` — тариф більше номерів не дає (у відповіді `limit` і `have`; якщо є `scope: "pool"` — це ліміт номерів від Calls4U). Веди на вибір тарифу, не на підтримку · `pool_empty` — лише для `assigned`: вільних номерів зараз немає (адмінам уже пішло сповіщення). Запропонуй переадресацію свого номера. */
                 409: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["Error"];
+                        "application/json": components["schemas"]["Error"] & {
+                            /** @enum {string} */
+                            scope?: "pool";
+                            limit?: number;
+                            have?: number;
+                        };
                     };
                 };
             };
@@ -1947,6 +1972,8 @@ export interface paths {
         /**
          * Чи є вільні номери в пулі
          * @description Для модалки «Підключити номер»: якщо `available` = 0 — кнопку «Дайте мені номер» показуй як «зараз немає, замовляємо» замість того, щоб дати натиснути й отримати `pool_empty`. Рахується для ЦЬОГО акаунта: номер, зарезервований під іншого клієнта, сюди не входить, а під цього — входить.
+         *     Типи номерів у модалці будуй з `available_by_kind`, а не зі списку «міський / 0 800»: показуй лише типи, що там є, з їхньою кількістю, і саме цей `kind` шли в `POST /app/numbers/claim`. Зараз там буде `mobile` (мобільні Speednet). `available` — сума по всіх типах; підставляти її біля кожного типу не можна. для ЦЬОГО акаунта: номер, зарезервований під іншого клієнта, сюди не входить, а під цього — входить.
+         *     Типи номерів у модалці будуй з `available_by_kind`, а не зі списку «міський / 0 800»: показуй лише типи, що там є, з їхньою кількістю, і саме цей `kind` шли в `POST /app/numbers/claim`. `available` — сума по всіх типах; підставляти її біля кожного типу не можна (15.10 модалка показувала «Доступно: 1» біля міського й 0 800, коли був лише один мобільний).
          */
         get: {
             parameters: {
@@ -1965,11 +1992,12 @@ export interface paths {
                     content: {
                         "application/json": {
                             ok?: boolean;
-                            /** @description вільних усього */
+                            /** @description вільних усього (сума по типах) */
                             available?: number;
                             /**
+                             * @description city — міський, mobile — мобільний, tollfree — 0 800
                              * @example {
-                             *       "city": 7
+                             *       "mobile": 1
                              *     }
                              */
                             available_by_kind?: {
@@ -2000,7 +2028,7 @@ export interface paths {
         put?: never;
         /**
          * Дайте мені номер — узяти з пулу
-         * @description Видає клієнту наш міський номер. Номер **готовий одразу**
+         * @description Видає клієнту наш номер (зараз — мобільні Speednet). Номер **готовий одразу**
          *     (`status: ready`): це наш номер на нашому транку, перевіряти
          *     вхідний, як у чужої АТС, нема чого. Далі його можна прив'язати
          *     до агента як будь-який інший (`PATCH /app/numbers/{id}`).
@@ -2010,12 +2038,21 @@ export interface paths {
          *     `409 pool_empty`, а адмінам іде сповіщення замовити ще.
          *
          *     Ліміт тарифу той самий, що й для своїх номерів (`number_limit`).
+         *     Плюс окремий ліміт саме на номери від нас: на PRO — до 5
+         *     (`409 number_limit` з `scope: "pool"` та полем `pool_limit`; див.
+         *     `pool_limit` і `can_claim` у `GET /app/numbers`).
          *
          *     Видалення такого номера (`DELETE /app/numbers/{id}`) повертає
          *     його в пул — але не одразу наступному клієнту: 30 днів
          *     «охолодження», бо попередньому власнику ще дзвонять його клієнти.
          *     Ці дзвінки агент уже не приймає: людина чує від оператора «номер
          *     не обслуговується», як на будь-якому вільному номері.
+         *
+         *     **Тріал без оплати:** номер, узятий на тріалі, повертається в пул
+         *     через 7 днів після кінця тріалу, якщо тариф так і не оплатили
+         *     (за добу — лист власнику). Охолодження тоді 7 днів. Зарезервовані
+         *     під акаунт (тестові/демо) і номери тих, хто платив, не чіпаються.
+         *     У кабінеті такий номер просто зникає зі списку.
          *
          *
          *     **Що працює одразу після видачі:** вхідні на номер приймає агент,
@@ -2088,13 +2125,32 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description `pool_empty` (у відповіді `available` за типами) · `number_limit` · `number_unavailable` */
+                /**
+                 * @description `pool_empty` — немає номерів запитаного типу. У відповіді `available` — що ЦЕЙ акаунт може взяти зараз за типами (лише ненульові, напр. `{mobile: 1}`); порожній `{}` — номерів немає зовсім. Типи в модалці будуй з `available_by_kind` у `GET /app/numbers/pool`, тоді цієї помилки не буде.
+                 *
+                 *     `number_limit` — тариф більше номерів не дає (поля `limit` і `have`). Якщо є поле `scope: "pool"` — це окремий ліміт саме на номери від Calls4U: на PRO до 5, покажи «Номерів від Calls4U у тарифі — до {pool_limit}».
+                 *
+                 *     `number_unavailable` — номер недоступний.
+                 */
                 409: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["Error"];
+                        "application/json": components["schemas"]["Error"] & {
+                            /**
+                             * @description pool = ліміт на номери від Calls4U, не загальний
+                             * @enum {string}
+                             */
+                            scope?: "pool";
+                            limit?: number;
+                            have?: number;
+                            /** @description ліміт номерів від Calls4U в тарифі */
+                            pool_limit?: number;
+                            available?: {
+                                [key: string]: number;
+                            };
+                        };
                     };
                 };
             };
@@ -2280,6 +2336,67 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/carrier-usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Наш облік хвилин і номерів за місяць — для звірки з рахунком оператора
+         * @description Під `X-Admin-Token`. Межі місяця — за Києвом, як рахує оператор. Вихідні — лише ті, на які відповіли (оператор бере посекундно від відповіді до кладіння трубки); вхідні — для інформації. Суми — за тарифами Додатка 1 до договору зі Speednet. Той самий текст першого числа о 10:00 приходить адмінам у Telegram. Заперечення оператору: на акт — 10 днів, претензії — до 10 числа, білінг для знижок — 5 робочих днів.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description YYYY-MM; без нього — минулий місяць */
+                    month?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description `carriers` — по операторах: out_calls, out_min, in_calls, in_min, numbers, numbers_new, cost_*; `text` — готовий звіт */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description `bad_month` */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description `admin_api_disabled` — ADMIN_API_TOKEN не задано */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/app/numbers/sip": {
         parameters: {
             query?: never;
@@ -2308,13 +2425,14 @@ export interface paths {
          *     2. `POST /app/numbers/sip {number_id}` — **окремий транк** для
          *        цього номера з логіном і паролем (приймає з будь-якого IP,
          *        захист — SIP digest-автентифікація, не список адрес). Це
-         *        обовʼязковий крок: без нього АТС клієнта не пройде;
+         *        обовʼязковий крок: без нього АТС клієнта не пройде.
+         *        Відповідь містить `sip_uri`, `username` і `password`
+         *        (пароль показується ОДИН РАЗ — попередь клієнта одразу);
          *     3. клієнт вписує в АТС `sip_uri` + `username`/`password`
          *        і робить пробний дзвінок;
-         *     4. `POST /app/numbers/sip/verify {phone}` — `verified: true`,
-         *        щойно перший вхідний дійшов. До того `false / no_calls_yet` —
-         *        це не помилка, а «ще не бачили дзвінка»; статус номера
-         *        `verification_required` каже те саме.
+         *     4. `POST /app/numbers/sip/verify` — два кроки: спочатку
+         *        `{phone, start: true}` → `since`, потім `{phone, since}` →
+         *        `verified: true`, щойно перший вхідний дійшов.
          *
          *     `verified` у цій відповіді — той самий факт, що й у verify.
          */
@@ -2476,11 +2594,24 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Перевірити SIP-підключення
-         * @description Кнопка «Перевірити» під адресою.
+         * Перевірити SIP-підключення або переадресацію
+         * @description Кнопка «Перевірити» під адресою АТС і в модалці переадресації.
          *
          *     Перевіряємо ФАКТ, а не налаштування: чи приходив на цей номер хоч
          *     один вхідний дзвінок. Заповнене поле в АТС ще нічого не доводить.
+         *
+         *     **Два кроки, щоб не зарахувати старий дзвінок.** На номер Calls4U,
+         *     куди вже колись дзвонили, перевірка без `since` проходить одразу —
+         *     навіть якщо переадресацію так і не поставили.
+         *       1. Коли людина відкрила крок «Перевірка» —
+         *          `{"phone": "...", "start": true}` → у відповіді `since`
+         *          (мить за годинником сервера, не браузера).
+         *       2. Кнопка «Перевірити» — `{"phone": "...", "since": "<з кроку 1>"}`:
+         *          рахуються лише дзвінки після цієї миті.
+         *
+         *     `phone` — номер, НА ЯКИЙ приходить дзвінок: для АТС — номер АТС,
+         *     для переадресації — номер **Calls4U** (не номер клієнта: дзвінок
+         *     записується під номером, на який його перекинули).
          *
          *     `200 verified:false` — це НЕ помилка, а «ще не бачили дзвінка».
          *     Показуй підказку з `hint` і лишай кнопку активною.
@@ -2496,6 +2627,10 @@ export interface paths {
                 content: {
                     "application/json": {
                         phone: string;
+                        /** @description почати перевірку — повертає since */
+                        start?: boolean;
+                        /** @description значення з відповіді на start */
+                        since?: string;
                     };
                 };
             };
@@ -2513,10 +2648,12 @@ export interface paths {
                             reason?: string;
                             hint?: string;
                             last_call_at?: string;
+                            /** @description лише у відповіді на start */
+                            since?: string;
                         };
                     };
                 };
-                /** @description `phone_required` · `invalid_json` */
+                /** @description `phone_required` · `invalid_json` · `bad_since` */
                 400: {
                     headers: {
                         [name: string]: unknown;
@@ -4737,10 +4874,14 @@ export interface paths {
                         contact_ids?: number[];
                         /** @description Необовʼязково: «дзвони всій базі» без галочок; `0` = без прив'язки. Якщо є `contact_ids` — вони важливіші. */
                         contact_base_id?: number;
-                        /** @description "HH:MM" у часовому поясі акаунта. Обидві межі або жодної: сама лише «з 09:00» не каже, коли зупинитись. */
+                        /** @description "HH:MM" у 24-годинному форматі, у часовому поясі акаунта. Обидві межі або жодної: сама лише «з 09:00» не каже, коли зупинитись. Для вихідних лише 09:00–20:00 — оператор дзвінки поза цим вікном не пропускає. */
                         schedule_start?: string;
                         schedule_end?: string;
-                        /** @description Галочки Пн–Нд. Порожній масив = зняти обмеження, а не «не дзвонити ніколи». */
+                        /**
+                         * @description Галочки Пн–Нд. Порожній масив = зняти обмеження, а не «не дзвонити ніколи».
+                         *
+                         *     **Для вихідних лише Пн–Пт** — Сб/Нд для вихідних недоступні (договір з оператором). Сб/Нд і режим «24/7» доступні лише для вхідних (`call_direction: inbound`).
+                         */
                         working_days?: string | ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[];
                         /** @description 0 = без стелі. Рахується окремо для кожного агента. */
                         calls_per_day?: number;
@@ -4844,7 +4985,7 @@ export interface paths {
                 };
                 401: components["responses"]["Unauthorized"];
                 /**
-                 * @description Дзвінок НЕ поставлено — вичерпано ліміт. Дві різні причини, і ведуть вони на різні екрани:
+                 * @description Дзвінок НЕ поставлено — вичерпано ліміт. Коди помилок:
                  *
                  *     `minutes_exhausted` — хвилини скінчились. Пропонуй БІЛЬШИЙ тариф.
                  *
@@ -4863,9 +5004,11 @@ export interface paths {
                     };
                 };
                 /**
-                 * @description `do_not_call` — цей номер просив більше не дзвонити.
+                 * @description `do_not_call` — цей номер просив більше не дзвонити; зняти лише через картку контакту.
                  *
-                 *     Не пропонуй «спробувати ще раз»: зняти це можна лише свідомо, через картку контакту.
+                 *     `calls_blocked` — дзвінки зупинені адміністратором.
+                 *
+                 *     `number_not_yours` — вказаний номер не належить цьому акаунту.
                  */
                 403: {
                     headers: {
@@ -4995,6 +5138,13 @@ export interface paths {
                         email?: string;
                         /** @description Мітки одразу при створенні — «Додати контакт» у майстрі має поле міток. Масив або рядок через кому; дублікати прибираються. */
                         tags?: string[] | string;
+                        /**
+                         * @description згода є — контакт лягає з датою згоди
+                         * @enum {string}
+                         */
+                        consent?: "granted";
+                        /** @description звідки згода; без нього — «вручну в кабінеті» */
+                        consent_source?: string;
                     };
                 };
             };
@@ -5391,6 +5541,8 @@ export interface paths {
                                 agents?: number;
                                 /** @description скільки номерів можна підключити; 0 = без обмеження */
                                 numbers?: number;
+                                /** @description з них від Calls4U (з пулу); на PRO 5 при numbers = 0 */
+                                pool_numbers?: number;
                             }[];
                         };
                     };
@@ -6333,9 +6485,10 @@ export interface paths {
                         contact_ids?: number[];
                         /** @description 0 = зняти прив'язку */
                         contact_base_id?: number;
-                        /** @description "HH:MM" */
+                        /** @description "HH:MM" у 24-годинному форматі; для вихідних лише 09:00–20:00 */
                         schedule_start?: string;
                         schedule_end?: string;
+                        /** @description Замінює список агента цілком. Для вихідних лише Пн–Пт; Сб/Нд доступні лише для вхідних (`call_direction: inbound`). */
                         working_days?: string | ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[];
                         calls_per_day?: number;
                         number_id?: number;
@@ -6427,7 +6580,9 @@ export interface paths {
          * Правка контакту — мітки, згода, «не дзвонити»
          * @description Передавай лише ті поля, що змінюються.
          *
-         *     `do_not_call: true` — не позначка для ока: після неї дзвінки на цей номер відсікаються і в тестовому дзвінку, і в кампанії.
+         *     `do_not_call: true` — не позначка для ока: після неї дзвінки на цей номер відсікаються і в тестовому дзвінку, і в кампанії. Агент ставить його й сам, якщо людина в розмові попросила більше не дзвонити (у звіті дзвінка тоді «⛔ Попросив більше не дзвонити»).
+         *
+         *     `consent: granted` разом із `consent_source` («форма на сайті», «договір №12»…) — доказ згоди: сервер ставить `consent_at` (коли згода з'явилась; повторне збереження дату не зсуває) і `consent_by` (хто з кабінету). Без `consent_source` — «вручну в кабінеті». Інший стан згоди стирає доказ; історія лишається в журналі дій акаунта.
          */
         patch: {
             parameters: {
@@ -6448,6 +6603,8 @@ export interface paths {
                         tags?: string[];
                         /** @enum {string} */
                         consent?: "" | "granted" | "pending";
+                        /** @description звідки згода — показуй поле поруч із перемикачем «Згода є» */
+                        consent_source?: string;
                         do_not_call?: boolean;
                     };
                 };
@@ -6521,6 +6678,13 @@ export interface paths {
                         email_column?: number;
                         /** @description Назва бази, у яку лягають контакти (з'явиться в `GET /app/contact-bases`). Без назви — у «Всі контакти». */
                         base_title?: string;
+                        /**
+                         * @description Галочка «Усі ці контакти дали згоду на дзвінки». Тоді `consent_source` обов'язковий, інакше 400 `consent_source_required`. Без галочки контакти лягають без згоди, як і раніше. Дублі (номер уже є) не чіпаються.
+                         * @enum {string}
+                         */
+                        consent?: "granted";
+                        /** @description Звідки згода: «форма на сайті», «договір», «CRM»… Лягає в кожен контакт як «імпорт: …» разом із датою й поштою того, хто імпортував. */
+                        consent_source?: string;
                     };
                     "text/csv": string;
                 };
@@ -6606,9 +6770,11 @@ export interface paths {
          *     обмежені своїм акаунтом. Стелі на кількість немає — база на 1 247
          *     контактів дає 1 247 номерів у черзі, не 1 000.
          *
-         *     Обдзвін іде 9:00–20:00 за Києвом у будні, з паузою 20 секунд між
-         *     дзвінками. Поза цим часом сам стає на паузу. На вхідні дзвінки це
-         *     не впливає — вони приймаються цілодобово.
+         *     Обдзвін іде 09:00–20:00 за Києвом у будні (Пн–Пт), з паузою 20
+         *     секунд між дзвінками. Субота, неділя і цілодобовий режим
+         *     **заборонені для вихідних** — це записано в договорі з оператором;
+         *     після 20:00 і у вихідні обдзвін автоматично стає на паузу. Вхідні
+         *     дзвінки приймаються цілодобово без обмежень.
          *
          *     Ліміт перевіряється не лише тут, а перед КОЖНИМ номером. Якщо
          *     хвилини скінчаться посеред обдзвону, кампанія сама стане на
@@ -6843,6 +7009,8 @@ export interface components {
             require_consent?: boolean;
             /** @description Оголошувати «я віртуальний помічник» першою фразою, не чекаючи питання. Умовчання — ні: попередження на старті помітно псує розмову. Це НЕ вимикач чесності — на пряме «ви робот?» агент відповідає правдиво завжди, і зняти це неможливо. */
             ai_disclosure_upfront?: boolean;
+            /** @description Казати «Розмова записується» одразу після першого речення привітання — на вхідних і вихідних цього акаунта. Записи розмов — персональні дані, і повідомити про запис — обов'язок клієнта як їх власника; цей перемикач робить це за нього. Звучить завжди: вписано в текст привітання, а не доручено моделі. Умовчання — ні. Поруч на екрані «Налаштування», біля `ai_disclosure_upfront`. */
+            record_notice?: boolean;
             /** @description Дзвінки зупинені нами (скарга оператора, розбір інциденту). Кабінет працює, дані доступні, але дзвінки віддають 402 `calls_blocked`. Показуй смугу з причиною, а не мовчазну неробочу кнопку. */
             calls_blocked?: boolean;
             calls_blocked_reason?: string | null;
@@ -6859,7 +7027,8 @@ export interface components {
         CallListItem: {
             id?: string;
             phone?: string;
-            company_name?: string;
+            /** @description ім'я контакту */
+            contact_name?: string | null;
             niche?: string;
             /**
              * @description Підсумок дзвінка. Завжди в одній формі: мала літера, слова через пробіл, українською. Порожній рядок — результат ще не визначений (дзвінок триває або не відбувся).
@@ -6874,10 +7043,14 @@ export interface components {
             analysis_text?: string | null;
             meeting_scheduled?: boolean;
             agent_id?: number | null;
+            /** @description ім'я агента — для інформації в деталях, не показувати як «Компанія» */
+            agent_name?: string | null;
             /** @description скільки реплік було в розмові */
             turn_count?: number;
             /** @description нотатка людини */
             manager_note?: string | null;
+            /** @description Чи є аудіозапис цього дзвінка. false → кнопку «Завантажити аудіо» показуй неактивною, не прибирай зовсім. */
+            has_recording?: boolean;
             /**
              * @description Строк реакції на цей дзвінок.
              *
@@ -6948,6 +7121,23 @@ export interface components {
                 /** @description «Заощаджено часу» — це РЕАЛЬНИЙ час у слухавці, а не оцінка. Не множ дзвінки на середню тривалість: набір номера й нотатки ми не міряємо, тож ширшої «економії» чесно порахувати не можемо. */
                 talk_minutes_saved?: number;
             };
+            /** @description Чи активна кнопка «Тестувати» на картці агента. false означає, що дзвінок не пройде зараз — причину показуй у `can_test_reason`. */
+            can_test?: boolean;
+            /**
+             * @description Чому «Тестувати» заблоковано:
+             *
+             *     `no_instructions` — агент без інструкції, дзвінок нікуди не приведе; запропонуй заповнити інструкцію.
+             *
+             *     `minutes_exhausted` — хвилини скінчились.
+             *
+             *     `plan_expired` — строк тарифу вийшов.
+             *
+             *     `calls_blocked` — дзвінки зупинені адміністратором.
+             *
+             *     null — якщо `can_test` true.
+             * @enum {string|null}
+             */
+            can_test_reason?: "no_instructions" | "minutes_exhausted" | "plan_expired" | "calls_blocked" | null;
         };
         Contact: {
             id?: number;
@@ -6964,6 +7154,12 @@ export interface components {
              * @enum {string}
              */
             consent?: "" | "granted" | "pending";
+            /** @description коли згода з'явилась (UTC); порожньо — згоди немає */
+            consent_at?: string;
+            /** @description звідки згода — це показуй на картці поруч із датою */
+            consent_source?: string;
+            /** @description хто з кабінету поставив згоду (пошта) */
+            consent_by?: string;
             /**
              * @description Прохання більше не дзвонити. Це не позначка для ока: дзвінки на такий номер відсікаються і в тестовому дзвінку (403 `do_not_call`), і в кампанії — ціль тихо пропускається зі статусом `skipped`.
              *

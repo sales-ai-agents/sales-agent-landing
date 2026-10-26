@@ -23,6 +23,7 @@ import {
 import { handleMutationError } from "@/lib/mutation-error";
 import { formatNumber, cn } from "@/lib/utils";
 import type { ContactFormData } from "@/lib/schemas";
+import type { ConsentStatus } from "@dashboard/types";
 import { Table } from "./_components/table";
 import { ContactKpiCard } from "./_components/contact-kpi-card";
 
@@ -91,6 +92,20 @@ const ContactsPage = () => {
       updateContact.mutate(
         { id, do_not_call: !current },
         { onError: (err) => handleMutationError(err) }
+      );
+    },
+    [updateContact]
+  );
+
+  const handleToggleConsent = useCallback(
+    (id: number, current: ConsentStatus) => {
+      const next: ConsentStatus = current === "granted" ? "" : "granted";
+      updateContact.mutate(
+        { id, consent: next },
+        {
+          onSuccess: () => toast.success(next === "granted" ? "Згоду отримано" : "Згоду знято"),
+          onError: (err) => handleMutationError(err),
+        }
       );
     },
     [updateContact]
@@ -245,6 +260,7 @@ const ContactsPage = () => {
           onSortingChange={setSorting}
           onDelete={handleDeleteContact}
           onToggleDoNotCall={handleToggleDoNotCall}
+          onToggleConsent={handleToggleConsent}
         />
       </div>
 

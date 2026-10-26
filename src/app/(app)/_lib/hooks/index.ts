@@ -30,6 +30,7 @@ export { useContactBases } from "./use-contact-bases";
 export {
   useNumbers,
   useNumbersMeta,
+  useNumbersClaimMeta,
   useOutboundCallerId,
   useNumberPool,
   useSipAddresses,
@@ -40,7 +41,7 @@ export {
   useUpdateNumber,
   useDeleteNumber,
 } from "./use-numbers";
-export type { NumbersAllowance, OutboundCallerId } from "./use-numbers";
+export type { NumbersAllowance, NumbersClaimMeta, OutboundCallerId } from "./use-numbers";
 export { useStats } from "./use-stats";
 export { useUploadContacts } from "./use-upload-contacts";
 export { useVoices } from "./use-voices";

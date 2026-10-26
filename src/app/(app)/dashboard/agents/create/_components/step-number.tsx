@@ -62,7 +62,7 @@ export const StepNumber = ({ form, numbers }: StepNumberProps) => {
       <Tabs defaultValue="my-numbers">
         <TabsList className="w-full">
           <TabsTrigger value="my-numbers" className="flex-1">
-            Мої номера
+            Мої номери
           </TabsTrigger>
           <TabsTrigger value="connect" className="flex-1">
             Підключити номер

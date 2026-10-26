@@ -13,6 +13,11 @@ export interface Account {
   agent_language?: AgentLanguage;
   marketing_consent?: boolean;
   email_verified?: boolean;
+  require_consent?: boolean;
+  ai_disclosure_upfront?: boolean;
+  record_notice?: boolean;
+  calls_blocked?: boolean;
+  calls_blocked_reason?: string | null;
 }
 
 export interface AuthResponse {
@@ -84,6 +89,9 @@ export interface UpdateProfileParams {
   short_name?: string;
   website?: string;
   agent_language?: AgentLanguage;
+  require_consent?: boolean;
+  ai_disclosure_upfront?: boolean;
+  record_notice?: boolean;
 }
 
 export interface UpdateProfileResponse {

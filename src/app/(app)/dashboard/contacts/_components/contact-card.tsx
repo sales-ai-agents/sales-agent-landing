@@ -1,17 +1,25 @@
+"use client";
+
 import { Trash2 } from "lucide-react";
 
 import { Button, Switch } from "@/components/ui";
 import { cn, formatDateShort } from "@/lib/utils";
-import type { Contact } from "@dashboard/types";
+import type { Contact, ConsentStatus } from "@dashboard/types";
 import { getTagColor, formatConsentLabel, formatLastCallResult } from "../_lib/utils";
 
 interface ContactCardProps {
   contact: Contact;
   onDelete: (id: number) => void;
   onToggleDoNotCall: (id: number, current: boolean) => void;
+  onToggleConsent?: (id: number, current: ConsentStatus) => void;
 }
 
-export const ContactCard = ({ contact, onDelete, onToggleDoNotCall }: ContactCardProps) => {
+export const ContactCard = ({
+  contact,
+  onDelete,
+  onToggleDoNotCall,
+  onToggleConsent,
+}: ContactCardProps) => {
   const tags = contact.tags ?? [];
   const consent = formatConsentLabel(contact.consent);
   const lastCallDate = contact.last_call_at ? formatDateShort(contact.last_call_at) : null;
@@ -55,30 +63,56 @@ export const ContactCard = ({ contact, onDelete, onToggleDoNotCall }: ContactCar
         </div>
       )}
 
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0 text-xs">
-          {contact.consent !== "" && (
-            <span className={cn("inline-flex items-center gap-1.5", consent.color)}>
-              <span className={cn("inline-block h-1.5 w-1.5 rounded-full", consent.dot)} />
-              {consent.label}
-            </span>
-          )}
-          {lastCallDate && (
-            <p className="text-muted-foreground mt-0.5">
-              {lastCallDate}
-              {lastCallResult ? ` · ${lastCallResult}` : ""}
-            </p>
+      <div className="space-y-2">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0 text-xs">
+            {contact.consent !== "" ? (
+              <div>
+                <span className={cn("inline-flex items-center gap-1.5", consent.color)}>
+                  <span className={cn("inline-block h-1.5 w-1.5 rounded-full", consent.dot)} />
+                  {consent.label}
+                </span>
+                {contact.consent_at && (
+                  <p className="text-muted-foreground mt-0.5">
+                    {formatDateShort(contact.consent_at)}
+                    {contact.consent_source ? ` · ${contact.consent_source}` : ""}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <span className="text-muted-foreground">Згода не зазначена</span>
+            )}
+            {lastCallDate && (
+              <p className="text-muted-foreground mt-0.5">
+                {lastCallDate}
+                {lastCallResult ? ` · ${lastCallResult}` : ""}
+              </p>
+            )}
+          </div>
+          {onToggleConsent && (
+            <label className="flex shrink-0 items-center gap-2 text-xs">
+              <span className="text-muted-foreground">Згода</span>
+              <Switch
+                checked={contact.consent === "granted"}
+                onCheckedChange={() => onToggleConsent(contact.id, contact.consent)}
+                aria-label="Згода на дзвінки"
+                className="bg-muted"
+              />
+            </label>
           )}
         </div>
-        <label className="flex shrink-0 items-center gap-2 text-xs">
-          <span className="text-muted-foreground">Не дзвонити</span>
-          <Switch
-            checked={contact.do_not_call}
-            onCheckedChange={() => onToggleDoNotCall(contact.id, contact.do_not_call)}
-            aria-label="Не дзвонити"
-            className="bg-muted"
-          />
-        </label>
+
+        <div className="flex items-center justify-end gap-3">
+          <label className="flex shrink-0 items-center gap-2 text-xs">
+            <span className="text-muted-foreground">Не дзвонити</span>
+            <Switch
+              checked={contact.do_not_call}
+              onCheckedChange={() => onToggleDoNotCall(contact.id, contact.do_not_call)}
+              aria-label="Не дзвонити"
+              className="bg-muted"
+            />
+          </label>
+        </div>
       </div>
     </div>
   );

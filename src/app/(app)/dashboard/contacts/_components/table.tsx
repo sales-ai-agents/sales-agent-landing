@@ -25,7 +25,7 @@ import {
   TableRow,
 } from "@/components/ui";
 import { cn, formatDateShort } from "@/lib/utils";
-import type { Contact } from "@dashboard/types";
+import type { Contact, ConsentStatus } from "@dashboard/types";
 import { getTagColor, formatConsentLabel, formatLastCallResult } from "../_lib/utils";
 import { ContactCard } from "./contact-card";
 
@@ -40,6 +40,7 @@ interface TableProps {
   onSortingChange: OnChangeFn<SortingState>;
   onDelete: (id: number) => void;
   onToggleDoNotCall: (id: number, current: boolean) => void;
+  onToggleConsent?: (id: number, current: ConsentStatus) => void;
 }
 
 export const Table = ({
@@ -51,6 +52,7 @@ export const Table = ({
   onSortingChange,
   onDelete,
   onToggleDoNotCall,
+  onToggleConsent,
 }: TableProps) => {
   const columns = useMemo(
     () => [
@@ -101,13 +103,23 @@ export const Table = ({
         header: "Згода",
         cell: (info) => {
           const value = info.getValue();
+          const consentAt = info.row.original.consent_at;
+          const consentSource = info.row.original.consent_source;
           if (value === "") return <span className="text-muted-foreground">—</span>;
           const { label, color, dot } = formatConsentLabel(value);
           return (
-            <span className={cn("inline-flex items-center gap-1.5 text-xs", color)}>
-              <span className={cn("inline-block h-1.5 w-1.5 rounded-full", dot)} />
-              {label}
-            </span>
+            <div>
+              <span className={cn("inline-flex items-center gap-1.5 text-xs", color)}>
+                <span className={cn("inline-block h-1.5 w-1.5 rounded-full", dot)} />
+                {label}
+              </span>
+              {consentAt && (
+                <p className="text-muted-foreground mt-0.5 text-xs">
+                  {formatDateShort(consentAt)}
+                  {consentSource ? ` · ${consentSource}` : ""}
+                </p>
+              )}
+            </div>
           );
         },
         enableSorting: false,
@@ -191,6 +203,7 @@ export const Table = ({
               contact={row.original}
               onDelete={onDelete}
               onToggleDoNotCall={onToggleDoNotCall}
+              onToggleConsent={onToggleConsent}
             />
           ))
         )}

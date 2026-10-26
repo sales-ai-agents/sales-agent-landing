@@ -47,7 +47,12 @@ export const AGENT_ERROR_MESSAGES: ErrorMessageMap = {
   agent_not_found: "Агента не знайдено.",
   agent_has_no_instructions: "Додайте інструкції, щоб агент міг дзвонити.",
   invalid_phone: "Введіть коректний номер телефону.",
-  do_not_call: "Цей номер просив більше не дзвонити.",
+  do_not_call: "Цей номер є у списку «Не дзвонити» — зніміть позначку на картці контакту.",
+  calls_blocked: "Дзвінки зупинені. Зверніться до підтримки.",
+  number_not_yours: "Вказаний номер не належить вашому акаунту.",
+  call_failed: "Не вдалося з'єднати дзвінок. Спробуйте ще раз.",
+  minutes_exhausted: "Хвилини вичерпано — поповніть тариф.",
+  plan_expired: "Строк тарифу вийшов — продовжіть підписку.",
 };
 
 export const NUMBER_ERROR_MESSAGES: ErrorMessageMap = {

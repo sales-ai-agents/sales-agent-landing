@@ -10,6 +10,9 @@ export interface Contact {
   created_at: string;
   tags: string[];
   consent: ConsentStatus;
+  consent_at: string;
+  consent_source: string;
+  consent_by: string;
   do_not_call: boolean;
   last_call_at: string | null;
   last_call_result: string | null;
@@ -40,6 +43,8 @@ export interface CreateContactParams {
   name?: string;
   email?: string;
   tags?: string[] | string;
+  consent?: "granted";
+  consent_source?: string;
 }
 
 export interface CreateContactResponse {
@@ -53,6 +58,7 @@ export interface UpdateContactParams {
   note?: string;
   tags?: string[];
   consent?: ConsentStatus;
+  consent_source?: string;
   do_not_call?: boolean;
 }
 
@@ -60,10 +66,6 @@ export interface UploadContactsResponse {
   ok: boolean;
   added: number;
   duplicates: number;
-  invalid: number;
-  total_rows: number;
-  base_id?: number;
-  base_title?: string;
 }
 
 export interface ContactsExportPreviewResponse {

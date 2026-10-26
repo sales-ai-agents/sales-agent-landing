@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle2, Info, Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui";
@@ -11,10 +11,16 @@ import { ApiError } from "@/lib/api-client";
 import { NUMBER_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/mutation-error";
 import { cn } from "@/lib/utils";
-import { useClaimNumber, useNumberPool, useNumbersMeta } from "@dashboard/hooks";
+import {
+  useClaimNumber,
+  useNumberPool,
+  useNumbersMeta,
+  useNumbersClaimMeta,
+} from "@dashboard/hooks";
 import type { NumberKind } from "@dashboard/types";
 
 import { CopyField } from "./copy-field";
+import { InfoNote } from "./info-note";
 import { SuccessMark } from "./flow-visuals";
 import { Stepper } from "./stepper";
 
@@ -29,34 +35,52 @@ interface BuyFlowProps {
   onCancel: () => void;
 }
 
+const KIND_META: Partial<Record<string, { title: string; description: string }>> = {
+  city: { title: "Міський номер", description: "Підходить для більшості бізнесів" },
+  mobile: { title: "Мобільний номер", description: "Мобільний номер Speednet" },
+  tollfree: { title: "Безкоштовний 0 800", description: "Для великих компаній" },
+};
+
+const STEPS = ["Тип номера", "Готово"];
+
 interface NumberOption {
-  kind: Extract<NumberKind, "city" | "tollfree">;
+  kind: NumberKind;
   title: string;
   description: string;
 }
 
-const STEPS = ["Тип номера", "Готово"];
-
-const NUMBER_OPTIONS: NumberOption[] = [
-  { kind: "city", title: "Міський номер", description: "Підходить для більшості бізнесів" },
-  { kind: "tollfree", title: "Безкоштовний 0 800", description: "Для великих компаній" },
-];
+const buildOptions = (availableByKind: Record<string, number>): NumberOption[] => {
+  const fromPool = Object.keys(availableByKind)
+    .filter((k) => availableByKind[k] > 0)
+    .map((k) => ({
+      kind: k as NumberKind,
+      title: KIND_META[k]?.title ?? k,
+      description: KIND_META[k]?.description ?? "",
+    }));
+  if (fromPool.length > 0) return fromPool;
+  return [{ kind: "mobile", title: "Мобільний номер", description: "" }];
+};
 
 export const BuyFlow = ({ agentId, onDone, onCancel }: BuyFlowProps) => {
   const router = useRouter();
   const [step, setStep] = useState(0);
-  const [selected, setSelected] = useState<NumberOption>(NUMBER_OPTIONS[0]);
+  const [selectedKind, setSelectedKind] = useState<NumberKind | null>(null);
   const [claimed, setClaimed] = useState<{ id: number; phone: string } | null>(null);
+  const [poolEmpty, setPoolEmpty] = useState(false);
 
   const { data: pool } = useNumberPool();
   const { data: allowance } = useNumbersMeta();
+  const { data: claimMeta } = useNumbersClaimMeta();
   const claimNumber = useClaimNumber();
 
-  const [poolEmpty, setPoolEmpty] = useState(false);
+  const availableByKind = pool?.available_by_kind ?? {};
+  const options = buildOptions(availableByKind);
+  const selected = options.find((opt) => opt.kind === selectedKind) ?? options[0];
 
-  const availableForKind = pool?.available_by_kind?.[selected.kind] ?? pool?.available ?? 0;
+  const availableForKind = availableByKind[selected.kind] ?? 0;
   const isPoolEmpty = poolEmpty || pool?.available === 0;
   const isLimitReached = allowance?.can_add === false;
+  const isPoolLimitReached = claimMeta?.can_claim === false;
 
   const handleClaim = (): void => {
     claimNumber.mutate(
@@ -68,8 +92,16 @@ export const BuyFlow = ({ agentId, onDone, onCancel }: BuyFlowProps) => {
         },
         onError: (error) => {
           if (error instanceof ApiError && error.code === "number_limit") {
-            toast.error(NUMBER_ERROR_MESSAGES.number_limit ?? error.hint);
-            router.push("/dashboard/billing");
+            const poolLimit = (error as ApiError & { pool_limit?: number }).pool_limit;
+            const scope = (error as ApiError & { scope?: string }).scope;
+            if (scope === "pool" && poolLimit != null) {
+              toast.error(
+                `Номерів від Calls4U у тарифі — до ${poolLimit}. Підключіть свій номер через переадресацію.`
+              );
+            } else {
+              toast.error(NUMBER_ERROR_MESSAGES.number_limit ?? error.hint);
+              router.push("/dashboard/billing");
+            }
             return;
           }
           if (error instanceof ApiError && error.code === "pool_empty") {
@@ -108,7 +140,22 @@ export const BuyFlow = ({ agentId, onDone, onCancel }: BuyFlowProps) => {
         </div>
       )}
 
-      {step === 0 && !isLimitReached && isPoolEmpty && (
+      {step === 0 && !isLimitReached && isPoolLimitReached && claimMeta && (
+        <div className="space-y-4">
+          <InfoNote>
+            {claimMeta.pool_limit > 0
+              ? `Номерів від Calls4U у тарифі — до ${claimMeta.pool_limit}. Підключено: ${claimMeta.pool_used}. Щоб отримати більше, підключіть свій номер через переадресацію.`
+              : "Номери від Calls4U у цьому тарифі недоступні. Підключіть свій номер через переадресацію."}
+          </InfoNote>
+          <div className="flex justify-start">
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Скасувати
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {step === 0 && !isLimitReached && !isPoolLimitReached && isPoolEmpty && (
         <div className="space-y-4">
           <InfoNote>{POOL_EMPTY_TEXT}</InfoNote>
           <div className="flex justify-start">
@@ -119,17 +166,17 @@ export const BuyFlow = ({ agentId, onDone, onCancel }: BuyFlowProps) => {
         </div>
       )}
 
-      {step === 0 && !isLimitReached && !isPoolEmpty && (
+      {step === 0 && !isLimitReached && !isPoolLimitReached && !isPoolEmpty && (
         <div className="space-y-4">
           <p className="text-sm font-medium">Оберіть тип номера</p>
           <div className="space-y-2">
-            {NUMBER_OPTIONS.map((option) => {
-              const available = pool?.available_by_kind?.[option.kind] ?? pool?.available ?? 0;
+            {options.map((option) => {
+              const available = availableByKind[option.kind] ?? 0;
               return (
                 <button
                   key={option.kind}
                   type="button"
-                  onClick={() => setSelected(option)}
+                  onClick={() => setSelectedKind(option.kind)}
                   aria-pressed={selected.kind === option.kind}
                   disabled={available === 0}
                   className={cn(
@@ -152,7 +199,9 @@ export const BuyFlow = ({ agentId, onDone, onCancel }: BuyFlowProps) => {
                     </span>
                     <div>
                       <p className="text-sm font-medium">{option.title}</p>
-                      <p className="text-muted-foreground text-xs">{option.description}</p>
+                      {option.description && (
+                        <p className="text-muted-foreground text-xs">{option.description}</p>
+                      )}
                     </div>
                   </div>
                   <span className="text-muted-foreground text-xs">
@@ -194,8 +243,8 @@ export const BuyFlow = ({ agentId, onDone, onCancel }: BuyFlowProps) => {
 
           <CopyField label="Ваш номер" value={claimed.phone} />
 
-          <div className="bg-success/15 flex items-center gap-2 rounded-lg p-3 text-sm">
-            <CheckCircle2 className="text-success h-4 w-4" />
+          <div className="bg-success/15 flex items-center gap-2 rounded-lg p-3">
+            <CheckCircle2 className="text-success h-4 w-4 shrink-0" />
             <p className="text-muted-foreground text-xs">
               Номер працює одразу. Ви можете призначити агента та напрямок у таблиці «Номери».
             </p>
@@ -209,10 +258,3 @@ export const BuyFlow = ({ agentId, onDone, onCancel }: BuyFlowProps) => {
     </div>
   );
 };
-
-const InfoNote = ({ children }: { children: React.ReactNode }) => (
-  <div className="bg-primary/5 text-muted-foreground flex gap-2 rounded-lg p-3 text-xs">
-    <Info className="text-primary h-4 w-4 shrink-0" />
-    <p>{children}</p>
-  </div>
-);

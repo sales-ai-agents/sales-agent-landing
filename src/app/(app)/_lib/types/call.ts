@@ -17,7 +17,7 @@ export type SlaState = "ok" | "breached" | "handled";
 export interface CallLog {
   id: string;
   phone: string;
-  company_name: string;
+  contact_name: string | null;
   niche: string;
   outcome: CallOutcome | null;
   analysis_text: string | null;
@@ -25,9 +25,11 @@ export interface CallLog {
   created_at: string;
   ended_at: string | null;
   agent_id: number | null;
+  agent_name: string | null;
   turn_count: number;
   duration_sec: number | null;
   manager_note: string | null;
+  has_recording: boolean;
   sla_state: SlaState | null;
   sla_minutes_left: number | null;
 }
@@ -92,6 +94,18 @@ export interface DeltaPct {
 
 export type CallBlockedReason = "minutes_exhausted" | "plan_expired";
 
+export type TestCallErrorCode =
+  | "do_not_call"
+  | "calls_blocked"
+  | "number_not_yours"
+  | "too_soon"
+  | "call_failed"
+  | "invalid_phone"
+  | "agent_has_no_instructions"
+  | "agent_not_found"
+  | "minutes_exhausted"
+  | "plan_expired";
+
 export interface StatsResponse {
   ok: boolean;
   minutes_used: number;
@@ -105,7 +119,7 @@ export interface StatsResponse {
   total_calls: number;
   successful_calls: number;
   missed_calls: number;
-  avg_call_usd?: number | null;
+  avg_call_usd: number | null;
   talk_minutes_saved: number;
   period_days: number;
   period: PeriodStats;

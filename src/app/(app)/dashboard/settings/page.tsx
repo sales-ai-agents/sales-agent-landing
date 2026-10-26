@@ -3,6 +3,7 @@
 import { useMe } from "@/lib/hooks";
 import { PageError, PageLoading } from "@/components/dashboard";
 import { Business } from "./_components/business";
+import { CallBehavior } from "./_components/call-behavior";
 import { Profile } from "./_components/profile";
 import { Password } from "./_components/password";
 import { Notifications } from "./_components/notifications";
@@ -30,6 +31,11 @@ const SettingsPage = () => {
         initialShortName={account?.short_name ?? ""}
         initialWebsite={account?.website ?? ""}
         initialLanguage={account?.agent_language ?? "uk"}
+      />
+
+      <CallBehavior
+        initialAiDisclosure={account?.ai_disclosure_upfront ?? false}
+        initialRecordNotice={account?.record_notice ?? false}
       />
 
       <Profile initialName={account?.name ?? ""} initialEmail={account?.email ?? ""} />

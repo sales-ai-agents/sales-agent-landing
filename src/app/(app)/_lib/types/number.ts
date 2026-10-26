@@ -33,6 +33,9 @@ export interface NumbersResponse {
   limit: number;
   used: number;
   can_add: boolean;
+  pool_limit: number;
+  pool_used: number;
+  can_claim: boolean;
 }
 
 export interface NumberPool {
@@ -104,6 +107,8 @@ export interface SipAddressesResponse {
 
 export interface VerifySipParams {
   phone: string;
+  start?: boolean;
+  since?: string;
 }
 
 export interface VerifySipResponse {
@@ -112,6 +117,16 @@ export interface VerifySipResponse {
   reason?: string;
   hint?: string;
   last_call_at?: string;
+  since?: string;
+}
+
+export interface NumberLimitError {
+  ok: false;
+  error: "number_limit";
+  scope?: "pool";
+  limit?: number;
+  have?: number;
+  pool_limit?: number;
 }
 
 export interface UpdateNumberParams {

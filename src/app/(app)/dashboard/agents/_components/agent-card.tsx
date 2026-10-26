@@ -37,13 +37,20 @@ const StatItem = ({ label, value, highlight = false }: StatItemProps) => {
   );
 };
 
-const TEST_TOOLTIP_READY = "Дзвінок надійде на ваш номер - клієнтам ми не телефонуватимемо";
-const TEST_TOOLTIP_NO_NUMBER = "Призначте агенту номер телефону, щоб здійснити тестовий дзвінок";
+const TEST_TOOLTIP_READY = "Дзвінок надійде на ваш номер — клієнтам ми не телефонуватимемо";
+
+const CAN_TEST_REASON_LABELS: Record<string, string> = {
+  no_instructions: "Додайте інструкції агенту, щоб здійснити тестовий дзвінок",
+  minutes_exhausted: "Хвилини вичерпано — поповніть тариф",
+  plan_expired: "Строк тарифу вийшов — продовжіть підписку",
+  calls_blocked: "Дзвінки зупинені — зверніться до підтримки",
+};
 
 export const AgentCard = ({ agent, onToggle, onTest }: AgentCardProps) => {
   const isActive = agent.is_active;
   const stats = agent.stats;
-  const hasNumber = Boolean(agent.number_id);
+  const canTest = agent.can_test ?? false;
+  const testReason = agent.can_test_reason ?? null;
 
   const totalCalls = stats?.total_calls ?? 0;
   const efficiencyPct = stats?.efficiency_pct;
@@ -67,9 +74,6 @@ export const AgentCard = ({ agent, onToggle, onTest }: AgentCardProps) => {
           </div>
           <div>
             <p className="text-sm font-semibold">{agent.name}</p>
-            <p className="text-muted-foreground text-xs">
-              agent_{String(agent.id).padStart(2, "0")}
-            </p>
           </div>
         </div>
         <Badge
@@ -100,14 +104,12 @@ export const AgentCard = ({ agent, onToggle, onTest }: AgentCardProps) => {
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        <div className="border-border rounded-md border">
-          <Link
-            href={`/dashboard/agents/${agent.id}/edit`}
-            className={buttonVariants({ variant: "outline", size: "sm" })}
-          >
-            Редагувати
-          </Link>
-        </div>
+        <Link
+          href={`/dashboard/agents/${agent.id}/edit`}
+          className={buttonVariants({ variant: "outline", size: "sm" })}
+        >
+          Редагувати
+        </Link>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger
@@ -115,17 +117,22 @@ export const AgentCard = ({ agent, onToggle, onTest }: AgentCardProps) => {
                 <Button
                   variant="outline"
                   size="sm"
-                  aria-disabled={!hasNumber}
-                  onClick={hasNumber ? onTest : undefined}
-                  className={cn(!hasNumber && "opacity-50")}
+                  aria-disabled={!canTest}
+                  onClick={canTest ? onTest : undefined}
+                  className={cn(!canTest && "bg-muted cursor-default opacity-50")}
                 >
                   Тестувати
-                  <Info className="text-muted-foreground ml-1 size-3.5" aria-hidden="true" />
+                  {!canTest && (
+                    <Info className="text-muted-foreground ml-1 size-3.5" aria-hidden="true" />
+                  )}
                 </Button>
               }
             />
             <TooltipContent side="bottom">
-              {hasNumber ? TEST_TOOLTIP_READY : TEST_TOOLTIP_NO_NUMBER}
+              {canTest
+                ? TEST_TOOLTIP_READY
+                : ((testReason && CAN_TEST_REASON_LABELS[testReason]) ??
+                  CAN_TEST_REASON_LABELS.no_instructions)}
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

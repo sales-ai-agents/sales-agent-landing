@@ -9,12 +9,16 @@ export interface AgentStats {
 
 export type CallDirection = "" | "inbound" | "outbound";
 
+export type CanTestReason =
+  "no_instructions" | "minutes_exhausted" | "plan_expired" | "calls_blocked" | null;
+
 export interface Agent {
   id: number;
   account_id: number;
   name: string;
   voice: string;
   instructions: string;
+  instructions_expanded?: string;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -27,6 +31,8 @@ export interface Agent {
   calls_per_day: number;
   number_id: number;
   number_phone: string;
+  can_test: boolean;
+  can_test_reason: CanTestReason;
   stats?: AgentStats;
 }
 

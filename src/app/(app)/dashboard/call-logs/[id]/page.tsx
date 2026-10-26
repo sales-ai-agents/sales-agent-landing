@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Download, Bot, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button, Textarea, Badge } from "@/components/ui";
+import { Button, buttonVariants, Textarea, Badge } from "@/components/ui";
 import { PageLoading, PageError, AudioPlayer } from "@/components/dashboard";
 import { useCallDetail, useSaveNote, useAgents, useCrmStatus, useCrmRetry } from "@dashboard/hooks";
 import { handleMutationError } from "@/lib/mutation-error";
@@ -96,20 +96,15 @@ const CallDetailPage = () => {
   const { data: crm } = useCrmStatus(callId);
   const saveNote = useSaveNote(callId);
 
-  const [note, setNote] = useState("");
-  const [noteLoaded, setNoteLoaded] = useState(false);
-
-  if (call && !noteLoaded) {
-    setNote(call.manager_note ?? "");
-    setNoteLoaded(true);
-  }
+  const [note, setNote] = useState<string | null>(null);
+  const displayNote = note ?? call?.manager_note ?? "";
 
   const handleSaveNote = useCallback(() => {
-    saveNote.mutate(note, {
+    saveNote.mutate(displayNote, {
       onSuccess: () => toast.success("Примітку збережено"),
       onError: (err) => handleMutationError(err),
     });
-  }, [saveNote, note]);
+  }, [saveNote, displayNote]);
 
   if (isLoading) return <PageLoading message="Завантажуємо дзвінок..." />;
   if (error) return <PageError message={error.message} onRetry={refetch} />;
@@ -138,11 +133,16 @@ const CallDetailPage = () => {
           </p>
         </div>
         <a
-          href={`/api/app/calls/${callId}/audio`}
-          download
-          target="_blank"
+          href={call.has_recording ? `/api/app/calls/${callId}/audio` : undefined}
+          download={call.has_recording || undefined}
+          target={call.has_recording ? "_blank" : undefined}
           rel="noopener noreferrer"
-          className="border-border bg-background hover:bg-muted inline-flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors"
+          aria-disabled={!call.has_recording}
+          className={cn(
+            buttonVariants({ variant: "outline", size: "sm" }),
+            "gap-2",
+            !call.has_recording && "pointer-events-none opacity-50"
+          )}
         >
           <Download className="h-4 w-4" />
           Завантажити аудіо
@@ -150,11 +150,11 @@ const CallDetailPage = () => {
       </div>
 
       <div className="border-border bg-background grid grid-cols-2 gap-4 rounded-2xl border p-5 sm:grid-cols-3 lg:grid-cols-6">
-        <InfoField label="Клієнт" value={call.phone} />
+        <InfoField label="Клієнт" value={call.contact_name ?? call.phone} />
 
         <InfoField
           label="Агент"
-          value={agentName}
+          value={call.agent_name ?? agentName}
           icon={<Bot className="text-primary h-4 w-4" />}
         />
 
@@ -180,14 +180,20 @@ const CallDetailPage = () => {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
-          <AudioPlayer src={`/api/app/calls/${callId}/audio`} />
+          {call.has_recording ? (
+            <AudioPlayer src={`/api/app/calls/${callId}/audio`} />
+          ) : (
+            <div className="border-border bg-background flex items-center justify-center rounded-2xl border p-5">
+              <p className="text-muted-foreground text-sm">Запис розмови відсутній</p>
+            </div>
+          )}
 
           <div className="border-border bg-background rounded-2xl border p-5">
             <h2 className="mb-4 text-sm font-semibold">Транскрипція</h2>
             {call.transcript?.length ? (
               <div className="space-y-4">
                 {call.transcript.map((msg, i) => (
-                  <div key={i} className="flex gap-3">
+                  <div key={`${msg.role}-${i}`} className="flex gap-3">
                     <span className="text-muted-foreground shrink-0 font-mono text-xs">
                       {formatTranscriptTime(i, call.duration_sec)}
                     </span>
@@ -220,10 +226,6 @@ const CallDetailPage = () => {
                 <span className="text-muted-foreground">Email</span>
                 <p>—</p>
               </div>
-              <div>
-                <span className="text-muted-foreground">Компанія</span>
-                <p>{call.company_name || "—"}</p>
-              </div>
             </div>
           </div>
 
@@ -232,7 +234,7 @@ const CallDetailPage = () => {
             <Textarea
               placeholder="Додати примітку..."
               rows={4}
-              value={note}
+              value={displayNote}
               onChange={(e) => setNote(e.target.value)}
             />
             {call.manager_note_at && (
