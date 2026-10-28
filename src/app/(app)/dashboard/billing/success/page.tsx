@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Loader2, XCircle } from "lucide-react";
 
 import { Button, Card, CardContent } from "@/components/ui";
-import { clearPendingBillingInvoiceId, getPendingBillingInvoiceId } from "@/lib/billing-checkout";
+import { clearPendingBillingPayment, getPendingBillingPayment } from "@/lib/billing-checkout";
 import PaymentStatusChecker from "./_components/payment-status-checker";
 
 const MissingInvoice = () => (
@@ -31,13 +31,17 @@ const BillingSuccessContent = () => {
   const searchParams = useSearchParams();
   const invoiceIdFromUrl = searchParams.get("invoice_id");
 
-  const [storedInvoiceId] = useState(() => getPendingBillingInvoiceId());
-  const invoiceId = invoiceIdFromUrl ?? storedInvoiceId;
+  const [pendingPayment] = useState(() => getPendingBillingPayment());
+  const invoiceId = invoiceIdFromUrl ?? pendingPayment?.invoiceId ?? null;
 
   if (!invoiceId) return <MissingInvoice />;
 
   return (
-    <PaymentStatusChecker invoiceId={invoiceId} onTerminalStatus={clearPendingBillingInvoiceId} />
+    <PaymentStatusChecker
+      invoiceId={invoiceId}
+      expectedAccountId={pendingPayment?.accountId ?? null}
+      onTerminalStatus={clearPendingBillingPayment}
+    />
   );
 };
 

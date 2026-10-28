@@ -12,10 +12,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui";
-import { SAVE_INVOICE_ERROR, savePendingBillingInvoiceId } from "@/lib/billing-checkout";
+import { SAVE_INVOICE_ERROR, savePendingBillingPayment } from "@/lib/billing-checkout";
 import { cn, formatNumber } from "@/lib/utils";
 import { SecureNote } from "@/components/dashboard/change-plan/confirm-step";
 import { resolveCheckoutErrorMessage } from "@/components/dashboard/change-plan/checkout-error";
+import { useMe } from "@/lib/hooks";
 import { useTopUp } from "@dashboard/hooks";
 import type { MinutesPack, TopUpPackKey } from "@dashboard/types";
 
@@ -33,6 +34,7 @@ export const TopUpDialog = ({
   onClose,
 }: TopUpDialogProps) => {
   const topUp = useTopUp();
+  const { data: account } = useMe();
   const [selectedKey, setSelectedKey] = useState<TopUpPackKey>(
     packs.some((p) => p.key === popularPackKey) ? popularPackKey : (packs[0]?.key ?? "100")
   );
@@ -40,13 +42,17 @@ export const TopUpDialog = ({
   const selectedPack = packs.find((p) => p.key === selectedKey);
 
   const handlePay = () => {
-    if (!selectedPack) return;
+    if (!selectedPack || !account) return;
 
     topUp.mutate(
       { pack: selectedPack.key },
       {
         onSuccess: (result) => {
-          if (!savePendingBillingInvoiceId(result.invoice_id)) {
+          const saved = savePendingBillingPayment({
+            invoiceId: result.invoice_id,
+            accountId: account.id,
+          });
+          if (!saved) {
             toast.error(SAVE_INVOICE_ERROR);
             return;
           }

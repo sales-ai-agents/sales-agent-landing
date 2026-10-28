@@ -58,6 +58,7 @@ export interface CheckoutRequest {
   period?: BillingPeriod;
   save_card?: boolean;
   auto_renew?: boolean;
+  return_url?: string;
 }
 
 export interface CheckoutResponse {

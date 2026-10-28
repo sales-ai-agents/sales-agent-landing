@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 
 import { Button, Card, CardContent } from "@/components/ui";
 import { ApiError } from "@/lib/api-client";
+import { useMe } from "@/lib/hooks";
 import { formatDateLong, formatNumber } from "@/lib/utils";
 import { usePaymentStatus } from "@dashboard/hooks";
 import { resolvePaymentOutcome } from "@dashboard/payment-status";
@@ -23,10 +24,12 @@ import type { PaymentStatusResponse } from "@dashboard/types";
 
 interface PaymentStatusCheckerProps {
   invoiceId: string;
+  expectedAccountId?: number | null;
   onTerminalStatus?: () => void;
 }
 
 const BILLING_ROUTE = "/dashboard/billing";
+const SIGN_IN_ROUTE = "/sign-in";
 
 const StatusLayout = ({ children }: { children: ReactNode }) => (
   <div className="flex min-h-[60vh] items-center justify-center">
@@ -47,23 +50,36 @@ const BackButton = ({ label = "Назад до тарифів" }: { label?: stri
   </Link>
 );
 
-const PaymentStatusChecker = ({ invoiceId, onTerminalStatus }: PaymentStatusCheckerProps) => {
+const PaymentStatusChecker = ({
+  invoiceId,
+  expectedAccountId,
+  onTerminalStatus,
+}: PaymentStatusCheckerProps) => {
   const router = useRouter();
-  const { data, error, isError, hasTimedOut } = usePaymentStatus(invoiceId);
+  const { data: account, isLoading: isAccountLoading } = useMe();
+  const isAccountMismatch =
+    expectedAccountId != null && account != null && account.id !== expectedAccountId;
+
+  const { data, error, isError, hasTimedOut } = usePaymentStatus(
+    isAccountMismatch ? null : invoiceId
+  );
 
   const outcome = data ? resolvePaymentOutcome(data) : null;
   const isNotFound = error instanceof ApiError && error.status === 404;
   const isTerminal = outcome === "paid" || outcome === "failed" || outcome === "refunded";
 
   useEffect(() => {
+    if (isAccountMismatch) return;
     if (isNotFound) {
       onTerminalStatus?.();
       router.replace(BILLING_ROUTE);
     } else if (isTerminal) {
       onTerminalStatus?.();
     }
-  }, [isNotFound, isTerminal, onTerminalStatus, router]);
+  }, [isAccountMismatch, isNotFound, isTerminal, onTerminalStatus, router]);
 
+  if (isAccountLoading) return <ConfirmingState />;
+  if (isAccountMismatch) return <AccountMismatchState />;
   if (isNotFound) return <RedirectingState />;
   if (outcome === "paid" && data) return <PaidState data={data} />;
   if (outcome === "failed") return <FailedState />;
@@ -120,6 +136,23 @@ const FailedState = () => (
       <Button className="mt-2 gap-2">
         <RefreshCw className="h-4 w-4" />
         Спробувати ще раз
+      </Button>
+    </Link>
+  </StatusLayout>
+);
+
+const AccountMismatchState = () => (
+  <StatusLayout>
+    <XCircle className="text-warning h-12 w-12" aria-hidden="true" />
+    <h1 className="font-display text-2xl font-bold">Інший акаунт</h1>
+    <p className="text-muted-foreground">
+      Ви увійшли не в той акаунт, з якого починали оплату. Увійдіть у правильний акаунт, щоб
+      побачити статус платежу.
+    </p>
+    <Link href={SIGN_IN_ROUTE}>
+      <Button className="mt-2 gap-2">
+        <ArrowLeft className="h-4 w-4" />
+        Увійти
       </Button>
     </Link>
   </StatusLayout>

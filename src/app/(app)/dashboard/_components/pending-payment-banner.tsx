@@ -7,7 +7,8 @@ import { Clock } from "lucide-react";
 
 import { Button } from "@/components/ui";
 import { ApiError } from "@/lib/api-client";
-import { clearPendingBillingInvoiceId, getPendingBillingInvoiceId } from "@/lib/billing-checkout";
+import { clearPendingBillingPayment, getPendingBillingPayment } from "@/lib/billing-checkout";
+import { useMe } from "@/lib/hooks";
 import { usePaymentStatus } from "@dashboard/hooks";
 import { resolvePaymentOutcome } from "@dashboard/payment-status";
 
@@ -15,9 +16,13 @@ const BILLING_SUCCESS_ROUTE = "/dashboard/billing/success";
 
 export const PendingPaymentBanner = () => {
   const pathname = usePathname();
+  const { data: account } = useMe();
   const isSuccessRoute = pathname === BILLING_SUCCESS_ROUTE;
 
-  const invoiceId = isSuccessRoute ? null : getPendingBillingInvoiceId();
+  const pending = isSuccessRoute ? null : getPendingBillingPayment();
+  const belongsToCurrentAccount =
+    pending != null && account != null && account.id === pending.accountId;
+  const invoiceId = belongsToCurrentAccount ? pending.invoiceId : null;
 
   const { data, error } = usePaymentStatus(invoiceId);
   const outcome = data ? resolvePaymentOutcome(data) : null;
@@ -25,7 +30,7 @@ export const PendingPaymentBanner = () => {
   const isNotFound = error instanceof ApiError && error.status === 404;
 
   useEffect(() => {
-    if (isResolved || isNotFound) clearPendingBillingInvoiceId();
+    if (isResolved || isNotFound) clearPendingBillingPayment();
   }, [isResolved, isNotFound]);
 
   if (!invoiceId || outcome !== "pending") return null;

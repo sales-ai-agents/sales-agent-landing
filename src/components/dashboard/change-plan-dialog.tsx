@@ -4,7 +4,12 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { Dialog, DialogContent } from "@/components/ui";
-import { SAVE_INVOICE_ERROR, savePendingBillingInvoiceId } from "@/lib/billing-checkout";
+import {
+  buildBillingReturnUrl,
+  SAVE_INVOICE_ERROR,
+  savePendingBillingPayment,
+} from "@/lib/billing-checkout";
+import { useMe } from "@/lib/hooks";
 import { useCheckout } from "@dashboard/hooks";
 import type { BillingPeriod, BillingPlan } from "@dashboard/types";
 
@@ -28,6 +33,7 @@ export const ChangePlanDialog = ({
   onClose,
 }: ChangePlanDialogProps) => {
   const checkout = useCheckout();
+  const { data: account } = useMe();
   const [showSummary, setShowSummary] = useState(false);
   const [saveCard, setSaveCard] = useState(true);
   const [autoRenew, setAutoRenew] = useState(false);
@@ -46,7 +52,7 @@ export const ChangePlanDialog = ({
   };
 
   const handleProceedToPayment = () => {
-    if (!selectedPlan) return;
+    if (!selectedPlan || !account) return;
 
     checkout.mutate(
       {
@@ -54,10 +60,15 @@ export const ChangePlanDialog = ({
         period: cycle,
         save_card: saveCard,
         auto_renew: autoRenew,
+        return_url: buildBillingReturnUrl(),
       },
       {
         onSuccess: (invoice) => {
-          if (!savePendingBillingInvoiceId(invoice.invoice_id)) {
+          const saved = savePendingBillingPayment({
+            invoiceId: invoice.invoice_id,
+            accountId: account.id,
+          });
+          if (!saved) {
             toast.error(SAVE_INVOICE_ERROR);
             return;
           }
