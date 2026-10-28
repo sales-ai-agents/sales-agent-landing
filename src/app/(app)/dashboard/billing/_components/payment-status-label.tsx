@@ -1,19 +1,24 @@
-import { isFailedPaymentStatus } from "@dashboard/payment-status";
-import type { PaymentStatus } from "@dashboard/types";
+import { cn } from "@/lib/utils";
+import type { BillingState } from "@dashboard/types";
 
 interface PaymentStatusLabelProps {
-  status: PaymentStatus;
-  paid: boolean;
+  state: BillingState;
 }
 
-export const PaymentStatusLabel = ({ status, paid }: PaymentStatusLabelProps) => {
-  if (paid) {
-    return <span className="text-success text-xs font-medium">Оплачено</span>;
-  }
-
-  if (isFailedPaymentStatus(status)) {
-    return <span className="text-destructive text-xs font-medium">Не пройшов</span>;
-  }
-
-  return <span className="text-warning text-xs font-medium">В обробці</span>;
+const STATE_LABELS: Record<BillingState, string> = {
+  paid: "Оплачено",
+  pending: "В обробці",
+  failed: "Не пройшов",
+  refunded: "Повернено",
 };
+
+const STATE_STYLES: Record<BillingState, string> = {
+  paid: "text-success",
+  pending: "text-warning",
+  failed: "text-destructive",
+  refunded: "text-muted-foreground",
+};
+
+export const PaymentStatusLabel = ({ state }: PaymentStatusLabelProps) => (
+  <span className={cn("text-xs font-medium", STATE_STYLES[state])}>{STATE_LABELS[state]}</span>
+);

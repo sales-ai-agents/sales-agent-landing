@@ -17,8 +17,6 @@ import type { PaymentHistoryItem } from "@dashboard/types";
 
 import { PaymentStatusLabel } from "./payment-status-label";
 
-const isPaidPayment = (payment: PaymentHistoryItem): boolean => payment.status === "success";
-
 const INITIAL_PAYMENT_COUNT = 3;
 
 interface PaymentHistorySectionProps {
@@ -132,7 +130,6 @@ const PaymentAmount = ({ payment }: { payment: PaymentHistoryItem }) => {
       {displayUsd && (
         <span className="text-muted-foreground text-xs font-normal">
           {formatNumber(payment.amount_uah)} грн
-          {payment.usd_rate ? ` (${payment.usd_rate.toFixed(2)}$)` : ""}
         </span>
       )}
     </div>
@@ -149,7 +146,7 @@ const PaymentRow = ({ payment }: PaymentRowProps) => (
       <PaymentAmount payment={payment} />
     </TableCell>
     <TableCell className="px-3 py-2.5">
-      <PaymentStatusLabel status={payment.status} paid={isPaidPayment(payment)} />
+      <PaymentStatusLabel state={payment.state} />
     </TableCell>
     <TableCell className="text-muted-foreground px-3 py-2.5 font-mono text-xs">
       {payment.invoice_id}
@@ -164,7 +161,7 @@ const PaymentCard = ({ payment }: PaymentRowProps) => (
         <p className="truncate text-sm font-medium">{formatPaymentDescription(payment)}</p>
         <p className="text-muted-foreground text-xs">{formatDateShort(getPaymentDate(payment))}</p>
       </div>
-      <PaymentStatusLabel status={payment.status} paid={isPaidPayment(payment)} />
+      <PaymentStatusLabel state={payment.state} />
     </div>
     <div className="flex items-end justify-between gap-3 text-sm font-medium">
       <PaymentAmount payment={payment} />

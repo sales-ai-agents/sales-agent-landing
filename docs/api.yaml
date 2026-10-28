@@ -1378,14 +1378,8 @@ paths:
       description: |
         Три способи з модалки «Підключити номер» — різниця в `source`:
 
-        * `forward` — «Поставлю переадресацію»: НЕ створює окремий номер
-          із `source=forward` — це з'їдає ліміт тарифу і не проходить
-          верифікацію. Переадресація — це наш номер (`assigned`) плюс
-          інструкція для клієнта: **21*<номер Calls4U># для Київстар,
-          Vodafone і lifecell. Поля в формі: «Номер Calls4U, на який
-          переадресовуєте» і «Ваш номер, з якого переадресовуєте».
-          Верифікацію виконуй через `POST /app/numbers/sip/verify` з двома
-          кроками (start → since), де `phone` — наш номер Calls4U.
+        * `forward` — «Поставлю переадресацію»: клієнт вводить СВІЙ номер,
+          з якого переадресовує на наш;
         * `sip` — «У мене є АТС»: свій номер + транк (далі
           `POST /app/numbers/sip`);
         * `assigned` — «Дайте мені номер»: `phone` **не передається**,
@@ -1445,21 +1439,11 @@ paths:
             прив'язаний. Пропонуй перевірити написання й звернутись до
             підтримки, а не «спробувати ще раз» ·
             `number_limit` — тариф більше номерів не дає (у відповіді
-            `limit` і `have`; якщо є `scope: "pool"` — це ліміт номерів
-            від Calls4U). Веди на вибір тарифу, не на підтримку ·
+            `limit` і `have`). Веди на вибір тарифу, не на підтримку ·
             `pool_empty` — лише для `assigned`: вільних номерів зараз
             немає (адмінам уже пішло сповіщення). Запропонуй
             переадресацію свого номера.
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/Error"
-                  - type: object
-                    properties:
-                      scope: { type: string, enum: [pool] }
-                      limit: { type: integer }
-                      have: { type: integer }
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
 
   /app/numbers/pool:
     get:
@@ -1470,14 +1454,6 @@ paths:
         «Дайте мені номер» показуй як «зараз немає, замовляємо» замість
         того, щоб дати натиснути й отримати `pool_empty`.
         Рахується для ЦЬОГО акаунта: номер, зарезервований під іншого
-        клієнта, сюди не входить, а під цього — входить.
-
-        Типи номерів у модалці будуй з `available_by_kind`, а не зі
-        списку «міський / 0 800»: показуй лише типи, що там є, з їхньою
-        кількістю, і саме цей `kind` шли в `POST /app/numbers/claim`.
-        Зараз там буде `mobile` (мобільні Speednet).
-        `available` — сума по всіх типах; підставляти її біля кожного
-        типу не можна. для ЦЬОГО акаунта: номер, зарезервований під іншого
         клієнта, сюди не входить, а під цього — входить.
 
         Типи номерів у модалці будуй з `available_by_kind`, а не зі
@@ -1519,8 +1495,8 @@ paths:
 
         Ліміт тарифу той самий, що й для своїх номерів (`number_limit`).
         Плюс окремий ліміт саме на номери від нас: на PRO — до 5
-        (`409 number_limit` з `scope: "pool"` та полем `pool_limit`; див.
-        `pool_limit` і `can_claim` у `GET /app/numbers`).
+        (`409 number_limit` з `scope: "pool"`; див. `pool_limit` і
+        `can_claim` у `GET /app/numbers`).
 
         Видалення такого номера (`DELETE /app/numbers/{id}`) повертає
         його в пул — але не одразу наступному клієнту: 30 днів
@@ -1589,33 +1565,8 @@ paths:
             ненульові, напр. `{mobile: 1}`); порожній `{}` — номерів немає
             зовсім. Типи в модалці будуй з `available_by_kind` у
             `GET /app/numbers/pool`, тоді цієї помилки не буде.
-
-
-            `number_limit` — тариф більше номерів не дає (поля `limit` і
-            `have`). Якщо є поле `scope: "pool"` — це окремий ліміт
-            саме на номери від Calls4U: на PRO до 5, покажи
-            «Номерів від Calls4U у тарифі — до {pool_limit}».
-
-
-            `number_unavailable` — номер недоступний.
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/Error"
-                  - type: object
-                    properties:
-                      scope:
-                        {
-                          type: string,
-                          enum: [pool],
-                          description: "pool = ліміт на номери від Calls4U, не загальний",
-                        }
-                      limit: { type: integer }
-                      have: { type: integer }
-                      pool_limit:
-                        { type: integer, description: "ліміт номерів від Calls4U в тарифі" }
-                      available: { type: object, additionalProperties: { type: integer } }
+            · `number_limit` · `number_unavailable`
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
 
   /admin/number-pool:
     get:
@@ -1736,14 +1687,13 @@ paths:
         2. `POST /app/numbers/sip {number_id}` — **окремий транк** для
            цього номера з логіном і паролем (приймає з будь-якого IP,
            захист — SIP digest-автентифікація, не список адрес). Це
-           обовʼязковий крок: без нього АТС клієнта не пройде.
-           Відповідь містить `sip_uri`, `username` і `password`
-           (пароль показується ОДИН РАЗ — попередь клієнта одразу);
+           обовʼязковий крок: без нього АТС клієнта не пройде;
         3. клієнт вписує в АТС `sip_uri` + `username`/`password`
            і робить пробний дзвінок;
-        4. `POST /app/numbers/sip/verify` — два кроки: спочатку
-           `{phone, start: true}` → `since`, потім `{phone, since}` →
-           `verified: true`, щойно перший вхідний дійшов.
+        4. `POST /app/numbers/sip/verify {phone}` — `verified: true`,
+           щойно перший вхідний дійшов. До того `false / no_calls_yet` —
+           це не помилка, а «ще не бачили дзвінка»; статус номера
+           `verification_required` каже те саме.
 
         `verified` у цій відповіді — той самий факт, що й у verify.
       responses:
@@ -3177,10 +3127,8 @@ paths:
                 schedule_start:
                   type: string
                   description: >
-                    "HH:MM" у 24-годинному форматі, у часовому поясі акаунта.
-                    Обидві межі або жодної: сама лише «з 09:00» не каже,
-                    коли зупинитись. Для вихідних лише 09:00–20:00 —
-                    оператор дзвінки поза цим вікном не пропускає.
+                    "HH:MM" у часовому поясі акаунта. Обидві межі або
+                    жодної: сама лише «з 09:00» не каже, коли зупинитись.
                 schedule_end: { type: string }
                 working_days:
                   oneOf:
@@ -3190,12 +3138,6 @@ paths:
                   description: >
                     Галочки Пн–Нд. Порожній масив = зняти обмеження, а не
                     «не дзвонити ніколи».
-
-
-                    **Для вихідних лише Пн–Пт** — Сб/Нд для вихідних
-                    недоступні (договір з оператором). Сб/Нд і режим
-                    «24/7» доступні лише для вхідних (`call_direction:
-                    inbound`).
                 calls_per_day:
                   type: integer
                   minimum: 0
@@ -3263,18 +3205,16 @@ paths:
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
         "403":
           description: >
-            `do_not_call` — цей номер просив більше не дзвонити; зняти лише
+            `do_not_call` — цей номер просив більше не дзвонити.
+
+
+            Не пропонуй «спробувати ще раз»: зняти це можна лише свідомо,
             через картку контакту.
-
-
-            `calls_blocked` — дзвінки зупинені адміністратором.
-
-
-            `number_not_yours` — вказаний номер не належить цьому акаунту.
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
         "402":
           description: >
-            Дзвінок НЕ поставлено — вичерпано ліміт. Коди помилок:
+            Дзвінок НЕ поставлено — вичерпано ліміт. Дві різні причини, і
+            ведуть вони на різні екрани:
 
 
             `minutes_exhausted` — хвилини скінчились. Пропонуй БІЛЬШИЙ тариф.
@@ -4057,6 +3997,10 @@ paths:
       description: >
         Фронт опитує це після повернення з оплати. Показувати екран
         успіху лише коли paid=true — редірект сам по собі нічого не доводить.
+        Поки `state` = `pending` — показуй «Платіж обробляється, тариф
+        увімкнеться автоматично» і опитуй далі (раз на 5–10 с); далі в
+        онбординг без тарифу не пускай. 27.10 WayForPay тримав оплату в
+        Pending 10 хвилин.
       parameters:
         - in: query
           name: invoice_id
@@ -4071,6 +4015,16 @@ paths:
                 properties:
                   ok: { type: boolean }
                   paid: { type: boolean, description: "єдине, на що можна дивитись" }
+                  state:
+                    type: string
+                    enum: [paid, pending, failed, refunded]
+                    description: >
+                      Те, що показати людині. `pending` — гроші в дорозі
+                      (рахунок без відповіді або WayForPay ще обробляє),
+                      тариф увімкнеться сам; `failed` — відмова / рахунок
+                      прострочено; `refunded` — гроші повернуто. По цьому
+                      полю switch робити можна — набір закритий.
+                  pending: { type: boolean, description: "те саме, що state == pending" }
                   status:
                     type: string
                     description: >
@@ -4155,6 +4109,10 @@ paths:
                             `InProcessing`…). Оплаченим вважай лише
                             `success`.
                           examples: ["success", "Declined"]
+                        state:
+                          type: string
+                          enum: [paid, pending, failed, refunded]
+                          description: "як у /app/billing/status — для бейджа в рядку історії"
                         created_at: { type: string }
                         paid_at: { type: string, nullable: true }
                         invoice_id:
@@ -4337,20 +4295,13 @@ paths:
                   items: { type: integer }
                   description: замінює список агента цілком
                 contact_base_id: { type: integer, description: "0 = зняти прив'язку" }
-                schedule_start:
-                  {
-                    type: string,
-                    description: '"HH:MM" у 24-годинному форматі; для вихідних лише 09:00–20:00',
-                  }
+                schedule_start: { type: string, description: '"HH:MM"' }
                 schedule_end: { type: string }
                 working_days:
                   oneOf:
                     - type: string
                     - type: array
                       items: { type: string, enum: [mon, tue, wed, thu, fri, sat, sun] }
-                  description: >
-                    Замінює список агента цілком. Для вихідних лише Пн–Пт;
-                    Сб/Нд доступні лише для вхідних (`call_direction: inbound`).
                 calls_per_day: { type: integer, minimum: 0 }
                 number_id: { type: integer }
       responses:
@@ -4561,11 +4512,9 @@ paths:
         обмежені своїм акаунтом. Стелі на кількість немає — база на 1 247
         контактів дає 1 247 номерів у черзі, не 1 000.
 
-        Обдзвін іде 09:00–20:00 за Києвом у будні (Пн–Пт), з паузою 20
-        секунд між дзвінками. Субота, неділя і цілодобовий режим
-        **заборонені для вихідних** — це записано в договорі з оператором;
-        після 20:00 і у вихідні обдзвін автоматично стає на паузу. Вхідні
-        дзвінки приймаються цілодобово без обмежень.
+        Обдзвін іде 9:00–20:00 за Києвом у будні, з паузою 20 секунд між
+        дзвінками. Поза цим часом сам стає на паузу. На вхідні дзвінки це
+        не впливає — вони приймаються цілодобово.
 
         Ліміт перевіряється не лише тут, а перед КОЖНИМ номером. Якщо
         хвилини скінчаться посеред обдзвону, кампанія сама стане на
@@ -4831,7 +4780,7 @@ components:
       properties:
         id: { type: string }
         phone: { type: string }
-        contact_name: { type: string, nullable: true, description: "ім'я контакту" }
+        company_name: { type: string }
         niche: { type: string }
         outcome:
           type: string
@@ -4848,10 +4797,18 @@ components:
             - передзвонити
             - погано чути
             - не дійшли до людини
+            - не з'єдналось
           description: >
             Підсумок дзвінка. Завжди в одній формі: мала літера, слова
             через пробіл, українською. Порожній рядок — результат ще не
-            визначений (дзвінок триває або не відбувся).
+            визначений (дзвінок триває).
+
+
+            `не з'єдналось` — до людини не дійшли: зайнято, не відповів,
+            номер не існує, або трубку взяв оператор зі своїм
+            повідомленням. Причина — в analysis_text. Хвилин такий дзвінок
+            не коштує (billed_sec = 0). Показуй як «Не з'єдналось», не як
+            «В процесі» й не як «Немає».
 
 
             Раніше приходило впереміш — `не_відповів` з підкресленням,
@@ -4866,19 +4823,8 @@ components:
         analysis_text: { type: string, nullable: true, description: короткий розбір розмови }
         meeting_scheduled: { type: boolean }
         agent_id: { type: integer, nullable: true }
-        agent_name:
-          {
-            type: string,
-            nullable: true,
-            description: "ім'я агента — для інформації в деталях, не показувати як «Компанія»",
-          }
         turn_count: { type: integer, description: скільки реплік було в розмові }
         manager_note: { type: string, nullable: true, description: нотатка людини }
-        has_recording:
-          type: boolean
-          description: >
-            Чи є аудіозапис цього дзвінка. false → кнопку «Завантажити
-            аудіо» показуй неактивною, не прибирай зовсім.
         sla_state:
           type: string
           nullable: true
@@ -4905,6 +4851,14 @@ components:
           type: integer
           nullable: true
           description: null, поки дзвінок не завершився
+        billed_sec:
+          type: integer
+          nullable: true
+          description: >
+            Скільки секунд пішло в хвилини тарифу. Колонку «Витрачено хв»
+            малюй з НЬОГО, а не з duration_sec: дзвінок «не з'єдналось»
+            (оператор узяв трубку, щоб сказати «номер не обслуговується»)
+            має тривалість, але клієнту не коштує нічого — billed_sec = 0.
         created_at: { type: string }
         ended_at: { type: string, nullable: true }
 
@@ -4993,33 +4947,6 @@ components:
                 оцінка. Не множ дзвінки на середню тривалість: набір
                 номера й нотатки ми не міряємо, тож ширшої «економії»
                 чесно порахувати не можемо.
-        can_test:
-          type: boolean
-          description: >
-            Чи активна кнопка «Тестувати» на картці агента. false означає,
-            що дзвінок не пройде зараз — причину показуй у `can_test_reason`.
-        can_test_reason:
-          type: string
-          nullable: true
-          enum: [no_instructions, minutes_exhausted, plan_expired, calls_blocked, null]
-          description: >
-            Чому «Тестувати» заблоковано:
-
-
-            `no_instructions` — агент без інструкції, дзвінок нікуди не
-            приведе; запропонуй заповнити інструкцію.
-
-
-            `minutes_exhausted` — хвилини скінчились.
-
-
-            `plan_expired` — строк тарифу вийшов.
-
-
-            `calls_blocked` — дзвінки зупинені адміністратором.
-
-
-            null — якщо `can_test` true.
 
     Contact:
       type: object

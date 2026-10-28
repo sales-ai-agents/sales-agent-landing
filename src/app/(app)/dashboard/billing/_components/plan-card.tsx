@@ -1,7 +1,7 @@
 import { Check } from "lucide-react";
 
 import { Button } from "@/components/ui";
-import { cn, formatNumber } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { getPlanFeatures } from "@dashboard/billing";
 import type { BillingPlan } from "@dashboard/types";
 
@@ -18,7 +18,6 @@ export const PlanCard = ({ plan, isCurrent, cycle = "month", onSelect }: PlanCar
   const isAnnual = cycle === "year" && !!plan.year;
 
   const displayPriceUsd = isAnnual ? plan.year!.price_usd : plan.price_usd;
-  const displayPriceUah = isAnnual ? plan.year!.price_uah : plan.price_uah;
 
   return (
     <div
@@ -59,12 +58,6 @@ export const PlanCard = ({ plan, isCurrent, cycle = "month", onSelect }: PlanCar
           <p className="text-muted-foreground mt-0.5 text-xs">
             ${(displayPriceUsd / 12).toFixed(1)} / міс
             {plan.year!.saving_usd > 0 ? ` · економія $${plan.year!.saving_usd}` : ""}
-          </p>
-        )}
-        {displayPriceUah != null && (
-          <p className="text-muted-foreground mt-1 text-xs">
-            ≈ {formatNumber(displayPriceUah)} грн
-            {plan.usd_rate ? ` (${plan.usd_rate.toFixed(2)}$)` : ""}
           </p>
         )}
       </div>

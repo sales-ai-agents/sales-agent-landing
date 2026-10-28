@@ -5,15 +5,19 @@ import { Check, Copy } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button, Label } from "@/components/ui";
+import { cn } from "@/lib/utils";
 
 interface CopyFieldProps {
   label: string;
   value: string;
+  masked?: boolean;
+  placeholder?: string;
 }
 
 const COPY_RESET_MS = 2000;
+const MASK = "••••••••••••";
 
-export const CopyField = ({ label, value }: CopyFieldProps) => {
+export const CopyField = ({ label, value, masked = false, placeholder }: CopyFieldProps) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async (): Promise<void> => {
@@ -27,11 +31,15 @@ export const CopyField = ({ label, value }: CopyFieldProps) => {
     }
   };
 
+  const displayValue = value ? (masked ? MASK : value) : placeholder;
+
   return (
     <div className="space-y-1.5">
       <Label>{label}</Label>
       <div className="border-input flex items-center gap-2 rounded-lg border px-3 py-0.5">
-        <span className="flex-1 truncate text-sm">{value}</span>
+        <span className={cn("flex-1 truncate text-sm", !value && "text-muted-foreground")}>
+          {displayValue}
+        </span>
         <Button
           type="button"
           variant="ghost"

@@ -34,7 +34,7 @@ const METHOD_CARDS: MethodCard[] = [
   {
     method: "forward",
     title: "Приймати дзвінки на ваш номер",
-    description: "Налаштуйте переадресацію з вашого номера на номер Calls4U.",
+    description: "Налаштуйте переадресацію вхідних дзвінків з вашого номера на номер Calls4U.",
     icon: PhoneForwarded,
   },
   {

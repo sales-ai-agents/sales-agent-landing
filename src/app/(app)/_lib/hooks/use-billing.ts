@@ -17,8 +17,8 @@ import type {
   TopUpResponse,
 } from "@dashboard/types";
 
-const STATUS_POLL_INTERVAL_MS = 2000;
-const STATUS_POLL_MAX_ATTEMPTS = 15;
+const STATUS_POLL_INTERVAL_MS = 5000;
+const STATUS_POLL_MAX_ATTEMPTS = 60;
 
 export const useBillingPlans = () => {
   return useQuery<BillingPlansResponse>({

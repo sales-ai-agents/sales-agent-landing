@@ -104,9 +104,13 @@ export type PaymentStatus =
   | "WaitingAuthComplete"
   | (string & {});
 
+export type BillingState = "paid" | "pending" | "failed" | "refunded";
+
 export interface PaymentStatusResponse extends Partial<AutoRenewState> {
   ok: boolean;
   paid: boolean;
+  state: BillingState;
+  pending: boolean;
   status: PaymentStatus;
   plan: string;
   amount_uah: number;
@@ -136,6 +140,7 @@ export interface PaymentHistoryItem {
   price_usd: number | null;
   usd_rate: number | null;
   status: PaymentStatus;
+  state: BillingState;
   created_at: string;
   paid_at: string | null;
   invoice_id: string;

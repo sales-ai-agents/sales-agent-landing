@@ -9,6 +9,8 @@ export const OPERATOR_FORWARD_HINTS: string[] = [
   "Kyivstar/Vodafone/lifecell: наберіть **21*номер# для безумовної переадресації.",
 ];
 
+export const SIP_ACTIVATION_DELAY_SECONDS = 60;
+
 export const normalizeUaPhone = (raw: string): string => {
   const digits = raw.replace(/\D/g, "");
   const subscriber = digits.startsWith("380")

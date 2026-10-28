@@ -2,7 +2,15 @@
 
 import type { ReactNode } from "react";
 import { useEffect } from "react";
-import { ArrowLeft, CheckCircle, Clock, Loader2, RefreshCw, XCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle,
+  Clock,
+  Loader2,
+  RefreshCw,
+  RotateCcw,
+  XCircle,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -45,7 +53,7 @@ const PaymentStatusChecker = ({ invoiceId, onTerminalStatus }: PaymentStatusChec
 
   const outcome = data ? resolvePaymentOutcome(data) : null;
   const isNotFound = error instanceof ApiError && error.status === 404;
-  const isTerminal = outcome === "paid" || outcome === "failed";
+  const isTerminal = outcome === "paid" || outcome === "failed" || outcome === "refunded";
 
   useEffect(() => {
     if (isNotFound) {
@@ -59,6 +67,7 @@ const PaymentStatusChecker = ({ invoiceId, onTerminalStatus }: PaymentStatusChec
   if (isNotFound) return <RedirectingState />;
   if (outcome === "paid" && data) return <PaidState data={data} />;
   if (outcome === "failed") return <FailedState />;
+  if (outcome === "refunded") return <RefundedState />;
   if (hasTimedOut) return <ProcessingState />;
   if (isError) return <ErrorState />;
   return <ConfirmingState />;
@@ -82,9 +91,10 @@ const RedirectingState = () => (
 const ProcessingState = () => (
   <StatusLayout>
     <Clock className="text-primary h-12 w-12" aria-hidden="true" />
-    <h1 className="font-display text-2xl font-bold">Оплата обробляється</h1>
+    <h1 className="font-display text-2xl font-bold">Платіж обробляється</h1>
     <p className="text-muted-foreground">
-      Тариф увімкнеться автоматично — оновіть сторінку за хвилину.
+      Тариф увімкнеться автоматично, щойно банк підтвердить оплату — зазвичай хвилина, іноді до
+      10–15 хвилин. Можете закрити сторінку: ми покажемо статус у кабінеті.
     </p>
     <BackButton />
   </StatusLayout>
@@ -110,6 +120,22 @@ const FailedState = () => (
       <Button className="mt-2 gap-2">
         <RefreshCw className="h-4 w-4" />
         Спробувати ще раз
+      </Button>
+    </Link>
+  </StatusLayout>
+);
+
+const RefundedState = () => (
+  <StatusLayout>
+    <RotateCcw className="text-muted-foreground h-12 w-12" aria-hidden="true" />
+    <h1 className="font-display text-2xl font-bold">Платіж повернено</h1>
+    <p className="text-muted-foreground">
+      Кошти повернулися на вашу картку. Щоб активувати тариф, оплатіть ще раз.
+    </p>
+    <Link href={BILLING_ROUTE}>
+      <Button className="mt-2 gap-2">
+        <RefreshCw className="h-4 w-4" />
+        До тарифів
       </Button>
     </Link>
   </StatusLayout>

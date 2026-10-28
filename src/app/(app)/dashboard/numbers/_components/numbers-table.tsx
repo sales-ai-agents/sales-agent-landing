@@ -92,11 +92,14 @@ const UnassignedWarning = () => (
 export const NumbersTable = ({ numbers, agents }: NumbersTableProps) => {
   const updateNumber = useUpdateNumber();
 
-  const handleAssign = (id: number, value: string | null): void => {
+  const handleAssign = (number: AgentNumber, value: string | null): void => {
     if (value === null) return;
 
+    const currentValue = number.agent_id ? String(number.agent_id) : UNASSIGNED_VALUE;
+    if (value === currentValue) return;
+
     updateNumber.mutate(
-      { id, agent_id: Number(value) },
+      { id: number.id, agent_id: Number(value) },
       {
         onSuccess: () => toast.success("Агента оновлено"),
         onError: (error) => handleMutationError(error, NUMBER_ERROR_MESSAGES),
@@ -107,7 +110,7 @@ export const NumbersTable = ({ numbers, agents }: NumbersTableProps) => {
   const renderAgentSelect = (number: AgentNumber, className?: string) => (
     <Select
       value={number.agent_id ? String(number.agent_id) : UNASSIGNED_VALUE}
-      onValueChange={(value) => handleAssign(number.id, value)}
+      onValueChange={(value) => handleAssign(number, value)}
     >
       <SelectTrigger className={cn("w-full sm:w-46", className)}>
         <SelectValue>{(value) => renderAgentLabel(value, agents)}</SelectValue>
