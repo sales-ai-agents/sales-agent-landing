@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import Link from "next/link";
 import {
   createColumnHelper,
   flexRender,
@@ -85,12 +86,26 @@ const CallerIdBadge = ({ callerId }: { callerId: boolean }) => {
 const UnassignedWarning = () => (
   <p className="text-destructive flex items-center gap-1.5 text-xs font-medium">
     <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-    Агента не призначено. Дзвінки на цей номер не прийматимуться.
+    Дзвінки на цей номер не прийматимуться.
+  </p>
+);
+
+const NoAgentsNotice = () => (
+  <p className="text-muted-foreground text-xs">
+    Спершу{" "}
+    <Link
+      href="/dashboard/agents/create"
+      className="text-primary font-medium underline-offset-2 hover:underline"
+    >
+      створіть агента
+    </Link>
+    , щоб призначити його на номер.
   </p>
 );
 
 export const NumbersTable = ({ numbers, agents }: NumbersTableProps) => {
   const updateNumber = useUpdateNumber();
+  const hasAgents = agents.length > 0;
 
   const handleAssign = (number: AgentNumber, value: string | null): void => {
     if (value === null) return;
@@ -107,12 +122,13 @@ export const NumbersTable = ({ numbers, agents }: NumbersTableProps) => {
     );
   };
 
-  const renderAgentSelect = (number: AgentNumber, className?: string) => (
+  const renderAgentSelect = (number: AgentNumber) => (
     <Select
       value={number.agent_id ? String(number.agent_id) : UNASSIGNED_VALUE}
       onValueChange={(value) => handleAssign(number, value)}
+      disabled={!hasAgents}
     >
-      <SelectTrigger className={cn("w-full sm:w-46", className)}>
+      <SelectTrigger className="w-full">
         <SelectValue>{(value) => renderAgentLabel(value, agents)}</SelectValue>
       </SelectTrigger>
       <SelectContent>
@@ -124,6 +140,14 @@ export const NumbersTable = ({ numbers, agents }: NumbersTableProps) => {
         ))}
       </SelectContent>
     </Select>
+  );
+
+  const renderAgentCell = (number: AgentNumber) => (
+    <div className="flex flex-col gap-1.5 md:max-w-xs">
+      {renderAgentSelect(number)}
+      {!hasAgents && <NoAgentsNotice />}
+      {hasAgents && number.agent_id === 0 && <UnassignedWarning />}
+    </div>
   );
 
   const columns = useMemo(
@@ -147,17 +171,7 @@ export const NumbersTable = ({ numbers, agents }: NumbersTableProps) => {
       columnHelper.display({
         id: "agent",
         header: "Призначений агент",
-        cell: ({ row }) => (
-          <div className="space-y-1.5">
-            {row.original.agent_name && (
-              <p className="text-sm">
-                Відповідає: <span className="font-medium">{row.original.agent_name}</span>
-              </p>
-            )}
-            {renderAgentSelect(row.original)}
-            {row.original.agent_id === 0 && <UnassignedWarning />}
-          </div>
-        ),
+        cell: ({ row }) => renderAgentCell(row.original),
       }),
       columnHelper.display({
         id: "direction",
@@ -220,8 +234,7 @@ export const NumbersTable = ({ numbers, agents }: NumbersTableProps) => {
               </div>
               <div className="space-y-1.5">
                 <p className="text-muted-foreground text-xs">Призначений агент</p>
-                {renderAgentSelect(number)}
-                {number.agent_id === 0 && <UnassignedWarning />}
+                {renderAgentCell(number)}
               </div>
               <div className="text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 text-xs">
                 <span>

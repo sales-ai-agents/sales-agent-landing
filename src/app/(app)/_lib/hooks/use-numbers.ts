@@ -174,6 +174,7 @@ export const useUpdateNumber = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: NUMBERS_KEY });
+      queryClient.invalidateQueries({ queryKey: ["agents"] });
     },
   });
 };

@@ -53,6 +53,7 @@ export const useCreateAgent = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["agents"] });
+      queryClient.invalidateQueries({ queryKey: ["numbers"] });
     },
   });
 };
@@ -122,6 +123,7 @@ export const useUpdateAgent = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["agents"] });
+      queryClient.invalidateQueries({ queryKey: ["numbers"] });
     },
   });
 };
