@@ -75,6 +75,7 @@ export interface ConnectNumberParams {
 export interface ConnectNumberResponse {
   ok: boolean;
   id: number;
+  phone?: string;
 }
 
 export interface ProvisionSipTrunkParams {

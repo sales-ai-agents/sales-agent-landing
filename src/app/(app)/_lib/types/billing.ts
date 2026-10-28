@@ -28,6 +28,7 @@ export interface BillingPlan {
   minutes: number;
   agents: number;
   numbers?: number;
+  pool_numbers?: number;
 }
 
 export type TopUpPackKey = "100" | "250" | "500" | "1000" | "2500";

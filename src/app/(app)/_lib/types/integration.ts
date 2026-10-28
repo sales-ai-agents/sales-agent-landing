@@ -4,12 +4,9 @@ export interface AvailableIntegration {
   connected: boolean;
   ready: boolean;
   contact_source?: boolean;
-  requires_picker?: boolean;
   status?: string;
   error?: string;
   account_email?: string;
-  email?: string;
-  spreadsheet_id?: string;
   spreadsheet_url?: string;
 }
 
@@ -27,7 +24,6 @@ export interface GoogleSheetsAuthUrlResponse {
 
 export interface GoogleSheetsConnectResponse {
   ok: boolean;
-  account_email?: string;
   email?: string;
   spreadsheet_id?: string;
   spreadsheet_url?: string;

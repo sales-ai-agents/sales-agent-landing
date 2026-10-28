@@ -68,7 +68,7 @@ interface CallCardProps {
 const CallCard = ({ call, agents, showSla }: CallCardProps) => {
   const config = getOutcomeConfig(call.outcome);
   const agentName = resolveAgentName(call.agent_id, agents);
-  const minutes = call.duration_sec ? `${(call.duration_sec / 60).toFixed(1)} хв` : "—";
+  const minutes = call.billed_sec ? `${(call.billed_sec / 60).toFixed(1)} хв` : "—";
 
   return (
     <Link
@@ -158,7 +158,7 @@ export const Table = ({ data, agents, pageCount, slaMinutes }: TableProps) => {
         id: "minutes",
         header: "Витрачено хв",
         cell: ({ row }) => {
-          const sec = row.original.duration_sec;
+          const sec = row.original.billed_sec;
           if (!sec) return <span className="text-muted-foreground text-sm">—</span>;
           return <span className="text-sm">{(sec / 60).toFixed(1)} хв</span>;
         },

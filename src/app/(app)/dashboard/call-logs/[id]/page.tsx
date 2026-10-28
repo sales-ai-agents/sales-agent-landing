@@ -113,7 +113,7 @@ const CallDetailPage = () => {
   const outcomeConfig = getOutcomeConfig(call.outcome);
   const duration = formatDuration(call.duration_sec);
   const agentName = agents.find((a) => a.id === call.agent_id)?.name ?? "—";
-  const minutesUsed = call.duration_sec ? (call.duration_sec / 60).toFixed(1) : "0";
+  const minutesUsed = call.billed_sec ? (call.billed_sec / 60).toFixed(1) : "0";
 
   return (
     <div className="space-y-6">
@@ -133,16 +133,11 @@ const CallDetailPage = () => {
           </p>
         </div>
         <a
-          href={call.has_recording ? `/api/app/calls/${callId}/audio` : undefined}
-          download={call.has_recording || undefined}
-          target={call.has_recording ? "_blank" : undefined}
+          href={`/api/app/calls/${callId}/audio`}
+          download
+          target="_blank"
           rel="noopener noreferrer"
-          aria-disabled={!call.has_recording}
-          className={cn(
-            buttonVariants({ variant: "outline", size: "sm" }),
-            "gap-2",
-            !call.has_recording && "pointer-events-none opacity-50"
-          )}
+          className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-2")}
         >
           <Download className="h-4 w-4" />
           Завантажити аудіо
@@ -150,11 +145,11 @@ const CallDetailPage = () => {
       </div>
 
       <div className="border-border bg-background grid grid-cols-2 gap-4 rounded-2xl border p-5 sm:grid-cols-3 lg:grid-cols-6">
-        <InfoField label="Клієнт" value={call.contact_name ?? call.phone} />
+        <InfoField label="Клієнт" value={call.company_name || call.phone} />
 
         <InfoField
           label="Агент"
-          value={call.agent_name ?? agentName}
+          value={agentName}
           icon={<Bot className="text-primary h-4 w-4" />}
         />
 
@@ -180,13 +175,7 @@ const CallDetailPage = () => {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
-          {call.has_recording ? (
-            <AudioPlayer src={`/api/app/calls/${callId}/audio`} />
-          ) : (
-            <div className="border-border bg-background flex items-center justify-center rounded-2xl border p-5">
-              <p className="text-muted-foreground text-sm">Запис розмови відсутній</p>
-            </div>
-          )}
+          <AudioPlayer src={`/api/app/calls/${callId}/audio`} />
 
           <div className="border-border bg-background rounded-2xl border p-5">
             <h2 className="mb-4 text-sm font-semibold">Транскрипція</h2>

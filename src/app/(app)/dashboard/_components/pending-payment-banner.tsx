@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Clock } from "lucide-react";
 
 import { Button } from "@/components/ui";
+import { ApiError } from "@/lib/api-client";
 import { clearPendingBillingInvoiceId, getPendingBillingInvoiceId } from "@/lib/billing-checkout";
 import { usePaymentStatus } from "@dashboard/hooks";
 import { resolvePaymentOutcome } from "@dashboard/payment-status";
@@ -18,13 +19,14 @@ export const PendingPaymentBanner = () => {
 
   const invoiceId = isSuccessRoute ? null : getPendingBillingInvoiceId();
 
-  const { data } = usePaymentStatus(invoiceId);
+  const { data, error } = usePaymentStatus(invoiceId);
   const outcome = data ? resolvePaymentOutcome(data) : null;
   const isResolved = outcome !== null && outcome !== "pending";
+  const isNotFound = error instanceof ApiError && error.status === 404;
 
   useEffect(() => {
-    if (isResolved) clearPendingBillingInvoiceId();
-  }, [isResolved]);
+    if (isResolved || isNotFound) clearPendingBillingInvoiceId();
+  }, [isResolved, isNotFound]);
 
   if (!invoiceId || outcome !== "pending") return null;
 

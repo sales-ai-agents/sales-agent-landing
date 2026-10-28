@@ -10,6 +10,7 @@ export type CallOutcome =
   | "передзвонити"
   | "погано чути"
   | "не дійшли до людини"
+  | "не з'єдналось"
   | (string & {});
 
 export type SlaState = "ok" | "breached" | "handled";
@@ -17,7 +18,7 @@ export type SlaState = "ok" | "breached" | "handled";
 export interface CallLog {
   id: string;
   phone: string;
-  contact_name: string | null;
+  company_name: string;
   niche: string;
   outcome: CallOutcome | null;
   analysis_text: string | null;
@@ -25,11 +26,10 @@ export interface CallLog {
   created_at: string;
   ended_at: string | null;
   agent_id: number | null;
-  agent_name: string | null;
   turn_count: number;
   duration_sec: number | null;
+  billed_sec: number | null;
   manager_note: string | null;
-  has_recording: boolean;
   sla_state: SlaState | null;
   sla_minutes_left: number | null;
 }

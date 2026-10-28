@@ -40,7 +40,8 @@ export const useSipConnect = ({ agentId, onVerified }: UseSipConnectOptions = {}
   const [isVerified, setIsVerified] = useState(false);
 
   const { data: numbers = [] } = useNumbers();
-  const { data: sipData } = useSipAddresses();
+  const hasSipNumbers = numbers.some((number) => number.source === "sip");
+  const { data: sipData } = useSipAddresses(hasSipNumbers);
   const connectNumber = useConnectNumber();
   const provisionTrunk = useProvisionSipTrunk();
   const verifySip = useVerifySip();
@@ -62,8 +63,9 @@ export const useSipConnect = ({ agentId, onVerified }: UseSipConnectOptions = {}
     ? sipData?.addresses.find((address) => address.number_id === existingNumber.id)
     : undefined;
 
-  const credentialsMatchPhone = credentials?.number_id === (numberId ?? existingNumber?.id);
-  const activeCredentials = credentialsMatchPhone ? credentials : null;
+  const activeNumberId = numberId ?? existingNumber?.id ?? null;
+  const credentialsMatchNumber = credentials?.number_id === activeNumberId;
+  const activeCredentials = credentialsMatchNumber ? credentials : null;
 
   const sipHost = activeCredentials?.sip_host ?? sipData?.host ?? "";
   const sipUri = activeCredentials?.sip_uri ?? existingAddress?.sip_uri ?? "";
@@ -80,6 +82,17 @@ export const useSipConnect = ({ agentId, onVerified }: UseSipConnectOptions = {}
   };
 
   useEffect(() => stopPolling, []);
+
+  const handlePhoneChange = (value: string): void => {
+    if (value === phone) return;
+    stopPolling();
+    setPhone(value);
+    setNumberId(null);
+    setIsVerified(false);
+    setVerifyHint(DEFAULT_VERIFY_HINT);
+    verifySince.current = undefined;
+    provisionTrunk.reset();
+  };
 
   const issueTrunk = (targetNumberId: number): void => {
     setNumberId(targetNumberId);
@@ -116,7 +129,7 @@ export const useSipConnect = ({ agentId, onVerified }: UseSipConnectOptions = {}
   const settleVerified = (): void => {
     stopPolling();
     setIsVerified(true);
-    if (numberId) onVerified?.(numberId);
+    if (activeNumberId) onVerified?.(activeNumberId);
   };
 
   const runVerifyOnce = (): void => {
@@ -168,9 +181,9 @@ export const useSipConnect = ({ agentId, onVerified }: UseSipConnectOptions = {}
 
   return {
     phone,
-    setPhone,
+    setPhone: handlePhoneChange,
     normalizedPhone,
-    numberId,
+    numberId: activeNumberId,
     isPhoneValid,
     isProvisioning,
     isPolling,

@@ -22,6 +22,7 @@ const OUTCOME_MAP: Record<string, OutcomeConfig> = {
   передзвонити: { label: "Передзвонити", variant: "secondary" },
   "погано чути": { label: "Погано чути", variant: "warning" },
   "не дійшли до людини": { label: "Не дійшли до людини", variant: "warning" },
+  "не з'єдналось": { label: "Не з'єдналось", variant: "secondary" },
 };
 
 const DEFAULT_CONFIG: OutcomeConfig = { label: "Немає", variant: "secondary" };
@@ -43,6 +44,7 @@ export const getOutcomeDisplay = (call: CallLog): OutcomeDisplay => {
     case "скинув":
     case "погано чути":
     case "не дійшли до людини":
+    case "не з'єдналось":
       return { label: "Без відповіді", badgeClass: "bg-muted text-muted-foreground", icon: "–" };
     case "передзвонити":
       return { label: "Передано", badgeClass: "bg-warning/10 text-warning", icon: "↗" };

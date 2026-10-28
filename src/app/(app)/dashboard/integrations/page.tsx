@@ -42,7 +42,7 @@ const IntegrationsPage = () => {
                 <GoogleSheetsCard
                   key={integration.id}
                   connected={integration.connected}
-                  email={integration.account_email || integration.email}
+                  email={integration.account_email}
                   ready={integration.ready}
                   status={integration.status}
                   error={integration.error}

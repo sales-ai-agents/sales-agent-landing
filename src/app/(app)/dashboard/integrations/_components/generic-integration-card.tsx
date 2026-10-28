@@ -62,7 +62,7 @@ const renderIntegrationLogo = (id: string) => {
 
 export const GenericIntegrationCard = ({ integration }: GenericIntegrationCardProps) => {
   const isError = integration.status === "error" || Boolean(integration.error);
-  const displayEmail = integration.account_email || integration.email;
+  const displayEmail = integration.account_email;
 
   return (
     <div className="border-border bg-background rounded-xl border p-5">
