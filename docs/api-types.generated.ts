@@ -7064,6 +7064,13 @@ export interface components {
             contact_base_id?: number;
             /** @description скільки контактів відмічено для цього агента (галочки в майстрі) */
             contacts_count?: number;
+            /** @description Чи можна натиснути «Тестувати» (`POST /app/agents/test-call`). Ті самі перевірки, що й у самому дзвінку, крім хвилинного інтервалу між тестами — `429 too_soon` фронт показує після натискання. */
+            can_test?: boolean;
+            /**
+             * @description Чому не можна — для підказки на сірій кнопці. `no_instructions` — «Додайте інструкції агенту»; `minutes_exhausted` / `plan_expired` — ті самі стани, що `blocked_reason` у `/app/stats`. `null`, коли `can_test: true`.
+             * @enum {string|null}
+             */
+            can_test_reason?: "no_instructions" | "minutes_exhausted" | "plan_expired" | "calls_blocked" | null;
             /** @description "HH:MM"; порожньо = загальні години */
             schedule_start?: string;
             schedule_end?: string;

@@ -1,16 +1,16 @@
 import { Check } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { TOTAL_STEPS } from "./wizard";
 
 interface StepIndicatorProps {
   currentStep: number;
+  totalSteps: number;
 }
 
-export const StepIndicator = ({ currentStep }: StepIndicatorProps) => {
+export const StepIndicator = ({ currentStep, totalSteps }: StepIndicatorProps) => {
   return (
     <div className="flex items-center justify-center">
-      {Array.from({ length: TOTAL_STEPS }).map((_, index) => {
+      {Array.from({ length: totalSteps }).map((_, index) => {
         const isCompleted = index < currentStep;
         const isCurrent = index === currentStep;
 
@@ -26,7 +26,7 @@ export const StepIndicator = ({ currentStep }: StepIndicatorProps) => {
             >
               {isCompleted ? <Check className="h-4 w-4" /> : index + 1}
             </div>
-            {index < TOTAL_STEPS - 1 && (
+            {index < totalSteps - 1 && (
               <div
                 className={cn(
                   "mx-2 h-0.5 min-w-9 flex-1",

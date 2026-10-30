@@ -31,7 +31,7 @@ const STATUS_BADGES: Record<NumberStatus, StatusBadge> = {
 };
 
 const resolveBadge = (number: AgentNumber): StatusBadge => {
-  if (number.is_active) return { label: "Основний", className: "bg-success/15 text-success" };
+  if (number.caller_id) return { label: "Основний", className: "bg-success/15 text-success" };
   return STATUS_BADGES[number.status] ?? STATUS_BADGES.disabled;
 };
 

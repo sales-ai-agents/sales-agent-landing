@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -14,7 +15,7 @@ import {
 import { ApiError } from "@/lib/api-client";
 import { NUMBER_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/mutation-error";
-import { useConnectNumber, useNumbers, useVerifySip } from "@dashboard/hooks";
+import { useConnectNumber, useNumbers } from "@dashboard/hooks";
 import type { AgentNumber } from "@dashboard/types";
 
 import { OPERATOR_FORWARD_HINTS, isValidUaPhone, normalizeUaPhone } from "./constants";
@@ -23,6 +24,7 @@ import { CopyField } from "./copy-field";
 import { PhoneField } from "./phone-field";
 import { PhonePulse, SuccessMark } from "./flow-visuals";
 import { Stepper } from "./stepper";
+import { useVerifyPolling } from "./use-verify-polling";
 
 interface ForwardFlowProps {
   agentId?: number;
@@ -32,48 +34,40 @@ interface ForwardFlowProps {
 
 const STEPS = ["Інструкція", "Перевірка"];
 
-const DEFAULT_VERIFY_HINT =
-  "Ми чекаємо вхідний дзвінок на обраний номер. Це може зайняти до 1 хвилини.";
-
 const isAssignedNumber = (number: AgentNumber): boolean => number.source === "assigned";
 
 export const ForwardFlow = ({ agentId, onDone, onCancel }: ForwardFlowProps) => {
   const router = useRouter();
   const [step, setStep] = useState(0);
-  const [phone, setPhone] = useState("");
   const [targetNumberId, setTargetNumberId] = useState("");
+  const [ownPhone, setOwnPhone] = useState("");
   const [numberId, setNumberId] = useState<number | null>(null);
-  const [verified, setVerified] = useState(false);
-  const [verifyHint, setVerifyHint] = useState(DEFAULT_VERIFY_HINT);
 
   const { data: numbers = [] } = useNumbers();
   const connectNumber = useConnectNumber();
-  const verifySip = useVerifySip();
+  const verify = useVerifyPolling();
 
   const availableNumbers = useMemo(() => numbers.filter(isAssignedNumber), [numbers]);
-
   const selectedNumber = availableNumbers.find((number) => String(number.id) === targetNumberId);
-
-  const normalizedPhone = normalizeUaPhone(phone);
 
   const handleNext = (): void => {
     if (!selectedNumber) {
-      toast.error("Оберіть номер для переадресації");
+      toast.error("Оберіть номер Calls4U для переадресації");
       return;
     }
 
-    if (!isValidUaPhone(phone)) {
-      toast.error(NUMBER_ERROR_MESSAGES.number_unavailable ?? "Введіть коректний номер");
+    if (!isValidUaPhone(ownPhone)) {
+      toast.error("Введіть ваш номер, з якого переадресовуєте");
       return;
     }
 
     connectNumber.mutate(
-      { source: "forward", phone: normalizedPhone, agent_id: agentId },
+      { source: "forward", phone: normalizeUaPhone(ownPhone), agent_id: agentId },
       {
         onSuccess: (created) => {
           setNumberId(created.id);
           setStep(1);
-          runVerify();
+          verify.start(selectedNumber.phone);
         },
         onError: (error) => {
           if (error instanceof ApiError && error.code === "number_limit") {
@@ -87,17 +81,8 @@ export const ForwardFlow = ({ agentId, onDone, onCancel }: ForwardFlowProps) => 
     );
   };
 
-  const runVerify = (): void => {
-    verifySip.mutate(
-      { phone: normalizedPhone },
-      {
-        onSuccess: (result) => {
-          setVerified(result.verified);
-          if (!result.verified) setVerifyHint(result.hint ?? DEFAULT_VERIFY_HINT);
-        },
-        onError: (error) => handleMutationError(error, NUMBER_ERROR_MESSAGES),
-      }
-    );
+  const handleRetry = (): void => {
+    if (selectedNumber) verify.start(selectedNumber.phone);
   };
 
   return (
@@ -114,33 +99,24 @@ export const ForwardFlow = ({ agentId, onDone, onCancel }: ForwardFlowProps) => 
           selectedNumberId={targetNumberId}
           selectedPhone={selectedNumber?.phone ?? ""}
           onNumberChange={setTargetNumberId}
-          phone={phone}
-          onPhoneChange={setPhone}
+          ownPhone={ownPhone}
+          onOwnPhoneChange={setOwnPhone}
           onNext={handleNext}
           onCancel={onCancel}
           isSubmitting={connectNumber.isPending}
         />
       )}
 
-      {step === 1 && !verified && (
-        <div className="space-y-4 text-center">
-          <PhonePulse animated={verifySip.isPending} />
-          <p className="font-medium">
-            {verifySip.isPending ? "Перевіряємо переадресацію..." : "Ще не бачили дзвінка"}
-          </p>
-          <p className="text-muted-foreground text-sm">{verifyHint}</p>
-          <div className="flex justify-between">
-            <Button type="button" variant="outline" onClick={onCancel}>
-              Скасувати
-            </Button>
-            <Button type="button" onClick={runVerify} disabled={verifySip.isPending}>
-              {verifySip.isPending ? "Перевіряємо..." : "Перевірити ще раз"}
-            </Button>
-          </div>
-        </div>
+      {step === 1 && !verify.isVerified && (
+        <ForwardVerifyStep
+          targetPhone={selectedNumber?.phone ?? ""}
+          isPolling={verify.isPolling}
+          onRetry={handleRetry}
+          onCancel={onCancel}
+        />
       )}
 
-      {step === 1 && verified && (
+      {step === 1 && verify.isVerified && (
         <div className="space-y-4 text-center">
           <SuccessMark />
           <p className="font-medium">Переадресація працює!</p>
@@ -159,13 +135,79 @@ export const ForwardFlow = ({ agentId, onDone, onCancel }: ForwardFlowProps) => 
   );
 };
 
+interface ForwardVerifyStepProps {
+  targetPhone: string;
+  isPolling: boolean;
+  onRetry: () => void;
+  onCancel: () => void;
+}
+
+const ForwardVerifyStep = ({
+  targetPhone,
+  isPolling,
+  onRetry,
+  onCancel,
+}: ForwardVerifyStepProps) => {
+  return (
+    <div className="space-y-5">
+      <div className="flex flex-col items-center gap-3 text-center">
+        <PhonePulse animated={isPolling} tone={isPolling ? "active" : "idle"} />
+        {isPolling ? (
+          <>
+            <p className="font-medium">Чекаємо на тестовий дзвінок</p>
+            <p className="text-muted-foreground max-w-sm text-sm">
+              Зателефонуйте на свій номер з іншого телефону. Якщо переадресацію налаштовано, дзвінок
+              надійде на номер Calls4U і ми одразу це побачимо.
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="font-medium">Дзвінка так і не було</p>
+            <p className="text-muted-foreground max-w-sm text-sm">
+              За хвилину очікування дзвінок на номер Calls4U не надійшов. Перевірте, що
+              переадресацію увімкнено у вашого оператора, і спробуйте ще раз.
+            </p>
+          </>
+        )}
+      </div>
+
+      {targetPhone && (
+        <div className="border-border bg-muted/40 flex items-center justify-between rounded-lg border px-4 py-3">
+          <span className="text-muted-foreground text-xs">Номер Calls4U</span>
+          <span className="text-sm font-medium">{targetPhone}</span>
+        </div>
+      )}
+
+      {isPolling && (
+        <div
+          className="text-muted-foreground flex items-center justify-center gap-2 text-xs"
+          role="status"
+          aria-live="polite"
+        >
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          <span>Перевіряємо автоматично — це може зайняти до 1 хвилини</span>
+        </div>
+      )}
+
+      <div className="flex justify-between gap-4">
+        <Button type="button" variant="outline" className="w-1/3" onClick={onCancel}>
+          Скасувати
+        </Button>
+        <Button type="button" className="w-1/3" onClick={onRetry} disabled={isPolling}>
+          {isPolling ? "Перевіряємо..." : "Перевірити ще раз"}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 interface ForwardSetupStepProps {
   numbers: AgentNumber[];
   selectedNumberId: string;
   selectedPhone: string;
   onNumberChange: (value: string) => void;
-  phone: string;
-  onPhoneChange: (value: string) => void;
+  ownPhone: string;
+  onOwnPhoneChange: (value: string) => void;
   onNext: () => void;
   onCancel: () => void;
   isSubmitting: boolean;
@@ -176,8 +218,8 @@ const ForwardSetupStep = ({
   selectedNumberId,
   selectedPhone,
   onNumberChange,
-  phone,
-  onPhoneChange,
+  ownPhone,
+  onOwnPhoneChange,
   onNext,
   onCancel,
   isSubmitting,
@@ -186,13 +228,14 @@ const ForwardSetupStep = ({
     return <EmptyNumbers onCancel={onCancel} />;
   }
 
-  const canSubmit = Boolean(selectedNumberId) && isValidUaPhone(phone);
+  const canSubmit = Boolean(selectedNumberId) && isValidUaPhone(ownPhone);
 
   return (
     <div className="space-y-6">
       <div className="space-y-1.5">
         <NumberSelect
           id="forward-target-number"
+          label="Номер Calls4U (куди переадресувати)"
           numbers={numbers}
           value={selectedNumberId}
           onValueChange={onNumberChange}
@@ -232,7 +275,12 @@ const ForwardSetupStep = ({
         <ForwardStepItem index={3} title="Поверніться сюди та перевірте підключення" />
       </ol>
 
-      <PhoneField id="forward-phone" label="Ваш номер" value={phone} onChange={onPhoneChange} />
+      <PhoneField
+        id="forward-own-phone"
+        label="Ваш номер (з якого переадресовуєте)"
+        value={ownPhone}
+        onChange={onOwnPhoneChange}
+      />
 
       <div className="flex justify-between gap-4">
         <Button type="button" className="w-1/3" variant="outline" onClick={onCancel}>

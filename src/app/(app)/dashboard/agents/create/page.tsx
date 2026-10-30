@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,7 +25,7 @@ import { StepCallType } from "./_components/step-call-type";
 import { StepSchedule } from "./_components/step-schedule";
 import { StepNumber } from "./_components/step-number";
 import { StepInstructions } from "./_components/step-instructions";
-import { TOTAL_STEPS, STEP_FIELDS, isStepValid } from "./_components/wizard";
+import { getStepFields, getWizardSteps, isStepValid, type WizardStep } from "./_components/wizard";
 import { normalizeUaPhone } from "@/app/(app)/dashboard/agents/_components/connect-number/constants";
 
 const DEFAULT_VALUES: CreateAgentFormData = {
@@ -62,8 +62,14 @@ const CreateAgentPage = () => {
   const { control, trigger, getValues } = form;
 
   const values = useWatch({ control });
-  const isLastStep = step === TOTAL_STEPS - 1;
-  const stepValid = isStepValid(step, values);
+  const callDirection = values.callDirection ?? DEFAULT_VALUES.callDirection;
+
+  const steps = useMemo(() => getWizardSteps(callDirection), [callDirection]);
+  const totalSteps = steps.length;
+  const currentStep = Math.min(step, totalSteps - 1);
+  const currentStepKey: WizardStep = steps[currentStep];
+  const isLastStep = currentStep === totalSteps - 1;
+  const stepValid = isStepValid(currentStepKey, values);
 
   const createAgentFromForm = useCallback(() => {
     createAgent.mutate(toAgentApiPayload(getValues()), {
@@ -79,7 +85,7 @@ const CreateAgentPage = () => {
     async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
 
-      const valid = await trigger(STEP_FIELDS[step]);
+      const valid = await trigger(getStepFields(currentStepKey));
       if (!valid) return;
 
       if (isLastStep) {
@@ -87,15 +93,15 @@ const CreateAgentPage = () => {
         return;
       }
 
-      setStep((current) => current + 1);
+      setStep(currentStep + 1);
     },
-    [trigger, step, isLastStep, createAgentFromForm]
+    [trigger, currentStepKey, currentStep, isLastStep, createAgentFromForm]
   );
 
   const handleBack = useCallback(() => {
-    if (step > 0) setStep((current) => current - 1);
+    if (currentStep > 0) setStep(currentStep - 1);
     else router.back();
-  }, [step, router]);
+  }, [currentStep, router]);
 
   const handleTestCall = useCallback(() => {
     const data = getValues();
@@ -116,16 +122,16 @@ const CreateAgentPage = () => {
   }, [getValues, testCall]);
 
   const renderStep = () => {
-    switch (step) {
-      case 0:
+    switch (currentStepKey) {
+      case "basics":
         return <StepBasics form={form} voices={voices} />;
-      case 1:
+      case "callType":
         return <StepCallType form={form} />;
-      case 2:
+      case "schedule":
         return <StepSchedule form={form} />;
-      case 3:
+      case "number":
         return <StepNumber form={form} numbers={numbers} />;
-      case 4:
+      case "instructions":
         return (
           <StepInstructions
             form={form}
@@ -149,12 +155,12 @@ const CreateAgentPage = () => {
         <div>
           <h1 className="font-display text-2xl font-bold">Створити нового агента</h1>
           <p className="text-muted-foreground text-sm">
-            Крок {step + 1} з {TOTAL_STEPS}
+            Крок {currentStep + 1} з {totalSteps}
           </p>
         </div>
       </div>
 
-      <StepIndicator currentStep={step} />
+      <StepIndicator currentStep={currentStep} totalSteps={totalSteps} />
 
       <form onSubmit={handleSubmit} noValidate className="space-y-6">
         <div className="border-border bg-background rounded-2xl border p-4 sm:p-6">

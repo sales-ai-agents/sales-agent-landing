@@ -23,7 +23,7 @@ interface StepCopy {
 const STEP_COPY: Record<CallDirection, StepCopy> = {
   inbound: {
     title: "Номер для вхідних дзвінків",
-    subtitle: "Оберіть номер, на який дзвонитимуть ваші клієнти. На нього відповідатиме цей агент.",
+    subtitle: "Оберіть номер, на який дзвонитимуть клієнти. На нього відповідатиме цей агент.",
   },
   outbound: {
     title: "Номер для дзвінків",
@@ -33,7 +33,8 @@ const STEP_COPY: Record<CallDirection, StepCopy> = {
 
 const matchesDirection = (number: AgentNumber, callDirection: CallDirection): boolean => {
   if (number.direction === "both") return true;
-  return number.direction === callDirection;
+  if (number.direction === callDirection) return true;
+  return callDirection === "inbound" && number.source === "sip";
 };
 
 export const StepNumber = ({ form, numbers }: StepNumberProps) => {

@@ -2,17 +2,26 @@ import { Check, Phone } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-export const PhonePulse = ({ animated = false }: { animated?: boolean }) => {
+interface PhonePulseProps {
+  animated?: boolean;
+  tone?: "active" | "idle";
+}
+
+export const PhonePulse = ({ animated = false, tone = "active" }: PhonePulseProps) => {
+  const isIdle = tone === "idle";
+
   return (
-    <div className="relative mx-auto my-14 flex h-24 w-24 items-center justify-center">
+    <div className="relative mx-auto my-14 flex h-14 w-14 items-center justify-center">
+      {animated && !isIdle && (
+        <span className="border-primary/40 absolute inset-0 animate-ping rounded-full border" />
+      )}
       <span
         className={cn(
-          "border-primary/30 absolute inset-0 rounded-full border-2",
-          animated && "animate-ping"
+          "relative flex h-14 w-14 items-center justify-center rounded-full",
+          isIdle ? "bg-muted" : "bg-primary/10"
         )}
-      />
-      <span className="bg-primary/10 flex h-16 w-16 items-center justify-center rounded-full">
-        <Phone className="text-primary h-7 w-7" />
+      >
+        <Phone className={cn("h-6 w-6", isIdle ? "text-muted-foreground" : "text-primary")} />
       </span>
     </div>
   );

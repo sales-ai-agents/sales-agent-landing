@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -12,14 +12,12 @@ import {
   useNumbers,
   useProvisionSipTrunk,
   useSipAddresses,
-  useVerifySip,
 } from "@dashboard/hooks";
 import type { AgentNumber } from "@dashboard/types";
 
 import { isValidUaPhone, normalizeUaPhone } from "./constants";
+import { useVerifyPolling } from "./use-verify-polling";
 
-const POLL_INTERVAL_MS = 5000;
-const POLL_TIMEOUT_MS = 120000;
 const DEFAULT_VERIFY_HINT =
   "Для перевірки ми чекаємо вхідний дзвінок з вашого номера. Це може зайняти до 1 хвилини.";
 
@@ -35,21 +33,12 @@ export const useSipConnect = ({ agentId, onVerified }: UseSipConnectOptions = {}
   const router = useRouter();
   const [phone, setPhone] = useState("");
   const [numberId, setNumberId] = useState<number | null>(null);
-  const [verifyHint, setVerifyHint] = useState(DEFAULT_VERIFY_HINT);
-  const [isPolling, setIsPolling] = useState(false);
-  const [isVerified, setIsVerified] = useState(false);
 
   const { data: numbers = [] } = useNumbers();
   const hasSipNumbers = numbers.some((number) => number.source === "sip");
   const { data: sipData } = useSipAddresses(hasSipNumbers);
   const connectNumber = useConnectNumber();
   const provisionTrunk = useProvisionSipTrunk();
-  const verifySip = useVerifySip();
-
-  const credentials = provisionTrunk.data ?? null;
-  const pollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
-  const pollDeadline = useRef(0);
-  const verifySince = useRef<string | undefined>(undefined);
 
   const normalizedPhone = normalizeUaPhone(phone);
   const isPhoneValid = isValidUaPhone(phone);
@@ -64,6 +53,18 @@ export const useSipConnect = ({ agentId, onVerified }: UseSipConnectOptions = {}
     : undefined;
 
   const activeNumberId = numberId ?? existingNumber?.id ?? null;
+
+  const handleVerified = useCallback((): void => {
+    if (activeNumberId) onVerified?.(activeNumberId);
+  }, [activeNumberId, onVerified]);
+
+  const verify = useVerifyPolling({
+    defaultHint: DEFAULT_VERIFY_HINT,
+    useServerHint: true,
+    onVerified: handleVerified,
+  });
+
+  const credentials = provisionTrunk.data ?? null;
   const credentialsMatchNumber = credentials?.number_id === activeNumberId;
   const activeCredentials = credentialsMatchNumber ? credentials : null;
 
@@ -73,24 +74,11 @@ export const useSipConnect = ({ agentId, onVerified }: UseSipConnectOptions = {}
   const password = activeCredentials?.password ?? null;
   const hasTrunk = Boolean(activeCredentials) || Boolean(existingNumber?.registered);
 
-  const stopPolling = (): void => {
-    if (pollTimer.current) {
-      clearInterval(pollTimer.current);
-      pollTimer.current = null;
-    }
-    setIsPolling(false);
-  };
-
-  useEffect(() => stopPolling, []);
-
   const handlePhoneChange = (value: string): void => {
     if (value === phone) return;
-    stopPolling();
+    verify.reset();
     setPhone(value);
     setNumberId(null);
-    setIsVerified(false);
-    setVerifyHint(DEFAULT_VERIFY_HINT);
-    verifySince.current = undefined;
     provisionTrunk.reset();
   };
 
@@ -126,58 +114,7 @@ export const useSipConnect = ({ agentId, onVerified }: UseSipConnectOptions = {}
     );
   };
 
-  const settleVerified = (): void => {
-    stopPolling();
-    setIsVerified(true);
-    if (activeNumberId) onVerified?.(activeNumberId);
-  };
-
-  const runVerifyOnce = (): void => {
-    verifySip.mutate(
-      { phone: normalizedPhone, since: verifySince.current },
-      {
-        onSuccess: (result) => {
-          if (result.verified) {
-            settleVerified();
-            return;
-          }
-          setVerifyHint(result.hint ?? DEFAULT_VERIFY_HINT);
-          if (Date.now() >= pollDeadline.current) stopPolling();
-        },
-        onError: (error) => {
-          stopPolling();
-          handleMutationError(error, NUMBER_ERROR_MESSAGES);
-        },
-      }
-    );
-  };
-
-  const startVerify = (): void => {
-    if (isPolling) return;
-    stopPolling();
-    setIsPolling(true);
-    pollDeadline.current = Date.now() + POLL_TIMEOUT_MS;
-    verifySince.current = undefined;
-
-    verifySip.mutate(
-      { phone: normalizedPhone, start: true },
-      {
-        onSuccess: (result) => {
-          verifySince.current = result.since;
-          if (result.verified) {
-            settleVerified();
-            return;
-          }
-          setVerifyHint(result.hint ?? DEFAULT_VERIFY_HINT);
-          pollTimer.current = setInterval(runVerifyOnce, POLL_INTERVAL_MS);
-        },
-        onError: (error) => {
-          stopPolling();
-          handleMutationError(error, NUMBER_ERROR_MESSAGES);
-        },
-      }
-    );
-  };
+  const startVerify = (): void => verify.start(normalizedPhone);
 
   return {
     phone,
@@ -186,9 +123,9 @@ export const useSipConnect = ({ agentId, onVerified }: UseSipConnectOptions = {}
     numberId: activeNumberId,
     isPhoneValid,
     isProvisioning,
-    isPolling,
-    isVerified,
-    verifyHint,
+    isPolling: verify.isPolling,
+    isVerified: verify.isVerified,
+    verifyHint: verify.hint,
     sipUri,
     sipHost,
     username,

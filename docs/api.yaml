@@ -4902,6 +4902,22 @@ components:
         contacts_count:
           type: integer
           description: скільки контактів відмічено для цього агента (галочки в майстрі)
+        can_test:
+          type: boolean
+          description: >
+            Чи можна натиснути «Тестувати» (`POST /app/agents/test-call`).
+            Ті самі перевірки, що й у самому дзвінку, крім хвилинного
+            інтервалу між тестами — `429 too_soon` фронт показує після
+            натискання.
+        can_test_reason:
+          type: string
+          nullable: true
+          enum: [no_instructions, minutes_exhausted, plan_expired, calls_blocked, null]
+          description: >
+            Чому не можна — для підказки на сірій кнопці. `no_instructions` —
+            «Додайте інструкції агенту»; `minutes_exhausted` / `plan_expired`
+            — ті самі стани, що `blocked_reason` у `/app/stats`. `null`, коли
+            `can_test: true`.
         schedule_start: { type: string, description: '"HH:MM"; порожньо = загальні години' }
         schedule_end: { type: string }
         working_days: { type: string, description: '"mon,tue,wed" у тижневому порядку' }
