@@ -115,6 +115,13 @@ export interface PricingPlan {
   readonly featured?: boolean;
 }
 
+export interface VideoChapter {
+  readonly time: string;
+  readonly title: string;
+  readonly highlighted: boolean;
+  readonly badge?: string;
+}
+
 export interface FaqEntry {
   readonly question: string;
   readonly answer: string | React.ReactNode;
@@ -137,12 +144,6 @@ export interface MockCallLogRow {
   readonly summary: string;
   readonly duration: string;
   readonly crm: string;
-}
-
-export interface CalculatorInputs {
-  readonly callsPerDay: number;
-  readonly avgDuration: number;
-  readonly hourlyRate: number;
 }
 
 export interface IconBadge {

@@ -55,10 +55,10 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="#pricing"
+                  href="#video"
                   className="text-base text-white transition-colors hover:text-white/80"
                 >
-                  Калькулятор
+                  Відео
                 </a>
               </li>
               <li>

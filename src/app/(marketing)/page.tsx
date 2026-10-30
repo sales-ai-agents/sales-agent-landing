@@ -12,7 +12,7 @@ import { FaqSection } from "@/components/marketing/faq-section";
 import { FinalCtaSection } from "@/components/marketing/final-cta-section";
 import {
   DynamicAudioDemoSection as AudioDemoSection,
-  DynamicCalculatorSection as CalculatorSection,
+  DynamicVideoSection as VideoSection,
   DynamicBuilderSection as BuilderSection,
 } from "@/components/marketing/dynamic-sections";
 import { JsonLd } from "@/components/marketing/json-ld";
@@ -74,7 +74,7 @@ export default function MarketingPage() {
       <CallLogsSection />
       <HandoffSection />
       <IntegrationsSection />
-      <CalculatorSection />
+      <VideoSection />
       <PricingSection />
       <TrustSection />
       <FaqSection />

@@ -6,7 +6,7 @@ export type AnalyticsEvent =
   | "test_call_start"
   | "test_call_start_click"
   | "demo_audio_play"
-  | "calculator_calculate"
+  | "video_play"
   | "pricing_plan_click";
 
 type AnalyticsEventParams = Record<string, string | number | boolean>;

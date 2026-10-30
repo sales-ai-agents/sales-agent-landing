@@ -9,6 +9,7 @@ import type {
   PricingPlan,
   Scenario,
   TrustItem,
+  VideoChapter,
 } from "@marketing/types";
 import {
   Bell,
@@ -430,4 +431,19 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
     ctaLabel: "Обговорити підключення",
     ctaHref: "/sign-up",
   },
+] as const;
+
+// --- Video Section ---
+
+export const VIDEO_ID = "_DNyhjh_eIo";
+
+export const VIDEO_CHAPTERS: readonly VideoChapter[] = [
+  { time: "0:26", title: "Де бізнес втрачає гроші на дзвінках", highlighted: false },
+  { time: "1:17", title: "До 60 000 ₴ втрат щомісяця", highlighted: true, badge: "Розрахунок" },
+  { time: "2:18", title: "Що таке AI-агент простими словами", highlighted: false },
+  { time: "2:54", title: "Реальний дзвінок AI-агента", highlighted: true, badge: "Слухати" },
+  { time: "3:22", title: "5 сценаріїв, де агент приносить гроші", highlighted: false },
+  { time: "4:34", title: "Міфи та заперечення", highlighted: false },
+  { time: "5:48", title: "Менеджер vs AI-агент: економіка", highlighted: false },
+  { time: "6:30", title: "Кейс: барбершоп", highlighted: true, badge: "Кейс" },
 ] as const;

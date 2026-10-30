@@ -14,10 +14,10 @@ export const DynamicAudioDemoSection = dynamic(
   { ssr: false }
 );
 
-export const DynamicCalculatorSection = dynamic(
+export const DynamicVideoSection = dynamic(
   () =>
-    import("@/components/marketing/calculator-section").then((m) => ({
-      default: m.CalculatorSection,
+    import("@/components/marketing/video-section").then((m) => ({
+      default: m.VideoSection,
     })),
   { ssr: false }
 );
