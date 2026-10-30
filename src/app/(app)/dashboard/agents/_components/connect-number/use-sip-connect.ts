@@ -19,7 +19,7 @@ import { isValidUaPhone, normalizeUaPhone } from "./constants";
 import { useVerifyPolling } from "./use-verify-polling";
 
 const DEFAULT_VERIFY_HINT =
-  "Для перевірки ми чекаємо вхідний дзвінок з вашого номера. Це може зайняти до 1 хвилини.";
+  "Для перевірки ми чекаємо вхідний дзвінок на ваш номер. Це може зайняти до 1 хвилини.";
 
 interface UseSipConnectOptions {
   agentId?: number;

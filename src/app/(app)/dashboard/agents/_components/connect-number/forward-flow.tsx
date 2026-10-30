@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -12,22 +11,17 @@ import {
   AccordionTrigger,
   Button,
 } from "@/components/ui";
-import { ApiError } from "@/lib/api-client";
-import { NUMBER_ERROR_MESSAGES } from "@/lib/error-messages";
-import { handleMutationError } from "@/lib/mutation-error";
-import { useConnectNumber, useNumbers } from "@dashboard/hooks";
+import { useNumbers } from "@dashboard/hooks";
 import type { AgentNumber } from "@dashboard/types";
 
-import { OPERATOR_FORWARD_HINTS, isValidUaPhone, normalizeUaPhone } from "./constants";
+import { OPERATOR_FORWARD_HINTS } from "./constants";
 import { NumberSelect } from "./number-select";
 import { CopyField } from "./copy-field";
-import { PhoneField } from "./phone-field";
 import { PhonePulse, SuccessMark } from "./flow-visuals";
 import { Stepper } from "./stepper";
 import { useVerifyPolling } from "./use-verify-polling";
 
 interface ForwardFlowProps {
-  agentId?: number;
   onDone: (numberId: number) => void;
   onCancel: () => void;
 }
@@ -36,15 +30,11 @@ const STEPS = ["Інструкція", "Перевірка"];
 
 const isAssignedNumber = (number: AgentNumber): boolean => number.source === "assigned";
 
-export const ForwardFlow = ({ agentId, onDone, onCancel }: ForwardFlowProps) => {
-  const router = useRouter();
+export const ForwardFlow = ({ onDone, onCancel }: ForwardFlowProps) => {
   const [step, setStep] = useState(0);
   const [targetNumberId, setTargetNumberId] = useState("");
-  const [ownPhone, setOwnPhone] = useState("");
-  const [numberId, setNumberId] = useState<number | null>(null);
 
   const { data: numbers = [] } = useNumbers();
-  const connectNumber = useConnectNumber();
   const verify = useVerifyPolling();
 
   const availableNumbers = useMemo(() => numbers.filter(isAssignedNumber), [numbers]);
@@ -56,29 +46,8 @@ export const ForwardFlow = ({ agentId, onDone, onCancel }: ForwardFlowProps) => 
       return;
     }
 
-    if (!isValidUaPhone(ownPhone)) {
-      toast.error("Введіть ваш номер, з якого переадресовуєте");
-      return;
-    }
-
-    connectNumber.mutate(
-      { source: "forward", phone: normalizeUaPhone(ownPhone), agent_id: agentId },
-      {
-        onSuccess: (created) => {
-          setNumberId(created.id);
-          setStep(1);
-          verify.start(selectedNumber.phone);
-        },
-        onError: (error) => {
-          if (error instanceof ApiError && error.code === "number_limit") {
-            toast.error(NUMBER_ERROR_MESSAGES.number_limit ?? error.hint);
-            router.push("/dashboard/billing");
-            return;
-          }
-          handleMutationError(error, NUMBER_ERROR_MESSAGES);
-        },
-      }
-    );
+    setStep(1);
+    verify.start(selectedNumber.phone);
   };
 
   const handleRetry = (): void => {
@@ -99,11 +68,8 @@ export const ForwardFlow = ({ agentId, onDone, onCancel }: ForwardFlowProps) => 
           selectedNumberId={targetNumberId}
           selectedPhone={selectedNumber?.phone ?? ""}
           onNumberChange={setTargetNumberId}
-          ownPhone={ownPhone}
-          onOwnPhoneChange={setOwnPhone}
           onNext={handleNext}
           onCancel={onCancel}
-          isSubmitting={connectNumber.isPending}
         />
       )}
 
@@ -125,7 +91,7 @@ export const ForwardFlow = ({ agentId, onDone, onCancel }: ForwardFlowProps) => 
             напрямок дзвінків
           </p>
           <div className="flex justify-end">
-            <Button type="button" onClick={() => numberId && onDone(numberId)}>
+            <Button type="button" onClick={() => selectedNumber && onDone(selectedNumber.id)}>
               Готово
             </Button>
           </div>
@@ -206,11 +172,8 @@ interface ForwardSetupStepProps {
   selectedNumberId: string;
   selectedPhone: string;
   onNumberChange: (value: string) => void;
-  ownPhone: string;
-  onOwnPhoneChange: (value: string) => void;
   onNext: () => void;
   onCancel: () => void;
-  isSubmitting: boolean;
 }
 
 const ForwardSetupStep = ({
@@ -218,17 +181,14 @@ const ForwardSetupStep = ({
   selectedNumberId,
   selectedPhone,
   onNumberChange,
-  ownPhone,
-  onOwnPhoneChange,
   onNext,
   onCancel,
-  isSubmitting,
 }: ForwardSetupStepProps) => {
   if (numbers.length === 0) {
     return <EmptyNumbers onCancel={onCancel} />;
   }
 
-  const canSubmit = Boolean(selectedNumberId) && isValidUaPhone(ownPhone);
+  const canSubmit = Boolean(selectedNumberId);
 
   return (
     <div className="space-y-6">
@@ -275,23 +235,11 @@ const ForwardSetupStep = ({
         <ForwardStepItem index={3} title="Поверніться сюди та перевірте підключення" />
       </ol>
 
-      <PhoneField
-        id="forward-own-phone"
-        label="Ваш номер (з якого переадресовуєте)"
-        value={ownPhone}
-        onChange={onOwnPhoneChange}
-      />
-
       <div className="flex justify-between gap-4">
         <Button type="button" className="w-1/3" variant="outline" onClick={onCancel}>
           Скасувати
         </Button>
-        <Button
-          type="button"
-          className="w-1/3"
-          onClick={onNext}
-          disabled={!canSubmit || isSubmitting}
-        >
+        <Button type="button" className="w-1/3" onClick={onNext} disabled={!canSubmit}>
           Далі
         </Button>
       </div>

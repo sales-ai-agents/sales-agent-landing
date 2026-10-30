@@ -184,8 +184,8 @@ const VerifySection = ({ onVerify, isVerifying, verifyHint }: VerifySectionProps
       <div className="space-y-1">
         <h3 className="font-medium">Перевірте підключення</h3>
         <p className="text-muted-foreground text-sm">
-          Коли налаштуєте АТС, натисніть кнопку нижче. Ми перевіримо, чи надходять дзвінки з вашого
-          номера.
+          Коли налаштуєте АТС, натисніть кнопку нижче. Ми перевіримо, чи надходять дзвінки на ваш
+          номер.
         </p>
       </div>
       <Button type="button" className="w-full" onClick={onVerify} disabled={isVerifying}>
@@ -194,7 +194,7 @@ const VerifySection = ({ onVerify, isVerifying, verifyHint }: VerifySectionProps
       </Button>
       {verifyHint && <p className="text-muted-foreground text-center text-xs">{verifyHint}</p>}
       <InfoNote>
-        Для перевірки ми чекаємо вхідний дзвінок з вашого номера. Це може зайняти до 1 хвилини.
+        Для перевірки ми чекаємо вхідний дзвінок на ваш номер. Це може зайняти до 1 хвилини.
       </InfoNote>
     </section>
   );

@@ -66,8 +66,8 @@ export const SipFlow = ({ agentId, onDone, onCancel }: SipFlowProps) => {
           </p>
           <p className="text-muted-foreground text-sm">{sip.verifyHint}</p>
           <InfoNote>
-            <b>Важливо:</b> телефонуйте з того номера, який ви вказали на попередньому кроці.
-            Дзвінок буде автоматично зараховано після перевірки.
+            Подзвоніть на <b>{sip.normalizedPhone}</b> з будь-якого іншого телефону — ваша АТС
+            переадресує дзвінок нам, і ми його побачимо.
           </InfoNote>
           <div className="flex justify-between">
             <Button type="button" variant="outline" onClick={onCancel}>

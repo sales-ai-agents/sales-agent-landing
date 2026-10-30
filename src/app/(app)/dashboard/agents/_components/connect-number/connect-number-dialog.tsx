@@ -100,9 +100,7 @@ export const ConnectNumberDialog = ({
         {method === "sip" && (
           <SipFlow agentId={agentId} onDone={handleDone} onCancel={handleCancel} />
         )}
-        {method === "forward" && (
-          <ForwardFlow agentId={agentId} onDone={handleDone} onCancel={handleCancel} />
-        )}
+        {method === "forward" && <ForwardFlow onDone={handleDone} onCancel={handleCancel} />}
         {method === "buy" && (
           <BuyFlow agentId={agentId} onDone={handleDone} onCancel={handleCancel} />
         )}
