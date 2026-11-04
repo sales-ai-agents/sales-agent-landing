@@ -1,14 +1,11 @@
 "use client";
 
 import { QueryClient, QueryClientProvider, QueryCache, MutationCache } from "@tanstack/react-query";
-import { GoogleOAuthProvider } from "@react-oauth/google";
 import { MotionConfig } from "framer-motion";
 import React, { useState } from "react";
 import { toast } from "sonner";
 
 import { ApiError, AUTH_FLOW_CODES } from "@/lib/api-client";
-
-const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
 
 function isSessionExpired(error: unknown) {
   return error instanceof ApiError && error.status === 401 && !AUTH_FLOW_CODES.has(error.code);
@@ -57,10 +54,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(makeQueryClient);
 
   return (
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <QueryClientProvider client={queryClient}>
-        <MotionConfig reducedMotion="user">{children}</MotionConfig>
-      </QueryClientProvider>
-    </GoogleOAuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <MotionConfig reducedMotion="user">{children}</MotionConfig>
+    </QueryClientProvider>
   );
 }

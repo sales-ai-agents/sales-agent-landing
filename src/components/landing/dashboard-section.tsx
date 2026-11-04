@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { StrokeIcon, type StrokeIconName } from "@/components/landing/icons";
-import { LinesHeading, MetaRow } from "@/components/landing/typography";
+import { CountValue, LinesHeading, MetaRow } from "@/components/landing/typography";
 
 const SIDEBAR_ITEMS: readonly { icon: StrokeIconName; label: string; active?: boolean }[] = [
   { icon: "overview", label: "Огляд", active: true },
@@ -66,7 +66,7 @@ function DashSidebar() {
     <aside className="dash-side">
       <div className="dash-logo">
         <Image src="/image/Logo.svg" alt="" width={39} height={40} />
-        <Image className="word" src="/image/calls4u.svg" alt="calls4u" width={96} height={20} />
+        <Image className="word" src="/image/calls4u.svg" alt="calls4u" width={99} height={22} />
       </div>
       <nav className="dash-nav" aria-label="Меню кабінету (демо)">
         {SIDEBAR_ITEMS.map((item) => (
@@ -91,7 +91,7 @@ function StatCards() {
       <div className="dcard">
         <span className="mono">Використання хвилин</span>
         <b>
-          <span data-count="186">186</span>
+          <CountValue value={186} />
           <small> / 300 хв</small>
         </b>
         <i className="bar">
@@ -148,7 +148,7 @@ function StatCard({ icon, tone, label, count, unit, note, trend }: StatCardProps
         {label}
       </span>
       <b>
-        <span data-count={count}>{count}</span>
+        <CountValue value={count} />
         {unit ? <small>{unit}</small> : null}
       </b>
       <small>{note}</small>

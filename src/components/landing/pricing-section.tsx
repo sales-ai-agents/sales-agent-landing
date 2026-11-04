@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { SIGN_UP_URL } from "@/components/landing/data";
 import { PRICING_PLANS, type PricingPlan } from "@/components/landing/content";
@@ -12,7 +11,7 @@ function PlanCard({ plan }: { plan: PricingPlan }) {
         <span className="mono">{plan.tagline}</span>
         {plan.badge ? <span className="badge">{plan.badge}</span> : null}
       </div>
-      <h4 className="t1">{plan.name}</h4>
+      <h3 className="t1">{plan.name}</h3>
       <div className="price">
         <b className="t1">{plan.price}</b>
         <span>/ місяць</span>
@@ -26,7 +25,7 @@ function PlanCard({ plan }: { plan: PricingPlan }) {
           </li>
         ))}
       </ul>
-      <Link className={cn("btn", `btn-${plan.ctaTone}`)} href={SIGN_UP_URL}>
+      <a className={cn("btn", `btn-${plan.ctaTone}`)} href={SIGN_UP_URL}>
         {plan.ctaLabel}
         {plan.ctaTone === "white" ? (
           <>
@@ -34,7 +33,7 @@ function PlanCard({ plan }: { plan: PricingPlan }) {
             <Arrow />
           </>
         ) : null}
-      </Link>
+      </a>
     </div>
   );
 }

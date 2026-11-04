@@ -20,6 +20,3 @@ export const queryAll = <TElement extends Element = HTMLElement>(
 export const clearTransform = (elements: readonly HTMLElement[]): void => {
   elements.forEach((element) => element.style.removeProperty("transform"));
 };
-
-export const wait = (milliseconds: number): Promise<void> =>
-  new Promise((resolve) => setTimeout(resolve, milliseconds));

@@ -3,7 +3,7 @@ import { LinesHeading, MetaRow } from "@/components/landing/typography";
 
 export function IntegrationsSection() {
   return (
-    <section className="sec" style={{ paddingTop: 0 }}>
+    <section className="sec sec--flush">
       <div className="wrap">
         <MetaRow left="(07) Інтеграції" right="Працює з вашими інструментами" />
         <div className="sec-head">
@@ -19,7 +19,7 @@ export function IntegrationsSection() {
         <div className="integ">
           {INTEGRATIONS.map((item) => (
             <div data-r="" key={item.title}>
-              <h4 className="t1">{item.title}</h4>
+              <h3 className="t1">{item.title}</h3>
               <p>{item.description}</p>
             </div>
           ))}

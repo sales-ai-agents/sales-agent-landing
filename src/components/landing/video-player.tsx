@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
 import { SIGN_UP_URL } from "@/components/landing/data";
@@ -34,11 +33,7 @@ export function VideoPlayer() {
   return (
     <div className="vid">
       <div className="vid-l" data-r="">
-        <div
-          className={cn("vid-player", isPlaying && "playing")}
-          id="vidPlayer"
-          onClick={() => !isPlaying && play(0)}
-        >
+        <div className={cn("vid-player", isPlaying && "playing")}>
           {isPlaying ? (
             <iframe
               key={startAt}
@@ -48,17 +43,23 @@ export function VideoPlayer() {
               allowFullScreen
             />
           ) : (
-            <>
+            <button
+              type="button"
+              className="vid-start"
+              aria-label="Дивитися відео: де бізнес втрачає гроші на дзвінках"
+              onClick={() => play(0)}
+            >
               <Image
                 src="/image/landing/preview.webp"
-                alt="Відео: де бізнес втрачає гроші на дзвінках"
+                alt=""
                 width={1280}
                 height={720}
+                sizes="(max-width: 1100px) 100vw, 56vw"
               />
-              <button type="button" className="vid-play" aria-label="Дивитися відео">
+              <span className="vid-play" aria-hidden="true">
                 <PlayIcon />
-              </button>
-            </>
+              </span>
+            </button>
           )}
         </div>
         <div className="vid-chip a">
@@ -96,9 +97,9 @@ export function VideoPlayer() {
             </button>
           ))}
         </div>
-        <Link className="btn btn-blue" href={SIGN_UP_URL}>
+        <a className="btn btn-blue" href={SIGN_UP_URL}>
           Спробувати безкоштовно <Arrow />
-        </Link>
+        </a>
       </div>
     </div>
   );

@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { AnchorLink } from "@/components/landing/anchor-link";
 import { cn } from "@/lib/utils";
-import { NAV_LINKS, SIGN_IN_URL } from "@/components/landing/data";
+import { NAV_LINKS, resolveLandingHref, SIGN_IN_URL } from "@/components/landing/data";
 
 const SCROLLED_OFFSET = 20;
 const HIDE_AFTER = 360;
@@ -31,43 +31,45 @@ function useNavVisibility() {
   return { scrolled, hidden };
 }
 
-export function LandingNav() {
+interface LandingNavProps {
+  basePath?: string;
+}
+
+export function LandingNav({ basePath = "" }: LandingNavProps) {
   const { scrolled, hidden } = useNavVisibility();
+  const topHref = basePath ? basePath : "#top";
 
   return (
-    <header className={cn("nav", scrolled && "scrolled", hidden && "hide")} id="nav">
+    <header className={cn("nav", scrolled && "scrolled", hidden && "hide")}>
       <div className="wrap">
-        <a href="#top" className="logo" aria-label="Calls4U">
-          <Image src="/image/Logo.svg" alt="" width={39} height={40} priority />
+        <AnchorLink href={topHref} className="logo" aria-label="Calls4U">
+          <Image src="/image/Logo.svg" alt="" width={39} height={40} loading="eager" />
           <Image
             className="word"
             src="/image/calls4u.svg"
             alt="calls4u"
-            width={96}
-            height={20}
-            priority
+            width={99}
+            height={22}
+            loading="eager"
           />
-        </a>
+        </AnchorLink>
         <nav className="nav-links" aria-label="Головне меню">
-          {NAV_LINKS.map((link) =>
-            link.href.startsWith("#") ? (
-              <a key={link.href} href={link.href}>
+          {NAV_LINKS.map((link) => {
+            const href = resolveLandingHref(link.href, basePath);
+            return (
+              <AnchorLink key={link.href} href={href}>
                 {link.label}
-              </a>
-            ) : (
-              <Link key={link.href} href={link.href}>
-                {link.label}
-              </Link>
-            )
-          )}
+              </AnchorLink>
+            );
+          })}
         </nav>
         <div className="nav-cta">
-          <Link className="nav-login" href={SIGN_IN_URL}>
+          <a className="nav-login" href={SIGN_IN_URL}>
             Увійти
-          </Link>
-          <a className="btn btn-blue" href="#top" data-focus-phone="">
-            Тестовий дзвінок
           </a>
+          <AnchorLink className="btn btn-blue" href={`${basePath}#top`} data-focus-phone="">
+            Тестовий дзвінок
+          </AnchorLink>
         </div>
       </div>
     </header>

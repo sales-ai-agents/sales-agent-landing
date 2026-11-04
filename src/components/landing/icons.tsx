@@ -80,6 +80,7 @@ const STROKE_ICONS = {
       <path d="m9 12 2 2 4-4" />
     </>
   ),
+  arrowUp: <path d="M12 19V5M5 12l7-7 7 7" />,
   globe: (
     <>
       <circle cx="12" cy="12" r="9" />

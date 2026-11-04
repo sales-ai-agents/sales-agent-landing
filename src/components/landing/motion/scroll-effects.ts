@@ -1,4 +1,4 @@
-import { animate, scroll } from "framer-motion";
+import { animate, scroll } from "framer-motion/dom";
 import { noop, type Cleanup } from "./shared";
 
 const PIN_QUERY = "(min-width: 1000px) and (min-height: 640px)";

@@ -1,29 +1,35 @@
 import Image from "next/image";
-import Link from "next/link";
+import { AnchorLink } from "@/components/landing/anchor-link";
 import {
   CONTACT_EMAIL,
   CONTACT_PHONE_HREF,
   CONTACT_PHONE_LABEL,
   FOOTER_DOCUMENTS,
   NAV_LINKS,
+  resolveLandingHref,
 } from "@/components/landing/data";
+import { FormDialogTrigger } from "@/components/landing/form-dialog-trigger";
 
-export function LandingFooter() {
+interface LandingFooterProps {
+  basePath?: string;
+}
+
+export function LandingFooter({ basePath = "" }: LandingFooterProps) {
   return (
     <footer>
       <div className="wrap">
         <div className="foot-top">
           <div>
-            <a href="#top" className="foot-logo">
+            <AnchorLink href={basePath ? basePath : "#top"} className="foot-logo">
               <Image className="ic" src="/image/Logo.svg" alt="" width={39} height={40} />
               <Image
                 className="word"
                 src="/image/calls4u.svg"
                 alt="calls4u"
-                width={96}
-                height={20}
+                width={99}
+                height={22}
               />
-            </a>
+            </AnchorLink>
             <p>
               ШІ-агент для рутинних дзвінків: підтверджує записи і передає результат у CRM або
               менеджеру.
@@ -31,31 +37,30 @@ export function LandingFooter() {
           </div>
           <div>
             <span className="mono">Навігація</span>
-            {NAV_LINKS.map((link) =>
-              link.href.startsWith("#") ? (
-                <a key={link.href} href={link.href}>
+            {NAV_LINKS.map((link) => {
+              const href = resolveLandingHref(link.href, basePath);
+              return (
+                <AnchorLink key={link.href} href={href}>
                   {link.label}
-                </a>
-              ) : (
-                <Link key={link.href} href={link.href}>
-                  {link.label}
-                </Link>
-              )
-            )}
+                </AnchorLink>
+              );
+            })}
           </div>
           <div>
             <span className="mono">Документи</span>
             {FOOTER_DOCUMENTS.map((document) => (
-              <Link key={document.href} href={document.href}>
+              <a key={document.href} href={document.href}>
                 {document.label}
-              </Link>
+              </a>
             ))}
           </div>
           <div>
             <span className="mono">Контакти</span>
             <a href={CONTACT_PHONE_HREF}>{CONTACT_PHONE_LABEL}</a>
             <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
-            <Link href="/contacts">Залишити заявку</Link>
+            <FormDialogTrigger kind="lead" source="landing_footer" className="foot-link">
+              Залишити заявку
+            </FormDialogTrigger>
           </div>
         </div>
         <div className="foot-bot">

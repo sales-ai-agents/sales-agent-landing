@@ -2,25 +2,14 @@
 
 import { useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
-import { useDemoCall } from "@marketing/hooks";
+import { useDemoCall } from "@/components/landing/api/use-demo-call";
 import { trackEvent } from "@/lib/analytics";
+import { formatPhoneInput, SUBSCRIBER_DIGITS } from "@/components/landing/phone";
 
-const SUBSCRIBER_DIGITS = 9;
 const SUCCESS_MESSAGE = "✓ Готово! Агент зателефонує вам протягом 20 секунд.";
 const INVALID_MESSAGE = "Введіть 9 цифр номера після +380.";
 
 export type TestCallStatus = "idle" | "ok" | "error";
-
-export const formatPhoneInput = (value: string): string => {
-  const digits = value
-    .replace(/\D/g, "")
-    .replace(/^380/, "")
-    .replace(/^0/, "")
-    .slice(0, SUBSCRIBER_DIGITS);
-  return [digits.slice(0, 2), digits.slice(2, 5), digits.slice(5, 7), digits.slice(7, 9)]
-    .filter(Boolean)
-    .join(" ");
-};
 
 const resolveStatus = (invalid: boolean, failed: boolean, succeeded: boolean): TestCallStatus => {
   if (invalid || failed) return "error";

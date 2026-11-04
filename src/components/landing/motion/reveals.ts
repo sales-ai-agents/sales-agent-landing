@@ -1,21 +1,8 @@
-import { animate, inView, stagger } from "framer-motion";
-import {
-  clearTransform,
-  EXPO_OUT,
-  noop,
-  POWER3_OUT,
-  queryAll,
-  QUART_OUT,
-  wait,
-  type Cleanup,
-} from "./shared";
+import { animate, inView, stagger } from "framer-motion/dom";
+import { clearTransform, EXPO_OUT, POWER3_OUT, queryAll, QUART_OUT, type Cleanup } from "./shared";
 
 const BLOCK_STAGGER = 0.06;
 const LINE_STAGGER = 0.09;
-const LETTER_STAGGER = 0.03;
-const HERO_REST_SELECTORS = [".stage-meta", ".hero-left", ".call-card", ".wave-stage"] as const;
-const FONT_WAIT_LIMIT_MS = 1500;
-const HERO_COUNT_DELAY_MS = 500;
 const COUNT_DURATION = 1.5;
 
 const stopAll =
@@ -23,7 +10,7 @@ const stopAll =
   () =>
     stops.forEach((stop) => stop());
 
-export function countUp(element: HTMLElement, reduce: boolean): void {
+function countUp(element: HTMLElement, reduce: boolean): void {
   if (element.dataset.done) return;
   element.dataset.done = "1";
   const target = Number(element.dataset.count);
@@ -92,42 +79,6 @@ export function revealLines(root: HTMLElement): Cleanup {
     )
   );
   return stopAll(stops);
-}
-
-export function playHeroIntro(root: HTMLElement): Cleanup {
-  const title = root.querySelector<HTMLElement>(".hero-title");
-  if (!title) return noop;
-  const rest = HERO_REST_SELECTORS.flatMap((selector) => queryAll(root, selector));
-  const counter = root.querySelector<HTMLElement>(".big70 [data-count]");
-  let cancelled = false;
-
-  Promise.race([document.fonts.ready, wait(FONT_WAIT_LIMIT_MS)]).then(() => {
-    if (cancelled) return;
-    title.style.opacity = "1";
-    animate(
-      queryAll(title, ".ch"),
-      { y: ["118%", "0%"], rotate: [6, 0] },
-      {
-        duration: 1.3,
-        ease: EXPO_OUT,
-        delay: stagger(LETTER_STAGGER),
-      }
-    );
-    animate(
-      rest,
-      { opacity: [0, 1], y: [28, 0] },
-      {
-        duration: 1.1,
-        ease: POWER3_OUT,
-        delay: stagger(0.09, { startDelay: 0.35 }),
-      }
-    ).then(() => clearTransform(rest));
-    if (counter) setTimeout(() => countUp(counter, false), HERO_COUNT_DELAY_MS);
-  });
-
-  return () => {
-    cancelled = true;
-  };
 }
 
 export function watchCounters(root: HTMLElement, reduce: boolean): Cleanup {

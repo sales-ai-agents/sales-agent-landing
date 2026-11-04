@@ -75,6 +75,6 @@ A web platform that enables small business owners (auto repair shops, beauty sal
 7. **Performance**: dynamic imports for heavy components (Recharts, Howler, Framer Motion)
 8. **Named exports, one component per file, kebab-case filenames**
 9. **Use `cn()` for conditional classNames**
-10. **Data fetching via TanStack Query hooks in `src/hooks/`** — not inline in pages
+10. **Data fetching via TanStack Query hooks in `src/lib/hooks/` or the route-level `_lib/hooks/`** — not inline in pages
 
 ---

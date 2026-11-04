@@ -1,7 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import type { Contact } from "@dashboard/types";
-import { formatConsentLabel, getTagColor } from "@/app/(app)/dashboard/contacts/_lib/utils";
+import { formatConsentLabel, getTagColor } from "@/app/(site)/(app)/dashboard/contacts/_lib/utils";
 
 interface ExportPreviewTableProps {
   contacts: Contact[];

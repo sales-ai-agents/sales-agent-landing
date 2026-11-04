@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
+import { GoogleLogin, GoogleOAuthProvider, type CredentialResponse } from "@react-oauth/google";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui";
@@ -10,6 +10,7 @@ import { useSocialLogin, useAuthProviders } from "@/lib/hooks";
 import { ApiError } from "@/lib/api-client";
 import { resolveErrorMessage, AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
 
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
 const GITHUB_CLIENT_ID = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID ?? "";
 const GITHUB_REDIRECT_URI = process.env.NEXT_PUBLIC_GITHUB_REDIRECT_URI ?? "";
 
@@ -94,13 +95,15 @@ export function SocialLoginButtons() {
       <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-between">
         {showGoogle && (
           <div className="flex-1">
-            <GoogleLogin
-              text="continue_with"
-              width="100%"
-              logo_alignment="center"
-              onSuccess={handleGoogleSuccess}
-              onError={() => toast.error("Не вдалося увійти через Google.")}
-            />
+            <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+              <GoogleLogin
+                text="continue_with"
+                width="100%"
+                logo_alignment="center"
+                onSuccess={handleGoogleSuccess}
+                onError={() => toast.error("Не вдалося увійти через Google.")}
+              />
+            </GoogleOAuthProvider>
           </div>
         )}
         {showGitHub && (

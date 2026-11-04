@@ -18,6 +18,9 @@ export const NAV_LINKS: readonly LandingLink[] = [
   { href: "#faq", label: "FAQ" },
 ] as const;
 
+export const resolveLandingHref = (href: string, basePath: string): string =>
+  href.startsWith("#") ? `${basePath}${href}` : href;
+
 export const FOOTER_DOCUMENTS: readonly LandingLink[] = [
   { href: "/offer", label: "Публічна оферта" },
   { href: "/service-terms", label: "Умови надання послуг" },
@@ -47,87 +50,6 @@ export const HERO_TRANSCRIPT: readonly TranscriptLine[] = [
   },
   { speaker: "client", text: "Краще курʼєром, на Шевченка, 15." },
   { speaker: "agent", text: "Змінила адресу. Курʼєр буде у четвер з 10:00 до 14:00." },
-] as const;
-
-export interface DemoChatLine {
-  readonly speaker: Speaker;
-  readonly text: string;
-}
-
-export interface DemoScenario {
-  readonly tag: string;
-  readonly title: string;
-  readonly durationSeconds: number;
-  readonly result: string;
-  readonly chat: readonly DemoChatLine[];
-}
-
-const agent = (text: string): DemoChatLine => ({ speaker: "agent", text });
-const client = (text: string): DemoChatLine => ({ speaker: "client", text });
-
-export const DEMO_SCENARIOS: readonly DemoScenario[] = [
-  {
-    tag: "Інтернет-магазин",
-    title: "Створення замовлення для відправки",
-    durationSeconds: 84,
-    result: "Замовлення створено",
-    chat: [
-      agent(
-        "Добрий день! Це Марія з магазину «Dim». Дзвоню щодо вашої заявки на кавоварку — оформлюємо замовлення?"
-      ),
-      client("Так, оформлюйте."),
-      agent("На яке відділення Нової пошти відправити?"),
-      client("Львів, відділення 12."),
-      agent("Записала. Оплата при отриманні чи карткою онлайн?"),
-      client("При отриманні."),
-      agent("Готово, замовлення створено. ТТН прийде в SMS сьогодні ввечері."),
-    ],
-  },
-  {
-    tag: "Служба доставки",
-    title: "Уточнення деталей доставки",
-    durationSeconds: 62,
-    result: "Доставку підтверджено",
-    chat: [
-      agent("Вітаю! Ваше замовлення №4821 прибуде завтра. Коли вам зручно отримати?"),
-      client("Після шостої вечора."),
-      agent("Підтверджую адресу: Шевченка, 15, квартира 8?"),
-      client("Так, усе правильно."),
-      agent("Чудово! Курʼєр буде завтра з 18:00 до 21:00 і попередить дзвінком."),
-    ],
-  },
-  {
-    tag: "Холодні дзвінки",
-    title: "Автоматизація бізнес-процесів",
-    durationSeconds: 118,
-    result: "Зустріч з менеджером призначено",
-    chat: [
-      agent(
-        "Добрий день! Ви керуєте автосервісом «Мотор»? Хочу запропонувати, як скоротити ручні дзвінки адміністратора."
-      ),
-      client("Так. А що саме ви пропонуєте?"),
-      agent(
-        "ШІ-агента, який сам підтверджує записи і нагадує клієнтам про ТО. Це до 70% часу адміністратора."
-      ),
-      client("Цікаво. Скільки коштує?"),
-      agent(
-        "Від $29 на місяць. Давайте менеджер покаже на вашому прикладі — четвер о 15:00 підійде?"
-      ),
-      client("Так, підійде."),
-      agent("Записала! Надішлю посилання на зустріч у Viber."),
-    ],
-  },
-  {
-    tag: "Служба доставки",
-    title: "Підтвердження доставки",
-    durationSeconds: 47,
-    result: "Доставку підтверджено",
-    chat: [
-      agent("Добрий день! Посилка вже у відділенні №3. Підкажіть, коли плануєте забрати?"),
-      client("Сьогодні ввечері."),
-      agent("Дякую! Відділення працює до 20:00. Позначаю для оператора: отримання сьогодні."),
-    ],
-  },
 ] as const;
 
 export interface StatCard {

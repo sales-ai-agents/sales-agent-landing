@@ -24,14 +24,51 @@ export function LinesHeading({ as: Tag = "h2", className, lines, style }: LinesH
 
 const WORD_PATTERN = /(\s+)/;
 
-export function SplitLetters({ text }: { text: string }) {
-  return text.split(WORD_PATTERN).map((part, index) => {
-    if (!part) return null;
-    if (/^\s+$/.test(part)) return <Fragment key={index}> </Fragment>;
+interface CountValueProps {
+  value: number;
+  animated?: boolean;
+}
+
+export function CountValue({ value, animated = true }: CountValueProps) {
+  return (
+    <span
+      className="count"
+      data-count={animated ? value : undefined}
+      style={{ minWidth: `${String(value).length}ch` }}
+    >
+      {value}
+    </span>
+  );
+}
+
+export const countLetters = (text: string): number => Array.from(text.replace(/\s+/g, "")).length;
+
+interface SplitLettersProps {
+  text: string;
+  startIndex?: number;
+}
+
+const isWhitespace = (value: string): boolean => /^\s+$/.test(value);
+
+export function SplitLetters({ text, startIndex = 0 }: SplitLettersProps) {
+  const parts = text.split(WORD_PATTERN).filter(Boolean);
+  const offsets = parts.reduce<number[]>((accumulated, part, index) => {
+    const previous =
+      index === 0 ? startIndex : accumulated[index - 1] + countLetters(parts[index - 1]);
+    accumulated.push(previous);
+    return accumulated;
+  }, []);
+
+  return parts.map((part, index) => {
+    if (isWhitespace(part)) return <Fragment key={index}> </Fragment>;
     return (
       <span className="w" key={index}>
         {Array.from(part).map((char, charIndex) => (
-          <span className="ch" key={charIndex}>
+          <span
+            className="ch"
+            key={charIndex}
+            style={{ "--i": offsets[index] + charIndex } as CSSProperties}
+          >
             {char}
           </span>
         ))}

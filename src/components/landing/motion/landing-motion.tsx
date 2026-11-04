@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect } from "react";
 import { parallaxRibbon, setupScenarios } from "./scroll-effects";
-import { playHeroIntro, revealBlocks, revealLines, watchCounters, watchInClass } from "./reveals";
+import { revealBlocks, revealLines, watchCounters, watchInClass } from "./reveals";
 import { startSmoothScroll } from "./smooth-scroll";
 import { ANIM_ATTRIBUTE, ANIM_READY_ATTRIBUTE, prefersReducedMotion, type Cleanup } from "./shared";
 
@@ -14,14 +14,7 @@ const startAnimations = (root: HTMLElement, reduce: boolean): Cleanup[] => {
   const always = [startSmoothScroll(reduce), watchCounters(root, reduce), watchInClass(root)];
   const scenarios = setupScenarios(root, reduce);
   if (reduce) return [...always, scenarios];
-  return [
-    ...always,
-    scenarios,
-    playHeroIntro(root),
-    revealLines(root),
-    revealBlocks(root),
-    parallaxRibbon(root),
-  ];
+  return [...always, scenarios, revealLines(root), revealBlocks(root), parallaxRibbon(root)];
 };
 
 export function LandingMotion() {

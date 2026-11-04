@@ -38,8 +38,8 @@ export const COMPANY_INFO = {
   taxId: "3888313957",
   taxSystem: "Спрощена система оподаткування, 3 група, 5% (не платник ПДВ)",
   address: "02000, м. Київ, б-р Ярослава Гашека, 24",
-  email: "support@calls4u.ai",
-  phone: "+380 99 036 73 86",
+  email: "salesagentswork@gmail.com",
+  phone: "+380 (91) 481 05 42",
   site: "calls4u.ai",
 } as const;
 

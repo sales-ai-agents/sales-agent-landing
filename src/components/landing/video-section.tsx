@@ -4,7 +4,7 @@ import { LinesHeading, MetaRow } from "@/components/landing/typography";
 
 export function VideoSection() {
   return (
-    <section className="sec" id="video" style={{ paddingTop: 0 }}>
+    <section className="sec sec--flush" id="video">
       <div className="wrap">
         <MetaRow left="(08) Відео" right="7 хвилин про дзвінки і гроші" />
         <div className="sec-head">

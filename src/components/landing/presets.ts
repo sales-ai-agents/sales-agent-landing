@@ -1,4 +1,4 @@
-import type { Preset } from "@marketing/builder-types";
+import type { Preset } from "@/components/landing/api/types";
 
 export const BUILDER_PRESETS: readonly Preset[] = [
   {

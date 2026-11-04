@@ -1,9 +1,19 @@
-import Link from "next/link";
 import { SIGN_UP_URL } from "@/components/landing/data";
 import { HeroCallCard } from "@/components/landing/hero-call-card";
 import { HeroWave } from "@/components/landing/hero-wave";
 import { PlayIcon, StrokeIcon, type StrokeIconName } from "@/components/landing/icons";
-import { Arrow, SplitLetters } from "@/components/landing/typography";
+import { Arrow, CountValue, countLetters, SplitLetters } from "@/components/landing/typography";
+
+const HERO_TITLE_LINES = ["ШІ-агент", "дзвонить", " за вас"] as const;
+const [FIRST_LINE_OFFSET, SECOND_LINE_OFFSET, THIRD_LINE_OFFSET] = HERO_TITLE_LINES.reduce<
+  number[]
+>(
+  (offsets, line, index) => [
+    ...offsets,
+    index === 0 ? 0 : offsets[index - 1] + countLetters(HERO_TITLE_LINES[index - 1]),
+  ],
+  []
+);
 
 const HERO_CHIPS: readonly { icon: StrokeIconName; label: string }[] = [
   { icon: "clock", label: "Запуск за 1 день" },
@@ -14,7 +24,7 @@ const HERO_CHIPS: readonly { icon: StrokeIconName; label: string }[] = [
 export function HeroSection() {
   return (
     <section className="hero2" id="hero">
-      <div className="stage" id="stage">
+      <div className="stage">
         <div className="stage-bg" aria-hidden="true">
           <span className="cols" />
           <i className="g1" />
@@ -30,19 +40,20 @@ export function HeroSection() {
           </span>
         </div>
 
-        <h1 className="hero-title t1" id="heroTitle" aria-label="ШІ-агент дзвонить за вас">
+        <h1 className="hero-title t1">
+          <span className="sr-only">ШІ-агент дзвонить за вас</span>
           <span className="ln" aria-hidden="true">
             <span>
-              <SplitLetters text="ШІ-агент" />
+              <SplitLetters text={HERO_TITLE_LINES[0]} startIndex={FIRST_LINE_OFFSET} />
             </span>
           </span>
           <span className="ln" aria-hidden="true">
             <span>
               <em>
-                <SplitLetters text="дзвонить" />
+                <SplitLetters text={HERO_TITLE_LINES[1]} startIndex={SECOND_LINE_OFFSET} />
               </em>
               <br className="br-m" />
-              <SplitLetters text=" за вас" />
+              <SplitLetters text={HERO_TITLE_LINES[2]} startIndex={THIRD_LINE_OFFSET} />
             </span>
           </span>
         </h1>
@@ -50,7 +61,7 @@ export function HeroSection() {
         <div className="hero-grid">
           <div className="hero-left">
             <div className="big70 t1">
-              <span data-count="70">70</span>
+              <CountValue value={70} animated={false} />
               <sup>%</sup>
             </div>
             <div className="hero-copy">
@@ -59,9 +70,9 @@ export function HeroSection() {
                 деталі й передає результат у CRM. Без програмістів і ручного обдзвону.
               </p>
               <div className="hero-btns">
-                <Link className="btn btn-blue" href={SIGN_UP_URL}>
+                <a className="btn btn-blue" href={SIGN_UP_URL}>
                   Спробувати безкоштовно <Arrow />
-                </Link>
+                </a>
                 <a className="btn btn-ghost" href="#demo">
                   <PlayIcon width={14} height={14} />
                   Прослухати демо

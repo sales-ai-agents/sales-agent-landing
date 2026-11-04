@@ -36,26 +36,34 @@ A web platform that enables small business owners to create AI-powered voice age
 
 | Route Group | Strategy | Reason |
 |-------------|----------|--------|
-| `(marketing)/*` | SSG (Static Site Generation) | SEO/GEO critical, content rarely changes |
-| `(app)/dashboard/*` | CSR (Client-Side Rendering) | Authenticated, dynamic data |
+| `(site)/(marketing)/*` | SSG (Static Site Generation) | SEO/GEO critical, content rarely changes |
+| `(site)/(app)/dashboard/*` | CSR (Client-Side Rendering) | Authenticated, dynamic data |
+| `(landing)/landing`, `(landing)/blog/*` | SSG (Static Site Generation) | New landing and blog: own root layout, minimal CSS/JS |
 
 ### Project Structure
 
 ```
 src/
 ├── app/
-│   ├── (app)/dashboard/        # Authenticated dashboard (agents, call-logs, contacts, settings)
-│   ├── (marketing)/            # Public marketing pages + auth (sign-in, sign-up)
-│   ├── layout.tsx              # Root layout
+│   ├── (site)/                 # Root layout #1: Tailwind, providers, marketing + dashboard + auth
+│   │   ├── (app)/dashboard/    # Authenticated dashboard (agents, call-logs, contacts, settings)
+│   │   ├── (auth)/             # Sign-in, sign-up, password reset
+│   │   └── (marketing)/        # Public marketing pages
+│   ├── (landing)/              # Root layout #2: standalone landing + blog (calls4u.css only)
 │   ├── globals.css             # Global styles (Tailwind)
+│   ├── global-not-found.tsx    # 404 for unmatched URLs (multiple root layouts)
+│   ├── llms.txt/               # llms.txt for AI crawlers
+│   ├── llms-full.txt/          # Full-text variant for LLMs
 │   ├── robots.ts               # SEO robots.txt generation
 │   └── sitemap.ts              # SEO sitemap generation
 ├── components/
 │   ├── dashboard/              # Dashboard-specific components (sidebar, header, charts, dialogs)
+│   ├── landing/                # New landing sections, motion, dialogs and calls4u.css
+│   ├── blog/                   # Blog index/article components
 │   ├── marketing/              # Marketing page sections (hero, FAQ, industries, builder, etc.)
 │   └── ui/                     # Reusable UI primitives (shadcn-style)
-├── hooks/                      # React Query hooks and custom hooks
-├── lib/                        # Utilities, schemas, constants, API config, mock data
+├── content/blog/               # Blog posts (typed content blocks)
+├── lib/                        # Utilities, schemas, constants, API config, shared hooks (lib/hooks)
 ├── types/                      # Centralized TypeScript type definitions
 └── fonts/                      # Custom fonts (Actay Wide, Gilroy)
 ```

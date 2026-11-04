@@ -23,7 +23,7 @@ export function SecuritySection() {
                 <StrokeIcon name={card.icon} />
               </span>
               <div>
-                <h4 className="t2">{card.title}</h4>
+                <h3 className="t2">{card.title}</h3>
                 <p>{card.description}</p>
               </div>
             </div>

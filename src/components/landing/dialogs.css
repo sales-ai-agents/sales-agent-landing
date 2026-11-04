@@ -1,0 +1,138 @@
+.c4u .dlg {
+  width: min(560px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  margin: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 32px;
+  background: #fff;
+  color: var(--ink);
+  overflow: auto;
+  overscroll-behavior: contain;
+  box-shadow: 0 40px 120px -30px rgba(11, 13, 18, 0.45);
+}
+.c4u .dlg::backdrop {
+  background: rgba(11, 13, 18, 0.55);
+  backdrop-filter: blur(4px);
+}
+.c4u .dlg-body {
+  position: relative;
+  display: grid;
+  gap: 18px;
+  padding: clamp(24px, 4vw, 40px);
+}
+.c4u .dlg-body h2 {
+  padding-right: 40px;
+  font-size: calc(clamp(26px, 3vw, 36px) * var(--d-scale2));
+}
+.c4u .dlg-lead {
+  color: var(--ink2);
+  font-size: 16px;
+  line-height: 1.45;
+}
+.c4u .dlg-x {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--paper);
+  font-size: 24px;
+  line-height: 1;
+}
+.c4u .dlg-x:hover {
+  background: var(--blue-soft);
+}
+.c4u .dlg-form {
+  display: grid;
+  gap: 14px;
+}
+.c4u .dlg-field {
+  display: grid;
+  gap: 6px;
+}
+.c4u .dlg-field .mono {
+  color: var(--ink2);
+}
+.c4u .dlg-field input,
+.c4u .dlg-field textarea {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--paper);
+  box-shadow: inset 0 0 0 1px transparent;
+  font-size: 16px;
+  transition: box-shadow 0.2s;
+}
+.c4u .dlg-field textarea {
+  padding: 14px 16px;
+  resize: vertical;
+  line-height: 1.45;
+}
+.c4u .dlg-field input:focus,
+.c4u .dlg-field textarea:focus {
+  outline: 0;
+  box-shadow: inset 0 0 0 1.5px var(--blue);
+}
+.c4u .dlg-field input[aria-invalid="true"] {
+  box-shadow: inset 0 0 0 1.5px #b42318;
+}
+.c4u .dlg-phone {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 16px;
+  border-radius: 14px;
+  background: var(--paper);
+}
+.c4u .dlg-phone:focus-within {
+  box-shadow: inset 0 0 0 1.5px var(--blue);
+}
+.c4u .dlg-phone input {
+  background: transparent;
+  padding-left: 0;
+  box-shadow: none;
+}
+.c4u .dlg-phone input:focus {
+  box-shadow: none;
+}
+.c4u .dlg-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: var(--ink2);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.c4u .dlg-check input {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  accent-color: var(--blue);
+}
+.c4u .dlg-form .form-msg {
+  margin: 0;
+}
+.c4u .dlg-form .form-msg:empty {
+  display: none;
+}
+.c4u .dlg-alt {
+  justify-self: center;
+  color: var(--ink2);
+  font-size: 15px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.c4u .dlg-alt:hover {
+  color: var(--blue);
+}
+@media (max-width: 720px) {
+  .c4u .dlg {
+    border-radius: 24px;
+  }
+}

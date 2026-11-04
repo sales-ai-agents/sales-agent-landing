@@ -1,6 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
-import { SIGN_UP_URL } from "@/components/landing/data";
+import { FormDialogTrigger } from "@/components/landing/form-dialog-trigger";
 import { FinalCallForm } from "@/components/landing/final-call-form";
 import { LinesHeading } from "@/components/landing/typography";
 
@@ -22,20 +21,16 @@ export function FinalCtaSection() {
         <span className="mono blue" data-r="">
           (13) Ваш хід
         </span>
-        <LinesHeading
-          className="t1"
-          style={{ marginTop: 28 }}
-          lines={["Перевірте", <em key="accent">на собі</em>]}
-        />
+        <LinesHeading className="t1" lines={["Перевірте", <em key="accent">на собі</em>]} />
         <p className="lead" data-r="">
           Введіть номер — агент зателефонує за 20 секунд. Для першого тесту достатньо одного
           сценарію і вашого телефону.
         </p>
         <FinalCallForm />
-        <div style={{ marginTop: 24 }} data-r="">
-          <Link className="btn btn-ghost" href={SIGN_UP_URL}>
+        <div className="final-alt" data-r="">
+          <FormDialogTrigger kind="lead" source="landing_final_cta" className="btn btn-ghost">
             Або забронювати демо з менеджером
-          </Link>
+          </FormDialogTrigger>
         </div>
       </div>
     </section>

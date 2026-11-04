@@ -68,6 +68,7 @@ export function VideoSection() {
 
               <Button
                 size="lg"
+                nativeButton={false}
                 render={
                   <Link
                     href="/sign-up"

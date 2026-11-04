@@ -5,7 +5,7 @@ import { LinesHeading, MetaRow } from "@/components/landing/typography";
 
 export function DemoSection() {
   return (
-    <section id="demo" style={{ padding: "clamp(64px,7vw,120px) 0 clamp(40px,4vw,72px)" }}>
+    <section className="demo-sec" id="demo">
       <div className="slab">
         <Image
           className="slab-ribbon"
@@ -16,12 +16,9 @@ export function DemoSection() {
           height={977}
           sizes="(max-width: 1600px) 60vw, 960px"
         />
-        <div
-          className="wrap"
-          style={{ paddingTop: "clamp(40px,4.6vw,80px)", paddingBottom: "clamp(40px,4.6vw,80px)" }}
-        >
+        <div className="wrap">
           <MetaRow left="(02) Послухайте самі" right="Реальні сценарії розмов" />
-          <div className="sec-head" style={{ marginBottom: "clamp(36px,5vw,72px)" }}>
+          <div className="sec-head">
             <LinesHeading
               className="h2 t1"
               lines={[

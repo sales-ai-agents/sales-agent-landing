@@ -14,7 +14,6 @@ export function FaqSection() {
             </span>
             <LinesHeading
               className="h2 t1"
-              style={{ marginTop: 22 }}
               lines={[
                 "Питання",
                 <Fragment key="accent">
@@ -29,7 +28,7 @@ export function FaqSection() {
               {CONTACT_PHONE_LABEL}
             </a>
           </div>
-          <div id="faqList" data-r="">
+          <div data-r="">
             {FAQ_ITEMS.map((item, index) => (
               <details key={item.question} open={index === 0}>
                 <summary>

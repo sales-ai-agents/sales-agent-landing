@@ -20,8 +20,8 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@dashboard/*": ["./src/app/(app)/_lib/*"],
-      "@marketing/*": ["./src/app/(marketing)/_lib/*"]
+      "@dashboard/*": ["./src/app/(site)/(app)/_lib/*"],
+      "@marketing/*": ["./src/app/(site)/(marketing)/_lib/*"]
     }
   },
   "include": [

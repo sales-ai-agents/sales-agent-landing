@@ -1,6 +1,8 @@
 "use client";
 
+import { useId } from "react";
 import { cn } from "@/lib/utils";
+import { PhoneInput } from "@/components/landing/phone-input";
 import { Arrow } from "@/components/landing/typography";
 import { useTestCall } from "@/components/landing/use-test-call";
 
@@ -8,21 +10,18 @@ const DEFAULT_NOTE = "Один тестовий дзвінок. Без спам�
 
 export function FinalCallForm() {
   const { value, onChange, onSubmit, status, message, isLoading } = useTestCall("landing_final");
+  const noteId = useId();
 
   return (
     <>
       <form className="final-form" data-r="" onSubmit={onSubmit} noValidate>
         <div className="row-in">
           <span className="cc">+380</span>
-          <input
-            type="tel"
-            inputMode="numeric"
-            autoComplete="tel-national"
-            placeholder="__ ___ __ __"
-            aria-label="Номер телефону"
-            data-phone=""
+          <PhoneInput
             value={value}
             onChange={onChange}
+            invalid={status === "error"}
+            describedBy={noteId}
           />
         </div>
         <button className="btn btn-blue" type="submit" disabled={isLoading}>
@@ -31,7 +30,7 @@ export function FinalCallForm() {
       </form>
       <p
         className={cn("final-note", status === "ok" && "ok", status === "error" && "err")}
-        id="finalNote"
+        id={noteId}
         role="status"
       >
         {message ?? DEFAULT_NOTE}

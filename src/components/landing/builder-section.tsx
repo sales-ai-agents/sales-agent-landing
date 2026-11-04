@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { BUILDER_CHECKLIST, ONBOARDING_STEPS, SIGN_UP_URL } from "@/components/landing/data";
 import { BuilderCard } from "@/components/landing/builder-card";
 import { CheckIcon } from "@/components/landing/icons";
@@ -25,7 +24,7 @@ export function BuilderSection() {
             <div className="step" data-r="" key={step.number}>
               <span className="n t1">{step.number}</span>
               <div>
-                <h4 className="t2">{step.title}</h4>
+                <h3 className="t2">{step.title}</h3>
                 <p>{step.description}</p>
               </div>
             </div>
@@ -49,9 +48,9 @@ export function BuilderSection() {
                 </li>
               ))}
             </ul>
-            <Link className="btn btn-blue" href={SIGN_UP_URL}>
+            <a className="btn btn-blue" href={SIGN_UP_URL}>
               Спробувати безкоштовно <Arrow />
-            </Link>
+            </a>
           </div>
           <BuilderCard />
         </div>
