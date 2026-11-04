@@ -1,20 +1,25 @@
 import Image from "next/image";
 import { AnchorLink } from "@/components/landing/anchor-link";
+import { getLandingCopy } from "@/components/landing/copy";
 import {
   CONTACT_EMAIL,
   CONTACT_PHONE_HREF,
   CONTACT_PHONE_LABEL,
   FOOTER_DOCUMENTS,
-  NAV_LINKS,
-  resolveLandingHref,
+  NAV_ITEMS,
+  resolveNavHref,
 } from "@/components/landing/data";
 import { FormDialogTrigger } from "@/components/landing/form-dialog-trigger";
+import type { Locale } from "@/lib/i18n/config";
 
 interface LandingFooterProps {
+  locale: Locale;
   basePath?: string;
 }
 
-export function LandingFooter({ basePath = "" }: LandingFooterProps) {
+export function LandingFooter({ locale, basePath = "" }: LandingFooterProps) {
+  const { footer, client } = getLandingCopy(locale);
+
   return (
     <footer>
       <div className="wrap">
@@ -30,42 +35,39 @@ export function LandingFooter({ basePath = "" }: LandingFooterProps) {
                 height={22}
               />
             </AnchorLink>
-            <p>
-              ШІ-агент для рутинних дзвінків: підтверджує записи і передає результат у CRM або
-              менеджеру.
-            </p>
+            <p>{footer.about}</p>
           </div>
           <div>
-            <span className="mono">Навігація</span>
-            {NAV_LINKS.map((link) => {
-              const href = resolveLandingHref(link.href, basePath);
-              return (
-                <AnchorLink key={link.href} href={href}>
-                  {link.label}
-                </AnchorLink>
-              );
-            })}
-          </div>
-          <div>
-            <span className="mono">Документи</span>
-            {FOOTER_DOCUMENTS.map((document) => (
-              <a key={document.href} href={document.href}>
-                {document.label}
-              </a>
+            <span className="mono">{footer.navTitle}</span>
+            {NAV_ITEMS.map((item) => (
+              <AnchorLink key={item.id} href={resolveNavHref(item, basePath, locale)}>
+                {client.nav.links[item.id]}
+              </AnchorLink>
             ))}
           </div>
           <div>
-            <span className="mono">Контакти</span>
+            <span className="mono">{footer.documentsTitle}</span>
+            {FOOTER_DOCUMENTS.map((document) => (
+              <a key={document.id} href={document.href}>
+                {footer.documents[document.id]}
+              </a>
+            ))}
+            {footer.documentsNote ? <small>{footer.documentsNote}</small> : null}
+          </div>
+          <div>
+            <span className="mono">{footer.contactsTitle}</span>
             <a href={CONTACT_PHONE_HREF}>{CONTACT_PHONE_LABEL}</a>
             <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
             <FormDialogTrigger kind="lead" source="landing_footer" className="foot-link">
-              Залишити заявку
+              {footer.leaveRequest}
             </FormDialogTrigger>
           </div>
         </div>
         <div className="foot-bot">
-          <span>© {new Date().getFullYear()} Calls4U. Всі права захищені.</span>
-          <span>Зроблено, щоб ваші менеджери займались продажами.</span>
+          <span>
+            © {new Date().getFullYear()} Calls4U. {footer.rights}
+          </span>
+          <span>{footer.tagline}</span>
         </div>
       </div>
       <div className="foot-word" aria-hidden="true">

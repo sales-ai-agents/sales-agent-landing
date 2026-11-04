@@ -4,9 +4,6 @@ import type { DemoScenario } from "@/components/landing/demo-scenarios/types";
 export const COLD_CALL_SCENARIO: DemoScenario = {
   id: "service",
   audioSrc: "/audio/demo-4.mp3",
-  tag: "Холодні дзвінки",
-  title: "Автоматизація бізнес-процесів",
-  result: "Зустріч з менеджером призначено",
   chat: [
     agent(0, "Алло?"),
     client(0.8, "Алло, да."),

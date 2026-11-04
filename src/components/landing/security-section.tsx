@@ -1,23 +1,20 @@
-import { SECURITY_CARDS, TRUST_BADGES } from "@/components/landing/content";
+import type { SecurityCopy } from "@/components/landing/copy/types";
 import { StrokeIcon } from "@/components/landing/icons";
-import { LinesHeading, MetaRow } from "@/components/landing/typography";
+import { CopyHeading, MetaRow } from "@/components/landing/typography";
 
-export function SecuritySection() {
+export function SecuritySection({ copy }: { copy: SecurityCopy }) {
   return (
     <section className="sec" id="security">
       <div className="wrap">
-        <MetaRow left="(10) Безпека і контроль" right="Ваші дані — ваші" />
+        <MetaRow left={copy.meta} right={copy.metaRight} />
         <div className="sec-head">
-          <LinesHeading
-            className="h2 t1"
-            lines={["Дані клієнтів", <em key="accent">лишаються у вас</em>]}
-          />
+          <CopyHeading className="h2 t1" heading={copy.heading} />
           <p className="lead" data-r="">
-            Ви керуєте записами, доступами і запуском дзвінків.
+            {copy.lead}
           </p>
         </div>
         <div className="sec-grid">
-          {SECURITY_CARDS.map((card) => (
+          {copy.cards.map((card) => (
             <div className="scard" data-r="" key={card.title}>
               <span className="ic">
                 <StrokeIcon name={card.icon} />
@@ -30,7 +27,7 @@ export function SecuritySection() {
           ))}
         </div>
         <div className="trust" data-r="">
-          {TRUST_BADGES.map((badge) => (
+          {copy.badges.map((badge) => (
             <span key={badge.label}>
               <StrokeIcon name={badge.icon} />
               {badge.label}

@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { AnchorLink } from "@/components/landing/anchor-link";
+import { useLandingCopy } from "@/components/landing/copy/provider";
 import { cn } from "@/lib/utils";
-import { NAV_LINKS, resolveLandingHref, SIGN_IN_URL } from "@/components/landing/data";
+import { NAV_ITEMS, resolveNavHref, SIGN_IN_URL } from "@/components/landing/data";
 
 const SCROLLED_OFFSET = 20;
 const HIDE_AFTER = 360;
@@ -36,6 +37,7 @@ interface LandingNavProps {
 }
 
 export function LandingNav({ basePath = "" }: LandingNavProps) {
+  const { locale, copy } = useLandingCopy();
   const { scrolled, hidden } = useNavVisibility();
   const topHref = basePath ? basePath : "#top";
 
@@ -53,22 +55,19 @@ export function LandingNav({ basePath = "" }: LandingNavProps) {
             loading="eager"
           />
         </AnchorLink>
-        <nav className="nav-links" aria-label="Головне меню">
-          {NAV_LINKS.map((link) => {
-            const href = resolveLandingHref(link.href, basePath);
-            return (
-              <AnchorLink key={link.href} href={href}>
-                {link.label}
-              </AnchorLink>
-            );
-          })}
+        <nav className="nav-links" aria-label={copy.nav.menuLabel}>
+          {NAV_ITEMS.map((item) => (
+            <AnchorLink key={item.id} href={resolveNavHref(item, basePath, locale)}>
+              {copy.nav.links[item.id]}
+            </AnchorLink>
+          ))}
         </nav>
         <div className="nav-cta">
           <a className="nav-login" href={SIGN_IN_URL}>
-            Увійти
+            {copy.nav.login}
           </a>
           <AnchorLink className="btn btn-blue" href={`${basePath}#top`} data-focus-phone="">
-            Тестовий дзвінок
+            {copy.nav.testCall}
           </AnchorLink>
         </div>
       </div>

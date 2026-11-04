@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { useLandingCopy } from "@/components/landing/copy/provider";
 
 const ACTIVE_LINE = 0.35;
 
@@ -11,6 +12,7 @@ export interface TocItem {
 }
 
 export function ArticleToc({ items }: { items: readonly TocItem[] }) {
+  const { copy } = useLandingCopy();
   const [activeId, setActiveId] = useState(items[0]?.id ?? "");
 
   useEffect(() => {
@@ -40,8 +42,8 @@ export function ArticleToc({ items }: { items: readonly TocItem[] }) {
   }, [items]);
 
   return (
-    <nav className="toc" aria-label="Зміст статті">
-      <span className="mono">Зміст</span>
+    <nav className="toc" aria-label={copy.blog.tocLabel}>
+      <span className="mono">{copy.blog.tocTitle}</span>
       {items.map((item) => (
         <a
           key={item.id}

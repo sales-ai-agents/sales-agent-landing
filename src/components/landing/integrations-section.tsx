@@ -1,23 +1,19 @@
-import { INTEGRATIONS } from "@/components/landing/content";
-import { LinesHeading, MetaRow } from "@/components/landing/typography";
+import type { IntegrationsCopy } from "@/components/landing/copy/types";
+import { CopyHeading, MetaRow } from "@/components/landing/typography";
 
-export function IntegrationsSection() {
+export function IntegrationsSection({ copy }: { copy: IntegrationsCopy }) {
   return (
     <section className="sec sec--flush">
       <div className="wrap">
-        <MetaRow left="(07) Інтеграції" right="Працює з вашими інструментами" />
+        <MetaRow left={copy.meta} right={copy.metaRight} />
         <div className="sec-head">
-          <LinesHeading
-            className="h2 t1"
-            lines={["Нічого не треба", <em key="accent">перебудовувати</em>]}
-          />
+          <CopyHeading className="h2 t1" heading={copy.heading} />
           <p className="lead" data-r="">
-            Після дзвінка агент передає статус, підсумок і запис у CRM, таблицю або вашу систему
-            автоматизації.
+            {copy.lead}
           </p>
         </div>
         <div className="integ">
-          {INTEGRATIONS.map((item) => (
+          {copy.items.map((item) => (
             <div data-r="" key={item.title}>
               <h3 className="t1">{item.title}</h3>
               <p>{item.description}</p>

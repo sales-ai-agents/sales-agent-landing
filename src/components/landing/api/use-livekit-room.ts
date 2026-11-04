@@ -3,6 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Room, RoomEvent, Track, type RemoteTrack } from "livekit-client";
 import type { RoomStatus } from "@/components/landing/api/types";
+import type { LivePanelCopy } from "@/components/landing/copy/client-types";
+import { useLandingCopy } from "@/components/landing/copy/provider";
+
+type ConnectionErrorKey = keyof LivePanelCopy["errors"];
 
 type SettledStatus = "idle" | "connected" | "disconnected" | "error";
 
@@ -17,31 +21,26 @@ interface UseLiveKitRoomResult {
   disconnect: () => void;
 }
 
-const DEFAULT_ERROR = "Помилка підключення до голосового чату. Спробуйте ще раз.";
-
-const resolveConnectionError = (error: unknown): string => {
-  if (!(error instanceof Error)) return "Не вдалося підключитися до кімнати.";
+const resolveConnectionError = (error: unknown): ConnectionErrorKey => {
+  if (!(error instanceof Error)) return "room";
   const message = error.message.toLowerCase();
 
   if (error.name === "NotAllowedError" || message.includes("permission denied")) {
-    return "Будь ласка, надайте доступ до мікрофона у налаштуваннях браузера.";
+    return "permission";
   }
-  if (error.name === "NotFoundError" || message.includes("device not found")) {
-    return "Мікрофон не знайдено. Будь ласка, підключіть мікрофон і спробуйте ще раз.";
-  }
+  if (error.name === "NotFoundError" || message.includes("device not found")) return "noDevice";
   if (error.name === "NotReadableError" || message.includes("could not start")) {
-    return "Мікрофон вже використовується іншою програмою або вкладкою.";
+    return "deviceBusy";
   }
-  if (message.includes("failed to connect") || message.includes("timeout")) {
-    return "Не вдалося встановити зв'язок. Перевірте інтернет-з'єднання.";
-  }
-  return DEFAULT_ERROR;
+  if (message.includes("failed to connect") || message.includes("timeout")) return "connection";
+  return "generic";
 };
 
 export function useLiveKitRoom({ wsUrl, token }: UseLiveKitRoomOptions): UseLiveKitRoomResult {
+  const { copy } = useLandingCopy();
   const roomRef = useRef<Room | null>(null);
   const [settledStatus, setSettledStatus] = useState<SettledStatus>("idle");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorKey, setErrorKey] = useState<ConnectionErrorKey | null>(null);
 
   useEffect(() => {
     if (!wsUrl || !token) return;
@@ -71,7 +70,7 @@ export function useLiveKitRoom({ wsUrl, token }: UseLiveKitRoomOptions): UseLive
       })
       .catch((error: unknown) => {
         if (cancelled) return;
-        setErrorMessage(resolveConnectionError(error));
+        setErrorKey(resolveConnectionError(error));
         setSettledStatus("error");
       });
 
@@ -84,6 +83,7 @@ export function useLiveKitRoom({ wsUrl, token }: UseLiveKitRoomOptions): UseLive
     };
   }, [wsUrl, token]);
 
+  const errorMessage = errorKey ? copy.livePanel.errors[errorKey] : null;
   const isConnecting = Boolean(wsUrl && token) && settledStatus === "idle";
   const status: RoomStatus = isConnecting ? "connecting" : settledStatus;
 

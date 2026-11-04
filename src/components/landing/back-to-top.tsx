@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { useLandingCopy } from "@/components/landing/copy/provider";
 import { StrokeIcon } from "@/components/landing/icons";
 
 const REVEAL_VIEWPORTS = 1;
@@ -11,6 +12,7 @@ const prefersReducedMotion = (): boolean =>
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 export function BackToTop() {
+  const { copy } = useLandingCopy();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -46,8 +48,8 @@ export function BackToTop() {
     <button
       type="button"
       className={cn("to-top", visible && "show")}
-      aria-label="Повернутися нагору"
-      title="Нагору"
+      aria-label={copy.backToTop.label}
+      title={copy.backToTop.title}
       onClick={scrollToTop}
     >
       <StrokeIcon name="arrowUp" weight={2.4} />

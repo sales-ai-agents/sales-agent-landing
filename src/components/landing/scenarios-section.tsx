@@ -1,10 +1,8 @@
-import { SCENARIOS, type Scenario } from "@/components/landing/data";
+import type { ScenarioCardCopy, ScenariosCopy } from "@/components/landing/copy/types";
 import { CheckIcon } from "@/components/landing/icons";
-import { Arrow, LinesHeading } from "@/components/landing/typography";
+import { Arrow, CopyHeading } from "@/components/landing/typography";
 
-const TOTAL = String(SCENARIOS.length).padStart(2, "0");
-
-function ScenarioCard({ scenario }: { scenario: Scenario }) {
+function ScenarioCard({ scenario }: { scenario: ScenarioCardCopy }) {
   return (
     <article className={`sc sc--${scenario.tone}`}>
       <div className="sc-top">
@@ -31,37 +29,33 @@ function ScenarioCard({ scenario }: { scenario: Scenario }) {
   );
 }
 
-export function ScenariosSection() {
+export function ScenariosSection({ copy }: { copy: ScenariosCopy }) {
+  const total = String(copy.cards.length).padStart(2, "0");
+
   return (
     <section className="hs" id="scenarios">
       <div className="hs-pin">
         <div className="wrap">
           <div className="meta-row mono">
-            <span>(04) Готові сценарії</span>
+            <span>{copy.meta}</span>
             <span className="hs-count">
-              <b>01</b> / {TOTAL}
+              <b>01</b> / {total}
             </span>
           </div>
           <div className="hs-title">
-            <LinesHeading
-              className="t1"
-              lines={["Дзвінки, які агент", <em key="accent">забирає одразу</em>]}
-            />
-            <p className="lead">
-              Не треба писати сценарій з нуля. Оберіть тип дзвінка, адаптуйте кілька фраз під бізнес
-              і запускайте тест.
-            </p>
+            <CopyHeading className="t1" heading={copy.heading} />
+            <p className="lead">{copy.lead}</p>
           </div>
         </div>
         <div className="hs-view">
           <div className="hs-track">
-            {SCENARIOS.map((scenario) => (
+            {copy.cards.map((scenario) => (
               <ScenarioCard key={scenario.number} scenario={scenario} />
             ))}
             <div className="hs-cta">
-              <p className="t2">Почніть з готового сценарію — фрази можна змінити під ваш бізнес</p>
+              <p className="t2">{copy.ctaText}</p>
               <a className="btn btn-blue" href="#builder">
-                Вибрати сценарій <Arrow />
+                {copy.ctaButton} <Arrow />
               </a>
             </div>
           </div>

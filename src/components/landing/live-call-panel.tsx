@@ -3,7 +3,9 @@
 import { useEffect } from "react";
 import type { RoomStatus, WebAgentSession } from "@/components/landing/api/types";
 import { useLiveKitRoom } from "@/components/landing/api/use-livekit-room";
+import { useLandingCopy } from "@/components/landing/copy/provider";
 import { useFormDialog } from "@/components/landing/use-form-dialog";
+import { formatMessage } from "@/lib/i18n/format";
 import { cn } from "@/lib/utils";
 
 interface LiveCallPanelProps {
@@ -11,24 +13,11 @@ interface LiveCallPanelProps {
   agentName: string;
 }
 
-const STATUS_LABELS: Record<RoomStatus, string> = {
-  idle: "Очікування…",
-  connecting: "Підключення…",
-  connected: "Розмова в процесі",
-  disconnected: "Дзвінок завершено",
-  error: "Помилка підключення",
-};
-
 const ACTIVE_STATUSES: readonly RoomStatus[] = ["connecting", "connected"];
 
-const resolveHint = (status: RoomStatus, agentName: string): string | null => {
-  if (status === "connected") return `Розмовляєте з ${agentName}`;
-  if (status === "connecting") return "Очікуйте підключення…";
-  if (status === "disconnected") return "Дякуємо за тестування!";
-  return null;
-};
-
 export function LiveCallPanel({ session, agentName }: LiveCallPanelProps) {
+  const { copy } = useLandingCopy();
+  const panel = copy.livePanel;
   const { status, errorMessage, disconnect } = useLiveKitRoom({
     wsUrl: session.url,
     token: session.token,
@@ -37,7 +26,12 @@ export function LiveCallPanel({ session, agentName }: LiveCallPanelProps) {
     "feedback",
     "landing_builder"
   );
-  const hint = resolveHint(status, agentName);
+  const hints: Partial<Record<RoomStatus, string>> = {
+    connected: formatMessage(panel.hintConnected, { name: agentName }),
+    connecting: panel.hintConnecting,
+    disconnected: panel.hintDone,
+  };
+  const hint = hints[status];
 
   useEffect(() => {
     if (status === "disconnected") showFeedback();
@@ -47,13 +41,13 @@ export function LiveCallPanel({ session, agentName }: LiveCallPanelProps) {
     <div className="live" role="status">
       <div className="live-state">
         <i className={cn("live-status", status)} aria-hidden="true" />
-        <b>{STATUS_LABELS[status]}</b>
+        <b>{panel.status[status]}</b>
       </div>
       {hint ? <p>{hint}</p> : null}
       {errorMessage ? <p className="form-msg err">{errorMessage}</p> : null}
       {ACTIVE_STATUSES.includes(status) ? (
         <button type="button" className="btn live-end" onClick={disconnect}>
-          Завершити дзвінок
+          {panel.end}
         </button>
       ) : null}
       {feedbackDialog}

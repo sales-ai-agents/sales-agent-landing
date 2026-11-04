@@ -1,11 +1,13 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
+import { useLandingCopy } from "@/components/landing/copy/provider";
 import { DialogShell } from "@/components/landing/dialog-shell";
 import type { FormDialogProps } from "@/components/landing/dialog-types";
 import { Arrow } from "@/components/landing/typography";
-import { FEEDBACK_MESSAGE_MAX_LENGTH, feedbackSchema } from "@/lib/schemas";
+import { buildFeedbackSchema } from "@/components/landing/schemas";
+import { FEEDBACK_MESSAGE_MAX_LENGTH } from "@/lib/schemas";
 import { trackEvent } from "@/lib/analytics";
 import { useFeedbackForm } from "@/components/landing/api/use-feedback-form";
 import "./dialogs.css";
@@ -19,6 +21,9 @@ interface FeedbackValues {
 const EMPTY_VALUES: FeedbackValues = { message: "", email: "", marketingConsent: false };
 
 export function FeedbackDialog({ open, source, onClose }: FormDialogProps) {
+  const { copy } = useLandingCopy();
+  const text = copy.dialogs.feedback;
+  const feedbackSchema = useMemo(() => buildFeedbackSchema(copy.validation), [copy.validation]);
   const [values, setValues] = useState<FeedbackValues>(EMPTY_VALUES);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
@@ -66,21 +71,17 @@ export function FeedbackDialog({ open, source, onClose }: FormDialogProps) {
     <DialogShell
       open={open}
       onClose={close}
-      title={submitted ? "Дякуємо за відгук!" : "Залиште відгук і отримайте знижку"}
-      description={
-        submitted
-          ? "Ми надішлемо вашу знижку на вказану пошту."
-          : "Напишіть, що вам сподобалось або чого не вистачило, — знижку надішлемо на пошту."
-      }
+      title={submitted ? text.doneTitle : text.title}
+      description={submitted ? text.doneDescription : text.description}
     >
       {submitted ? (
         <button type="button" className="btn btn-blue" onClick={close}>
-          Закрити
+          {copy.dialogs.done}
         </button>
       ) : (
         <form className="dlg-form" onSubmit={submit} noValidate>
           <label className="dlg-field">
-            <span className="mono">Відгук</span>
+            <span className="mono">{text.message}</span>
             <textarea
               name="message"
               rows={4}
@@ -91,7 +92,7 @@ export function FeedbackDialog({ open, source, onClose }: FormDialogProps) {
             />
           </label>
           <label className="dlg-field">
-            <span className="mono">Email</span>
+            <span className="mono">{text.email}</span>
             <input
               name="email"
               type="email"
@@ -108,13 +109,13 @@ export function FeedbackDialog({ open, source, onClose }: FormDialogProps) {
               checked={values.marketingConsent}
               onChange={update("marketingConsent")}
             />
-            <span>Погоджуюсь отримувати інформаційні та рекламні повідомлення від calls4u.ai</span>
+            <span>{text.consent}</span>
           </label>
           <p className={message ? "form-msg err" : "form-msg"} id={messageId} role="alert">
             {message}
           </p>
           <button className="btn btn-blue" type="submit" disabled={isLoading}>
-            {isLoading ? "Надсилаємо…" : "Надіслати"} <Arrow />
+            {isLoading ? text.submitting : text.submit} <Arrow />
           </button>
         </form>
       )}

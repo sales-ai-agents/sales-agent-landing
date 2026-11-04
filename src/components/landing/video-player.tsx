@@ -4,18 +4,20 @@ import { useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
-import { SIGN_UP_URL } from "@/components/landing/data";
-import { VIDEO_CHAPTERS, VIDEO_ID } from "@/components/landing/content";
+import { SIGN_UP_URL, VIDEO_ID } from "@/components/landing/data";
+import { useLandingCopy } from "@/components/landing/copy/provider";
 import { CheckIcon, PlayIcon, StrokeIcon } from "@/components/landing/icons";
 import { Arrow } from "@/components/landing/typography";
 
 const formatChapter = (seconds: number): string =>
   `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 
-const embedUrl = (startSeconds: number): string =>
-  `https://www.youtube-nocookie.com/embed/${VIDEO_ID}?autoplay=1&rel=0&modestbranding=1&start=${startSeconds}`;
+const embedUrl = (startSeconds: number, language: string): string =>
+  `https://www.youtube-nocookie.com/embed/${VIDEO_ID}?autoplay=1&rel=0&modestbranding=1&hl=${language}&start=${startSeconds}`;
 
 export function VideoPlayer() {
+  const { locale, copy } = useLandingCopy();
+  const video = copy.video;
   const [startAt, setStartAt] = useState<number | null>(null);
   const [activeChapter, setActiveChapter] = useState<number | null>(null);
   const isPlaying = startAt !== null;
@@ -37,16 +39,17 @@ export function VideoPlayer() {
           {isPlaying ? (
             <iframe
               key={startAt}
-              src={embedUrl(startAt)}
-              title="Відео Calls4U: де бізнес втрачає клієнтів на дзвінках"
+              src={embedUrl(startAt, locale)}
+              title={video.iframeTitle}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
+              referrerPolicy="strict-origin-when-cross-origin"
             />
           ) : (
             <button
               type="button"
               className="vid-start"
-              aria-label="Дивитися відео: де бізнес втрачає гроші на дзвінках"
+              aria-label={video.startLabel}
               onClick={() => play(0)}
             >
               <Image
@@ -67,8 +70,8 @@ export function VideoPlayer() {
             <StrokeIcon name="phoneMissed" weight={2.2} />
           </i>
           <div>
-            <b>Пропущений дзвінок</b>
-            <small>Сьогодні, 19:42</small>
+            <b>{video.missedTitle}</b>
+            <small>{video.missedTime}</small>
           </div>
         </div>
         <div className="vid-chip b">
@@ -76,15 +79,15 @@ export function VideoPlayer() {
             <CheckIcon />
           </i>
           <div>
-            <b>ШІ-агент передзвонив</b>
-            <small>через 30 секунд · запис підтверджено</small>
+            <b>{video.callbackTitle}</b>
+            <small>{video.callbackNote}</small>
           </div>
         </div>
       </div>
 
       <div className="vid-r" data-r="">
         <div className="chapters">
-          {VIDEO_CHAPTERS.map((chapter) => (
+          {video.chapters.map((chapter) => (
             <button
               key={chapter.startSeconds}
               type="button"
@@ -98,7 +101,7 @@ export function VideoPlayer() {
           ))}
         </div>
         <a className="btn btn-blue" href={SIGN_UP_URL}>
-          Спробувати безкоштовно <Arrow />
+          {video.signUp} <Arrow />
         </a>
       </div>
     </div>

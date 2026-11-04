@@ -1,13 +1,13 @@
-import { STAT_CARDS } from "@/components/landing/data";
+import type { NumbersCopy } from "@/components/landing/copy/types";
 import { CountValue, MetaRow } from "@/components/landing/typography";
 
-export function NumbersSection() {
+export function NumbersSection({ copy }: { copy: NumbersCopy }) {
   return (
     <section className="sec sec--intro">
       <div className="wrap">
-        <MetaRow left="(03) У цифрах" right="Що отримує бізнес" />
+        <MetaRow left={copy.meta} right={copy.metaRight} />
         <div className="nums">
-          {STAT_CARDS.map((stat) => (
+          {copy.stats.map((stat) => (
             <div className="num" data-r="" key={stat.description}>
               <div className="v t1">
                 {stat.count === undefined ? stat.value : <CountValue value={stat.count} />}

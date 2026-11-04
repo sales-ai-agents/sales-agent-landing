@@ -1,27 +1,23 @@
 import { SIGN_UP_URL } from "@/components/landing/data";
+import type { HeroCopy } from "@/components/landing/copy/types";
 import { HeroCallCard } from "@/components/landing/hero-call-card";
 import { HeroWave } from "@/components/landing/hero-wave";
-import { PlayIcon, StrokeIcon, type StrokeIconName } from "@/components/landing/icons";
+import { PlayIcon, StrokeIcon } from "@/components/landing/icons";
 import { Arrow, CountValue, countLetters, SplitLetters } from "@/components/landing/typography";
 
-const HERO_TITLE_LINES = ["ШІ-агент", "дзвонить", " за вас"] as const;
-const [FIRST_LINE_OFFSET, SECOND_LINE_OFFSET, THIRD_LINE_OFFSET] = HERO_TITLE_LINES.reduce<
-  number[]
->(
-  (offsets, line, index) => [
-    ...offsets,
-    index === 0 ? 0 : offsets[index - 1] + countLetters(HERO_TITLE_LINES[index - 1]),
-  ],
-  []
-);
+const getLineOffsets = (lines: readonly string[]): number[] =>
+  lines.reduce<number[]>(
+    (offsets, _line, index) => [
+      ...offsets,
+      index === 0 ? 0 : offsets[index - 1] + countLetters(lines[index - 1]),
+    ],
+    []
+  );
 
-const HERO_CHIPS: readonly { icon: StrokeIconName; label: string }[] = [
-  { icon: "clock", label: "Запуск за 1 день" },
-  { icon: "link", label: "Інтеграція з CRM" },
-  { icon: "phone", label: "Дзвінки 24/7" },
-];
+export function HeroSection({ copy }: { copy: HeroCopy }) {
+  const [first, second, third] = copy.titleLines;
+  const [firstOffset, secondOffset, thirdOffset] = getLineOffsets(copy.titleLines);
 
-export function HeroSection() {
   return (
     <section className="hero2" id="hero">
       <div className="stage">
@@ -32,28 +28,28 @@ export function HeroSection() {
         </div>
 
         <div className="stage-meta mono">
-          <span>(01) Голосовий ШІ-агент</span>
-          <span>Україна · Дзвінки 24/7</span>
+          <span>{copy.metaLeft}</span>
+          <span>{copy.metaCenter}</span>
           <span className="live-dot">
             <i />
-            Агент на лінії
+            {copy.metaLive}
           </span>
         </div>
 
         <h1 className="hero-title t1">
-          <span className="sr-only">ШІ-агент дзвонить за вас</span>
+          <span className="sr-only">{copy.srTitle}</span>
           <span className="ln" aria-hidden="true">
             <span>
-              <SplitLetters text={HERO_TITLE_LINES[0]} startIndex={FIRST_LINE_OFFSET} />
+              <SplitLetters text={first} startIndex={firstOffset} />
             </span>
           </span>
           <span className="ln" aria-hidden="true">
             <span>
               <em>
-                <SplitLetters text={HERO_TITLE_LINES[1]} startIndex={SECOND_LINE_OFFSET} />
+                <SplitLetters text={second} startIndex={secondOffset} />
               </em>
               <br className="br-m" />
-              <SplitLetters text={HERO_TITLE_LINES[2]} startIndex={THIRD_LINE_OFFSET} />
+              <SplitLetters text={third} startIndex={thirdOffset} />
             </span>
           </span>
         </h1>
@@ -66,20 +62,20 @@ export function HeroSection() {
             </div>
             <div className="hero-copy">
               <p>
-                <strong>часу менеджера звільняється.</strong> Агент сам телефонує клієнтам, уточнює
-                деталі й передає результат у CRM. Без програмістів і ручного обдзвону.
+                <strong>{copy.leadStrong}</strong>
+                {copy.leadRest}
               </p>
               <div className="hero-btns">
                 <a className="btn btn-blue" href={SIGN_UP_URL}>
-                  Спробувати безкоштовно <Arrow />
+                  {copy.signUp} <Arrow />
                 </a>
                 <a className="btn btn-ghost" href="#demo">
                   <PlayIcon width={14} height={14} />
-                  Прослухати демо
+                  {copy.listenDemo}
                 </a>
               </div>
               <div className="chips">
-                {HERO_CHIPS.map((chip) => (
+                {copy.chips.map((chip) => (
                   <span className="chip" key={chip.label}>
                     <StrokeIcon name={chip.icon} />
                     {chip.label}

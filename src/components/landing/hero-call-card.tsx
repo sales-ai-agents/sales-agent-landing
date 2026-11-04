@@ -1,6 +1,7 @@
 "use client";
 
 import { useId } from "react";
+import { useLandingCopy } from "@/components/landing/copy/provider";
 import { useFormDialog } from "@/components/landing/use-form-dialog";
 import { cn } from "@/lib/utils";
 import { PhoneInput } from "@/components/landing/phone-input";
@@ -8,6 +9,8 @@ import { Arrow } from "@/components/landing/typography";
 import { useTestCall } from "@/components/landing/use-test-call";
 
 export function HeroCallCard() {
+  const { copy } = useLandingCopy();
+  const card = copy.heroCard;
   const { value, onChange, onSubmit, status, message, isLoading } = useTestCall("landing_hero");
   const messageId = useId();
   const { show: showFeedback, dialog: feedbackDialog } = useFormDialog(
@@ -19,14 +22,15 @@ export function HeroCallCard() {
     <>
       <form className="call-card" id="heroForm" onSubmit={onSubmit} noValidate>
         <div className="cc-top mono">
-          <span>Тест у реальному часі</span>
+          <span>{card.topLabel}</span>
           <span className="live-dot">
             <i />
             00:20
           </span>
         </div>
         <p className="cc-title t2">
-          Введіть номер — агент <em>зателефонує за 20 секунд</em>
+          {card.titleLead}
+          <em>{card.titleAccent}</em>
         </p>
         <label className="phone-field">
           <span className="cc">+380</span>
@@ -38,7 +42,7 @@ export function HeroCallCard() {
           />
         </label>
         <button className="btn btn-blue" type="submit" disabled={isLoading}>
-          Запустити тестовий дзвінок <Arrow />
+          {card.submit} <Arrow />
         </button>
         <div
           className={cn("form-msg", status === "ok" && "ok", status === "error" && "err")}
@@ -48,22 +52,23 @@ export function HeroCallCard() {
           {message}
           {status === "ok" ? (
             <button type="button" className="form-msg-action" onClick={showFeedback}>
-              Отримати розрахунок
+              {card.getEstimate}
             </button>
           ) : null}
         </div>
         <div className="call-foot">
           <span className="call-foot-lead">
             <span className="avatars">
-              <span>О</span>
-              <span>І</span>
-              <span>С</span>
+              {card.avatars.map((initial) => (
+                <span key={initial}>{initial}</span>
+              ))}
             </span>
             <span>
-              Вже протестували <b>200+ компаній</b>
+              {card.footLead}
+              <b>{card.footStrong}</b>
             </span>
           </span>
-          <span>Один дзвінок. Без спаму.</span>
+          <span>{card.footNote}</span>
         </div>
       </form>
       {feedbackDialog}

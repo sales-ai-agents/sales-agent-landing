@@ -6,6 +6,7 @@ import { ArticleToc } from "@/components/blog/article-toc";
 import { CopyLinkButton } from "@/components/blog/copy-link-button";
 import { ReadingProgress } from "@/components/blog/reading-progress";
 import { buildPostGraph } from "@/components/blog/structured-data";
+import { getLandingCopy } from "@/components/landing/copy";
 import { FinalCtaSection } from "@/components/landing/final-cta-section";
 import { LandingFooter } from "@/components/landing/landing-footer";
 import { LandingNav } from "@/components/landing/landing-nav";
@@ -13,76 +14,81 @@ import { PostCard } from "@/components/landing/post-card";
 import { PostCoverArt } from "@/components/landing/post-cover";
 import { Arrow, MetaRow, NoWrapAiTerms } from "@/components/landing/typography";
 import { JsonLd } from "@/components/landing/json-ld";
-import {
-  BLOG_BASE_PATH,
-  BLOG_POSTS,
-  formatPostDate,
-  formatReadTime,
-  getPostBySlug,
-  getPostPath,
-  getRelatedPosts,
-} from "@/content/blog/posts";
-import { INDEXABLE_ROBOTS, OG_IMAGE, OG_LOCALES } from "@/lib/seo";
-import { LANDING_PATH, SITE_NAME, SITE_URL } from "@/lib/site";
+import { formatPostDate, getPostBySlug, getPostSlugs, getRelatedPosts } from "@/content/blog/posts";
+import { isLocale } from "@/lib/i18n/config";
+import { formatMessage } from "@/lib/i18n/format";
+import { blogPath, landingPath, languageAlternates, postPath, postUrl } from "@/lib/i18n/paths";
+import { buildOgImage, buildOgLocales, INDEXABLE_ROBOTS } from "@/lib/seo";
+import { SITE_NAME } from "@/lib/site";
 
 const RELATED_POSTS_COUNT = 3;
 
 interface ArticlePageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }
 
 export const dynamicParams = false;
 
 export function generateStaticParams(): { slug: string }[] {
-  return BLOG_POSTS.map((post) => ({ slug: post.slug }));
+  return getPostSlugs().map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const { locale, slug } = await params;
+  if (!isLocale(locale)) return {};
+  const post = getPostBySlug(locale, slug);
   if (!post) return {};
-  const url = `${SITE_URL}${getPostPath(post)}`;
+  const image = buildOgImage(getLandingCopy(locale).seo.ogImageAlt);
 
   return {
     title: post.title,
     description: post.excerpt,
-    alternates: { canonical: getPostPath(post), languages: { "uk-UA": url, "x-default": url } },
+    alternates: {
+      canonical: postPath(locale, slug),
+      languages: languageAlternates((candidate) => postUrl(candidate, slug)),
+    },
     robots: INDEXABLE_ROBOTS,
     openGraph: {
       type: "article",
       title: post.title,
       description: post.excerpt,
-      url,
+      url: postUrl(locale, slug),
       siteName: SITE_NAME,
-      images: [OG_IMAGE],
+      images: [image],
       publishedTime: post.publishedAt,
       modifiedTime: post.updatedAt,
       section: post.category,
       authors: [SITE_NAME],
-      ...OG_LOCALES,
+      ...buildOgLocales(locale),
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.excerpt,
-      images: [OG_IMAGE.url],
+      images: [image.url],
     },
   };
 }
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
-  const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const { locale, slug } = await params;
+  if (!isLocale(locale)) notFound();
+  const post = getPostBySlug(locale, slug);
   if (!post) notFound();
+
+  const copy = getLandingCopy(locale);
+  const article = copy.blog.article;
+  const readTime = formatMessage(copy.client.blog.readTime, { minutes: post.readMinutes });
+  const startTest = `${landingPath(locale)}#top`;
 
   return (
     <>
       <ReadingProgress />
-      <LandingNav basePath={LANDING_PATH} />
+      <LandingNav basePath={landingPath(locale)} />
       <main id="main">
         <header className="art-head wrap">
-          <nav className="crumbs mono" aria-label="Навігаційний ланцюжок">
-            <Link href={BLOG_BASE_PATH}>Блог</Link>
+          <nav className="crumbs mono" aria-label={article.crumbsLabel}>
+            <Link href={blogPath(locale)}>{copy.blog.index.heading}</Link>
             <span aria-hidden="true">/</span>
             <span className="tag">{post.category}</span>
           </nav>
@@ -94,37 +100,37 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               <span className="av" aria-hidden="true">
                 C
               </span>
-              Команда {SITE_NAME}
+              {article.team}
             </span>
-            <time dateTime={post.publishedAt}>{formatPostDate(post.publishedAt)}</time>
-            <span>{formatReadTime(post)} читання</span>
+            <time dateTime={post.publishedAt}>{formatPostDate(locale, post.publishedAt)}</time>
+            <span>{readTime}</span>
           </div>
         </header>
 
         <div className="wrap art-cover">
-          <PostCoverArt cover={post.cover} />
+          <PostCoverArt cover={post.cover} copy={copy.client.blog.covers} />
         </div>
 
         <div className="wrap art-layout">
           <ArticleToc items={getHeadings(post.blocks)} />
           <article className="prose" data-article-body="">
-            <ArticleBody blocks={post.blocks} />
+            <ArticleBody blocks={post.blocks} speakers={copy.client.speakers} />
             <div className="art-cta">
-              <span className="mono">Перевірте на практиці</span>
-              <b>Почуйте агента на своєму сценарії</b>
-              <p>Введіть номер — агент зателефонує за 20 секунд. Без спаму та передачі бази.</p>
-              <a className="btn btn-white" href={`${LANDING_PATH}#top`}>
-                Запустити тестовий дзвінок <Arrow />
+              <span className="mono">{article.bottomCtaKicker}</span>
+              <b>{article.bottomCtaTitle}</b>
+              <p>{article.bottomCtaText}</p>
+              <a className="btn btn-white" href={startTest}>
+                {article.ctaButton} <Arrow />
               </a>
             </div>
           </article>
           <aside className="art-side">
             <div className="side-cta">
-              <span className="mono">Спробуйте самі</span>
-              <b>Агент зателефонує вам за 20 секунд</b>
-              <p>Один тестовий дзвінок — і ви почуєте, як звучить розмова з вашими клієнтами.</p>
-              <a className="btn btn-white" href={`${LANDING_PATH}#top`}>
-                Тестовий дзвінок <Arrow />
+              <span className="mono">{article.sideCtaKicker}</span>
+              <b>{article.sideCtaTitle}</b>
+              <p>{article.sideCtaText}</p>
+              <a className="btn btn-white" href={startTest}>
+                {article.sideCtaButton} <Arrow />
               </a>
             </div>
             <div className="share">
@@ -135,19 +141,27 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
         <section className="sec how related">
           <div className="wrap">
-            <MetaRow left="Читайте також" right={<Link href={BLOG_BASE_PATH}>Усі статті →</Link>} />
+            <MetaRow
+              left={article.related}
+              right={<Link href={blogPath(locale)}>{article.allArticles}</Link>}
+            />
             <div className="posts">
-              {getRelatedPosts(post, RELATED_POSTS_COUNT).map((related) => (
-                <PostCard key={related.slug} post={related} />
+              {getRelatedPosts(locale, post, RELATED_POSTS_COUNT).map((related) => (
+                <PostCard
+                  key={related.slug}
+                  post={related}
+                  locale={locale}
+                  copy={copy.client.blog}
+                />
               ))}
             </div>
           </div>
         </section>
 
-        <FinalCtaSection />
+        <FinalCtaSection copy={copy.finalCta} />
       </main>
-      <LandingFooter basePath={LANDING_PATH} />
-      <JsonLd data={buildPostGraph(post)} />
+      <LandingFooter locale={locale} basePath={landingPath(locale)} />
+      <JsonLd data={buildPostGraph(locale, post)} />
     </>
   );
 }

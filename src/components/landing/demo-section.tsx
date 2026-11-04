@@ -1,9 +1,9 @@
-import { Fragment } from "react";
 import Image from "next/image";
+import type { DemoSectionCopy } from "@/components/landing/copy/types";
 import { DemoPlayer } from "@/components/landing/demo-player";
-import { LinesHeading, MetaRow } from "@/components/landing/typography";
+import { CopyHeading, MetaRow } from "@/components/landing/typography";
 
-export function DemoSection() {
+export function DemoSection({ copy }: { copy: DemoSectionCopy }) {
   return (
     <section className="demo-sec" id="demo">
       <div className="slab">
@@ -17,20 +17,11 @@ export function DemoSection() {
           sizes="(max-width: 1600px) 60vw, 960px"
         />
         <div className="wrap">
-          <MetaRow left="(02) Послухайте самі" right="Реальні сценарії розмов" />
+          <MetaRow left={copy.meta} right={copy.metaRight} />
           <div className="sec-head">
-            <LinesHeading
-              className="h2 t1"
-              lines={[
-                "Не презентація,",
-                <Fragment key="accent">
-                  а <em>живий дзвінок</em>
-                </Fragment>,
-              ]}
-            />
+            <CopyHeading className="h2 t1" heading={copy.heading} />
             <p className="lead" data-r="">
-              Послухайте, як агент підтверджує запис, ставить уточнювальні питання і фіксує
-              результат у кабінеті.
+              {copy.lead}
             </p>
           </div>
           <div className="demo-grid">

@@ -9,7 +9,12 @@ export const getHeadings = (blocks: readonly PostBlock[]): { id: string; label: 
     .filter((block) => block.type === "heading")
     .map((block, index) => ({ id: getHeadingId(index + 1), label: block.text }));
 
-function renderBlock(block: PostBlock, headingPosition: number) {
+interface Speakers {
+  readonly agent: string;
+  readonly client: string;
+}
+
+function renderBlock(block: PostBlock, headingPosition: number, speakers: Speakers) {
   switch (block.type) {
     case "lead":
       return <p className="lead-p">{block.text}</p>;
@@ -43,7 +48,7 @@ function renderBlock(block: PostBlock, headingPosition: number) {
               key={`${line.speaker}-${line.text}`}
               className={`msg ${line.speaker === "agent" ? "a" : "c"}`}
             >
-              <small>{line.speaker === "agent" ? "ШІ-агент" : "Клієнт"}</small>
+              <small>{speakers[line.speaker]}</small>
               {line.text}
             </div>
           ))}
@@ -59,13 +64,18 @@ const countHeadingsUpTo = (blocks: readonly PostBlock[]): number[] =>
     return positions;
   }, []);
 
-export function ArticleBody({ blocks }: { blocks: readonly PostBlock[] }) {
+interface ArticleBodyProps {
+  blocks: readonly PostBlock[];
+  speakers: Speakers;
+}
+
+export function ArticleBody({ blocks, speakers }: ArticleBodyProps) {
   const headingPositions = countHeadingsUpTo(blocks);
 
   return (
     <>
       {blocks.map((block, index) => (
-        <Fragment key={index}>{renderBlock(block, headingPositions[index])}</Fragment>
+        <Fragment key={index}>{renderBlock(block, headingPositions[index], speakers)}</Fragment>
       ))}
     </>
   );

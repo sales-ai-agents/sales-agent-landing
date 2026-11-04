@@ -1,3 +1,4 @@
+import type { DemoScenarioId } from "@/components/landing/copy/client-types";
 import type { Speaker } from "@/components/landing/data";
 
 export interface DemoLine {
@@ -7,10 +8,7 @@ export interface DemoLine {
 }
 
 export interface DemoScenario {
-  readonly id: string;
+  readonly id: DemoScenarioId;
   readonly audioSrc: string;
-  readonly tag: string;
-  readonly title: string;
-  readonly result: string;
   readonly chat: readonly DemoLine[];
 }

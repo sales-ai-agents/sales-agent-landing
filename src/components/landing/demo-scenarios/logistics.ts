@@ -4,9 +4,6 @@ import type { DemoScenario } from "@/components/landing/demo-scenarios/types";
 export const LOGISTICS_SCENARIO: DemoScenario = {
   id: "logistics",
   audioSrc: "/audio/demo-5.ogg",
-  tag: "Логістика",
-  title: "Створення замовлення для відправки",
-  result: "Замовлення створено",
   chat: [
     agent(0.2, "Доброго дня. Це Віталія з відділу логістики. Чим можу допомогти?"),
     client(

@@ -1,13 +1,10 @@
-import { BLOG_BASE_PATH, BLOG_POSTS, getPostPath } from "@/content/blog/posts";
+import { getLandingCopy } from "@/components/landing/copy";
+import { getPosts } from "@/content/blog/posts";
 import type { BlogPost } from "@/content/blog/types";
+import type { Locale } from "@/lib/i18n/config";
+import { blogUrl, homeUrl, postUrl } from "@/lib/i18n/paths";
 import { isoDate } from "@/lib/seo";
-import {
-  SITE_NAME,
-  SITE_OG_IMAGE,
-  SITE_ORGANIZATION_ID,
-  SITE_URL,
-  SITE_WEBSITE_ID,
-} from "@/lib/site";
+import { SITE_OG_IMAGE, SITE_ORGANIZATION_ID, SITE_URL, SITE_WEBSITE_ID } from "@/lib/site";
 import {
   buildBreadcrumbNode,
   buildGraph,
@@ -15,11 +12,7 @@ import {
   buildWebsiteNode,
 } from "@/lib/structured-data";
 
-export const BLOG_URL = `${SITE_URL}${BLOG_BASE_PATH}`;
-
 const OG_IMAGE_URL = `${SITE_URL}${SITE_OG_IMAGE}`;
-const HOME_BREADCRUMB = { name: "Головна", url: SITE_URL };
-const BLOG_BREADCRUMB = { name: "Блог", url: BLOG_URL };
 
 const countWords = (post: BlogPost): number =>
   post.blocks
@@ -32,21 +25,23 @@ const countWords = (post: BlogPost): number =>
     .split(/\s+/)
     .filter(Boolean).length;
 
-export const buildPostGraph = (post: BlogPost): object => {
-  const url = `${SITE_URL}${getPostPath(post)}`;
+export const buildPostGraph = (locale: Locale, post: BlogPost): object => {
+  const copy = getLandingCopy(locale);
+  const url = postUrl(locale, post.slug);
+  const blogPageUrl = blogUrl(locale);
   const pageId = `${url}#webpage`;
   const breadcrumbId = `${url}#breadcrumb`;
 
   return buildGraph([
-    buildOrganizationNode(),
-    buildWebsiteNode(),
+    buildOrganizationNode(copy.seo.organizationDescription),
+    buildWebsiteNode(locale),
     {
       "@type": "WebPage",
       "@id": pageId,
       url,
       name: post.title,
       description: post.excerpt,
-      inLanguage: "uk",
+      inLanguage: locale,
       isPartOf: { "@id": SITE_WEBSITE_ID },
       breadcrumb: { "@id": breadcrumbId },
       primaryImageOfPage: { "@type": "ImageObject", url: OG_IMAGE_URL },
@@ -63,54 +58,58 @@ export const buildPostGraph = (post: BlogPost): object => {
       dateModified: isoDate(post.updatedAt),
       author: { "@id": SITE_ORGANIZATION_ID },
       publisher: { "@id": SITE_ORGANIZATION_ID },
-      inLanguage: "uk",
+      inLanguage: locale,
       articleSection: post.category,
       wordCount: countWords(post),
       timeRequired: `PT${post.readMinutes}M`,
-      isPartOf: { "@type": "Blog", "@id": `${BLOG_URL}#blog`, name: `Блог ${SITE_NAME}` },
+      isPartOf: { "@type": "Blog", "@id": `${blogPageUrl}#blog`, name: copy.blog.name },
     },
     buildBreadcrumbNode(breadcrumbId, [
-      HOME_BREADCRUMB,
-      BLOG_BREADCRUMB,
+      { name: copy.seo.breadcrumbHome, url: homeUrl(locale) },
+      { name: copy.blog.index.heading, url: blogPageUrl },
       { name: post.title, url },
     ]),
   ]);
 };
 
-export const buildBlogIndexGraph = (): object => {
-  const pageId = `${BLOG_URL}#webpage`;
-  const breadcrumbId = `${BLOG_URL}#breadcrumb`;
+export const buildBlogIndexGraph = (locale: Locale): object => {
+  const copy = getLandingCopy(locale);
+  const url = blogUrl(locale);
+  const pageId = `${url}#webpage`;
+  const breadcrumbId = `${url}#breadcrumb`;
 
   return buildGraph([
-    buildOrganizationNode(),
-    buildWebsiteNode(),
+    buildOrganizationNode(copy.seo.organizationDescription),
+    buildWebsiteNode(locale),
     {
       "@type": "CollectionPage",
       "@id": pageId,
-      url: BLOG_URL,
-      name: `Блог ${SITE_NAME} — дзвінки, продажі та ШІ`,
-      description:
-        "Гайди, розрахунки і практичні поради про автоматизацію дзвінків, голосових ШІ-агентів і продажі по телефону.",
-      inLanguage: "uk",
+      url,
+      name: copy.blog.index.title,
+      description: copy.blog.index.schemaDescription,
+      inLanguage: locale,
       isPartOf: { "@id": SITE_WEBSITE_ID },
       breadcrumb: { "@id": breadcrumbId },
-      mainEntity: { "@id": `${BLOG_URL}#blog` },
+      mainEntity: { "@id": `${url}#blog` },
     },
     {
       "@type": "Blog",
-      "@id": `${BLOG_URL}#blog`,
-      url: BLOG_URL,
-      name: `Блог ${SITE_NAME}`,
-      inLanguage: "uk",
+      "@id": `${url}#blog`,
+      url,
+      name: copy.blog.name,
+      inLanguage: locale,
       publisher: { "@id": SITE_ORGANIZATION_ID },
-      blogPost: BLOG_POSTS.map((post) => ({
+      blogPost: getPosts(locale).map((post) => ({
         "@type": "BlogPosting",
-        "@id": `${SITE_URL}${getPostPath(post)}#article`,
+        "@id": `${postUrl(locale, post.slug)}#article`,
         headline: post.title,
-        url: `${SITE_URL}${getPostPath(post)}`,
+        url: postUrl(locale, post.slug),
         datePublished: isoDate(post.publishedAt),
       })),
     },
-    buildBreadcrumbNode(breadcrumbId, [HOME_BREADCRUMB, BLOG_BREADCRUMB]),
+    buildBreadcrumbNode(breadcrumbId, [
+      { name: copy.seo.breadcrumbHome, url: homeUrl(locale) },
+      { name: copy.blog.index.heading, url },
+    ]),
   ]);
 };

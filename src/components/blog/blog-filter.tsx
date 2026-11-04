@@ -2,26 +2,34 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useLandingCopy } from "@/components/landing/copy/provider";
 import type { BlogPost } from "@/content/blog/types";
 import { PostCard } from "@/components/landing/post-card";
-
-const ALL_CATEGORIES = "Усі";
 
 interface BlogFilterProps {
   posts: readonly BlogPost[];
 }
 
 export function BlogFilter({ posts }: BlogFilterProps) {
-  const [category, setCategory] = useState(ALL_CATEGORIES);
-  const categories = [ALL_CATEGORIES, ...new Set(posts.map((post) => post.category))];
+  const { locale, copy } = useLandingCopy();
+  const [category, setCategory] = useState<string | null>(null);
+  const categories = [...new Set(posts.map((post) => post.category))];
 
-  const countFor = (name: string): number =>
-    name === ALL_CATEGORIES ? posts.length : posts.filter((post) => post.category === name).length;
+  const countFor = (name: string): number => posts.filter((post) => post.category === name).length;
 
   return (
     <>
-      <h2 className="sr-only">Статті блогу</h2>
-      <div className="filters" role="group" aria-label="Категорії статей">
+      <h2 className="sr-only">{copy.blog.listHeading}</h2>
+      <div className="filters" role="group" aria-label={copy.blog.categoriesLabel}>
+        <button
+          type="button"
+          className={cn(category === null && "on")}
+          aria-pressed={category === null}
+          onClick={() => setCategory(null)}
+        >
+          {copy.blog.all}
+          <span className="cnt">{posts.length}</span>
+        </button>
         {categories.map((name) => (
           <button
             key={name}
@@ -40,8 +48,10 @@ export function BlogFilter({ posts }: BlogFilterProps) {
           <PostCard
             key={post.slug}
             post={post}
+            locale={locale}
+            copy={copy.blog}
             variant={index === 0 ? "post--feat" : "default"}
-            hidden={category !== ALL_CATEGORIES && post.category !== category}
+            hidden={category !== null && post.category !== category}
           />
         ))}
       </div>

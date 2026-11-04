@@ -1,13 +1,15 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
+import { useLandingCopy } from "@/components/landing/copy/provider";
 import { DialogShell } from "@/components/landing/dialog-shell";
 import type { FormDialogProps } from "@/components/landing/dialog-types";
 import { formatPhoneInput, extractSubscriberDigits } from "@/components/landing/phone";
 import { PhoneInput } from "@/components/landing/phone-input";
 import { Arrow } from "@/components/landing/typography";
-import { LEAD_FIELD_MAX_LENGTH, leadSchema } from "@/lib/schemas";
+import { buildLeadSchema } from "@/components/landing/schemas";
+import { LEAD_FIELD_MAX_LENGTH } from "@/lib/schemas";
 import { trackEvent } from "@/lib/analytics";
 import { useLeadForm } from "@/components/landing/api/use-lead-form";
 import "./dialogs.css";
@@ -25,6 +27,9 @@ interface LeadValues {
 const EMPTY_VALUES: LeadValues = { name: "", phone: "", niche: "", contact: "" };
 
 export function LeadDialog({ open, source, onClose }: FormDialogProps) {
+  const { copy } = useLandingCopy();
+  const text = copy.dialogs.lead;
+  const leadSchema = useMemo(() => buildLeadSchema(copy.validation), [copy.validation]);
   const [values, setValues] = useState<LeadValues>(EMPTY_VALUES);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
@@ -77,21 +82,17 @@ export function LeadDialog({ open, source, onClose }: FormDialogProps) {
     <DialogShell
       open={open}
       onClose={close}
-      title={submitted ? "Дякуємо за заявку!" : "Отримайте розрахунок ШІ-агента"}
-      description={
-        submitted
-          ? "Менеджер зв'яжеться з вами найближчим часом."
-          : "Покажемо, які процеси автоматизуємо, порахуємо економію часу та бюджету й запропонуємо простий сценарій."
-      }
+      title={submitted ? text.doneTitle : text.title}
+      description={submitted ? text.doneDescription : text.description}
     >
       {submitted ? (
         <button type="button" className="btn btn-blue" onClick={close}>
-          Закрити
+          {copy.dialogs.done}
         </button>
       ) : (
         <form className="dlg-form" onSubmit={submit} noValidate>
           <label className="dlg-field">
-            <span className="mono">Ім&apos;я</span>
+            <span className="mono">{text.name}</span>
             <input
               name="name"
               autoComplete="name"
@@ -103,7 +104,7 @@ export function LeadDialog({ open, source, onClose }: FormDialogProps) {
             />
           </label>
           <label className="dlg-field">
-            <span className="mono">Телефон</span>
+            <span className="mono">{text.phone}</span>
             <span className="dlg-phone">
               <span className="cc">{COUNTRY_CODE}</span>
               <PhoneInput
@@ -115,7 +116,7 @@ export function LeadDialog({ open, source, onClose }: FormDialogProps) {
             </span>
           </label>
           <label className="dlg-field">
-            <span className="mono">Сфера діяльності</span>
+            <span className="mono">{text.niche}</span>
             <input
               name="niche"
               maxLength={LEAD_FIELD_MAX_LENGTH}
@@ -124,7 +125,7 @@ export function LeadDialog({ open, source, onClose }: FormDialogProps) {
             />
           </label>
           <label className="dlg-field">
-            <span className="mono">Telegram / email</span>
+            <span className="mono">{text.contact}</span>
             <input
               name="contact"
               autoComplete="email"
@@ -137,10 +138,10 @@ export function LeadDialog({ open, source, onClose }: FormDialogProps) {
             {message}
           </p>
           <button className="btn btn-blue" type="submit" disabled={isLoading}>
-            {isLoading ? "Надсилаємо…" : "Отримати розрахунок"} <Arrow />
+            {isLoading ? text.submitting : text.submit} <Arrow />
           </button>
           <a className="dlg-alt" href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer">
-            Або напишіть у Telegram
+            {text.telegram}
           </a>
         </form>
       )}

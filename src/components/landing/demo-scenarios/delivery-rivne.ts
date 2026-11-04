@@ -6,9 +6,6 @@ const MASKED_PHONE = "096 ••• •• ••";
 export const DELIVERY_RIVNE_SCENARIO: DemoScenario = {
   id: "delivery",
   audioSrc: "/audio/demo-1.ogg",
-  tag: "Служба доставки",
-  title: "Підтвердження доставки",
-  result: "Доставку підтверджено",
   chat: [
     agent(
       1.3,

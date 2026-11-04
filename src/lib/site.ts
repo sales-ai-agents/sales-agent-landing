@@ -28,4 +28,3 @@ export const SITE_WEBSITE_ID = `${SITE_URL}/#website`;
 
 export const LANDING_IS_PUBLIC = false;
 export const LANDING_PATH = "/landing";
-export const LANDING_URL = `${SITE_URL}${LANDING_PATH}`;

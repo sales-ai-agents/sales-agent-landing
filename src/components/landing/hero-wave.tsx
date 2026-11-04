@@ -3,7 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 import { cn } from "@/lib/utils";
-import { HERO_TRANSCRIPT, type Speaker } from "@/components/landing/data";
+import type { HeroWaveLine } from "@/components/landing/copy/client-types";
+import { useLandingCopy } from "@/components/landing/copy/provider";
+import type { Speaker } from "@/components/landing/data";
 import { prefersReducedMotion } from "@/components/landing/motion/shared";
 import {
   createWaveState,
@@ -75,9 +77,10 @@ function useWaveCanvas(
 function useTypedTranscript(
   stageRef: RefObject<HTMLDivElement | null>,
   textRef: RefObject<HTMLSpanElement | null>,
-  stateRef: RefObject<WaveState>
+  stateRef: RefObject<WaveState>,
+  transcript: readonly HeroWaveLine[]
 ): Speaker {
-  const [speaker, setSpeaker] = useState<Speaker>(HERO_TRANSCRIPT[0].speaker);
+  const [speaker, setSpeaker] = useState<Speaker>(transcript[0].speaker);
 
   useEffect(() => {
     const stage = stageRef.current;
@@ -96,7 +99,7 @@ function useTypedTranscript(
 
     const tick = (): void => {
       if (!visible) return;
-      const line = HERO_TRANSCRIPT[lineIndex];
+      const line = transcript[lineIndex];
       if (typedLength === 0) startLine(line.speaker);
       typedLength = reduce ? line.text.length : typedLength + 1;
       textNode.textContent = line.text.slice(0, typedLength);
@@ -104,7 +107,7 @@ function useTypedTranscript(
         timer = setTimeout(tick, TYPING_BASE_MS + Math.random() * TYPING_JITTER_MS);
         return;
       }
-      lineIndex = (lineIndex + 1) % HERO_TRANSCRIPT.length;
+      lineIndex = (lineIndex + 1) % transcript.length;
       typedLength = 0;
       timer = setTimeout(tick, LINE_PAUSE_MS);
     };
@@ -121,17 +124,19 @@ function useTypedTranscript(
       observer.disconnect();
       clearTimeout(timer);
     };
-  }, [stageRef, textRef, stateRef]);
+  }, [stageRef, textRef, stateRef, transcript]);
 
   return speaker;
 }
 
 export function HeroWave() {
+  const { copy } = useLandingCopy();
+  const wave = copy.heroWave;
   const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const stateRef = useRef<WaveState>(createWaveState());
-  const speaker = useTypedTranscript(stageRef, textRef, stateRef);
+  const speaker = useTypedTranscript(stageRef, textRef, stateRef, wave.transcript);
   useWaveCanvas(stageRef, canvasRef, stateRef);
 
   return (
@@ -139,7 +144,7 @@ export function HeroWave() {
       <canvas className="wave" ref={canvasRef} />
       <div className="transcript">
         <span className={cn("who", speaker === "client" && "c")}>
-          {speaker === "client" ? "Клієнт" : "Агент"}
+          {speaker === "client" ? wave.client : wave.agent}
         </span>
         <span className="txt">
           <span ref={textRef} />

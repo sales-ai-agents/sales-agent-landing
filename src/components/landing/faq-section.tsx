@@ -1,35 +1,26 @@
-import { Fragment } from "react";
 import { CONTACT_PHONE_HREF, CONTACT_PHONE_LABEL } from "@/components/landing/data";
-import { FAQ_ITEMS } from "@/components/landing/content";
-import { LinesHeading } from "@/components/landing/typography";
+import type { FaqCopy } from "@/components/landing/copy/types";
+import { CopyHeading } from "@/components/landing/typography";
 
-export function FaqSection() {
+export function FaqSection({ copy }: { copy: FaqCopy }) {
   return (
     <section className="sec" id="faq">
       <div className="wrap">
         <div className="faq">
           <div className="faq-side">
             <span className="mono blue" data-r="">
-              (12) Часті питання
+              {copy.meta}
             </span>
-            <LinesHeading
-              className="h2 t1"
-              lines={[
-                "Питання",
-                <Fragment key="accent">
-                  і <em>відповіді</em>
-                </Fragment>,
-              ]}
-            />
+            <CopyHeading className="h2 t1" heading={copy.heading} />
             <p className="lead" data-r="">
-              Не знайшли відповідь? Зателефонуйте нам — відповімо протягом робочого дня.
+              {copy.lead}
             </p>
             <a className="btn btn-ghost" href={CONTACT_PHONE_HREF} data-r="">
               {CONTACT_PHONE_LABEL}
             </a>
           </div>
           <div data-r="">
-            {FAQ_ITEMS.map((item, index) => (
+            {copy.items.map((item, index) => (
               <details key={item.question} open={index === 0}>
                 <summary>
                   <span className="mono">{String(index + 1).padStart(2, "0")}</span>

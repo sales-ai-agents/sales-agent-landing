@@ -3,13 +3,12 @@
 import { useState } from "react";
 import type { Preset, WebAgentSession } from "@/components/landing/api/types";
 import { useWebAgent } from "@/components/landing/api/use-web-agent";
-import { BUILDER_PRESETS } from "@/components/landing/presets";
+import { useLandingCopy } from "@/components/landing/copy/provider";
+import { buildFallbackPresets, localizePreset } from "@/components/landing/presets";
 import { useLandingPresets } from "@/components/landing/use-landing-presets";
 import { trackEvent } from "@/lib/analytics";
 
 export type Voice = "female" | "male";
-
-const DEFAULT_NAMES: Record<Voice, string> = { female: "Марія", male: "Олександр" };
 
 const VOICE_API_VALUES: Record<Voice, string> = { female: "жіночий", male: "чоловічий" };
 
@@ -31,15 +30,20 @@ interface AgentBuilder {
 }
 
 export function useAgentBuilder(loadPresets: boolean): AgentBuilder {
+  const { copy } = useLandingCopy();
+  const labels = copy.builderCard.presets;
+  const defaultNames = copy.builderCard.defaultNames;
   const apiPresets = useLandingPresets(loadPresets);
   const { startAgent, isLoading, session, errorMessage, reset } = useWebAgent();
-  const [name, setName] = useState(DEFAULT_NAMES.female);
+  const [name, setName] = useState(defaultNames.female);
   const [voice, setVoice] = useState<Voice>("female");
-  const [selectedId, setSelectedId] = useState(BUILDER_PRESETS[0].id);
+  const [selectedId, setSelectedId] = useState(buildFallbackPresets(labels)[0].id);
   const [editedPrompt, setEditedPrompt] = useState<string | null>(null);
 
   const hasApiPresets = apiPresets.length > 0;
-  const presets: readonly Preset[] = hasApiPresets ? apiPresets : BUILDER_PRESETS;
+  const presets: readonly Preset[] = hasApiPresets
+    ? apiPresets.map((preset) => localizePreset(preset, labels))
+    : buildFallbackPresets(labels);
   const selectedPreset = presets.find((preset) => preset.id === selectedId) ?? presets[0];
   const prompt = editedPrompt ?? selectedPreset.prompt;
   const canStart = name.trim().length > 0 && prompt.trim().length > 0;
@@ -50,9 +54,9 @@ export function useAgentBuilder(loadPresets: boolean): AgentBuilder {
   };
 
   const selectVoice = (next: Voice): void => {
-    const previousDefault = DEFAULT_NAMES[voice];
+    const previousDefault = defaultNames[voice];
     setVoice(next);
-    if (name === previousDefault) setName(DEFAULT_NAMES[next]);
+    if (name === previousDefault) setName(defaultNames[next]);
     reset();
   };
 

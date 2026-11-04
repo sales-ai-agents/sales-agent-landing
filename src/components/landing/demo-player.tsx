@@ -3,7 +3,9 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
 import type { CSSProperties, RefObject } from "react";
 import { cn } from "@/lib/utils";
+import { useLandingCopy } from "@/components/landing/copy/provider";
 import { DEMO_SCENARIOS } from "@/components/landing/demo-scenarios";
+import type { ClientCopy } from "@/components/landing/copy/client-types";
 import { buildChatMessages, type ChatMessage } from "@/components/landing/demo-chat";
 import { CheckIcon, PauseIcon, PlayIcon } from "@/components/landing/icons";
 import { useDemoPlayback } from "@/components/landing/use-demo-playback";
@@ -17,6 +19,8 @@ const BAR_HEIGHTS = Array.from({ length: BAR_COUNT }, (_, index) => {
   const height = 18 + Math.abs(Math.sin(index * 0.9) * 50 + Math.sin(index * 0.37) * 30);
   return Math.round(Math.min(100, height) * 100) / 100;
 });
+
+type Speakers = ClientCopy["speakers"];
 
 const formatClock = (seconds: number): string =>
   `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
@@ -51,7 +55,7 @@ function useStickToBottom(
   }, [chatRef, scenarioIndex, lastMessageId]);
 }
 
-function ChatBubble({ message }: { message: ChatMessage }) {
+function ChatBubble({ message, speakers }: { message: ChatMessage; speakers: Speakers }) {
   const side = message.speaker === "agent" ? "a" : "c";
   if (message.typing) {
     return (
@@ -64,16 +68,19 @@ function ChatBubble({ message }: { message: ChatMessage }) {
   }
   return (
     <div className={cn("msg", side)}>
-      <small>{message.speaker === "agent" ? "ШІ-агент" : "Клієнт"}</small>
+      <small>{speakers[message.speaker]}</small>
       {message.text}
     </div>
   );
 }
 
 export function DemoPlayer() {
+  const { copy } = useLandingCopy();
+  const text = copy.demoPlayer;
   const { index, playing, progress, duration, failed, toggle, select, seek } = useDemoPlayback();
   const chatRef = useRef<HTMLDivElement>(null);
   const scenario = DEMO_SCENARIOS[index];
+  const scenarioText = text.scenarios[scenario.id];
   const currentTime = duration === null ? 0 : progress * duration;
   const messages = buildChatMessages({
     scenario,
@@ -91,7 +98,7 @@ export function DemoPlayer() {
       <div className="demo-tabs" data-r="">
         {DEMO_SCENARIOS.map((item, tabIndex) => (
           <button
-            key={item.title}
+            key={item.id}
             type="button"
             className={cn("demo-tab", tabIndex === index && "on")}
             style={{ "--prog": tabIndex === index ? progress : 0 } as CSSProperties}
@@ -99,7 +106,7 @@ export function DemoPlayer() {
             onClick={() => select(tabIndex)}
           >
             <span className="mono">0{tabIndex + 1}</span>
-            <b className="t2">{item.title}</b>
+            <b className="t2">{text.scenarios[item.id].title}</b>
           </button>
         ))}
       </div>
@@ -109,14 +116,16 @@ export function DemoPlayer() {
           <button
             type="button"
             className="play"
-            aria-label={playing ? "Пауза" : "Відтворити"}
+            aria-label={playing ? text.pause : text.play}
             onClick={toggle}
           >
             {playing ? <PauseIcon /> : <PlayIcon />}
           </button>
           <div className="t">
-            <b>{scenario.title}</b>
-            <span className="mono">{scenario.tag} · реальний запис розмови</span>
+            <b>{scenarioText.title}</b>
+            <span className="mono">
+              {scenarioText.tag} · {text.recording}
+            </span>
           </div>
         </div>
         <div className="pwave">
@@ -134,7 +143,7 @@ export function DemoPlayer() {
             max={SEEK_STEPS}
             value={Math.round(progress * SEEK_STEPS)}
             disabled={duration === null}
-            aria-label="Перемотування запису"
+            aria-label={text.seek}
             onChange={(event) => seek(Number(event.target.value) / SEEK_STEPS)}
           />
         </div>
@@ -144,21 +153,23 @@ export function DemoPlayer() {
         </div>
         {failed ? (
           <p className="player-error" role="alert">
-            Не вдалося відтворити запис. Спробуйте ще раз.
+            {text.failed}
           </p>
         ) : null}
         <div
           className="chat"
           ref={chatRef}
           role="region"
-          aria-label="Транскрипт розмови"
+          aria-label={text.transcript}
           tabIndex={0}
           data-lenis-prevent=""
         >
           {messages.length === 0 ? (
-            <p className="chat-hint">Натисніть ▶, щоб послухати розмову</p>
+            <p className="chat-hint">{text.hint}</p>
           ) : (
-            messages.map((message) => <ChatBubble key={message.id} message={message} />)
+            messages.map((message) => (
+              <ChatBubble key={message.id} message={message} speakers={copy.speakers} />
+            ))
           )}
         </div>
         <div className={cn("result", isDone && "done")}>
@@ -166,7 +177,9 @@ export function DemoPlayer() {
             <i>
               <CheckIcon />
             </i>
-            <span>Результат: {scenario.result}</span>
+            <span>
+              {text.result}: {scenarioText.result}
+            </span>
           </span>
           <span className="mono">→ CRM</span>
         </div>

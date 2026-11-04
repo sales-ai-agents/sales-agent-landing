@@ -1,57 +1,13 @@
 import Image from "next/image";
+import type { DashboardCopy, DashboardStatCopy } from "@/components/landing/copy/types";
 import { StrokeIcon, type StrokeIconName } from "@/components/landing/icons";
-import { CountValue, LinesHeading, MetaRow } from "@/components/landing/typography";
+import { CopyHeading, CountValue, MetaRow } from "@/components/landing/typography";
 
-const SIDEBAR_ITEMS: readonly { icon: StrokeIconName; label: string; active?: boolean }[] = [
-  { icon: "overview", label: "Огляд", active: true },
-  { icon: "agents", label: "Агенти" },
-  { icon: "users", label: "Контакти" },
-  { icon: "phone", label: "Дзвінки" },
-  { icon: "grid", label: "Номери" },
-  { icon: "card", label: "Тарифи і Оплата" },
-  { icon: "puzzle", label: "Інтеграції" },
-];
-
-const AGENT_ROWS = [
-  { initial: "М", name: "Марія", task: "Підтвердження записів", rate: 86 },
-  { initial: "О", name: "Олег", task: "Уточнення замовлень", rate: 74 },
-  { initial: "І", name: "Ірина", task: "Кваліфікація лідів", rate: 61 },
-] as const;
-
-const CALL_ROWS = [
-  {
-    client: "Олена К.",
-    agent: "Марія",
-    duration: "1:02",
-    tone: "g",
-    status: "Запис підтверджено",
-    time: "10:24",
-  },
-  {
-    client: "Ігор М.",
-    agent: "Олег",
-    duration: "1:45",
-    tone: "y",
-    status: "Перенесено на пʼятницю",
-    time: "10:31",
-  },
-  {
-    client: "Світлана Т.",
-    agent: "Марія",
-    duration: "0:15",
-    tone: "r",
-    status: "Не відповіла · повтор о 14:00",
-    time: "10:38",
-  },
-  {
-    client: "Андрій В.",
-    agent: "Ірина",
-    duration: "2:55",
-    tone: "b",
-    status: "Тепла заявка → менеджеру",
-    time: "10:45",
-  },
-] as const;
+const USED_MINUTES = 186;
+const USAGE_PERCENT = 62;
+const TOTAL_CALLS = 248;
+const SAVED_HOURS = 31;
+const GOAL_CALLS = 172;
 
 const CHART_LINES = [
   { className: "ln1", points: "20,104.8 130,84.4 240,94.6 350,57.2 460,70.8 570,125.2 680,19.8" },
@@ -59,124 +15,94 @@ const CHART_LINES = [
   { className: "ln3", points: "20,159.2 130,149 240,152.4 350,135.4 460,142.2 570,166 680,121.8" },
 ] as const;
 
-const WEEK_DAYS = ["Вт", "Ср", "Чт", "Пт", "Сб", "Нд", "Пн"] as const;
-
-function DashSidebar() {
+function DashSidebar({ copy }: { copy: DashboardCopy }) {
   return (
     <aside className="dash-side">
       <div className="dash-logo">
         <Image src="/image/Logo.svg" alt="" width={39} height={40} />
         <Image className="word" src="/image/calls4u.svg" alt="calls4u" width={99} height={22} />
       </div>
-      <nav className="dash-nav" aria-label="Меню кабінету (демо)">
-        {SIDEBAR_ITEMS.map((item) => (
-          <span key={item.label} className={item.active ? "on" : undefined}>
+      <nav className="dash-nav" aria-label={copy.menuLabel}>
+        {copy.sidebar.map((item, index) => (
+          <span key={item.label} className={index === 0 ? "on" : undefined}>
             <StrokeIcon name={item.icon} />
             {item.label}
           </span>
         ))}
       </nav>
       <div className="dash-plan">
-        <span className="mono">Тариф</span>
-        <b>Business</b>
-        <small>Керувати тарифом →</small>
+        <span className="mono">{copy.planLabel}</span>
+        <b>{copy.planName}</b>
+        <small>{copy.planLink}</small>
       </div>
     </aside>
-  );
-}
-
-function StatCards() {
-  return (
-    <div className="dash-cards">
-      <div className="dcard">
-        <span className="mono">Використання хвилин</span>
-        <b>
-          <CountValue value={186} />
-          <small> / 300 хв</small>
-        </b>
-        <i className="bar">
-          <i style={{ width: "62%" }} />
-        </i>
-        <small>Залишилось 114 хв · вистачить ще на ~9 днів</small>
-      </div>
-      <StatCard
-        icon="phone"
-        tone="g"
-        label="Усього дзвінків"
-        count={248}
-        note="За останні 7 днів"
-        trend="+18% проти попередніх 7 днів"
-      />
-      <StatCard
-        icon="clock"
-        tone="b"
-        label="Заощаджено часу"
-        count={31}
-        unit=" год"
-        note="За останні 7 днів"
-        trend="≈ 4 робочі дні менеджера"
-      />
-      <StatCard
-        icon="target"
-        tone="o"
-        label="Досягнуто цілі"
-        count={172}
-        note="69% від усіх дзвінків"
-        trend="+12% проти попередніх 7 днів"
-      />
-    </div>
   );
 }
 
 interface StatCardProps {
   icon: StrokeIconName;
   tone: "g" | "b" | "o";
-  label: string;
+  copy: DashboardStatCopy;
   count: number;
-  unit?: string;
-  note: string;
-  trend: string;
 }
 
-function StatCard({ icon, tone, label, count, unit, note, trend }: StatCardProps) {
+function StatCard({ icon, tone, copy, count }: StatCardProps) {
   return (
     <div className="dcard">
       <span className="mono">
         <i className={`ico ${tone}`}>
           <StrokeIcon name={icon} weight={2.2} />
         </i>
-        {label}
+        {copy.label}
       </span>
       <b>
         <CountValue value={count} />
-        {unit ? <small>{unit}</small> : null}
+        {copy.unit ? <small>{copy.unit}</small> : null}
       </b>
-      <small>{note}</small>
-      <small className="up">{trend}</small>
+      <small>{copy.note}</small>
+      <small className="up">{copy.trend}</small>
     </div>
   );
 }
 
-function ActivityChart() {
+function StatCards({ copy }: { copy: DashboardCopy }) {
+  return (
+    <div className="dash-cards">
+      <div className="dcard">
+        <span className="mono">{copy.usage.label}</span>
+        <b>
+          <CountValue value={USED_MINUTES} />
+          <small>{copy.usage.total}</small>
+        </b>
+        <i className="bar">
+          <i style={{ width: `${USAGE_PERCENT}%` }} />
+        </i>
+        <small>{copy.usage.note}</small>
+      </div>
+      <StatCard icon="phone" tone="g" copy={copy.totalCalls} count={TOTAL_CALLS} />
+      <StatCard icon="clock" tone="b" copy={copy.savedTime} count={SAVED_HOURS} />
+      <StatCard icon="target" tone="o" copy={copy.goals} count={GOAL_CALLS} />
+    </div>
+  );
+}
+
+function ActivityChart({ copy }: { copy: DashboardCopy["chart"] }) {
+  const [all, goals, saved] = copy.legend;
+
   return (
     <div className="dpanel dash-chart">
       <div className="dp-head">
-        <b>Активність дзвінків</b>
+        <b>{copy.title}</b>
         <span className="legend">
           <i className="l1" />
-          Усі дзвінки
+          {all}
           <i className="l2" />
-          Досягнуто цілі
+          {goals}
           <i className="l3" />
-          Заощаджений час
+          {saved}
         </span>
       </div>
-      <svg
-        viewBox="0 0 700 230"
-        preserveAspectRatio="none"
-        role="img"
-        aria-label="Графік активності дзвінків за тиждень"
-      >
+      <svg viewBox="0 0 700 230" preserveAspectRatio="none" role="img" aria-label={copy.ariaLabel}>
         <g className="grid">
           <path d="M20 20H680M20 70H680M20 120H680M20 170H680M20 200H680" />
         </g>
@@ -185,7 +111,7 @@ function ActivityChart() {
         ))}
       </svg>
       <div className="days mono">
-        {WEEK_DAYS.map((day) => (
+        {copy.days.map((day) => (
           <span key={day}>{day}</span>
         ))}
       </div>
@@ -193,14 +119,14 @@ function ActivityChart() {
   );
 }
 
-function AgentsPanel() {
+function AgentsPanel({ copy }: { copy: DashboardCopy["agentsPanel"] }) {
   return (
     <div className="dpanel dash-agents">
       <div className="dp-head">
-        <span className="mono">Ефективність агентів</span>
-        <small className="blue">Усі агенти →</small>
+        <span className="mono">{copy.title}</span>
+        <small className="blue">{copy.all}</small>
       </div>
-      {AGENT_ROWS.map((agent) => (
+      {copy.rows.map((agent) => (
         <div className="agent" key={agent.name}>
           <span className="av">{agent.initial}</span>
           <div>
@@ -213,31 +139,29 @@ function AgentsPanel() {
           <em>{agent.rate}%</em>
         </div>
       ))}
-      <span className="dp-btn">Перейти до всіх агентів</span>
+      <span className="dp-btn">{copy.button}</span>
     </div>
   );
 }
 
-function CallsTable() {
+function CallsTable({ copy }: { copy: DashboardCopy["callsTable"] }) {
   return (
     <div className="dpanel dash-table">
       <div className="dp-head">
-        <b>Останні дзвінки</b>
-        <small className="muted">Усі дзвінки →</small>
+        <b>{copy.title}</b>
+        <small className="muted">{copy.all}</small>
       </div>
       <div className="dt-scroll">
         <table>
           <thead>
             <tr>
-              <th>Клієнт</th>
-              <th>Агент</th>
-              <th>Тривалість</th>
-              <th>Результат</th>
-              <th>Час</th>
+              {copy.headers.map((header) => (
+                <th key={header}>{header}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {CALL_ROWS.map((row) => (
+            {copy.rows.map((row) => (
               <tr key={row.client}>
                 <td>
                   <b>{row.client}</b>
@@ -260,41 +184,37 @@ function CallsTable() {
   );
 }
 
-export function DashboardSection() {
+export function DashboardSection({ copy }: { copy: DashboardCopy }) {
   return (
     <section className="sec" id="control">
       <div className="wrap">
-        <MetaRow left="(06) Ваш кабінет" right="Повний контроль після кожного дзвінка" />
+        <MetaRow left={copy.meta} right={copy.metaRight} />
         <div className="sec-head">
-          <LinesHeading
-            className="h2 t1"
-            lines={["Ви бачите", <em key="accent">кожну розмову</em>]}
-          />
+          <CopyHeading className="h2 t1" heading={copy.heading} />
           <p className="lead" data-r="">
-            Так виглядає кабінет Calls4U: хвилини, дзвінки, заощаджений час і результат кожної
-            розмови — в одному місці.
+            {copy.lead}
           </p>
         </div>
         <div className="dash" data-r="" data-in="">
-          <DashSidebar />
+          <DashSidebar copy={copy} />
           <div className="dash-main">
             <div className="dash-head">
               <div>
-                <b>Огляд</b>
-                <small>Статистика роботи ваших ШІ-агентів</small>
+                <b>{copy.headTitle}</b>
+                <small>{copy.headSubtitle}</small>
               </div>
               <div className="dash-tools">
-                <span className="demo-chip mono">Демо-дані</span>
-                <span className="dash-sel">7 днів ▾</span>
-                <span className="dash-new">+ Новий агент</span>
+                <span className="demo-chip mono">{copy.demoChip}</span>
+                <span className="dash-sel">{copy.range}</span>
+                <span className="dash-new">{copy.newAgent}</span>
               </div>
             </div>
-            <StatCards />
+            <StatCards copy={copy} />
             <div className="dash-row">
-              <ActivityChart />
-              <AgentsPanel />
+              <ActivityChart copy={copy.chart} />
+              <AgentsPanel copy={copy.agentsPanel} />
             </div>
-            <CallsTable />
+            <CallsTable copy={copy.callsTable} />
           </div>
         </div>
       </div>

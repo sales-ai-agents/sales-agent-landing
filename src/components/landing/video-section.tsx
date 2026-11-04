@@ -1,25 +1,16 @@
-import { Fragment } from "react";
+import type { VideoSectionCopy } from "@/components/landing/copy/types";
 import { VideoPlayer } from "@/components/landing/video-player";
-import { LinesHeading, MetaRow } from "@/components/landing/typography";
+import { CopyHeading, MetaRow } from "@/components/landing/typography";
 
-export function VideoSection() {
+export function VideoSection({ copy }: { copy: VideoSectionCopy }) {
   return (
     <section className="sec sec--flush" id="video">
       <div className="wrap">
-        <MetaRow left="(08) Відео" right="7 хвилин про дзвінки і гроші" />
+        <MetaRow left={copy.meta} right={copy.metaRight} />
         <div className="sec-head">
-          <LinesHeading
-            className="h2 t1"
-            lines={[
-              "Де ваш бізнес втрачає",
-              <Fragment key="accent">
-                <em>клієнтів</em> на дзвінках
-              </Fragment>,
-            ]}
-          />
+          <CopyHeading className="h2 t1" heading={copy.heading} />
           <p className="lead" data-r="">
-            Рахуємо, скільки коштують пропущені дзвінки — до 60 000 ₴ на місяць, — і показуємо
-            реальний дзвінок ШІ-агента.
+            {copy.lead}
           </p>
         </div>
         <VideoPlayer />

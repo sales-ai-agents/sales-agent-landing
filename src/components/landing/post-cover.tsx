@@ -1,4 +1,5 @@
 import Image from "next/image";
+import type { CoversCopy } from "@/components/landing/copy/client-types";
 import type { PostCover } from "@/content/blog/types";
 
 const ECON_BAR_COUNT = 34;
@@ -7,37 +8,42 @@ const ECON_BARS = Array.from({ length: ECON_BAR_COUNT }, (_, index) =>
   Math.round(18 + Math.abs(Math.sin(index * 0.7) * 55 + Math.sin(index * 0.23) * 25))
 );
 
-export function PostCoverArt({ cover }: { cover: PostCover }) {
+interface PostCoverArtProps {
+  cover: PostCover;
+  copy: CoversCopy;
+}
+
+export function PostCoverArt({ cover, copy }: PostCoverArtProps) {
   switch (cover) {
     case "five":
       return (
         <div className="cv cv-five">
-          <span className="cv-label">Гайд · 5 сценаріїв</span>
+          <span className="cv-label">{copy.five.label}</span>
           <b>5</b>
-          <span className="cv-bub a">Підтверджуємо ваш запис на завтра о 14:00?</span>
-          <span className="cv-bub c">Так, буду</span>
+          <span className="cv-bub a">{copy.five.agent}</span>
+          <span className="cv-bub c">{copy.five.client}</span>
         </div>
       );
     case "econ":
       return (
         <div className="cv cv-econ">
-          <span className="cv-label">Економіка · приклад</span>
+          <span className="cv-label">{copy.econ.label}</span>
           <div className="cv-bars">
             {ECON_BARS.map((height, index) => (
               <i key={index} style={{ height: `${height}%` }} />
             ))}
           </div>
-          <b>−51 480 ₴</b>
-          <small>на місяць іде разом із пропущеними дзвінками</small>
+          <b>{copy.econ.amount}</b>
+          <small>{copy.econ.caption}</small>
         </div>
       );
     case "vs":
       return (
         <div className="cv cv-vs">
-          <span className="cv-label">Порівняння</span>
-          <b>Адміністратор</b>
+          <span className="cv-label">{copy.vs.label}</span>
+          <b>{copy.vs.left}</b>
           <em>vs</em>
-          <b>ШІ-агент</b>
+          <b>{copy.vs.right}</b>
         </div>
       );
     case "crm":
@@ -49,23 +55,25 @@ export function PostCoverArt({ cover }: { cover: PostCover }) {
             fill
             sizes="(max-width: 720px) 100vw, 40vw"
           />
-          <span className="cv-label">Інструкція</span>
-          <b>1 день</b>
+          <span className="cv-label">{copy.crm.label}</span>
+          <b>{copy.crm.value}</b>
         </div>
       );
     case "myth":
       return (
         <div className="cv cv-myth">
-          <span className="cv-label">Міфи</span>
-          <b>Міф</b>
+          <span className="cv-label">{copy.myth.label}</span>
+          <b>{copy.myth.value}</b>
         </div>
       );
     case "script":
       return (
         <div className="cv cv-script">
-          <span className="cv-label">Гайд · 7 порад</span>
+          <span className="cv-label">{copy.script.label}</span>
           <b>
-            «Добрий день! <em>Це Марія</em> із салону»
+            {copy.script.before}
+            <em>{copy.script.accent}</em>
+            {copy.script.after}
           </b>
         </div>
       );

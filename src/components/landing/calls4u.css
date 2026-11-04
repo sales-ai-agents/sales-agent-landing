@@ -3006,6 +3006,14 @@ body:has(.c4u) {
   max-width: 300px;
   margin-top: 16px;
 }
+.c4u .foot-top small {
+  display: block;
+  margin-top: 8px;
+  max-width: 240px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.85);
+}
 .c4u .foot-top .foot-logo {
   display: flex;
   align-items: center;

@@ -4,9 +4,6 @@ import type { DemoScenario } from "@/components/landing/demo-scenarios/types";
 export const DELIVERY_LVIV_SCENARIO: DemoScenario = {
   id: "warehouse",
   audioSrc: "/audio/demo-3.ogg",
-  tag: "Служба доставки",
-  title: "Уточнення деталей доставки",
-  result: "Доставку підтверджено",
   chat: [
     agent(
       0.3,

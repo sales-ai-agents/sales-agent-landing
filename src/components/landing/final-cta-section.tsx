@@ -1,9 +1,10 @@
 import Image from "next/image";
+import type { FinalCtaCopy } from "@/components/landing/copy/types";
 import { FormDialogTrigger } from "@/components/landing/form-dialog-trigger";
 import { FinalCallForm } from "@/components/landing/final-call-form";
-import { LinesHeading } from "@/components/landing/typography";
+import { CopyHeading } from "@/components/landing/typography";
 
-export function FinalCtaSection() {
+export function FinalCtaSection({ copy }: { copy: FinalCtaCopy }) {
   return (
     <section className="final">
       <div className="wrap">
@@ -19,17 +20,16 @@ export function FinalCtaSection() {
           />
         </div>
         <span className="mono blue" data-r="">
-          (13) Ваш хід
+          {copy.meta}
         </span>
-        <LinesHeading className="t1" lines={["Перевірте", <em key="accent">на собі</em>]} />
+        <CopyHeading className="t1" heading={copy.heading} />
         <p className="lead" data-r="">
-          Введіть номер — агент зателефонує за 20 секунд. Для першого тесту достатньо одного
-          сценарію і вашого телефону.
+          {copy.lead}
         </p>
         <FinalCallForm />
         <div className="final-alt" data-r="">
           <FormDialogTrigger kind="lead" source="landing_final_cta" className="btn btn-ghost">
-            Або забронювати демо з менеджером
+            {copy.demoWithManager}
           </FormDialogTrigger>
         </div>
       </div>

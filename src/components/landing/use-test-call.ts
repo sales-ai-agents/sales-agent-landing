@@ -3,11 +3,9 @@
 import { useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { useDemoCall } from "@/components/landing/api/use-demo-call";
+import { useLandingCopy } from "@/components/landing/copy/provider";
 import { trackEvent } from "@/lib/analytics";
 import { formatPhoneInput, SUBSCRIBER_DIGITS } from "@/components/landing/phone";
-
-const SUCCESS_MESSAGE = "✓ Готово! Агент зателефонує вам протягом 20 секунд.";
-const INVALID_MESSAGE = "Введіть 9 цифр номера після +380.";
 
 export type TestCallStatus = "idle" | "ok" | "error";
 
@@ -17,6 +15,7 @@ const resolveStatus = (invalid: boolean, failed: boolean, succeeded: boolean): T
 };
 
 export function useTestCall(location: string) {
+  const { copy } = useLandingCopy();
   const [value, setValue] = useState("");
   const [invalid, setInvalid] = useState(false);
   const { requestCall, isLoading, isSuccess, errorMessage, reset } = useDemoCall();
@@ -40,8 +39,8 @@ export function useTestCall(location: string) {
 
   const status = resolveStatus(invalid, Boolean(errorMessage), isSuccess);
   const message = invalid
-    ? INVALID_MESSAGE
-    : (errorMessage ?? (isSuccess ? SUCCESS_MESSAGE : null));
+    ? copy.testCallInvalid
+    : (errorMessage ?? (isSuccess ? copy.testCallSuccess : null));
 
   return { value, onChange, onSubmit, status, message, isLoading };
 }

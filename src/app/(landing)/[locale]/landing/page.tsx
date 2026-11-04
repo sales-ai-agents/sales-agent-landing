@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/landing/json-ld";
 import { LandingNav } from "@/components/landing/landing-nav";
 import { HeroSection } from "@/components/landing/hero-section";
@@ -15,32 +16,38 @@ import { FaqSection } from "@/components/landing/faq-section";
 import { FinalCtaSection } from "@/components/landing/final-cta-section";
 import { LandingFooter } from "@/components/landing/landing-footer";
 import { LandingMotion } from "@/components/landing/motion/landing-motion";
-import { LANDING_GRAPH } from "@/components/landing/structured-data";
+import { getLandingCopy } from "@/components/landing/copy";
+import { buildLandingGraph } from "@/components/landing/structured-data";
+import { isLocale } from "@/lib/i18n/config";
 
 export const dynamic = "force-static";
 
-export default function LandingPage() {
+export default async function LandingPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  if (!isLocale(locale)) notFound();
+  const copy = getLandingCopy(locale);
+
   return (
     <>
       <LandingNav />
       <main id="top">
-        <HeroSection />
-        <DemoSection />
-        <NumbersSection />
-        <ScenariosSection />
-        <BuilderSection />
-        <DashboardSection />
-        <IntegrationsSection />
-        <VideoSection />
-        <PricingSection />
-        <SecuritySection />
-        <BlogSection />
-        <FaqSection />
-        <FinalCtaSection />
+        <HeroSection copy={copy.hero} />
+        <DemoSection copy={copy.demo} />
+        <NumbersSection copy={copy.numbers} />
+        <ScenariosSection copy={copy.scenarios} />
+        <BuilderSection copy={copy.builder} />
+        <DashboardSection copy={copy.dashboard} />
+        <IntegrationsSection copy={copy.integrations} />
+        <VideoSection copy={copy.video} />
+        <PricingSection copy={copy.pricing} />
+        <SecuritySection copy={copy.security} />
+        <BlogSection locale={locale} copy={copy.blogTeaser} cardCopy={copy.client.blog} />
+        <FaqSection copy={copy.faq} />
+        <FinalCtaSection copy={copy.finalCta} />
       </main>
-      <LandingFooter />
+      <LandingFooter locale={locale} />
       <LandingMotion />
-      <JsonLd data={LANDING_GRAPH} />
+      <JsonLd data={buildLandingGraph(locale)} />
     </>
   );
 }

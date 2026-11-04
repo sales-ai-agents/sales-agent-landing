@@ -1,3 +1,4 @@
+import { LOCALES, type Locale } from "@/lib/i18n/config";
 import {
   BRAND_ALTERNATE_NAMES,
   SITE_CONTACT,
@@ -14,14 +15,14 @@ export interface BreadcrumbItem {
 }
 
 const LOGO_ID = `${SITE_URL}/#logo`;
-const SUPPORTED_LANGUAGES = ["uk", "ru"] as const;
+const SUPPORT_LANGUAGES = ["uk", "ru"] as const;
 
 export const buildGraph = (nodes: readonly object[]): object => ({
   "@context": "https://schema.org",
   "@graph": nodes,
 });
 
-export const buildOrganizationNode = (): object => ({
+export const buildOrganizationNode = (description: string): object => ({
   "@type": "Organization",
   "@id": SITE_ORGANIZATION_ID,
   name: SITE_NAME,
@@ -29,12 +30,11 @@ export const buildOrganizationNode = (): object => ({
   url: SITE_URL,
   logo: { "@type": "ImageObject", "@id": LOGO_ID, url: SITE_LOGO_URL, caption: SITE_NAME },
   image: { "@id": LOGO_ID },
-  description:
-    "Calls4U — платформа голосових ШІ-агентів, які телефонують клієнтам за бізнес: підтверджують записи, нагадують про візити, уточнюють замовлення й передають результат у CRM.",
+  description,
   email: SITE_CONTACT.email,
   telephone: SITE_CONTACT.phone,
   sameAs: [SITE_CONTACT.telegram],
-  knowsLanguage: SUPPORTED_LANGUAGES,
+  knowsLanguage: LOCALES,
   areaServed: { "@type": "Country", name: "Ukraine" },
   contactPoint: [
     {
@@ -42,18 +42,18 @@ export const buildOrganizationNode = (): object => ({
       contactType: "sales",
       email: SITE_CONTACT.email,
       telephone: SITE_CONTACT.phone,
-      availableLanguage: SUPPORTED_LANGUAGES,
+      availableLanguage: SUPPORT_LANGUAGES,
     },
   ],
 });
 
-export const buildWebsiteNode = (): object => ({
+export const buildWebsiteNode = (locale: Locale): object => ({
   "@type": "WebSite",
   "@id": SITE_WEBSITE_ID,
   url: SITE_URL,
   name: SITE_NAME,
   alternateName: BRAND_ALTERNATE_NAMES,
-  inLanguage: "uk",
+  inLanguage: locale,
   publisher: { "@id": SITE_ORGANIZATION_ID },
 });
 

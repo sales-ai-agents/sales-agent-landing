@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef } from "react";
 import type { MouseEvent, ReactNode } from "react";
+import { useLandingCopy } from "@/components/landing/copy/provider";
 
 interface DialogShellProps {
   open: boolean;
@@ -12,6 +13,7 @@ interface DialogShellProps {
 }
 
 export function DialogShell({ open, title, description, onClose, children }: DialogShellProps) {
+  const { copy } = useLandingCopy();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
 
@@ -35,7 +37,7 @@ export function DialogShell({ open, title, description, onClose, children }: Dia
       onClick={closeOnBackdrop}
     >
       <div className="dlg-body">
-        <button type="button" className="dlg-x" aria-label="Закрити" onClick={onClose}>
+        <button type="button" className="dlg-x" aria-label={copy.dialogs.close} onClick={onClose}>
           ×
         </button>
         <h2 className="t2" id={titleId}>

@@ -1,11 +1,14 @@
 import type { Preset } from "@/components/landing/api/types";
+import type { BuilderCardCopy, PresetCopy, PresetId } from "@/components/landing/copy/client-types";
 
-export const BUILDER_PRESETS: readonly Preset[] = [
+interface PresetPrompt {
+  readonly id: PresetId;
+  readonly prompt: string;
+}
+
+const PRESET_PROMPTS: readonly PresetPrompt[] = [
   {
     id: "admin",
-    label: "Адміністратор",
-    description:
-      "Агент запише клієнта на послугу: з'ясує послугу, фахівця, зручний день і час, ім'я та телефон",
     prompt: `Ти — {agent_name}, адміністратор барбершопу «Стиль». Приймаєш вхідні дзвінки і записуєш клієнтів до майстра.
 
 Контекст: клієнт сам зателефонував, щоб записатися або уточнити візит.
@@ -76,9 +79,6 @@ export const BUILDER_PRESETS: readonly Preset[] = [
   },
   {
     id: "logist",
-    label: "Логіст",
-    description:
-      "Агент уточнить маршрут, тип вантажу, дату, контактну особу та передасть заявку менеджеру",
     prompt: `Ти — {agent_name}, оператор служби логістики «ШвидкоВезем». Консультуєш клієнтів по тарифах, умовах та оформлюєш заявки.
 
 Контекст: вхідний дзвінок у службу логістики — статус відправлення або нова заявка.
@@ -147,9 +147,6 @@ recap. Якщо клієнт одразу сказав «Київ–Львів, 
   },
   {
     id: "order",
-    label: "Замовлення",
-    description:
-      "Агент підбере товар, зафіксує кількість, спосіб оплати та доставки, адресу й контакти",
     prompt: `Ти — {agent_name}, оператор служби доставки. Дзвониш клієнту щодо його замовлення.
 
 Контекст: клієнт вже оформив замовлення, ти телефонуєш щоб підтвердити деталі і уточнити адресу.
@@ -203,3 +200,13 @@ recap. Якщо клієнт одразу сказав «Київ–Львів, 
   «Кур'єр зателефонує за 30 хвилин до приїзду. Гарного дня!»`,
   },
 ] as const;
+
+export const buildFallbackPresets = (labels: BuilderCardCopy["presets"]): readonly Preset[] =>
+  PRESET_PROMPTS.map(({ id, prompt }) => ({ id, prompt, ...labels[id] }));
+
+export const localizePreset = (preset: Preset, labels: BuilderCardCopy["presets"]): Preset => {
+  const localized: PresetCopy | undefined = Object.hasOwn(labels, preset.id)
+    ? labels[preset.id as PresetId]
+    : undefined;
+  return localized ? { ...preset, ...localized } : preset;
+};

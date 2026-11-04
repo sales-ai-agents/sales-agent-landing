@@ -1,34 +1,29 @@
 import { useMutation } from "@tanstack/react-query";
 import { apiPost } from "@/lib/api-client";
 import { API_ENDPOINTS } from "@/lib/api-config";
+import { resolveApiError } from "@/components/landing/api/errors";
+import type { ApiErrors } from "@/components/landing/copy/client-types";
+import { useLandingCopy } from "@/components/landing/copy/provider";
 
 const COUNTRY_CODE = "+380";
-const FALLBACK_ERROR = "Щось пішло не так. Спробуйте ще раз.";
-
-const ERROR_MESSAGES: Readonly<Record<string, string>> = {
-  invalid_phone: "Невірний формат номера. Перевірте і спробуйте ще раз.",
-  invalid_json: "Невірний формат запиту. Спробуйте ще раз.",
-  phone_cooldown: "Ми вже телефонували на цей номер. Спробуйте пізніше.",
-  ip_limit: "Забагато запитів. Спробуйте через годину.",
-  busy_try_later: "Зараз багато заявок. Спробуйте за кілька хвилин.",
-};
 
 interface DemoCallResponse {
   ok?: boolean;
   error?: string;
 }
 
-const requestDemoCall = async (subscriberDigits: string): Promise<void> => {
+const requestDemoCall = async (subscriberDigits: string, errors: ApiErrors): Promise<void> => {
   const body = await apiPost<DemoCallResponse>(API_ENDPOINTS.DEMO_CALL, {
     phone: `${COUNTRY_CODE}${subscriberDigits}`,
   });
   if (body?.ok) return;
-  throw new Error(ERROR_MESSAGES[body?.error ?? ""] ?? FALLBACK_ERROR);
+  throw new Error(resolveApiError(errors, body?.error));
 };
 
 export function useDemoCall() {
+  const { copy } = useLandingCopy();
   const { mutate, status, error, reset } = useMutation<void, Error, string>({
-    mutationFn: requestDemoCall,
+    mutationFn: (subscriberDigits) => requestDemoCall(subscriberDigits, copy.errors),
     throwOnError: false,
   });
 

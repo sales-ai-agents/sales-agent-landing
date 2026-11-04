@@ -8,33 +8,11 @@ const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "0.0.0.0", "[::1]"]);
 const BILLING_RETURN_ROUTE = "/dashboard/billing/success";
 const SEE_OTHER = 303;
 
-const GATED_LANDING_ROUTE = "/landing";
-const LANDING_ACCESS_COOKIE = "landing";
-const LANDING_ACCESS_VALUE = "true";
-const UNMATCHED_ROUTE = "/_not-available";
-
-function isGatedLandingRoute(pathname: string): boolean {
-  return pathname === GATED_LANDING_ROUTE || pathname.startsWith(GATED_LANDING_ROUTE + "/");
-}
-
-function hasLandingAccess(request: NextRequest): boolean {
-  return request.cookies.get(LANDING_ACCESS_COOKIE)?.value === LANDING_ACCESS_VALUE;
-}
-
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (request.method === "POST" && pathname === BILLING_RETURN_ROUTE) {
     return NextResponse.redirect(request.nextUrl, SEE_OTHER);
-  }
-
-  if (isGatedLandingRoute(pathname)) {
-    const response = hasLandingAccess(request)
-      ? NextResponse.next()
-      : NextResponse.rewrite(new URL(UNMATCHED_ROUTE, request.url));
-    response.headers.set("Cache-Control", "private, no-store");
-    response.headers.set("Vary", "Cookie");
-    return response;
   }
 
   const hasSession = request.cookies.has(SESSION_COOKIE);

@@ -2,13 +2,13 @@
 
 import { useId } from "react";
 import { cn } from "@/lib/utils";
+import { useLandingCopy } from "@/components/landing/copy/provider";
 import { PhoneInput } from "@/components/landing/phone-input";
 import { Arrow } from "@/components/landing/typography";
 import { useTestCall } from "@/components/landing/use-test-call";
 
-const DEFAULT_NOTE = "Один тестовий дзвінок. Без спаму та передачі бази.";
-
 export function FinalCallForm() {
+  const { copy } = useLandingCopy();
   const { value, onChange, onSubmit, status, message, isLoading } = useTestCall("landing_final");
   const noteId = useId();
 
@@ -25,7 +25,7 @@ export function FinalCallForm() {
           />
         </div>
         <button className="btn btn-blue" type="submit" disabled={isLoading}>
-          Запустити дзвінок <Arrow />
+          {copy.finalForm.submit} <Arrow />
         </button>
       </form>
       <p
@@ -33,7 +33,7 @@ export function FinalCallForm() {
         id={noteId}
         role="status"
       >
-        {message ?? DEFAULT_NOTE}
+        {message ?? copy.finalForm.note}
       </p>
     </>
   );

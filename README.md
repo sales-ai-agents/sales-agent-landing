@@ -62,8 +62,8 @@ src/
 │   ├── blog/                   # Blog index/article components
 │   ├── marketing/              # Marketing page sections (hero, FAQ, industries, builder, etc.)
 │   └── ui/                     # Reusable UI primitives (shadcn-style)
-├── content/blog/               # Blog posts (typed content blocks)
-├── lib/                        # Utilities, schemas, constants, API config, shared hooks (lib/hooks)
+├── content/blog/{uk,ru,en}/    # Blog posts per locale (typed content blocks)
+├── lib/                        # Utilities, schemas, constants, API config, shared hooks (lib/hooks), i18n (lib/i18n)
 ├── types/                      # Centralized TypeScript type definitions
 └── fonts/                      # Custom fonts (Actay Wide, Gilroy)
 ```

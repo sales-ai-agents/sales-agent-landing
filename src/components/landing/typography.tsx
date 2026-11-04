@@ -1,5 +1,6 @@
 import { Fragment } from "react";
 import type { CSSProperties, ReactNode } from "react";
+import type { Heading, HeadingLine } from "@/components/landing/copy/types";
 
 type HeadingTag = "h2" | "h3";
 
@@ -19,6 +20,33 @@ export function LinesHeading({ as: Tag = "h2", className, lines, style }: LinesH
         </span>
       ))}
     </Tag>
+  );
+}
+
+const renderHeadingLine = (line: HeadingLine): ReactNode =>
+  line.map((part, index) =>
+    typeof part === "string" ? (
+      <Fragment key={index}>{part}</Fragment>
+    ) : (
+      <em key={index}>{part.em}</em>
+    )
+  );
+
+interface CopyHeadingProps {
+  as?: HeadingTag;
+  className: string;
+  heading: Heading;
+  style?: CSSProperties;
+}
+
+export function CopyHeading({ as, className, heading, style }: CopyHeadingProps) {
+  return (
+    <LinesHeading
+      as={as}
+      className={className}
+      style={style}
+      lines={heading.map(renderHeadingLine)}
+    />
   );
 }
 
@@ -77,7 +105,7 @@ export function SplitLetters({ text, startIndex = 0 }: SplitLettersProps) {
   });
 }
 
-const AI_TERM = /(ШІ-[^\s,.:;!?»]+)/;
+const AI_TERM = /((?:ШІ|ИИ)-[^\s,.:;!?»]+)/;
 
 export function NoWrapAiTerms({ text }: { text: string }) {
   return text.split(AI_TERM).map((part, index) =>

@@ -1,10 +1,10 @@
 import { cn } from "@/lib/utils";
 import { SIGN_UP_URL } from "@/components/landing/data";
-import { PRICING_PLANS, type PricingPlan } from "@/components/landing/content";
+import type { PricingCopy, PricingPlanCopy } from "@/components/landing/copy/types";
 import { CheckIcon } from "@/components/landing/icons";
-import { Arrow, LinesHeading, MetaRow } from "@/components/landing/typography";
+import { Arrow, CopyHeading, MetaRow } from "@/components/landing/typography";
 
-function PlanCard({ plan }: { plan: PricingPlan }) {
+function PlanCard({ plan, perMonth }: { plan: PricingPlanCopy; perMonth: string }) {
   return (
     <div className={cn("plan", plan.featured && "hot")} data-r="">
       <div className="plan-top">
@@ -14,7 +14,7 @@ function PlanCard({ plan }: { plan: PricingPlan }) {
       <h3 className="t1">{plan.name}</h3>
       <div className="price">
         <b className="t1">{plan.price}</b>
-        <span>/ місяць</span>
+        <span>{perMonth}</span>
       </div>
       <p className="sub">{plan.subtitle}</p>
       <ul>
@@ -38,29 +38,24 @@ function PlanCard({ plan }: { plan: PricingPlan }) {
   );
 }
 
-export function PricingSection() {
+export function PricingSection({ copy }: { copy: PricingCopy }) {
   return (
     <section className="sec how" id="pricing">
       <div className="wrap">
-        <MetaRow left="(09) Тарифи" right="Оплата щомісяця · Без контрактів" />
+        <MetaRow left={copy.meta} right={copy.metaRight} />
         <div className="sec-head">
-          <LinesHeading
-            className="h2 t1"
-            lines={["Тариф під кількість", <em key="accent">ваших дзвінків</em>]}
-          />
+          <CopyHeading className="h2 t1" heading={copy.heading} />
           <p className="lead" data-r="">
-            У кожному тарифі — готові хвилини розмов, ШІ-агенти і журнал дзвінків. Почніть із
-            безкоштовного тестового дзвінка.
+            {copy.lead}
           </p>
         </div>
         <div className="plans">
-          {PRICING_PLANS.map((plan) => (
-            <PlanCard key={plan.id} plan={plan} />
+          {copy.plans.map((plan) => (
+            <PlanCard key={plan.id} plan={plan} perMonth={copy.perMonth} />
           ))}
         </div>
         <p className="plans-note" data-r="">
-          Оплачуєте лише використані хвилини. Сценарії, інтеграції з CRM і тестовий баланс уже
-          включені.
+          {copy.note}
         </p>
       </div>
     </section>
