@@ -1,5 +1,13 @@
 import { z } from "zod";
 
+import {
+  callFieldsSchema,
+  CALL_TYPE_IDS,
+  toApiCallFields,
+  type CallField,
+  type CallTypeId,
+} from "@/lib/call-config/schema";
+
 export const signInSchema = z.object({
   email: z.email("Введіть коректну електронну адресу"),
   password: z.string().min(8, "Пароль має містити щонайменше 8 символів"),
@@ -113,11 +121,13 @@ const agentConfigShape = {
     .string()
     .min(1, "Інструкції обов'язкові")
     .max(INSTRUCTIONS_MAX_LENGTH, `Максимум ${INSTRUCTIONS_MAX_LENGTH} символів`),
+  callType: z.enum(CALL_TYPE_IDS).nullable(),
+  callFields: callFieldsSchema,
 };
 
 export const contactSelectionIsValid = (data: {
   callDirection?: CallDirection;
-  contactIds?: number[];
+  contactIds?: (number | undefined)[];
 }): boolean => data.callDirection === "inbound" || (data.contactIds?.length ?? 0) > 0;
 
 export const numberSelectionIsValid = (data: { numberId?: number }): boolean =>
@@ -167,6 +177,8 @@ export interface AgentApiPayload {
   name: string;
   voice: string;
   instructions: string;
+  call_type: CallTypeId | null;
+  call_fields: CallField[];
   call_direction: CallDirection;
   contact_ids: number[];
   schedule_start: string;
@@ -185,6 +197,8 @@ export const toAgentApiPayload = (
     name: data.name,
     voice: data.voice,
     instructions: data.instructions,
+    call_type: data.callType,
+    call_fields: toApiCallFields(data.callFields),
     call_direction: data.callDirection,
     contact_ids: isOutbound ? data.contactIds : [],
     schedule_start: data.scheduleStart,

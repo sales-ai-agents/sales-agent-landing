@@ -17,6 +17,7 @@ import {
   DEFAULT_NUMBER_ID,
 } from "@/lib/schemas";
 import { useCreateAgent, useTestCall, useVoices, useNumbers } from "@dashboard/hooks";
+import { toApiCallFields } from "@/lib/call-config/schema";
 import { handleMutationError } from "@/lib/mutation-error";
 import { AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
 import { StepIndicator } from "./_components/step-indicator";
@@ -39,6 +40,8 @@ const DEFAULT_VALUES: CreateAgentFormData = {
   callsPerDay: 20,
   numberId: DEFAULT_NUMBER_ID,
   instructions: "",
+  callType: null,
+  callFields: [],
   testPhone: "",
 };
 
@@ -113,6 +116,7 @@ const CreateAgentPage = () => {
         name: data.name,
         voice: data.voice,
         instructions: data.instructions,
+        call_fields: toApiCallFields(data.callFields),
       },
       {
         onSuccess: () => toast.success("Дзвінок ініційовано — очікуйте виклик"),

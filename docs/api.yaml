@@ -64,6 +64,8 @@ info:
         "started_at": "...", "ended_at": "...", "duration_sec": 142,
         "outcome": "нейтрально", "meeting_scheduled": true,
         "summary": "...", "manager_note": "",
+        "collected_data": [{"field_id": "booking-phone", "label": "Телефон", "type": "phone", "required": true, "value": "+380931112233"}],
+        "collected_data_complete": true,
         "transcript": [{"role": "assistant", "content": "..."}]
       }
     }
@@ -695,6 +697,117 @@ paths:
           description: OK
         "401": { $ref: "#/components/responses/Unauthorized" }
 
+  /app/call-results:
+    get:
+      tags: [calls]
+      summary: Стрічка результатів дзвінків — «що сталось» для власника
+      description: |
+        Картка на кожен завершений дзвінок: тип події, заголовок одним
+        реченням і поля «назва: значення». Це те, що власник бачить після
+        дзвінків: «Новий запис: стрижка — у суботу, 7 листопада, о 18:00»
+        з майстром, ім'ям і телефоном, «Просить передзвонити — після
+        обіду», «Відмова: вже є підрядник» тощо.
+
+        **Як малювати.** Іконка й колір — з `result.type`, заголовок —
+        `result.title`, тіло — `result.fields` по черзі (`label: value`).
+        Поля приходять лише непорожні й уже в потрібному порядку, тож
+        знати кожен сценарій наперед фронту не треба: новий тип покажеться
+        тими самими рядками.
+
+        **Значок на дзвіночку** — з `unseen_important`, не з `unseen`.
+        Кампанія на 500 номерів дає сотні «не відповіли», і «312» на
+        значку нічого не каже. `unseen_important` — непереглянуті, де
+        власнику треба діяти (`action_required: true`).
+
+        **Перегляд НЕ позначається сам.** Відкрити стрічку — не те саме,
+        що прочитати. Позначай через `POST /app/call-results/seen`: картку
+        — коли її відкрили, усі — кнопкою «Позначити всі прочитаними».
+
+        Найновіші зверху. Історія до появи стрічки (02.11.2026) уже
+        вважається переглянутою.
+      parameters:
+        - { name: limit, in: query, schema: { type: integer, default: 20, maximum: 100 } }
+        - { name: offset, in: query, schema: { type: integer, default: 0 } }
+        - name: unseen
+          in: query
+          schema: { type: string, enum: ["1"] }
+          description: "1 — лише непереглянуті"
+        - name: type
+          in: query
+          schema: { type: string }
+          description: >
+            Через кому: `booking,callback`. Невідомі значення ігноруються.
+            Порожньо — усі типи.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  total: { type: integer, description: скільки карток з цими фільтрами }
+                  limit: { type: integer }
+                  offset: { type: integer }
+                  unseen: { type: integer, description: усі непереглянуті }
+                  unseen_important:
+                    type: integer
+                    description: непереглянуті, де треба діяти — для значка
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        call_id:
+                          { type: string, description: "для /app/calls/{call_id} і запису розмови" }
+                        created_at: { type: string }
+                        ended_at: { type: string }
+                        phone: { type: string }
+                        agent_id: { type: integer, nullable: true }
+                        agent_name: { type: string }
+                        seen: { type: boolean }
+                        result: { $ref: "#/components/schemas/CallResult" }
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /app/call-results/seen:
+    post:
+      tags: [calls]
+      summary: Позначити картки переглянутими
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: "Або `call_ids`, або `all: true`."
+              properties:
+                call_ids:
+                  type: array
+                  maxItems: 200
+                  items: { type: string }
+                all: { type: boolean, description: "true — усі непереглянуті акаунта" }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  marked:
+                    {
+                      type: integer,
+                      description: скільки позначено зараз (чужі й уже переглянуті не рахуються),
+                    }
+                  unseen: { type: integer }
+                  unseen_important: { type: integer }
+          description: OK — лічильники вже після позначки, значок можна оновити з відповіді
+        "400":
+          description: "`nothing_to_mark` — не передано ні call_ids, ні all · `invalid_json`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
   /app/calls/{call_id}/audio:
     get:
       tags: [calls]
@@ -807,6 +920,10 @@ paths:
         кодування, і замість «Іван» виходить «Ð†Ð²Ð°Ð½». Роздільник — крапка
         з комою: так Excel з українською локаллю розкладає по колонках без
         майстра імпорту.
+
+
+        Після стандартних колонок ідуть зібрані дані (`collected_data`): по
+        одній колонці на кожну назву поля, у порядку першої появи.
       parameters:
         - { name: date_from, in: query, schema: { type: string, format: date } }
         - { name: date_to, in: query, schema: { type: string, format: date } }
@@ -984,6 +1101,182 @@ paths:
                         spreadsheet_url: { type: string, description: посилання на таблицю }
           description: OK
         "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /app/integrations/crm:
+    get:
+      tags: [webhooks]
+      summary: Підключена CRM (KeyCRM або Bitrix24)
+      description: |
+        Одна CRM на акаунт. `connected: false` — нічого не підключено,
+        решти полів тоді немає. API-ключ і адреса вебхука назовні не
+        віддаються ніколи: лише назва CRM і домен порталу (`account`).
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  crm: { $ref: "#/components/schemas/CrmIntegration" }
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [webhooks]
+      summary: Підключити KeyCRM або Bitrix24
+      description: |
+        Спершу перевіряємо доступ на тому боці, і лише тоді зберігаємо —
+        «Підключено» з ключем, що не працює, гірше за відмову одразу.
+
+        **KeyCRM:** `api_key` — у KeyCRM «Налаштування → Загальні → Ключ
+        API». Розділ «Воронки» в KeyCRM має бути увімкнений (інакше
+        `leads_disabled`). Після дзвінка створюється картка у воронці;
+        покупця шукаємо за телефоном (є — картка на нього, нема —
+        створюємо); час запису чи передзвону → «дата наступного контакту».
+
+        **Bitrix24:** `webhook_url` — «Розробникам → Інше → Вхідний
+        вебхук» з правами **CRM**, вигляд
+        `https://ваш.bitrix24.ua/rest/1/abc123/`. Класична CRM — лід;
+        проста (без лідів) — контакт + угода, режим визначаємо самі. На час
+        запису чи передзвону — справа з нагадуванням за годину й за 15 хв.
+
+        Повторне підключення замінює попереднє (і CRM, і ключ).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [provider]
+              properties:
+                provider: { type: string, enum: [keycrm, bitrix24] }
+                api_key: { type: string, description: "лише для keycrm" }
+                webhook_url: { type: string, description: "лише для bitrix24" }
+                push: { type: string, enum: [important, conversations, all], default: important }
+                pipeline_id: { type: integer, nullable: true }
+                source_id: { type: integer, nullable: true, description: "лише keycrm" }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  crm: { $ref: "#/components/schemas/CrmIntegration" }
+          description: Підключено — після цього показуй вибір воронки (`pipelines`) і джерела (`sources`)
+        "400":
+          description: >
+            `unknown_provider` · `credentials_required` (порожній ключ чи
+            адреса) · `invalid_url` (не схоже на вебхук Bitrix24 або адреса
+            не назовні) · `auth_failed` (ключ/вебхук не діє) · `no_access`
+            (у вебхука немає прав CRM) · `leads_disabled` (у KeyCRM вимкнено
+            «Воронки») · `invalid_push` · `invalid_json`
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "502":
+          description: "`crm_unavailable` — CRM не відповіла, спробуйте ще раз"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "503":
+          description: "`rate_limited` — CRM просить зачекати"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "504":
+          description: "`timeout`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    patch:
+      tags: [webhooks]
+      summary: Що надсилати в CRM і куди
+      description: >
+        `push`: `important` (за замовчуванням) — лише де треба діяти: запис,
+        передзвін, заявка, оплата, «потрібна увага»; `conversations` — усі
+        розмови, крім недозвонів; `all` — усе. `pipeline_id` / `source_id` —
+        з `pipelines` / `sources` у відповіді; `null` — за замовчуванням CRM.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                push: { type: string, enum: [important, conversations, all] }
+                pipeline_id: { type: integer, nullable: true }
+                source_id: { type: integer, nullable: true }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  crm: { $ref: "#/components/schemas/CrmIntegration" }
+          description: OK
+        "400":
+          description: "`invalid_push` · `unknown_pipeline_id` · `unknown_source_id` · `invalid_json`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`crm_not_configured`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    delete:
+      tags: [webhooks]
+      summary: Відключити CRM
+      description: Те, що вже в CRM, лишається там — ми нічого на тому боці не видаляємо.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  removed: { type: boolean }
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /app/integrations/crm/test:
+    post:
+      tags: [webhooks]
+      summary: Тестова картка в CRM
+      description: >
+        Створює в CRM картку «Тест Calls4U — інтеграція працює» (без
+        телефону, щоб не плодити вигаданого покупця) — кнопка «Перевірити»
+        після підключення. Успіх також знімає з інтеграції статус `error`.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  external_id:
+                    {
+                      type: string,
+                      description: "`card:123` (KeyCRM), `lead:45` / `deal:45` (Bitrix24)",
+                    }
+                  url:
+                    {
+                      type: string,
+                      description: "посилання на картку (Bitrix24); для KeyCRM порожнє",
+                    }
+          description: Картку створено
+        "400":
+          description: "`auth_failed` · `no_access` · `leads_disabled` · `bad_request` (з `detail`)"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`crm_not_configured`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "502":
+          description: "`crm_unavailable`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "503":
+          description: "`rate_limited`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "504":
+          description: "`timeout`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
 
   /app/integrations/google-sheets/preview:
     get:
@@ -2642,11 +2935,19 @@ paths:
                       properties:
                         kind:
                           type: string
-                          enum: [escalation, limit_exhausted]
+                          enum: [escalation, limit_exhausted, call_result]
                           description: >
+                            `call_result` — **працює**: лист / Telegram
+                            власнику одразу після дзвінка, де треба діяти —
+                            новий запис, просить передзвонити, заявка,
+                            оплата. Тема — заголовок картки, у тілі — ті
+                            самі поля, що в кабінеті. Про відмови й
+                            недозвони не пишемо: вони лише в стрічці.
+
+
                             `limit_exhausted` — **працює**: лист на 80 %
                             витрачених хвилин і ще один, коли вони
-                            скінчились (на тріалі це 10 хвилин, тож
+                            скінчились (на тріалі це 20 хвилин, тож
                             приходить швидко). Поріг і частота перевірки —
                             на сервері.
 
@@ -2691,7 +2992,7 @@ paths:
                     type: object
                     required: [kind]
                     properties:
-                      kind: { type: string, enum: [escalation, limit_exhausted] }
+                      kind: { type: string, enum: [escalation, limit_exhausted, call_result] }
                       email_enabled: { type: boolean }
                       telegram_enabled: { type: boolean }
                       email: { type: string, maxLength: 160 }
@@ -2941,17 +3242,14 @@ paths:
       tags: [calls]
       summary: Стан синхронізації дзвінка з CRM
       description: >
-        **Конекторів CRM поки немає. Цей ендпоінт існує саме тому.**
+        Працює з KeyCRM і Bitrix24 (`/app/integrations/crm`). Надсилає
+        робітник за чергою: `pending` → за ~10 с `synced`, або `failed` з
+        повторами через 1, 5, 15, 60, 180 хв.
 
 
-        Без нього фронт малює «Не синхронізовано» проти кожного рядка — а
-        це неправда: не «не вийшло», а «CRM не підключена». Клієнт читає
-        це як поломку і йде в підтримку.
-
-
-        Тому `configured` і `state` розділені. Поки `configured: false` —
-        колонку синхронізації в журналі не показувати взагалі, а панель у
-        картці дзвінка згорнути.
+        `configured` і `state` розділені: поки `configured: false` — колонку
+        синхронізації в журналі не показувати взагалі, а панель у картці
+        дзвінка згорнути. «CRM не підключена» — не поломка.
       parameters:
         - { name: call_id, in: path, required: true, schema: { type: string } }
       responses:
@@ -2968,16 +3266,40 @@ paths:
                       configured:
                         type: boolean
                         description: чи підключено хоч якусь CRM до акаунта
-                      provider: { type: string, nullable: true }
+                      provider: { type: string, nullable: true, enum: [keycrm, bitrix24, null] }
+                      provider_name: { type: string, nullable: true }
                       state:
                         type: string
-                        enum: [not_configured, pending, synced, failed]
-                        description: "`not_configured` — стан акаунта, а не цього дзвінка"
+                        enum: [not_configured, not_queued, pending, synced, failed, skipped]
+                        description: >
+                          `not_configured` — стан акаунта, а не цього дзвінка.
+                          `not_queued` — дзвінок був до підключення CRM.
+                          `skipped` — за налаштуванням `push` не надсилався
+                          (кнопка «Надіслати в CRM» все одно доступна).
                       synced_at: { type: string, nullable: true }
-                      error: { type: string, nullable: true }
+                      error:
+                        type: string
+                        nullable: true
+                        description: "`auth_failed` · `no_access` · `leads_disabled` · `rate_limited` · `crm_unavailable` · `timeout` · `bad_request` · `crm_not_connected`"
+                      attempts: { type: integer }
+                      will_retry:
+                        {
+                          type: boolean,
+                          description: "true — повторимо самі, кнопку можна не тиснути",
+                        }
+                      external_id:
+                        {
+                          type: string,
+                          nullable: true,
+                          description: "`card:123` / `lead:45` / `deal:45`",
+                        }
+                      external_url:
+                        type: string
+                        nullable: true
+                        description: "посилання «Відкрити в CRM» (Bitrix24); для KeyCRM null"
                       can_retry:
                         type: boolean
-                        description: чи має сенс показувати кнопку «Повторити»
+                        description: чи має сенс показувати кнопку «Повторити» / «Надіслати в CRM»
           description: OK
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404":
@@ -2989,18 +3311,22 @@ paths:
       tags: [calls]
       summary: Повторити синхронізацію з CRM
       description: >
-        Поки CRM не підключена, повторювати нема чого — повертається
-        `501 crm_not_configured`, а не `ok`. Кнопка не має вдавати
-        успішну роботу.
+        Знову в чергу (лічильник спроб з нуля) — робітник візьме за ~10 с,
+        стан дивись у `crm-status`. Працює й для `skipped`: «Надіслати в
+        CRM» вручну. Поки CRM не підключена — `501 crm_not_configured`, а не
+        `ok`: кнопка не має вдавати успішну роботу.
       parameters:
         - { name: call_id, in: path, required: true, schema: { type: string } }
       responses:
         "200":
           content: { application/json: { schema: { $ref: "#/components/schemas/Ok" } } }
-          description: Поставлено в чергу
+          description: "Поставлено в чергу (`state: pending`)"
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404":
           description: "`not_found`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "409":
+          description: "`call_in_progress` — дзвінок ще триває, результату ще немає"
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
         "501":
           description: "`crm_not_configured` — жодного конектора до акаунта не підключено"
@@ -3100,7 +3426,29 @@ paths:
                 instructions:
                   type: string
                   maxLength: 4000
-                  description: Що агент говорить. Без цього він не зможе дзвонити.
+                  description: >
+                    Що агент говорить. Без цього він не зможе дзвонити.
+                    Зазвичай — шаблон із `GET /app/agent-templates`, який
+                    людина відредагувала. Незаповнені поля в [дужках] не
+                    пропускаємо: `400 instructions_unfilled`.
+                report_fields:
+                  type: string
+                  maxLength: 500
+                  description: >
+                    Поле «Що має бути у звіті після дзвінка» під
+                    інструкцією: «номер, ім'я, тип доставки». Агент сам про
+                    це спитає, а картка результату покаже саме ці рядки
+                    (`result.fields` з `key: extra`). Порожньо — звіт як
+                    зазвичай. Якщо задано `call_fields`, агент питає за ними,
+                    а не за цим полем.
+                call_type: { $ref: "#/components/schemas/CallType" }
+                call_fields:
+                  type: array
+                  maxItems: 15
+                  items: { $ref: "#/components/schemas/CallField" }
+                  description: >
+                    Що агент збирає в розмові. Порядок масиву зберігається.
+                    Не передано — порожній список.
                 call_direction:
                   type: string
                   enum: [inbound, outbound]
@@ -3162,9 +3510,228 @@ paths:
                     description: скільки з `contact_ids` справді записано (свої і наявні)
           description: Створено
         "400":
-          description: "`name_required` · `invalid_json` · `invalid_call_direction` · `contact_base_required` (лише якщо передано id неіснуючої бази) · `invalid_contact_ids` · `invalid_schedule` · `invalid_working_days` · `invalid_calls_per_day` · `number_not_connected`"
+          description: >
+            `name_required` · `invalid_json` · `invalid_call_direction` ·
+            `contact_base_required` (лише якщо передано id неіснуючої бази) ·
+            `invalid_contact_ids` · `invalid_schedule` · `invalid_working_days` ·
+            `invalid_calls_per_day` · `number_not_connected` ·
+            `invalid_call_type` · `invalid_call_fields` (поганий елемент, тип,
+            порожня чи задовга назва, повтор id, не масив) ·
+            `too_many_call_fields` (більше 15) ·
+            `instructions_unfilled` — в інструкції лишились поля в [дужках];
+            `fields` — які саме, у порядку появи (з повторами), щоб
+            підсвітити їх у тексті.
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
         "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /app/agent-templates:
+    get:
+      tags: [agents]
+      summary: Шаблони для кроку «Інструкція для агента»
+      description: |
+        Плитки «Почніть із шаблону» й текст, який підставляється в поле
+        «Інструкції». Тексти ведемо тут, а не на фронті: у шаблоні «Запис»
+        блок `МАЙСТРИ:` із рядками `- Ім'я: години` вмикає повний збір
+        запису (послуга, майстер, час, ім'я, телефон, переказ), і змінений
+        на фронті шаблон тихо зробив би агента гіршим.
+
+        **Як малювати.** Плитки — з `templates` (іконка `icon`, заголовок
+        `title`, підпис `subtitle`). Клік — у поле «Інструкції» йде
+        `instructions`, у поле «Що має бути у звіті» — `report_fields`,
+        «Корисні підказки» — `tips`. Людина править обидва поля як хоче.
+
+        **Лічильник «Заповніть поля в [дужках] — залишилось N».** Рахуй на
+        фронті регуляркою `placeholder_pattern` (кожен збіг, з повторами).
+        Сервер перевіряє те саме: агента з [дужками] не створить і не
+        подзвонить — `400 instructions_unfilled` з `fields`.
+
+        Шаблонів може стати більше — малюй список, а не три зашиті плитки.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  templates:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string, examples: [booking, order, sales] }
+                        title: { type: string, examples: ["Запис"] }
+                        subtitle: { type: string, examples: ["Записує клієнта на послугу"] }
+                        icon: { type: string, enum: [calendar, package, trending-up] }
+                        call_direction:
+                          type: string
+                          enum: [inbound, outbound]
+                          description: підказка для кроку «Що робить агент», якщо його ще не обрали
+                        instructions: { type: string, description: "текст із полями в [дужках]" }
+                        report_fields:
+                          {
+                            type: string,
+                            description: "готовий перелік для поля «Що має бути у звіті»",
+                          }
+                        tips: { type: array, items: { type: string } }
+                  placeholder_pattern: { type: string, examples: ["\\[[^\\[\\]\\n]{1,80}\\]"] }
+                  instructions_max: { type: integer, examples: [4000] }
+                  report_fields_max: { type: integer, examples: [500] }
+                  report_fields_label:
+                    { type: string, examples: ["Що має бути у звіті після дзвінка"] }
+                  report_fields_hint: { type: string, description: підказка під полем }
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /app/bookings:
+    get:
+      tags: [agents]
+      summary: Журнал записів
+      description: |
+        Хто, до кого й коли записаний: те, що записав агент під час дзвінка
+        (`source: call`), і те, що власник додав сам (`source: manual`).
+        Саме звідси агент знає, який час уже зайнятий, тому двох людей на одну
+        годину до одного майстра він не запише.
+
+        Журнал знає лише про ці записи. Клієнт записався повз систему — власник
+        додає його сюди, інакше агент вважатиме час вільним.
+      parameters:
+        - { name: date_from, in: query, schema: { type: string, examples: ["2026-11-05"] } }
+        - { name: date_to, in: query, schema: { type: string, examples: ["2026-11-12"] } }
+        - { name: agent_id, in: query, schema: { type: integer } }
+        - {
+            name: cancelled,
+            in: query,
+            schema: { type: string, enum: ["1"] },
+            description: "1 — разом зі скасованими",
+          }
+        - { name: limit, in: query, schema: { type: integer, default: 200, maximum: 500 } }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  bookings: { type: array, items: { $ref: "#/components/schemas/Booking" } }
+          description: OK, найраніші зверху
+        "400":
+          description: "`invalid_query`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [agents]
+      summary: Додати запис вручну або закрити час
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [agent_id, starts_at]
+              properties:
+                agent_id: { type: integer }
+                master:
+                  { type: string, description: "порожньо — зайнятий час усіх майстрів агента" }
+                starts_at:
+                  {
+                    type: string,
+                    examples: ["2026-11-05 18:00"],
+                    description: "YYYY-MM-DD HH:MM за Києвом",
+                  }
+                minutes: { type: integer, default: 60, minimum: 5, maximum: 480 }
+                service: { type: string }
+                client_name: { type: string }
+                phone: { type: string }
+                note: { type: string }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  id: { type: integer }
+          description: Записано
+        "400":
+          description: "`invalid_json` · `invalid_starts_at` · `invalid_minutes`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`agent_not_found`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "409":
+          description: "`slot_taken` — цей час у майстра вже зайнятий"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/bookings/{booking_id}:
+    parameters:
+      - { name: booking_id, in: path, required: true, schema: { type: integer } }
+    delete:
+      tags: [agents]
+      summary: Скасувати запис
+      description: Час знову стає вільним для агента. Клієнту ми про це не телефонуємо.
+      responses:
+        "200":
+          content: { application/json: { schema: { $ref: "#/components/schemas/Ok" } } }
+          description: Скасовано
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`not_found` — і для неіснуючого, і для чужого запису"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/agents/{agent_id}/free-slots:
+    parameters:
+      - { name: agent_id, in: path, required: true, schema: { type: integer } }
+    get:
+      tags: [agents]
+      summary: Вільний час агента на день
+      description: |
+        Те саме, що агент бачить під час дзвінка: години майстрів з інструкції
+        мінус журнал записів. `schedule_found: false` — в інструкції немає годин
+        у форматі `пн–пт 10:00–19:00`, тоді агент працює без журналу. Покажи це
+        на кроці «Інструкція», щоб людина дописала години.
+      parameters:
+        - {
+            name: date,
+            in: query,
+            schema: { type: string, examples: ["2026-11-05"] },
+            description: "порожньо — сьогодні",
+          }
+        - {
+            name: service,
+            in: query,
+            schema: { type: string },
+            description: "послуга: від неї залежить тривалість",
+          }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  schedule_found: { type: boolean }
+                  date: { type: string }
+                  minutes: { type: integer, description: "тривалість, з якою рахували" }
+                  masters:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name: { type: string }
+                        free: { type: array, items: { type: string, examples: ["18:00"] } }
+          description: OK
+        "400":
+          description: "`invalid_date`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`agent_not_found`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
 
   /app/agents/test-call:
     post:
@@ -3192,12 +3759,24 @@ paths:
                     «послухайте агента», але агента ще немає і agent_id взяти
                     нізвідки. Нічого не зберігається — просто дзвінок із цими
                     інструкціями.
+                report_fields:
+                  type: string
+                  description: >
+                    Для тесту ДО створення агента: «що має бути у звіті» —
+                    щоб тестовий дзвінок одразу показав, яким буде звіт.
+                call_fields:
+                  type: array
+                  maxItems: 15
+                  items: { $ref: "#/components/schemas/CallField" }
+                  description: >
+                    Поля для цього тестового дзвінка, щоб він працював так само,
+                    як справжній. Не передано — поля збереженого агента.
       responses:
         "200":
           content: { application/json: { schema: { $ref: "#/components/schemas/Ok" } } }
           description: Дзвінок поставлено
         "400":
-          description: "`invalid_phone` · `agent_has_no_instructions` · `invalid_json`"
+          description: "`invalid_phone` · `agent_has_no_instructions` · `invalid_json` · `invalid_call_fields` · `too_many_call_fields` · `instructions_unfilled` (з `fields`) — у тексті лишились [дужки]"
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404":
@@ -4287,7 +4866,24 @@ paths:
               properties:
                 name: { type: string, maxLength: 120 }
                 voice: { type: string, maxLength: 64 }
-                instructions: { type: string, maxLength: 4000 }
+                instructions:
+                  {
+                    type: string,
+                    maxLength: 4000,
+                    description: "[дужки] не пропускаємо — `instructions_unfilled`",
+                  }
+                report_fields:
+                  {
+                    type: string,
+                    maxLength: 500,
+                    description: "що має бути у звіті; порожньо — звіт як зазвичай",
+                  }
+                call_type: { $ref: "#/components/schemas/CallType" }
+                call_fields:
+                  type: array
+                  maxItems: 15
+                  items: { $ref: "#/components/schemas/CallField" }
+                  description: "Замінює список цілком: `[]` очищає, не передано — лишається як було."
                 is_active: { type: boolean, description: "false = агент на паузі" }
                 call_direction: { type: string, enum: [inbound, outbound] }
                 contact_ids:
@@ -4315,7 +4911,7 @@ paths:
                   agent: { $ref: "#/components/schemas/Agent" }
           description: OK
         "400":
-          description: "`name_required` · `nothing_to_update` · `invalid_json` · `invalid_call_direction` · `contact_base_required` (id неіснуючої бази) · `invalid_contact_ids` · `invalid_schedule` · `invalid_working_days` · `invalid_calls_per_day` · `number_not_connected`"
+          description: "`name_required` · `nothing_to_update` · `invalid_json` · `invalid_call_direction` · `contact_base_required` (id неіснуючої бази) · `invalid_contact_ids` · `invalid_schedule` · `invalid_working_days` · `invalid_calls_per_day` · `number_not_connected` · `invalid_call_type` · `invalid_call_fields` · `too_many_call_fields` · `instructions_unfilled` (з `fields`)"
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404":
@@ -4657,6 +5253,202 @@ components:
       properties:
         ok: { type: boolean, const: true }
 
+    Booking:
+      type: object
+      properties:
+        id: { type: integer }
+        agent_id: { type: integer }
+        agent_name: { type: string }
+        master: { type: string }
+        starts_at: { type: string, examples: ["2026-11-05 18:00"], description: "за Києвом" }
+        minutes: { type: integer }
+        service: { type: string }
+        client_name: { type: string }
+        phone: { type: string }
+        note: { type: string }
+        call_id:
+          { type: string, description: "дзвінок, у якому записали; порожньо для ручного запису" }
+        source: { type: string, enum: [call, manual] }
+        status: { type: string, enum: [booked, cancelled] }
+        created_at: { type: string }
+
+    CrmIntegration:
+      type: object
+      properties:
+        connected: { type: boolean }
+        provider: { type: string, enum: [keycrm, bitrix24] }
+        provider_name: { type: string }
+        status:
+          type: string
+          enum: [connected, error]
+          description: "`error` — ключ чи вебхук перестав діяти; показуй «Перепідключити»"
+        error:
+          {
+            type: string,
+            nullable: true,
+            description: "`auth_failed` · `no_access` · `leads_disabled`",
+          }
+        account:
+          {
+            type: string,
+            description: "«KeyCRM» або домен порталу Bitrix24 — для «Підключено до …»",
+          }
+        push: { type: string, enum: [important, conversations, all] }
+        mode:
+          {
+            type: string,
+            nullable: true,
+            enum: [classic, simple, null],
+            description: "Bitrix24: класична (ліди) чи проста (угоди)",
+          }
+        pipeline_id: { type: integer, nullable: true }
+        source_id: { type: integer, nullable: true }
+        pipelines:
+          type: array
+          description: "воронки KeyCRM або воронки угод Bitrix24 (проста CRM); для класичної Bitrix24 порожньо"
+          items: { type: object, properties: { id: { type: integer }, title: { type: string } } }
+        sources:
+          type: array
+          description: джерела KeyCRM; для Bitrix24 порожньо (ставимо «Дзвінок»)
+          items: { type: object, properties: { id: { type: integer }, title: { type: string } } }
+        connected_at: { type: string, nullable: true }
+
+    CallResult:
+      type: object
+      nullable: true
+      description: >
+        Картка результату дзвінка. null — дзвінок ще триває. Та сама картка
+        приходить у `GET /app/calls` (`result`), `GET /app/calls/{id}`,
+        стрічці `GET /app/call-results` і у вебхуку `call.completed`
+        (`call.result`).
+      properties:
+        version: { type: integer, description: "1" }
+        type:
+          type: string
+          enum:
+            [
+              booking,
+              payment,
+              callback,
+              request,
+              refusal,
+              do_not_call,
+              needs_attention,
+              not_reached,
+            ]
+          description: >
+            `booking` — записали / домовились про зустріч (рушій справді
+            записав, не «модель думає»). `payment` — погодився на оплату.
+            `callback` — просить передзвонити. `request` — заявка чи
+            замовлення без конкретного часу. `refusal` — відмова, немає
+            часу, поклали слухавку. `do_not_call` — попросив більше не
+            дзвонити (номер уже в «Не дзвонити»). `needs_attention` —
+            розмова була, домовленості немає: питання без відповіді або
+            «схоже, погодився, але запис не підтверджено». `not_reached` —
+            не відповіли, автовідповідач, не з'єдналось.
+        title:
+          type: string
+          description: "Одне речення для заголовка: «Новий запис: стрижка — у суботу, 7 листопада, о 18:00»"
+        action_required:
+          type: boolean
+          description: >
+            Власнику треба щось зробити: прийняти клієнта, передзвонити,
+            відповісти на питання. true для booking, payment, callback,
+            request і для needs_attention з питаннями або непідтвердженим
+            записом. Виділяй такі картки й рахуй з них значок.
+        unconfirmed:
+          type: boolean
+          description: >
+            Клієнт хотів записатись чи домовитись, але запису немає: агент
+            не зафіксував або розмова зірвалась. Лише для needs_attention.
+            Про такі картки власнику теж приходить лист / Telegram — це
+            клієнт, якого ще можна повернути дзвінком.
+        when:
+          type: object
+          nullable: true
+          description: "Лише для booking і callback. null — часу не назвали."
+          properties:
+            date:
+              {
+                type: string,
+                nullable: true,
+                description: "YYYY-MM-DD за Києвом; null — дня не назвали",
+              }
+            time: { type: string, nullable: true, description: "HH:MM; null — години не назвали" }
+            time_mode:
+              type: string
+              nullable: true
+              enum: [at, after, before, null]
+              description: "at — «о 18:00», after — «після 18:00», before — «до 18:00»"
+            text:
+              { type: string, description: "Як сказати людині: «у суботу, 7 листопада, о 18:00»" }
+        contact:
+          type: object
+          description: усе — лише зі слів співрозмовника в цій розмові; порожньо — не називав
+          properties:
+            name: { type: string, description: "порожньо — не назвався" }
+            phone: { type: string }
+            company: { type: string, description: "компанія чи бізнес співрозмовника (B2B)" }
+            position: { type: string }
+            email: { type: string }
+            other_phone: { type: string, description: інший номер для зв'язку }
+            other: { type: string, description: "Telegram, Viber, Instagram…" }
+        amount:
+          type: object
+          nullable: true
+          description: сума домовленості, якщо її назвали; у CRM іде як сума угоди
+          properties:
+            value: { type: number }
+            currency: { type: string, enum: [UAH] }
+        service: { type: string, description: "послуга — для booking, payment, request" }
+        master: { type: string, description: "до кого записали, якщо агент питав майстра" }
+        reason: { type: string, description: "причина — для refusal і not_reached" }
+        client_data:
+          type: array
+          description: >
+            Дані під нішу клієнта, які він назвав у розмові: доставка —
+            «Адреса», «Замовлення»; СТО — «Авто», «Що зламалось»; ресторан
+            — «Гостей». Перелік НЕ фіксований: назви полів визначає розбір
+            розмови під конкретний бізнес. Ці ж рядки вже є у `fields` з
+            `key: extra` — окремо малювати не треба.
+          items:
+            type: object
+            properties:
+              label: { type: string }
+              value: { type: string }
+        details:
+          type: array
+          items: { type: string }
+          description: "до 5 важливих деталей зі слів клієнта: побажання, обмеження, вік, адреса"
+        open_questions:
+          type: array
+          items: { type: string }
+          description: питання клієнта, на які агент не відповів — на них відповідає власник
+        summary: { type: string, description: "3-5 речень про розмову" }
+        next_step: { type: string, description: що зробити далі }
+        interest:
+          type: string
+          nullable: true
+          enum: [високий, середній, низький, немає, null]
+        fields:
+          type: array
+          description: >
+            Готові рядки картки в потрібному порядку, лише непорожні. Малюй
+            `label: value` один під одним — це і є форма результату.
+            `key` стабільний (when, service, master, extra, name, company,
+            position, spoke_with, phone, contact_phone, other_phone, email,
+            other_contacts, amount, reason, objections, do_not_call,
+            open_questions, details, next_step), `label` — український текст для людини.
+            `extra` — поля під нішу (див. `client_data`), їх може бути
+            кілька, і `label` у них щоразу свій. Картка однакова для будь-якої
+            ніші: барбершоп, доставка, СТО — фронт нічого не знає наперед.
+          items:
+            type: object
+            properties:
+              key: { type: string }
+              label: { type: string }
+              value: { type: string }
+
     Error:
       type: object
       properties:
@@ -4825,6 +5617,10 @@ components:
         agent_id: { type: integer, nullable: true }
         turn_count: { type: integer, description: скільки реплік було в розмові }
         manager_note: { type: string, nullable: true, description: нотатка людини }
+        result: { $ref: "#/components/schemas/CallResult" }
+        result_seen:
+          type: boolean
+          description: чи бачив власник цю картку в стрічці (POST /app/call-results/seen)
         sla_state:
           type: string
           nullable: true
@@ -4885,6 +5681,73 @@ components:
               type: string
               nullable: true
               description: коли нотатку востаннє правили; null, якщо нотатки немає
+            collected_data:
+              type: array
+              items: { $ref: "#/components/schemas/CollectedDataItem" }
+              description: >
+                Дані, які агент зібрав у цьому дзвінку, у порядку полів агента,
+                по одному запису на поле. Це знімок, зроблений на старті дзвінка:
+                пізніша правка чи видалення полів його не змінює. Поки розмова
+                йде або якщо вона не відбулась, значення null. Дзвінок без полів
+                — `[]`, не null. Є лише в цьому маршруті й у вебхуку, у списку
+                дзвінків немає.
+            collected_data_complete:
+              type: boolean
+              description: >
+                true, коли в кожного обов'язкового поля є значення. Дзвінок без
+                полів — true.
+
+    CallType:
+      type: string
+      nullable: true
+      enum: [booking, support, sales, null]
+      description: >
+        Набір полів і шаблон інструкції. Шаблони за замовчуванням тримає фронт,
+        бекенд лише зберігає вибір. null — агент створений до цієї функції.
+
+    CallField:
+      type: object
+      required: [id, label, type, required]
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description: >
+            Стабільний ідентифікатор, унікальний у межах агента. Створює клієнт
+            (UUID або slug на кшталт `booking-phone`), сервер його не міняє.
+        label:
+          type: string
+          minLength: 1
+          maxLength: 60
+          description: >
+            Назва, яку бачить людина й модель. Сервер обрізає пробіли й
+            відхиляє керівні символи.
+        type: { type: string, enum: [text, longText, phone, dateTime] }
+        required:
+          type: boolean
+          description: >
+            true — агент намагається дізнатись це до кінця розмови. false —
+            записує, лише якщо людина сама скаже.
+
+    CollectedDataItem:
+      type: object
+      required: [field_id, label, type, required, value]
+      properties:
+        field_id: { type: string }
+        label: { type: string, description: "назва на момент дзвінка" }
+        type: { type: string, enum: [text, longText, phone, dateTime] }
+        required: { type: boolean, description: "обов'язковість на момент дзвінка" }
+        value:
+          type: string
+          nullable: true
+          description: >
+            null — людина цього не сказала. `phone` — E.164, якщо можливо;
+            номер, з якого йде дзвінок, лише якщо людина прямо на нього
+            погодилась. `dateTime` — ISO 8601 у часовому поясі акаунта; немає
+            дня або години — null. Модель має показати уривок розмови, звідки
+            взяла значення; без нього значення не приймається.
+          examples: ["2026-11-12T15:30:00+02:00"]
 
     Agent:
       type: object
@@ -4894,6 +5757,15 @@ components:
         name: { type: string }
         voice: { type: string }
         instructions: { type: string }
+        report_fields:
+          { type: string, description: "«Що має бути у звіті після дзвінка»; порожньо — не задано" }
+        call_type: { $ref: "#/components/schemas/CallType" }
+        call_fields:
+          type: array
+          items: { $ref: "#/components/schemas/CallField" }
+          description: >
+            Що агент збирає в розмові, завжди масив. Є в `GET /app/agents/{agent_id}`
+            і у відповіді на редагування, у списку `GET /app/agents` немає.
         is_active: { type: boolean }
         created_at: { type: string }
         updated_at: { type: string }

@@ -6,6 +6,8 @@ import { Phone } from "lucide-react";
 import { Button, Label, Textarea } from "@/components/ui";
 import { INSTRUCTIONS_MAX_LENGTH, type CreateAgentFormData } from "@/lib/schemas";
 import { PhoneField } from "@/app/(site)/(app)/dashboard/agents/_components/connect-number/phone-field";
+import { CallConfigSection } from "../../_components/call-config/call-config-section";
+import { useCallConfigForm } from "../../_components/call-config/use-call-config-form";
 
 interface StepInstructionsProps {
   form: UseFormReturn<CreateAgentFormData>;
@@ -29,6 +31,8 @@ export const StepInstructions = ({ form, isTesting, onTestCall }: StepInstructio
 
   const instructions = watch("instructions");
   const testPhone = watch("testPhone");
+
+  const callConfig = useCallConfigForm(form);
 
   return (
     <div className="space-y-6">
@@ -59,6 +63,8 @@ export const StepInstructions = ({ form, isTesting, onTestCall }: StepInstructio
           </span>
         </div>
       </div>
+
+      <CallConfigSection {...callConfig} />
 
       <div className="bg-primary/5 rounded-lg p-4">
         <p className="text-sm font-medium">Корисні підказки</p>

@@ -1,3 +1,5 @@
+import type { CallField, CallTypeId } from "@/lib/call-config/schema";
+
 export interface AgentStats {
   total_calls: number;
   meetings: number;
@@ -19,6 +21,8 @@ export interface Agent {
   voice: string;
   instructions: string;
   instructions_expanded?: string;
+  call_type?: CallTypeId | null;
+  call_fields?: CallField[];
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -51,6 +55,8 @@ export interface AgentsResponse {
 }
 
 export interface AgentConfigParams {
+  call_type?: CallTypeId | null;
+  call_fields?: CallField[];
   call_direction?: "inbound" | "outbound";
   contact_ids?: number[];
   contact_base_id?: number;
@@ -91,6 +97,7 @@ export interface TestCallParams {
   name?: string;
   voice?: string;
   instructions?: string;
+  call_fields?: CallField[];
 }
 
 export interface Voice {

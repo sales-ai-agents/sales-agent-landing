@@ -1,3 +1,5 @@
+import type { DeepPartial } from "react-hook-form";
+
 import {
   createAgentBaseSchema,
   contactSelectionIsValid,
@@ -13,7 +15,7 @@ const STEP_FIELDS: Record<WizardStep, (keyof CreateAgentFormData)[]> = {
   callType: ["contactIds"],
   schedule: [],
   number: ["numberId"],
-  instructions: ["instructions"],
+  instructions: ["instructions", "callType", "callFields"],
 };
 
 const ALL_STEPS: WizardStep[] = ["basics", "callType", "schedule", "number", "instructions"];
@@ -41,7 +43,10 @@ const STEP_SCHEMAS = ALL_STEPS.reduce(
   {} as Record<WizardStep, ReturnType<typeof createAgentBaseSchema.pick> | null>
 );
 
-export const isStepValid = (step: WizardStep, values: Partial<CreateAgentFormData>): boolean => {
+export const isStepValid = (
+  step: WizardStep,
+  values: DeepPartial<CreateAgentFormData>
+): boolean => {
   const schema = STEP_SCHEMAS[step];
   if (schema && !schema.safeParse(values).success) return false;
   if (step === "callType" && !contactSelectionIsValid(values)) return false;

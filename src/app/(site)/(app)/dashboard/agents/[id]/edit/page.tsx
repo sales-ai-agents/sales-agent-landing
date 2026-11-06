@@ -60,6 +60,8 @@ const buildDefaultValues = (agent: AgentDetail): EditAgentFormData => ({
   callsPerDay: agent.calls_per_day,
   numberId: agent.number_id ?? DEFAULT_NUMBER_ID,
   instructions: agent.instructions,
+  callType: agent.call_type ?? null,
+  callFields: agent.call_fields ?? [],
 });
 
 const EditAgentForm = ({ agent }: { agent: AgentDetail }) => {

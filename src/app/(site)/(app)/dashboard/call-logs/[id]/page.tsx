@@ -21,6 +21,7 @@ import {
 } from "@/lib/utils";
 import { formatTranscriptTime } from "@/app/(site)/(app)/dashboard/call-logs/_lib/utils";
 import { InfoField } from "@/app/(site)/(app)/dashboard/call-logs/_components/info-field";
+import { CollectedDataPanel } from "@/app/(site)/(app)/dashboard/call-logs/_components/collected-data-panel";
 import type { CrmStatus, SlaState } from "@dashboard/types";
 
 const SlaDisplay = ({
@@ -176,6 +177,13 @@ const CallDetailPage = () => {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
           <AudioPlayer src={`/api/app/calls/${callId}/audio`} />
+
+          {call.collected_data && call.collected_data.length > 0 && (
+            <CollectedDataPanel
+              items={call.collected_data}
+              isComplete={call.collected_data_complete ?? true}
+            />
+          )}
 
           <div className="border-border bg-background rounded-2xl border p-5">
             <h2 className="mb-4 text-sm font-semibold">Транскрипція</h2>

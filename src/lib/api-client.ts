@@ -33,6 +33,7 @@ export class ApiError extends Error {
   readonly retryAfter?: number;
   readonly attemptsLeft?: number;
   readonly hint?: string;
+  readonly fields?: string[];
 
   constructor(
     status: number,
@@ -40,7 +41,8 @@ export class ApiError extends Error {
     message: string,
     retryAfter?: number,
     attemptsLeft?: number,
-    hint?: string
+    hint?: string,
+    fields?: string[]
   ) {
     super(message);
     this.name = "ApiError";
@@ -49,6 +51,7 @@ export class ApiError extends Error {
     this.retryAfter = retryAfter;
     this.attemptsLeft = attemptsLeft;
     this.hint = hint;
+    this.fields = fields;
   }
 }
 
@@ -58,6 +61,7 @@ interface ApiErrorBody {
   retry_after?: number;
   attempts_left?: number;
   hint?: string;
+  fields?: string[];
 }
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -115,7 +119,15 @@ async function request<T>(url: string, method: HttpMethod, options?: RequestOpti
       throw new ApiError(401, "session_expired", "Сесія закінчилася. Увійдіть знову.");
     }
 
-    throw new ApiError(response.status, code, message, undefined, body?.attempts_left, body?.hint);
+    throw new ApiError(
+      response.status,
+      code,
+      message,
+      undefined,
+      body?.attempts_left,
+      body?.hint,
+      body?.fields
+    );
   }
 
   return response.json();

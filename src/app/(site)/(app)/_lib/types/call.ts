@@ -1,3 +1,5 @@
+import type { CallFieldType } from "@/lib/call-config/schema";
+
 export type CallOutcome =
   | ""
   | "зустріч"
@@ -39,10 +41,20 @@ export interface TranscriptMessage {
   content: string;
 }
 
+export interface CollectedDataItem {
+  field_id: string;
+  label: string;
+  type: CallFieldType;
+  required: boolean;
+  value: string | null;
+}
+
 export interface CallDetail extends CallLog {
   transcript: TranscriptMessage[];
   manager_note: string | null;
   manager_note_at: string | null;
+  collected_data?: CollectedDataItem[];
+  collected_data_complete?: boolean;
 }
 
 export type CallStatusFilter = "success" | "failed" | "attention";

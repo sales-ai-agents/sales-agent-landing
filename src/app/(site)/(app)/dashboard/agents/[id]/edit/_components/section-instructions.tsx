@@ -4,6 +4,8 @@ import type { UseFormReturn } from "react-hook-form";
 
 import { Textarea } from "@/components/ui";
 import { INSTRUCTIONS_MAX_LENGTH, type EditAgentFormData } from "@/lib/schemas";
+import { CallConfigSection } from "../../../_components/call-config/call-config-section";
+import { useCallConfigForm } from "../../../_components/call-config/use-call-config-form";
 
 interface SectionInstructionsProps {
   form: UseFormReturn<EditAgentFormData>;
@@ -17,6 +19,8 @@ export const SectionInstructions = ({ form }: SectionInstructionsProps) => {
   } = form;
 
   const instructions = watch("instructions");
+
+  const callConfig = useCallConfigForm(form);
 
   return (
     <section className="space-y-4">
@@ -40,6 +44,8 @@ export const SectionInstructions = ({ form }: SectionInstructionsProps) => {
           </span>
         </div>
       </div>
+
+      <CallConfigSection {...callConfig} />
     </section>
   );
 };
