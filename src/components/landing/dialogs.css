@@ -65,6 +65,7 @@
   border-radius: 14px;
   background: var(--paper);
   box-shadow: inset 0 0 0 1px transparent;
+  font: inherit;
   font-size: 16px;
   transition: box-shadow 0.2s;
 }

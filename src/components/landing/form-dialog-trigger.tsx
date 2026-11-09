@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useFormDialog, type FormDialogKind } from "@/components/landing/use-form-dialog";
+import { useFormDialog, type FormDialogKind } from "@/components/landing/form-dialog-provider";
 
 interface FormDialogTriggerProps {
   kind: FormDialogKind;
@@ -11,14 +11,11 @@ interface FormDialogTriggerProps {
 }
 
 export function FormDialogTrigger({ kind, source, className, children }: FormDialogTriggerProps) {
-  const { show, dialog } = useFormDialog(kind, source);
+  const show = useFormDialog(kind, source);
 
   return (
-    <>
-      <button type="button" className={className} onClick={show}>
-        {children}
-      </button>
-      {dialog}
-    </>
+    <button type="button" className={className} onClick={show}>
+      {children}
+    </button>
   );
 }

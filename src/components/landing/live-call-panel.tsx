@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import type { RoomStatus, WebAgentSession } from "@/components/landing/api/types";
 import { useLiveKitRoom } from "@/components/landing/api/use-livekit-room";
 import { useLandingCopy } from "@/components/landing/copy/provider";
-import { useFormDialog } from "@/components/landing/use-form-dialog";
+import { useFormDialog } from "@/components/landing/form-dialog-provider";
 import { formatMessage } from "@/lib/i18n/format";
 import { cn } from "@/lib/utils";
 
@@ -22,10 +22,7 @@ export function LiveCallPanel({ session, agentName }: LiveCallPanelProps) {
     wsUrl: session.url,
     token: session.token,
   });
-  const { show: showFeedback, dialog: feedbackDialog } = useFormDialog(
-    "feedback",
-    "landing_builder"
-  );
+  const showFeedback = useFormDialog("feedback", "landing_builder");
   const hints: Partial<Record<RoomStatus, string>> = {
     connected: formatMessage(panel.hintConnected, { name: agentName }),
     connecting: panel.hintConnecting,
@@ -50,7 +47,6 @@ export function LiveCallPanel({ session, agentName }: LiveCallPanelProps) {
           {panel.end}
         </button>
       ) : null}
-      {feedbackDialog}
     </div>
   );
 }
