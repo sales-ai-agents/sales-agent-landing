@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -79,6 +79,8 @@ const EditAgentForm = ({ agent }: { agent: AgentDetail }) => {
     mode: "onChange",
   });
 
+  const isOutbound = useWatch({ control: form.control, name: "callDirection" }) === "outbound";
+
   const handleSave = useCallback(
     (data: EditAgentFormData) => {
       updateAgent.mutate(
@@ -117,7 +119,7 @@ const EditAgentForm = ({ agent }: { agent: AgentDetail }) => {
       <form onSubmit={form.handleSubmit(handleSave)} noValidate className="space-y-8">
         <SectionBasics form={form} voices={voices} />
         <SectionCalls form={form} />
-        <SectionSchedule form={form} />
+        {isOutbound && <SectionSchedule form={form} />}
         <SectionNumber form={form} numbers={numbers} />
         <SectionInstructions form={form} />
 

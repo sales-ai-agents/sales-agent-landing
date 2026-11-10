@@ -23,7 +23,7 @@ export const SectionSchedule = ({ form }: SectionScheduleProps) => {
     <section className="space-y-4">
       <h2 className="text-lg font-medium">Розклад і ліміти дзвінків</h2>
 
-      <div className="grid gap-6 lg:grid-cols-[auto_1fr_auto]">
+      <div className="flex flex-wrap gap-6">
         <fieldset className="space-y-2">
           <legend className="mb-2 text-sm">Час прозвону</legend>
           <div className="flex items-center gap-2">
@@ -57,28 +57,6 @@ export const SectionSchedule = ({ form }: SectionScheduleProps) => {
 
         <Controller
           control={control}
-          name="workingDays"
-          render={({ field }) => (
-            <fieldset className="space-y-2">
-              <legend className="mb-2 text-sm">Робочі дні</legend>
-              <ToggleGroup
-                multiple
-                aria-label="Робочі дні"
-                value={field.value}
-                onValueChange={(value) => field.onChange(value as Weekday[])}
-              >
-                {WEEKDAYS.map((day) => (
-                  <Toggle key={day} value={day} aria-label={WEEKDAY_LABELS[day]}>
-                    {WEEKDAY_LABELS[day]}
-                  </Toggle>
-                ))}
-              </ToggleGroup>
-            </fieldset>
-          )}
-        />
-
-        <Controller
-          control={control}
           name="callsPerDay"
           render={({ field }) => (
             <fieldset className="space-y-2">
@@ -94,6 +72,28 @@ export const SectionSchedule = ({ form }: SectionScheduleProps) => {
                 {CALLS_PER_DAY_OPTIONS.map((option) => (
                   <Toggle key={option} value={String(option)} variant="soft">
                     {option}
+                  </Toggle>
+                ))}
+              </ToggleGroup>
+            </fieldset>
+          )}
+        />
+
+        <Controller
+          control={control}
+          name="workingDays"
+          render={({ field }) => (
+            <fieldset className="space-y-2">
+              <legend className="mb-2 text-sm">Робочі дні</legend>
+              <ToggleGroup
+                multiple
+                aria-label="Робочі дні"
+                value={field.value}
+                onValueChange={(value) => field.onChange(value as Weekday[])}
+              >
+                {WEEKDAYS.map((day) => (
+                  <Toggle key={day} value={day} aria-label={WEEKDAY_LABELS[day]}>
+                    {WEEKDAY_LABELS[day]}
                   </Toggle>
                 ))}
               </ToggleGroup>

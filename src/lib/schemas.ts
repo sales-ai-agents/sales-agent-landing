@@ -181,10 +181,10 @@ export interface AgentApiPayload {
   call_fields: CallField[];
   call_direction: CallDirection;
   contact_ids: number[];
-  schedule_start: string;
-  schedule_end: string;
-  working_days: Weekday[];
-  calls_per_day: number;
+  schedule_start?: string;
+  schedule_end?: string;
+  working_days?: Weekday[];
+  calls_per_day?: number;
   number_id: number;
 }
 
@@ -201,11 +201,13 @@ export const toAgentApiPayload = (
     call_fields: toApiCallFields(data.callFields),
     call_direction: data.callDirection,
     contact_ids: isOutbound ? data.contactIds : [],
-    schedule_start: data.scheduleStart,
-    schedule_end: data.scheduleEnd,
-    working_days: data.workingDays,
-    calls_per_day: data.callsPerDay,
     number_id: data.numberId,
+    ...(isOutbound && {
+      schedule_start: data.scheduleStart,
+      schedule_end: data.scheduleEnd,
+      working_days: data.workingDays,
+      calls_per_day: data.callsPerDay,
+    }),
   };
 };
 
