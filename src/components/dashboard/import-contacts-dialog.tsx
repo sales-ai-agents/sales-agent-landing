@@ -24,14 +24,17 @@ import {
   useUploadContacts,
 } from "@dashboard/hooks";
 import { ApiError } from "@/lib/api-client";
-import { GOOGLE_SHEETS_ERROR_MESSAGES } from "@/lib/error-messages";
+import { CONTACTS_IMPORT_ERROR_MESSAGES, GOOGLE_SHEETS_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/mutation-error";
 import {
   clearGoogleSheetsOAuthState,
   generateAndSaveGoogleSheetsOAuthState,
 } from "@/lib/google-sheets-oauth";
 
+import { ColumnMapping } from "./import/column-mapping";
+import { ConsentFields } from "./import/consent-fields";
 import { FileUploadPanel } from "./import/file-upload-panel";
+import { useFileImport } from "./import/use-file-import";
 import {
   GoogleSheetsImportPanel,
   type SheetsImportSelection,
@@ -47,7 +50,9 @@ interface ImportContactsDialogProps {
 
 export const ImportContactsDialog = ({ onClose }: ImportContactsDialogProps) => {
   const [source, setSource] = useState<ImportSource>("file");
-  const [file, setFile] = useState<File | null>(null);
+  const fileImport = useFileImport();
+  const [isConsentGranted, setIsConsentGranted] = useState(false);
+  const [consentSource, setConsentSource] = useState("");
   const [sheetsSelection, setSheetsSelection] = useState<SheetsImportSelection | null>(null);
 
   const { data: integrations } = useIntegrations();
@@ -83,16 +88,32 @@ export const ImportContactsDialog = ({ onClose }: ImportContactsDialogProps) => 
     });
   }, [getAuthUrl]);
 
+  const trimmedConsentSource = consentSource.trim();
+  const consentPayloadSource = isConsentGranted ? trimmedConsentSource : undefined;
+  const isConsentValid = !isConsentGranted || trimmedConsentSource !== "";
+
   const handleUploadFile = (): void => {
-    if (!file) return;
-    uploadContacts.mutate(file, {
-      onSuccess: (data) => {
-        const skipped = data.duplicates ? `, ${data.duplicates} дублікатів пропущено` : "";
-        toast.success(`Додано ${data.added} контактів${skipped}`);
-        onClose();
+    const { file, preview, phoneColumn, nameColumn, baseTitle } = fileImport;
+    if (!file || !preview) return;
+
+    uploadContacts.mutate(
+      {
+        file,
+        phoneColumn,
+        nameColumn,
+        emailColumn: preview.guess.email,
+        baseTitle,
+        consentSource: consentPayloadSource,
       },
-      onError: (error) => toast.error(error.message),
-    });
+      {
+        onSuccess: (data) => {
+          const skipped = data.duplicates ? `, ${data.duplicates} дублікатів пропущено` : "";
+          toast.success(`Додано ${data.added} контактів${skipped}`);
+          onClose();
+        },
+        onError: (error) => handleMutationError(error, CONTACTS_IMPORT_ERROR_MESSAGES),
+      }
+    );
   };
 
   const handleImportSheets = (): void => {
@@ -104,6 +125,10 @@ export const ImportContactsDialog = ({ onClose }: ImportContactsDialogProps) => 
         phone_column: sheetsSelection.phoneColumn,
         name_column: sheetsSelection.nameColumn >= 0 ? sheetsSelection.nameColumn : undefined,
         base_title: sheetsSelection.spreadsheetName,
+        ...(consentPayloadSource && {
+          consent: "granted" as const,
+          consent_source: consentPayloadSource,
+        }),
       },
       {
         onSuccess: (data) => {
@@ -118,8 +143,9 @@ export const ImportContactsDialog = ({ onClose }: ImportContactsDialogProps) => 
   };
 
   const isFileSource = source === "file";
-  const isPending = uploadContacts.isPending || importSheets.isPending;
-  const canImport = isFileSource ? Boolean(file) : Boolean(sheetsSelection);
+  const isPending = uploadContacts.isPending || importSheets.isPending || fileImport.isPreviewing;
+  const hasSelection = isFileSource ? fileImport.isReady : Boolean(sheetsSelection);
+  const canImport = hasSelection && isConsentValid;
 
   const handleImport = (): void => {
     if (isFileSource) {
@@ -150,7 +176,7 @@ export const ImportContactsDialog = ({ onClose }: ImportContactsDialogProps) => 
               className="border-border data-active:border-primary data-active:bg-primary/5 h-12 border"
             >
               <FileText className="h-4 w-4" />
-              CSV / XLSX
+              CSV
             </TabsTrigger>
             <TabsTrigger
               value="google_sheets"
@@ -162,7 +188,21 @@ export const ImportContactsDialog = ({ onClose }: ImportContactsDialogProps) => 
           </TabsList>
 
           <TabsContent value="file">
-            <FileUploadPanel file={file} onFileChange={setFile} />
+            <div className="space-y-4">
+              <FileUploadPanel file={fileImport.file} onFileChange={fileImport.selectFile} />
+              {fileImport.isPreviewing && (
+                <p className="text-muted-foreground text-sm">Читаємо файл...</p>
+              )}
+              {fileImport.preview && (
+                <ColumnMapping
+                  header={fileImport.preview.header}
+                  phoneColumn={fileImport.phoneColumn}
+                  nameColumn={fileImport.nameColumn}
+                  onPhoneColumnChange={fileImport.setPhoneColumn}
+                  onNameColumnChange={fileImport.setNameColumn}
+                />
+              )}
+            </div>
           </TabsContent>
 
           <TabsContent value="google_sheets">
@@ -174,6 +214,13 @@ export const ImportContactsDialog = ({ onClose }: ImportContactsDialogProps) => 
             />
           </TabsContent>
         </Tabs>
+
+        <ConsentFields
+          isGranted={isConsentGranted}
+          source={consentSource}
+          onGrantedChange={setIsConsentGranted}
+          onSourceChange={setConsentSource}
+        />
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={isPending}>

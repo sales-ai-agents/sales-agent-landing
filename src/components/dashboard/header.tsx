@@ -21,6 +21,7 @@ import {
 import { cn, getInitials } from "@/lib/utils";
 import { DASHBOARD_NAV_ITEMS } from "@/lib/constants";
 import { useLogout, useMe } from "@/lib/hooks";
+import { CallResultsBell } from "./call-results-bell";
 
 export const DashboardHeader = () => {
   const pathname = usePathname();
@@ -115,6 +116,8 @@ export const DashboardHeader = () => {
       <div className="hidden flex-1 md:block" />
 
       <div className="ml-auto flex items-center gap-3 sm:gap-6">
+        <CallResultsBell />
+
         <Link id="onboarding-create-agent-btn" href="/dashboard/agents/create" className="shrink-0">
           <Button size="icon" className="sm:hidden" aria-label="Новий агент">
             <Plus className="h-4 w-4" />

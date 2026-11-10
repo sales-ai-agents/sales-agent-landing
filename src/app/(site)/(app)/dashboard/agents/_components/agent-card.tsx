@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Bot, Info, Pause, Play } from "lucide-react";
+import { Bot, Info, Pause, Play, Rocket } from "lucide-react";
 
 import {
   Badge,
@@ -20,6 +20,7 @@ export interface AgentCardProps {
   agent: Agent;
   onToggle: () => void;
   onTest: () => void;
+  onStartCampaign: () => void;
 }
 
 interface StatItemProps {
@@ -46,7 +47,7 @@ const CAN_TEST_REASON_LABELS: Record<string, string> = {
   calls_blocked: "Дзвінки зупинені — зверніться до підтримки",
 };
 
-export const AgentCard = ({ agent, onToggle, onTest }: AgentCardProps) => {
+export const AgentCard = ({ agent, onToggle, onTest, onStartCampaign }: AgentCardProps) => {
   const isActive = agent.is_active;
   const stats = agent.stats;
   const canTest = agent.can_test ?? false;
@@ -136,6 +137,12 @@ export const AgentCard = ({ agent, onToggle, onTest }: AgentCardProps) => {
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
+        {agent.call_direction === "outbound" && (
+          <Button variant="outline" size="sm" onClick={onStartCampaign}>
+            <Rocket className="mr-1 h-3 w-3" aria-hidden="true" />
+            Запустити обдзвін
+          </Button>
+        )}
         <Button variant="ghost" size="sm" onClick={onToggle}>
           {isActive ? (
             <>

@@ -116,6 +116,7 @@ const CreateAgentPage = () => {
         name: data.name,
         voice: data.voice,
         instructions: data.instructions,
+        ...(data.callType && { call_type: data.callType }),
         call_fields: toApiCallFields(data.callFields),
       },
       {

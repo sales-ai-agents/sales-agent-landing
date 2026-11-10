@@ -6,7 +6,7 @@ import { Info, Upload } from "lucide-react";
 
 import { Button } from "@/components/ui";
 
-const ACCEPTED_FILE_EXTENSIONS = ".csv,.xlsx";
+const ACCEPTED_FILE_EXTENSIONS = ".csv";
 const BYTES_IN_KILOBYTE = 1024;
 
 interface FileUploadPanelProps {
@@ -16,7 +16,7 @@ interface FileUploadPanelProps {
 
 const isSupportedFile = (file: File): boolean => {
   const name = file.name.toLowerCase();
-  return name.endsWith(".csv") || name.endsWith(".xlsx");
+  return name.endsWith(".csv");
 };
 
 const formatFileSize = (bytes: number): string => {
@@ -28,7 +28,9 @@ export const FileUploadPanel = ({ file, onFileChange }: FileUploadPanelProps) =>
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    onFileChange(event.target.files?.[0] ?? null);
+    const selected = event.target.files?.[0] ?? null;
+    if (selected && !isSupportedFile(selected)) return;
+    onFileChange(selected);
   };
 
   const handleDrop = (event: DragEvent): void => {
@@ -79,7 +81,7 @@ export const FileUploadPanel = ({ file, onFileChange }: FileUploadPanelProps) =>
         >
           Вибрати файл
         </Button>
-        <p className="text-muted-foreground mt-4 text-xs">Підтримувані формати: CSV, XLSX</p>
+        <p className="text-muted-foreground mt-4 text-xs">Підтримуваний формат: CSV</p>
         <p className="text-muted-foreground text-xs">Максимальний розмір файлу: 10 МБ</p>
         <input
           ref={inputRef}

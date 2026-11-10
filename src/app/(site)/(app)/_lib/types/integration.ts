@@ -59,6 +59,8 @@ export interface GoogleSheetsImportParams {
   note_column?: number;
   has_header?: boolean;
   base_title?: string;
+  consent?: "granted";
+  consent_source?: string;
 }
 
 export interface GoogleSheetsImportResponse {
@@ -69,4 +71,56 @@ export interface GoogleSheetsImportResponse {
   duplicates: number;
   invalid: number;
   total_rows: number;
+}
+
+export type CrmProvider = "keycrm" | "bitrix24";
+export type CrmPushMode = "important" | "conversations" | "all";
+export type CrmMode = "classic" | "simple";
+export type CrmConnectionStatus = "connected" | "error";
+
+export interface CrmOption {
+  id: number;
+  title: string;
+}
+
+export interface CrmIntegration {
+  connected: boolean;
+  provider?: CrmProvider;
+  provider_name?: string;
+  status?: CrmConnectionStatus;
+  error?: string | null;
+  account?: string;
+  push?: CrmPushMode;
+  mode?: CrmMode | null;
+  pipeline_id?: number | null;
+  source_id?: number | null;
+  pipelines?: CrmOption[];
+  sources?: CrmOption[];
+  connected_at?: string | null;
+}
+
+export interface CrmIntegrationResponse {
+  ok: boolean;
+  crm: CrmIntegration;
+}
+
+export interface ConnectCrmParams {
+  provider: CrmProvider;
+  api_key?: string;
+  webhook_url?: string;
+  push?: CrmPushMode;
+  pipeline_id?: number | null;
+  source_id?: number | null;
+}
+
+export interface UpdateCrmParams {
+  push?: CrmPushMode;
+  pipeline_id?: number | null;
+  source_id?: number | null;
+}
+
+export interface TestCrmResponse {
+  ok: boolean;
+  external_id: string;
+  url: string;
 }

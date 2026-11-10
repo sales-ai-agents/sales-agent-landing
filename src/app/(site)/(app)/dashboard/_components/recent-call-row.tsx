@@ -5,7 +5,7 @@ import { ChevronRight } from "lucide-react";
 
 import { TableCell, TableRow } from "@/components/ui";
 import type { CallLog, Agent } from "@dashboard/types";
-import { getOutcomeDisplay } from "@/app/(site)/(app)/_lib/call-outcome";
+import { CallResultCell } from "@/components/dashboard/call-result-cell";
 import { formatDuration, formatRelativeTime, maskPhone } from "@/lib/utils";
 
 export interface RecentCallRowProps {
@@ -18,7 +18,6 @@ export const RecentCallRow = ({ call, agents }: RecentCallRowProps) => {
   const agentName = agents.find((a) => a.id === call.agent_id)?.name ?? "—";
   const duration = call.duration_sec ? formatDuration(call.duration_sec) : "—";
   const time = formatRelativeTime(call.created_at);
-  const { label, badgeClass, icon } = getOutcomeDisplay(call);
 
   const navigate = (): void => {
     router.push(`/dashboard/call-logs/${call.id}`);
@@ -44,12 +43,7 @@ export const RecentCallRow = ({ call, agents }: RecentCallRowProps) => {
       <TableCell className="text-muted-foreground px-4 py-2.5 text-sm">{agentName}</TableCell>
       <TableCell className="text-muted-foreground px-4 py-2.5 text-sm">{duration}</TableCell>
       <TableCell className="px-4 py-2.5">
-        <span
-          className={`inline-flex items-center gap-1 rounded-full px-3 py-0.5 text-sm ${badgeClass}`}
-        >
-          <span>{icon}</span>
-          {label}
-        </span>
+        <CallResultCell call={call} />
       </TableCell>
       <TableCell className="text-muted-foreground px-4 py-2.5 text-sm">{time}</TableCell>
       <TableCell className="px-2 py-2.5">

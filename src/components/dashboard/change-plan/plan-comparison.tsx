@@ -9,7 +9,6 @@ import {
   Minus,
   Phone,
   ScrollText,
-  Wallet,
   Webhook,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -31,7 +30,6 @@ const ROW_ICONS: Record<PlanComparisonIcon, LucideIcon> = {
   minutes: Clock,
   agents: Bot,
   phoneNumbers: Phone,
-  startingBalance: Wallet,
   callLog: ScrollText,
   csvCampaigns: FileSpreadsheet,
   webhooks: Webhook,

@@ -9,6 +9,8 @@ import type {
   CrmStatusResponse,
 } from "@dashboard/types";
 
+const CRM_PENDING_POLL_MS = 3000;
+
 export const useCallDetail = (callId: string | undefined) => {
   return useQuery<CallDetail | null>({
     queryKey: ["call-detail", callId],
@@ -43,6 +45,8 @@ export const useCrmStatus = (callId: string | undefined) => {
       return data.crm;
     },
     enabled: !!callId,
+    refetchInterval: (query) =>
+      query.state.data?.state === "pending" ? CRM_PENDING_POLL_MS : false,
   });
 };
 

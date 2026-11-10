@@ -1,4 +1,4 @@
-export type NotificationKind = "escalation" | "limit_exhausted";
+export type NotificationKind = "escalation" | "limit_exhausted" | "call_result";
 
 export interface NotificationSetting {
   kind: NotificationKind;

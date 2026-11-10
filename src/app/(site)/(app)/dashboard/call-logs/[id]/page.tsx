@@ -1,14 +1,20 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Download, Bot, RefreshCw } from "lucide-react";
+import { ArrowLeft, Download, Bot } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button, buttonVariants, Textarea, Badge } from "@/components/ui";
 import { PageLoading, PageError, AudioPlayer } from "@/components/dashboard";
-import { useCallDetail, useSaveNote, useAgents, useCrmStatus, useCrmRetry } from "@dashboard/hooks";
+import {
+  useCallDetail,
+  useSaveNote,
+  useAgents,
+  useCrmStatus,
+  useMarkResultsSeen,
+} from "@dashboard/hooks";
 import { handleMutationError } from "@/lib/mutation-error";
 import { getOutcomeConfig } from "@/app/(site)/(app)/_lib/call-outcome";
 import {
@@ -21,8 +27,10 @@ import {
 } from "@/lib/utils";
 import { formatTranscriptTime } from "@/app/(site)/(app)/dashboard/call-logs/_lib/utils";
 import { InfoField } from "@/app/(site)/(app)/dashboard/call-logs/_components/info-field";
+import { CallResultCard } from "@/app/(site)/(app)/dashboard/call-logs/_components/call-result-card";
+import { CrmStatusPanel } from "@/app/(site)/(app)/dashboard/call-logs/_components/crm-status-panel";
 import { CollectedDataPanel } from "@/app/(site)/(app)/dashboard/call-logs/_components/collected-data-panel";
-import type { CrmStatus, SlaState } from "@dashboard/types";
+import type { SlaState } from "@dashboard/types";
 
 const SlaDisplay = ({
   state,
@@ -49,45 +57,6 @@ const SlaDisplay = ({
   }
 };
 
-const CRM_STATE_MAP: Record<string, { label: string; color: string }> = {
-  synced: { label: "Синхронізовано", color: "text-success" },
-  pending: { label: "Очікується", color: "text-warning" },
-  failed: { label: "Не синхронізовано", color: "text-destructive" },
-  not_configured: { label: "CRM не підключено", color: "text-muted-foreground" },
-};
-
-const CrmPanel = ({ callId, crm }: { callId: string; crm: CrmStatus }) => {
-  const crmRetry = useCrmRetry();
-  const stateConfig = CRM_STATE_MAP[crm.state] ?? CRM_STATE_MAP.not_configured;
-
-  const handleRetry = useCallback(() => {
-    crmRetry.mutate(callId, {
-      onSuccess: () => toast.success("Синхронізацію поставлено в чергу"),
-      onError: (err) => handleMutationError(err),
-    });
-  }, [crmRetry, callId]);
-
-  return (
-    <div className="border-border bg-background rounded-2xl border p-5">
-      <h3 className="mb-3 text-sm font-semibold">CRM синхронізація</h3>
-      <p className={cn("text-sm font-medium", stateConfig.color)}>● {stateConfig.label}</p>
-      {crm.error && <p className="text-muted-foreground mt-2 text-xs">{crm.error}</p>}
-      {crm.can_retry && (
-        <Button
-          variant="outline"
-          size="sm"
-          className="mt-3 w-full gap-1.5"
-          onClick={handleRetry}
-          disabled={crmRetry.isPending}
-        >
-          <RefreshCw className={cn("h-3.5 w-3.5", crmRetry.isPending && "animate-spin")} />
-          Повторити синхронізацію
-        </Button>
-      )}
-    </div>
-  );
-};
-
 const CallDetailPage = () => {
   const params = useParams();
   const callId = params.id as string;
@@ -96,9 +65,16 @@ const CallDetailPage = () => {
   const { data: agents = [] } = useAgents();
   const { data: crm } = useCrmStatus(callId);
   const saveNote = useSaveNote(callId);
+  const { mutate: markResultsSeen } = useMarkResultsSeen();
 
   const [note, setNote] = useState<string | null>(null);
   const displayNote = note ?? call?.manager_note ?? "";
+
+  const shouldMarkSeen = Boolean(call?.result) && call?.result_seen === false;
+
+  useEffect(() => {
+    if (shouldMarkSeen) markResultsSeen({ call_ids: [callId] });
+  }, [shouldMarkSeen, callId, markResultsSeen]);
 
   const handleSaveNote = useCallback(() => {
     saveNote.mutate(displayNote, {
@@ -176,6 +152,8 @@ const CallDetailPage = () => {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
+          {call.result && <CallResultCard result={call.result} />}
+
           <AudioPlayer src={`/api/app/calls/${callId}/audio`} />
 
           {call.collected_data && call.collected_data.length > 0 && (
@@ -213,7 +191,7 @@ const CallDetailPage = () => {
         </div>
 
         <div className="space-y-4">
-          {crm && crm.configured && <CrmPanel callId={callId} crm={crm} />}
+          {crm?.configured && <CrmStatusPanel callId={callId} crm={crm} />}
 
           <div className="border-border bg-background rounded-2xl border p-5">
             <h3 className="mb-3 text-sm font-semibold">Пов&apos;язаний контакт</h3>

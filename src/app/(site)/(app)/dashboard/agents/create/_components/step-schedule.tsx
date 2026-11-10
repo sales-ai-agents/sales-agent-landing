@@ -3,7 +3,7 @@
 import { Controller, type UseFormReturn } from "react-hook-form";
 import { Info } from "lucide-react";
 
-import { Input, Label, Toggle, ToggleGroup } from "@/components/ui";
+import { Label, Toggle, ToggleGroup } from "@/components/ui";
 import {
   ALL_WEEKDAYS,
   CALLS_PER_DAY_OPTIONS,
@@ -12,13 +12,14 @@ import {
   type Weekday,
   WEEKDAY_LABELS,
 } from "@/lib/schemas";
+import { TimeField } from "../../_components/time-field";
 
 interface StepScheduleProps {
   form: UseFormReturn<CreateAgentFormData>;
 }
 
 export const StepSchedule = ({ form }: StepScheduleProps) => {
-  const { control, register } = form;
+  const { control } = form;
 
   return (
     <div className="space-y-6">
@@ -36,13 +37,35 @@ export const StepSchedule = ({ form }: StepScheduleProps) => {
             <Label htmlFor="schedule-start" className="text-muted-foreground text-xs">
               Початок
             </Label>
-            <Input id="schedule-start" type="time" {...register("scheduleStart")} />
+            <Controller
+              control={control}
+              name="scheduleStart"
+              render={({ field }) => (
+                <TimeField
+                  id="schedule-start"
+                  label="Початок"
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
+            />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="schedule-end" className="text-muted-foreground text-xs">
               Кінець
             </Label>
-            <Input id="schedule-end" type="time" {...register("scheduleEnd")} />
+            <Controller
+              control={control}
+              name="scheduleEnd"
+              render={({ field }) => (
+                <TimeField
+                  id="schedule-end"
+                  label="Кінець"
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
+            />
           </div>
         </div>
       </fieldset>

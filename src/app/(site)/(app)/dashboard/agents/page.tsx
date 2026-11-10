@@ -19,6 +19,8 @@ import { useAgents, useToggleAgentStatus, useTestCall } from "@dashboard/hooks";
 import { AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/mutation-error";
 import { AgentCard } from "./_components/agent-card";
+import { CampaignsSection } from "./_components/campaigns/campaigns-section";
+import { StartCampaignDialog } from "./_components/campaigns/start-campaign-dialog";
 import { PhoneField } from "./_components/connect-number/phone-field";
 import { isValidUaPhone, normalizeUaPhone } from "./_components/connect-number/constants";
 import type { Agent } from "@dashboard/types";
@@ -29,6 +31,7 @@ const AgentsPage = () => {
   const toggleStatus = useToggleAgentStatus();
   const testCall = useTestCall();
 
+  const [campaignAgent, setCampaignAgent] = useState<Agent | null>(null);
   const [testPhone, setTestPhone] = useState("");
   const [testDialog, setTestDialog] = useState<{
     agentId: number;
@@ -106,6 +109,8 @@ const AgentsPage = () => {
         <p className="text-muted-foreground text-sm">Керуйте вашими голосовими ШІ-агентами</p>
       </div>
 
+      <CampaignsSection />
+
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {agents.map((agent: Agent) => (
           <AgentCard
@@ -113,6 +118,7 @@ const AgentsPage = () => {
             agent={agent}
             onToggle={() => handleToggle(agent)}
             onTest={() => setTestDialog({ agentId: agent.id, agentName: agent.name })}
+            onStartCampaign={() => setCampaignAgent(agent)}
           />
         ))}
 
@@ -136,6 +142,8 @@ const AgentsPage = () => {
       <p className="text-muted-foreground text-center text-sm">
         Показано 1-{agents.length} з {agents.length} агентів
       </p>
+
+      <StartCampaignDialog agent={campaignAgent} onClose={() => setCampaignAgent(null)} />
 
       <Dialog
         open={!!testDialog}

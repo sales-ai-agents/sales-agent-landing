@@ -54,16 +54,20 @@ info:
     POST <його URL>
     Content-Type: application/json; charset=utf-8
     X-Calls4U-Event: call.completed
+    X-Calls4U-Delivery: 1842
     X-Calls4U-Signature: sha256=<hmac тіла запиту>
 
     {
       "event": "call.completed",
       "account_id": 5,
       "call": {
-        "id": "...", "phone": "+380931112233",
+        "id": "...", "phone": "+380931112233", "company_name": "",
+        "agent_id": 77, "agent_name": "Марина — адміністратор",
+        "direction": "inbound",
         "started_at": "...", "ended_at": "...", "duration_sec": 142,
-        "outcome": "нейтрально", "meeting_scheduled": true,
+        "outcome": "зустріч", "meeting_scheduled": true,
         "summary": "...", "manager_note": "",
+        "result": { "type": "booking", "title": "...", "when": {...}, "contact": {...}, "fields": [...] },
         "collected_data": [{"field_id": "booking-phone", "label": "Телефон", "type": "phone", "required": true, "value": "+380931112233"}],
         "collected_data_complete": true,
         "transcript": [{"role": "assistant", "content": "..."}]
@@ -71,13 +75,26 @@ info:
     }
     ```
 
+    `result` — та сама картка, що в кабінеті (схема `CallResult`).
+    `direction` — `inbound`, `outbound` або порожньо (демо, тест).
+    `agent_name` — ім'я агента на момент дзвінка, порожньо, якщо агента
+    вже видалили.
+
     Підпис рахується від **сирого тіла** запиту:
     `HMAC-SHA256(body, secret)`. Клієнт звіряє його й через це знає, що
     запит справді від нас, а не від того, хто вгадав URL.
 
-    Ми чекаємо будь-яку відповідь із кодом < 400. На `5xx`, `429` і
-    мовчання пробуємо ще: 1 хв, 5 хв, 30 хв, 2 год, 6 год. На `4xx` не
-    повторюємо — приймач сказав, що сам запит поганий.
+    Ми чекаємо будь-яку відповідь із кодом < 400 за 10 секунд. На `5xx`,
+    `429` і мовчання пробуємо ще: 1 хв, 5 хв, 30 хв, 2 год, 6 год. На
+    `4xx` не повторюємо — приймач сказав, що сам запит поганий.
+
+    `X-Calls4U-Delivery` однаковий у всіх повторах однієї доставки. Повтор
+    буває й тоді, коли приймач усе записав, але не відповів вчасно, тож
+    дублі відсіюються за цим номером (або за `call.id`).
+
+    Пробний запит (`POST /app/webhooks/{id}/test`) має той самий вигляд,
+    лише `event: webhook.test`, `X-Calls4U-Delivery: test` і вигадані дані.
+    Розбір на боці клієнта можна писати по ньому.
 
 servers:
   - url: https://api.calls4u.ai/webhook
@@ -3142,6 +3159,11 @@ paths:
         чергу».
 
 
+        Тіло того самого вигляду, що в справжнього `call.completed` (див.
+        «Вивантаження назовні» вгорі), з `event: webhook.test` і вигаданим
+        записом на завтра о 15:30.
+
+
         Відповідь `200` з `ok: false` означає, що ми достукались, а приймач
         відповів помилкою: дивись `response_code` і `error`.
       parameters:
@@ -3764,6 +3786,12 @@ paths:
                   description: >
                     Для тесту ДО створення агента: «що має бути у звіті» —
                     щоб тестовий дзвінок одразу показав, яким буде звіт.
+                call_type:
+                  description: >-
+                    Тип дзвінка агента, який ще не збережено: booking вмикає збір запису з підсумком.
+                    Якщо не передано, береться з картки агента.
+                  allOf:
+                    - $ref: "#/components/schemas/CallType"
                 call_fields:
                   type: array
                   maxItems: 15

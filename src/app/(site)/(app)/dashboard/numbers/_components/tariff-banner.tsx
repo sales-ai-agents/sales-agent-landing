@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Info } from "lucide-react";
 
 import { Button } from "@/components/ui";
-import { pluralizeUk } from "@/lib/utils";
+import { pluralizeNumbers } from "@/lib/utils";
 
 interface TariffBannerProps {
   limit: number;
@@ -15,8 +15,7 @@ interface TariffBannerProps {
   canClaim?: boolean;
 }
 
-const formatCount = (count: number): string =>
-  `${count} ${pluralizeUk(count, ["номер", "номери", "номерів"])}`;
+const formatCount = (count: number): string => `${count} ${pluralizeNumbers(count)}`;
 
 export const TariffBanner = ({
   limit,

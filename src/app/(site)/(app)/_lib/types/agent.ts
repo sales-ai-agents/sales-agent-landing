@@ -97,6 +97,7 @@ export interface TestCallParams {
   name?: string;
   voice?: string;
   instructions?: string;
+  call_type?: CallTypeId;
   call_fields?: CallField[];
 }
 

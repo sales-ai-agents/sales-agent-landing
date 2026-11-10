@@ -5,6 +5,11 @@ import { useIntegrations } from "@dashboard/hooks";
 
 import { GoogleSheetsCard } from "./_components/google-sheets-card";
 import { GenericIntegrationCard } from "./_components/generic-integration-card";
+import { CrmCard } from "./_components/crm/crm-card";
+import { WebhookCard } from "./_components/webhook/webhook-card";
+import { isCrmProvider } from "./_lib/crm-providers";
+
+const WEBHOOK_INTEGRATION_ID = "webhook";
 
 const IntegrationsPage = () => {
   const { data: integrations, isLoading, error, refetch } = useIntegrations();
@@ -19,7 +24,9 @@ const IntegrationsPage = () => {
     );
   }
 
-  const availableIntegrations = integrations.available ?? [];
+  const availableIntegrations = (integrations.available ?? []).filter(
+    (integration) => integration.id !== WEBHOOK_INTEGRATION_ID
+  );
 
   return (
     <div className="space-y-6">
@@ -30,35 +37,35 @@ const IntegrationsPage = () => {
         </p>
       </div>
 
-      {availableIntegrations.length === 0 ? (
-        <div className="border-border bg-background rounded-xl border p-8 text-center">
-          <p className="text-muted-foreground text-sm">Наразі немає доступних інтеграцій</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {availableIntegrations.map((integration) => {
-            if (integration.id === "google_sheets") {
-              return (
-                <GoogleSheetsCard
-                  key={integration.id}
-                  connected={integration.connected}
-                  email={integration.account_email}
-                  ready={integration.ready}
-                  status={integration.status}
-                  error={integration.error}
-                  spreadsheet_url={integration.spreadsheet_url}
-                />
-              );
-            }
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {availableIntegrations.map((integration) => {
+          if (integration.id === "google_sheets") {
+            return (
+              <GoogleSheetsCard
+                key={integration.id}
+                connected={integration.connected}
+                email={integration.account_email}
+                ready={integration.ready}
+                status={integration.status}
+                error={integration.error}
+                spreadsheet_url={integration.spreadsheet_url}
+              />
+            );
+          }
 
-            return <GenericIntegrationCard key={integration.id} integration={integration} />;
-          })}
-        </div>
-      )}
+          if (isCrmProvider(integration.id)) {
+            return (
+              <CrmCard key={integration.id} integration={integration} provider={integration.id} />
+            );
+          }
 
-      {/*NOT READY YET*/}
-      {/*<CrmConnectors />*/}
-      {/*<ApiKeysSection />*/}
+          return <GenericIntegrationCard key={integration.id} integration={integration} />;
+        })}
+
+        <div className="md:col-span-2">
+          <WebhookCard />
+        </div>
+      </div>
     </div>
   );
 };

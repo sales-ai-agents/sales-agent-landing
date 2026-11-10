@@ -14,9 +14,28 @@ import type {
   WebhookDeliveriesResponse,
 } from "@dashboard/types";
 
+const WEBHOOKS_KEY = ["webhooks"] as const;
+const INTEGRATIONS_KEY = ["integrations"] as const;
+
+interface WebhookDeliveriesOptions {
+  webhookId: number;
+  limit?: number;
+  enabled?: boolean;
+}
+
+const useInvalidateWebhooks = () => {
+  const queryClient = useQueryClient();
+
+  return () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: WEBHOOKS_KEY }),
+      queryClient.invalidateQueries({ queryKey: INTEGRATIONS_KEY }),
+    ]);
+};
+
 export const useWebhooks = () => {
   return useQuery<Webhook[]>({
-    queryKey: ["webhooks"],
+    queryKey: WEBHOOKS_KEY,
     queryFn: async () => {
       const data = await apiGet<WebhooksResponse>(API_ENDPOINTS.APP_WEBHOOKS);
       return data.webhooks;
@@ -25,42 +44,30 @@ export const useWebhooks = () => {
 };
 
 export const useCreateWebhook = () => {
-  const queryClient = useQueryClient();
+  const invalidateWebhooks = useInvalidateWebhooks();
 
   return useMutation<CreateWebhookResponse, Error, CreateWebhookParams>({
     mutationFn: (params) => apiPost<CreateWebhookResponse>(API_ENDPOINTS.APP_WEBHOOKS, params),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["webhooks"] });
-      queryClient.invalidateQueries({ queryKey: ["integrations"] });
-    },
+    onSuccess: invalidateWebhooks,
+    gcTime: 0,
   });
 };
 
 export const useUpdateWebhook = () => {
-  const queryClient = useQueryClient();
+  const invalidateWebhooks = useInvalidateWebhooks();
 
-  return useMutation({
-    mutationFn: async ({ id, ...data }: UpdateWebhookParams & { id: number }) => {
-      return apiPatch(apiUrl.webhook(id), data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["webhooks"] });
-      queryClient.invalidateQueries({ queryKey: ["integrations"] });
-    },
+  return useMutation<unknown, Error, UpdateWebhookParams & { id: number }>({
+    mutationFn: ({ id, ...data }) => apiPatch(apiUrl.webhook(id), data),
+    onSuccess: invalidateWebhooks,
   });
 };
 
 export const useDeleteWebhook = () => {
-  const queryClient = useQueryClient();
+  const invalidateWebhooks = useInvalidateWebhooks();
 
-  return useMutation({
-    mutationFn: async (id: number) => {
-      return apiDelete(apiUrl.webhook(id));
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["webhooks"] });
-      queryClient.invalidateQueries({ queryKey: ["integrations"] });
-    },
+  return useMutation<unknown, Error, number>({
+    mutationFn: (id) => apiDelete(apiUrl.webhook(id)),
+    onSettled: invalidateWebhooks,
   });
 };
 
@@ -73,17 +80,23 @@ export const useTestWebhook = () => {
 export const useReissueWebhookSecret = () => {
   return useMutation<ReissueSecretResponse, Error, number>({
     mutationFn: (id) => apiPost<ReissueSecretResponse>(apiUrl.webhookSecret(id)),
+    gcTime: 0,
   });
 };
 
-export const useWebhookDeliveries = (webhookId?: number, limit?: number) => {
+export const useWebhookDeliveries = ({
+  webhookId,
+  limit,
+  enabled = true,
+}: WebhookDeliveriesOptions) => {
   return useQuery<WebhookDelivery[]>({
-    queryKey: ["webhook-deliveries", webhookId, limit],
+    queryKey: [...WEBHOOKS_KEY, "deliveries", webhookId, limit],
     queryFn: async () => {
       const data = await apiGet<WebhookDeliveriesResponse>(
         apiUrl.webhookDeliveries(webhookId, limit)
       );
       return data.deliveries;
     },
+    enabled,
   });
 };

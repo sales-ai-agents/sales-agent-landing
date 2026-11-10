@@ -11,6 +11,7 @@ interface NumberPickerProps {
   value: number;
   onChange: (value: number) => void;
   showCallerId?: boolean;
+  primaryPhone?: string;
 }
 
 const resolveCallerIdCaption = (callerId: boolean): string =>
@@ -30,17 +31,26 @@ const STATUS_BADGES: Record<NumberStatus, StatusBadge> = {
   disabled: { label: "Вимкнено", className: "bg-muted text-muted-foreground" },
 };
 
-const resolveBadge = (number: AgentNumber): StatusBadge => {
-  if (number.caller_id) return { label: "Основний", className: "bg-success/15 text-success" };
+const PRIMARY_BADGE: StatusBadge = { label: "Основний", className: "bg-success/15 text-success" };
+
+const resolveBadge = (number: AgentNumber, isPrimary: boolean): StatusBadge => {
+  if (isPrimary) return PRIMARY_BADGE;
   return STATUS_BADGES[number.status] ?? STATUS_BADGES.disabled;
 };
 
-export const NumberPicker = ({ numbers, value, onChange, showCallerId }: NumberPickerProps) => {
+export const NumberPicker = ({
+  numbers,
+  value,
+  onChange,
+  showCallerId,
+  primaryPhone,
+}: NumberPickerProps) => {
   return (
     <div role="radiogroup" aria-label="Номер для дзвінків" className="space-y-2.5">
       {numbers.map((number) => {
         const isSelected = value === number.id;
-        const badge = resolveBadge(number);
+        const isPrimary = Boolean(showCallerId) && number.phone === primaryPhone;
+        const badge = resolveBadge(number, isPrimary);
 
         return (
           <label

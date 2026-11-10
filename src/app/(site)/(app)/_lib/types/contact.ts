@@ -62,6 +62,30 @@ export interface UpdateContactParams {
   do_not_call?: boolean;
 }
 
+export interface ContactsUploadGuess {
+  phone: number;
+  name: number;
+  email: number;
+}
+
+export interface ContactsUploadPreviewResponse {
+  ok: boolean;
+  header: string[];
+  has_header: boolean;
+  sample: string[][];
+  total_rows: number;
+  guess: ContactsUploadGuess;
+}
+
+export interface UploadContactsParams {
+  file: File;
+  phoneColumn: number;
+  nameColumn: number;
+  emailColumn: number;
+  baseTitle?: string;
+  consentSource?: string;
+}
+
 export interface UploadContactsResponse {
   ok: boolean;
   added: number;

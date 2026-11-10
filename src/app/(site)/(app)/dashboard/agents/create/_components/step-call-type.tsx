@@ -14,6 +14,8 @@ import {
   type CreateAgentFormData,
   type CallDirection,
 } from "@/lib/schemas";
+import { CONTACT_ERROR_MESSAGES } from "@/lib/error-messages";
+import { handleMutationError } from "@/lib/mutation-error";
 import { useCreateContact } from "@dashboard/hooks";
 import { DIRECTION_ICONS } from "../../_components/direction-icons";
 import { ContactPicker } from "../../_components/contact-picker";
@@ -41,14 +43,14 @@ export const StepCallType = ({ form }: StepCallTypeProps) => {
         toast.success("Контакт додано");
         setShowAddContact(false);
       },
-      onError: (error) => toast.error(error.message),
+      onError: (error) => handleMutationError(error, CONTACT_ERROR_MESSAGES),
     });
   };
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-display text-xl font-bold">Тип дзвінка та база контактів</h2>
+        <h2 className="font-display text-xl font-bold">Напрямок дзвінків</h2>
         <p className="text-muted-foreground mt-1 text-sm">
           Оберіть, які дзвінки буде здійснювати агент.
         </p>
@@ -59,7 +61,7 @@ export const StepCallType = ({ form }: StepCallTypeProps) => {
         name="callDirection"
         render={({ field }) => (
           <RadioGroup
-            aria-label="Тип дзвінка"
+            aria-label="Напрямок дзвінків"
             value={field.value}
             onValueChange={(value) => field.onChange(value as CallDirection)}
             className="grid grid-cols-1 gap-3 sm:grid-cols-2"

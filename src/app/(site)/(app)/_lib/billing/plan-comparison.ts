@@ -3,12 +3,12 @@ import type { BillingPlan } from "@dashboard/types";
 
 import { formatIntegrations, formatSupport, getPlanCapabilities } from "./plan-capabilities";
 import type { PlanCapabilities } from "./plan-capabilities";
+import { formatPlanNumbers } from "./plan-numbers";
 
 export type PlanComparisonIcon =
   | "minutes"
   | "agents"
   | "phoneNumbers"
-  | "startingBalance"
   | "callLog"
   | "csvCampaigns"
   | "webhooks"
@@ -33,12 +33,6 @@ export interface PlanComparisonRow {
 const formatMinutes = (minutes: number): string => `${formatNumber(minutes)} хв`;
 
 const formatAgents = (agents: number): string => (agents === 0 ? "Необмежено" : `До ${agents}`);
-
-const formatPhoneNumbers = (count: number): string =>
-  `${count} ${count === 1 ? "номер" : "номери"}`;
-
-const formatBalance = (balanceUsd: number | null): string =>
-  balanceUsd === null ? "—" : `$${balanceUsd}`;
 
 interface ComparisonContext {
   hasCurrent: boolean;
@@ -105,10 +99,13 @@ export const getPlanComparisonRows = (
       current: { text: currentPlan && formatAgents(currentPlan.agents) },
       next: { text: formatAgents(nextPlan.agents) },
     },
-    textRow(context, "phoneNumbers", "Телефонні номери", (c) => formatPhoneNumbers(c.phoneNumbers)),
-    textRow(context, "startingBalance", "Стартовий баланс на дзвінки", (c) =>
-      formatBalance(c.startingBalanceUsd)
-    ),
+    {
+      key: "phoneNumbers",
+      icon: "phoneNumbers",
+      label: "Телефонні номери",
+      current: { text: (currentPlan && formatPlanNumbers(currentPlan)) ?? undefined },
+      next: { text: formatPlanNumbers(nextPlan) ?? undefined },
+    },
     flagRow(context, "callLog", "Журнал дзвінків", (c) => c.callLog),
     flagRow(context, "csvCampaigns", "CSV-кампанії", (c) => c.csvCampaigns),
     flagRow(context, "webhooks", "Webhooks", (c) => c.webhooks),

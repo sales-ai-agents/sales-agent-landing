@@ -10,6 +10,7 @@ import { Notifications } from "./_components/notifications";
 import { MarketingConsent } from "./_components/marketing-consent";
 import { DangerZone } from "./_components/danger-zone";
 import { Timezone } from "./_components/timezone";
+import { VerificationSection } from "./_components/verification";
 
 const SettingsPage = () => {
   const { data: account, isLoading, error, refetch } = useMe();
@@ -32,6 +33,8 @@ const SettingsPage = () => {
         initialWebsite={account?.website ?? ""}
         initialLanguage={account?.agent_language ?? "uk"}
       />
+
+      <VerificationSection />
 
       <CallBehavior
         initialAiDisclosure={account?.ai_disclosure_upfront ?? false}

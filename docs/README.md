@@ -7,8 +7,8 @@ the source of truth for request/response shapes and error codes.
 
 ## Hand-written types vs generated reference
 
-The app's domain types live in `src/app/(app)/_lib/types/*` and
-`src/lib/types/*`. They are hand-written on purpose: they use clean domain
+The app's domain types live in `src/app/(site)/(app)/_lib/types/*` (alias
+`@dashboard/types`) and `src/lib/types/*`. They are hand-written on purpose: they use clean domain
 names (`Agent`, `Contact`, …), mark fields non-optional where the API always
 returns them, and model request-param shapes that the spec describes only
 loosely. These are the types application code imports.

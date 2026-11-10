@@ -12,7 +12,6 @@ import {
 import { ChevronRight } from "lucide-react";
 
 import {
-  Badge,
   Table as UiTable,
   TableBody,
   TableCell,
@@ -20,7 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui";
-import { getOutcomeConfig } from "@/app/(site)/(app)/_lib/call-outcome";
+import { CallResultCell } from "@/components/dashboard/call-result-cell";
 import { formatDuration, formatSlaMinutes, formatDateShort, formatTime, cn } from "@/lib/utils";
 import type { CallLog, Agent, SlaState } from "@dashboard/types";
 import { resolveAgentName } from "../_lib/utils";
@@ -66,7 +65,6 @@ interface CallCardProps {
 }
 
 const CallCard = ({ call, agents, showSla }: CallCardProps) => {
-  const config = getOutcomeConfig(call.outcome);
   const agentName = resolveAgentName(call.agent_id, agents);
   const minutes = call.billed_sec ? `${(call.billed_sec / 60).toFixed(1)} хв` : "—";
 
@@ -81,11 +79,11 @@ const CallCard = ({ call, agents, showSla }: CallCardProps) => {
           <p className="text-muted-foreground truncate text-xs">{agentName}</p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
-          <Badge variant={config.variant} className="w-fit">
-            ● {config.label}
-          </Badge>
           {showSla && <SlaIndicator state={call.sla_state} minutesLeft={call.sla_minutes_left} />}
         </div>
+      </div>
+      <div className="mt-3">
+        <CallResultCell call={call} />
       </div>
       <div className="text-muted-foreground mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
         <span>
@@ -128,24 +126,20 @@ export const Table = ({ data, agents, pageCount, slaMinutes }: TableProps) => {
           return <span className="text-muted-foreground text-sm">{name}</span>;
         },
       }),
-      columnHelper.accessor("outcome", {
-        header: showSla ? "Статус / SLA" : "Статус",
-        cell: ({ row }) => {
-          const config = getOutcomeConfig(row.original.outcome);
-          return (
-            <div className="flex flex-col gap-0.5">
-              <Badge variant={config.variant} className="w-fit">
-                ● {config.label}
-              </Badge>
-              {showSla && (
-                <SlaIndicator
-                  state={row.original.sla_state}
-                  minutesLeft={row.original.sla_minutes_left}
-                />
-              )}
-            </div>
-          );
-        },
+      columnHelper.display({
+        id: "result",
+        header: showSla ? "Результат / SLA" : "Результат",
+        cell: ({ row }) => (
+          <div className="flex min-w-0 flex-col gap-1">
+            <CallResultCell call={row.original} />
+            {showSla && (
+              <SlaIndicator
+                state={row.original.sla_state}
+                minutesLeft={row.original.sla_minutes_left}
+              />
+            )}
+          </div>
+        ),
       }),
       columnHelper.accessor("duration_sec", {
         header: "Тривалість",

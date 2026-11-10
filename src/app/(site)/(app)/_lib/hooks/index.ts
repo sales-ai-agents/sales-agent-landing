@@ -43,7 +43,7 @@ export {
 } from "./use-numbers";
 export type { NumbersAllowance, NumbersClaimMeta, OutboundCallerId } from "./use-numbers";
 export { useStats } from "./use-stats";
-export { useUploadContacts } from "./use-upload-contacts";
+export { usePreviewContacts, useUploadContacts } from "./use-upload-contacts";
 export { useVoices } from "./use-voices";
 export {
   useWebhooks,
@@ -55,7 +55,21 @@ export {
   useWebhookDeliveries,
 } from "./use-webhooks";
 export { useApiKeys, useCreateApiKey, useDeleteApiKey } from "./use-api-keys";
+export {
+  useUnseenImportantCount,
+  useCallResultsFeed,
+  useMarkResultsSeen,
+} from "./use-call-results";
+export { useCampaigns, useStartCampaign, useControlCampaign } from "./use-campaigns";
+export { useVerification, useSubmitVerification } from "./use-verification";
 export { useIntegrations } from "./use-integrations";
+export {
+  useCrmIntegration,
+  useConnectCrm,
+  useUpdateCrm,
+  useDisconnectCrm,
+  useTestCrm,
+} from "./use-crm";
 export {
   useGoogleSheetsAuthUrl,
   useConnectGoogleSheets,

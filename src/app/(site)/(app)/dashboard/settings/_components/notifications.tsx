@@ -1,131 +1,204 @@
 "use client";
 
-import { useState } from "react";
-import { Info } from "lucide-react";
+import { Controller, useForm, type Control } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 
-import { Alert, AlertDescription, Button, Input, Switch } from "@/components/ui";
-import { useNotifications, useUpdateNotifications } from "@dashboard/hooks";
+import { Button, Input, Label, Skeleton, Switch } from "@/components/ui";
+import { AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/mutation-error";
+import { useNotifications, useUpdateNotifications } from "@dashboard/hooks";
 import type { NotificationSetting } from "@dashboard/types";
+import {
+  NOTIFICATION_EMAIL_MAX_LENGTH,
+  NOTIFICATION_TELEGRAM_MAX_LENGTH,
+  VISIBLE_NOTIFICATION_KINDS,
+  buildNotificationChanges,
+  buildNotificationFormValues,
+  notificationFormSchema,
+  type NotificationFormData,
+  type VisibleNotificationKind,
+} from "../_lib/notification-form";
 
-const KIND_LABELS: Record<string, { title: string; description: string }> = {
-  escalation: {
-    title: "Ескалації",
-    description: "Сповіщення, коли агент передає дзвінок на оператора",
+interface NotificationKindCopy {
+  title: string;
+  description: string;
+}
+
+const KIND_COPY: Record<VisibleNotificationKind, NotificationKindCopy> = {
+  call_result: {
+    title: "Результати дзвінків",
+    description:
+      "Новий запис, просить передзвонити, заявка, оплата, зірваний запис. Відмови й недозвони лише в кабінеті.",
   },
   limit_exhausted: {
-    title: "Закінчення ліміту хвилин",
-    description: "Сповіщення, коли літ мінливість до ліміту або білінговим рахунок",
+    title: "Хвилини закінчуються",
+    description: "Лист, коли витрачено 80 % хвилин, і ще один, коли вони скінчились.",
   },
 };
 
-interface NotificationRowProps {
-  setting: NotificationSetting;
-  onChange: (updated: Partial<NotificationSetting>) => void;
+const EMAIL_FIELD_ID = "notification-email";
+const TELEGRAM_FIELD_ID = "notification-telegram";
+
+interface KindRowProps {
+  kind: VisibleNotificationKind;
+  control: Control<NotificationFormData>;
 }
 
-const NotificationRow = ({ setting, onChange }: NotificationRowProps) => {
-  const labels = KIND_LABELS[setting.kind] ?? { title: setting.kind, description: "" };
+const KindRow = ({ kind, control }: KindRowProps) => {
+  const { title, description } = KIND_COPY[kind];
 
   return (
-    <div className="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-4 border-b py-3 last:border-0">
+    <div className="border-border grid grid-cols-[1fr_4.5rem_4.5rem] items-center gap-4 border-b py-4 sm:grid-cols-[1fr_6rem_6rem]">
       <div>
-        <p className="text-sm font-medium">{labels.title}</p>
-        <p className="text-muted-foreground text-xs">{labels.description}</p>
+        <p className="text-sm font-semibold">{title}</p>
+        <p className="text-muted-foreground mt-0.5 text-xs">{description}</p>
       </div>
-      <Switch
-        checked={setting.email_enabled}
-        onCheckedChange={(val) => onChange({ email_enabled: val })}
-        aria-label={`Email для ${labels.title}`}
-      />
-      <Input
-        value={setting.email}
-        onChange={(e) => onChange({ email: e.target.value })}
-        placeholder="email@example.com"
-        className="text-sm"
-      />
-      <Switch
-        checked={setting.telegram_enabled}
-        onCheckedChange={(val) => onChange({ telegram_enabled: val })}
-        aria-label={`Telegram для ${labels.title}`}
-      />
-      <Input
-        value={setting.telegram}
-        onChange={(e) => onChange({ telegram: e.target.value })}
-        placeholder="@username"
-        className="text-sm"
-      />
+      <div className="flex justify-center">
+        <Controller
+          control={control}
+          name={`${kind}.email_enabled`}
+          render={({ field }) => (
+            <Switch
+              checked={field.value}
+              onCheckedChange={field.onChange}
+              aria-label={`Пошта: ${title}`}
+            />
+          )}
+        />
+      </div>
+      <div className="flex justify-center">
+        <Controller
+          control={control}
+          name={`${kind}.telegram_enabled`}
+          render={({ field }) => (
+            <Switch
+              checked={field.value}
+              onCheckedChange={field.onChange}
+              aria-label={`Telegram: ${title}`}
+            />
+          )}
+        />
+      </div>
     </div>
   );
 };
 
-export const Notifications = () => {
-  const { data: notifications } = useNotifications();
+interface NotificationsFormProps {
+  settings: NotificationSetting[];
+}
+
+const NotificationsForm = ({ settings }: NotificationsFormProps) => {
   const updateNotifications = useUpdateNotifications();
 
-  const [local, setLocal] = useState<NotificationSetting[] | null>(null);
+  const {
+    control,
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isDirty },
+  } = useForm<NotificationFormData>({
+    resolver: zodResolver(notificationFormSchema),
+    defaultValues: buildNotificationFormValues(settings),
+  });
 
-  const data = local ?? notifications;
-
-  const handleChange = (kind: string, updated: Partial<NotificationSetting>) => {
-    const base = local ?? notifications ?? [];
-    setLocal(base.map((item) => (item.kind === kind ? { ...item, ...updated } : item)));
-  };
-
-  const handleSave = () => {
-    if (!data) return;
+  const onSubmit = (data: NotificationFormData): void => {
+    const changes = buildNotificationChanges(settings, data);
+    if (changes.length === 0) {
+      reset(data);
+      return;
+    }
 
     updateNotifications.mutate(
-      { notifications: data },
+      { notifications: changes },
       {
-        onSuccess: () => {
+        onSuccess: (response) => {
           toast.success("Сповіщення збережено");
-          setLocal(null);
+          reset(buildNotificationFormValues(response.notifications));
         },
-        onError: (err) => handleMutationError(err),
+        onError: (error) => handleMutationError(error, AUTH_ERROR_MESSAGES),
       }
     );
   };
 
-  if (!data?.length) return null;
-
   return (
-    <section className="border-border bg-background rounded-2xl border p-5">
-      <h2 className="text-base font-semibold">Сповіщення</h2>
-      <p className="text-muted-foreground mt-1 text-xs">
-        Налаштуйте, куди та про що ви хочете отримувати сповіщення
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      noValidate
+      className="border-border bg-background rounded-2xl border p-5 sm:p-6"
+    >
+      <h2 className="text-xl font-bold">Сповіщення</h2>
+      <p className="text-muted-foreground mt-1 text-sm">
+        Куди писати, коли після дзвінка треба щось зробити
       </p>
-      <div className="mt-4">
-        <div className="grid grid-cols-[1fr_auto_1fr_auto_1fr] gap-4 border-b pb-2">
-          <p className="text-muted-foreground text-xs">Тип сповіщення</p>
-          <p className="text-muted-foreground text-xs">Email</p>
-          <div />
-          <p className="text-muted-foreground text-xs">Telegram</p>
-          <div />
+
+      <div className="mt-5">
+        <div className="text-muted-foreground border-border grid grid-cols-[1fr_4.5rem_4.5rem] gap-4 border-b pb-2 text-sm sm:grid-cols-[1fr_6rem_6rem]">
+          <span>Подія</span>
+          <span className="text-center">Пошта</span>
+          <span className="text-center">Telegram</span>
         </div>
-        {data.map((setting) => (
-          <NotificationRow
-            key={setting.kind}
-            setting={setting}
-            onChange={(updated) => handleChange(setting.kind, updated)}
-          />
+        {VISIBLE_NOTIFICATION_KINDS.map((kind) => (
+          <KindRow key={kind} kind={kind} control={control} />
         ))}
       </div>
-      <Alert variant="info" className="mt-4">
-        <Info />
-        <AlertDescription className="text-xs">
-          Сповіщення про пропущені дзвінки не буде. Ми фокусуємось на важливих подіях
-        </AlertDescription>
-      </Alert>
-      <Button
-        size="sm"
-        className="mt-4"
-        onClick={handleSave}
-        disabled={updateNotifications.isPending}
-      >
-        {updateNotifications.isPending ? "Збереження..." : "Зберегти"}
-      </Button>
-    </section>
+
+      <div className="mt-5 grid gap-4 sm:grid-cols-2">
+        <div className="space-y-1.5">
+          <Label htmlFor={EMAIL_FIELD_ID}>Пошта</Label>
+          <Input
+            id={EMAIL_FIELD_ID}
+            type="email"
+            autoComplete="off"
+            maxLength={NOTIFICATION_EMAIL_MAX_LENGTH}
+            placeholder="Порожньо: на пошту акаунта"
+            aria-invalid={Boolean(errors.email)}
+            {...register("email")}
+          />
+          {errors.email && (
+            <p role="alert" className="text-destructive text-xs">
+              {errors.email.message}
+            </p>
+          )}
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor={TELEGRAM_FIELD_ID}>Telegram chat ID</Label>
+          <Input
+            id={TELEGRAM_FIELD_ID}
+            inputMode="numeric"
+            autoComplete="off"
+            maxLength={NOTIFICATION_TELEGRAM_MAX_LENGTH}
+            placeholder="Наприклад, 123456789"
+            aria-invalid={Boolean(errors.telegram)}
+            {...register("telegram")}
+          />
+          {errors.telegram ? (
+            <p role="alert" className="text-destructive text-xs">
+              {errors.telegram.message}
+            </p>
+          ) : (
+            <p className="text-muted-foreground text-xs">
+              Лише цифри. Спершу натисніть /start у боті Calls4U.
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-5 flex justify-end">
+        <Button type="submit" disabled={!isDirty || updateNotifications.isPending}>
+          {updateNotifications.isPending ? "Збереження..." : "Зберегти"}
+        </Button>
+      </div>
+    </form>
   );
+};
+
+export const Notifications = () => {
+  const { data: settings, isLoading } = useNotifications();
+
+  if (isLoading) return <Skeleton className="h-96 w-full rounded-2xl" />;
+  if (!settings?.length) return null;
+
+  return <NotificationsForm settings={settings} />;
 };

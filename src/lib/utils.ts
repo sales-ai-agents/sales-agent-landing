@@ -151,6 +151,9 @@ export function pluralizeUk(n: number, [one, few, many]: UkrainianForms): string
 export const pluralizeDays = (n: number): string => pluralizeUk(n, ["день", "дні", "днів"]);
 export const pluralizeMonths = (n: number): string =>
   pluralizeUk(n, ["місяць", "місяці", "місяців"]);
+export const pluralizeGoals = (n: number): string => pluralizeUk(n, ["ціль", "цілі", "цілей"]);
+export const pluralizeNumbers = (n: number): string =>
+  pluralizeUk(n, ["номер", "номери", "номерів"]);
 
 export function getPageIndex(currentPage: number, pageCount: number, index: number): number {
   if (pageCount <= 5) return index;

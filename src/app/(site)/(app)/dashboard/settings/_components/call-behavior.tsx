@@ -4,6 +4,7 @@ import { toast } from "sonner";
 
 import { Switch } from "@/components/ui";
 import { useUpdateProfile } from "@/lib/hooks";
+import { AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/mutation-error";
 
 interface CallBehaviorProps {
@@ -22,7 +23,7 @@ export const CallBehavior = ({ initialAiDisclosure, initialRecordNotice }: CallB
       { ai_disclosure_upfront: value },
       {
         onSuccess: () => toast.success("Налаштування збережено"),
-        onError: (err) => handleMutationError(err),
+        onError: (err) => handleMutationError(err, AUTH_ERROR_MESSAGES),
       }
     );
   };
@@ -32,7 +33,7 @@ export const CallBehavior = ({ initialAiDisclosure, initialRecordNotice }: CallB
       { record_notice: value },
       {
         onSuccess: () => toast.success("Налаштування збережено"),
-        onError: (err) => handleMutationError(err),
+        onError: (err) => handleMutationError(err, AUTH_ERROR_MESSAGES),
       }
     );
   };

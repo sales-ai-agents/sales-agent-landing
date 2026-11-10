@@ -5,6 +5,7 @@ import { Controller, type UseFormReturn } from "react-hook-form";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui";
 import type { CallDirection, CreateAgentFormData } from "@/lib/schemas";
+import { useOutboundCallerId } from "@dashboard/hooks";
 import type { AgentNumber } from "@dashboard/types";
 
 import { NumberPicker } from "../../_components/number-picker";
@@ -38,6 +39,7 @@ const matchesDirection = (number: AgentNumber, callDirection: CallDirection): bo
 };
 
 export const StepNumber = ({ form, numbers }: StepNumberProps) => {
+  const { data: callerId } = useOutboundCallerId();
   const callDirection = form.watch("callDirection");
   const selectedNumberId = form.watch("numberId");
 
@@ -85,6 +87,7 @@ export const StepNumber = ({ form, numbers }: StepNumberProps) => {
                   value={field.value}
                   onChange={field.onChange}
                   showCallerId={callDirection === "outbound"}
+                  primaryPhone={callerId?.phone}
                 />
               )}
             />

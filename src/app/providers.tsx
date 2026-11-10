@@ -11,9 +11,13 @@ function isSessionExpired(error: unknown) {
   return error instanceof ApiError && error.status === 401 && !AUTH_FLOW_CODES.has(error.code);
 }
 
+const AUTH_ME_QUERY_KEY = ["auth", "me"] as const;
+
 function handleSessionExpired(queryClient: QueryClient) {
+  if (queryClient.getQueryData(AUTH_ME_QUERY_KEY) === null) return;
+
   toast.error("Сесія закінчилася. Увійдіть знову.", { id: "session-expired" });
-  queryClient.setQueryData(["auth", "me"], null);
+  queryClient.setQueryData(AUTH_ME_QUERY_KEY, null);
 }
 
 function makeQueryClient(): QueryClient {

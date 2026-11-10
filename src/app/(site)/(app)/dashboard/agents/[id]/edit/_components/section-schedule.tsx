@@ -2,7 +2,7 @@
 
 import { Controller, type UseFormReturn } from "react-hook-form";
 
-import { Input, Label, Toggle, ToggleGroup } from "@/components/ui";
+import { Toggle, ToggleGroup } from "@/components/ui";
 import {
   CALLS_PER_DAY_OPTIONS,
   WEEKDAYS,
@@ -10,13 +10,14 @@ import {
   type Weekday,
   WEEKDAY_LABELS,
 } from "@/lib/schemas";
+import { TimeField } from "../../../_components/time-field";
 
 interface SectionScheduleProps {
   form: UseFormReturn<EditAgentFormData>;
 }
 
 export const SectionSchedule = ({ form }: SectionScheduleProps) => {
-  const { control, register } = form;
+  const { control } = form;
 
   return (
     <section className="space-y-4">
@@ -26,24 +27,31 @@ export const SectionSchedule = ({ form }: SectionScheduleProps) => {
         <fieldset className="space-y-2">
           <legend className="mb-2 text-sm">Час прозвону</legend>
           <div className="flex items-center gap-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="schedule-start" className="sr-only">
-                Початок
-              </Label>
-              <Input
-                id="schedule-start"
-                type="time"
-                {...register("scheduleStart")}
-                className="w-28"
-              />
-            </div>
+            <Controller
+              control={control}
+              name="scheduleStart"
+              render={({ field }) => (
+                <TimeField
+                  id="schedule-start"
+                  label="Початок"
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
+            />
             <span className="text-muted-foreground">-</span>
-            <div className="space-y-1.5">
-              <Label htmlFor="schedule-end" className="sr-only">
-                Кінець
-              </Label>
-              <Input id="schedule-end" type="time" {...register("scheduleEnd")} className="w-28" />
-            </div>
+            <Controller
+              control={control}
+              name="scheduleEnd"
+              render={({ field }) => (
+                <TimeField
+                  id="schedule-end"
+                  label="Кінець"
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
+            />
           </div>
         </fieldset>
 

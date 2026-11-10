@@ -1,5 +1,5 @@
 import type { Agent } from "@dashboard/types";
-import { formatNumber } from "@/lib/utils";
+import { formatNumber, pluralizeGoals } from "@/lib/utils";
 
 const COLORS = [
   { bg: "bg-primary/10", bar: "bg-primary", text: "text-primary" },
@@ -14,9 +14,10 @@ export interface AgentEfficiencyRowProps {
 
 export const AgentEfficiencyRow = ({ agent, index }: AgentEfficiencyRowProps) => {
   const efficiency = agent.stats?.efficiency_pct ?? null;
+  const goals = agent.stats?.meetings ?? 0;
   const subtitle =
     efficiency !== null
-      ? `${formatNumber(agent.stats?.meetings ?? 0)} цілей досягнуто`
+      ? `${formatNumber(goals)} ${pluralizeGoals(goals)} досягнуто`
       : "Ще не дзвонив";
 
   const color = COLORS[index % COLORS.length];

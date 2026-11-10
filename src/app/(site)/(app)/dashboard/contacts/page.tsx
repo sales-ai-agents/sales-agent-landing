@@ -20,6 +20,7 @@ import {
   useDeleteContact,
   useUpdateContact,
 } from "@dashboard/hooks";
+import { CONTACT_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/mutation-error";
 import { formatNumber, cn } from "@/lib/utils";
 import type { ContactFormData } from "@/lib/schemas";
@@ -71,7 +72,7 @@ const ContactsPage = () => {
           toast.success("Контакт додано");
           setShowAddDialog(false);
         },
-        onError: (err) => handleMutationError(err),
+        onError: (err) => handleMutationError(err, CONTACT_ERROR_MESSAGES),
       });
     },
     [createContact]
@@ -81,7 +82,7 @@ const ContactsPage = () => {
     (id: number) => {
       deleteContact.mutate(id, {
         onSuccess: () => toast.success("Контакт видалено"),
-        onError: (err) => handleMutationError(err),
+        onError: (err) => handleMutationError(err, CONTACT_ERROR_MESSAGES),
       });
     },
     [deleteContact]
@@ -91,7 +92,7 @@ const ContactsPage = () => {
     (id: number, current: boolean) => {
       updateContact.mutate(
         { id, do_not_call: !current },
-        { onError: (err) => handleMutationError(err) }
+        { onError: (err) => handleMutationError(err, CONTACT_ERROR_MESSAGES) }
       );
     },
     [updateContact]
@@ -104,7 +105,7 @@ const ContactsPage = () => {
         { id, consent: next },
         {
           onSuccess: () => toast.success(next === "granted" ? "Згоду отримано" : "Згоду знято"),
-          onError: (err) => handleMutationError(err),
+          onError: (err) => handleMutationError(err, CONTACT_ERROR_MESSAGES),
         }
       );
     },

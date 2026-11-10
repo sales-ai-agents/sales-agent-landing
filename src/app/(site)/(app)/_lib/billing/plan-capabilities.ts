@@ -18,8 +18,6 @@ type IntegrationsLevel = "limited" | "all";
 type SupportLevel = "basic" | "priority";
 
 export interface PlanCapabilities {
-  phoneNumbers: number;
-  startingBalanceUsd: number | null;
   callLog: boolean;
   csvCampaigns: boolean;
   webhooks: boolean;
@@ -30,8 +28,6 @@ export interface PlanCapabilities {
 
 const PLAN_CAPABILITIES: Record<PlanTier, PlanCapabilities> = {
   trial: {
-    phoneNumbers: 1,
-    startingBalanceUsd: null,
     callLog: true,
     csvCampaigns: false,
     webhooks: false,
@@ -40,8 +36,6 @@ const PLAN_CAPABILITIES: Record<PlanTier, PlanCapabilities> = {
     businessProcess: false,
   },
   start: {
-    phoneNumbers: 1,
-    startingBalanceUsd: 5,
     callLog: true,
     csvCampaigns: false,
     webhooks: false,
@@ -50,8 +44,6 @@ const PLAN_CAPABILITIES: Record<PlanTier, PlanCapabilities> = {
     businessProcess: false,
   },
   business: {
-    phoneNumbers: 1,
-    startingBalanceUsd: 10,
     callLog: true,
     csvCampaigns: true,
     webhooks: true,
@@ -60,8 +52,6 @@ const PLAN_CAPABILITIES: Record<PlanTier, PlanCapabilities> = {
     businessProcess: false,
   },
   pro: {
-    phoneNumbers: 3,
-    startingBalanceUsd: 20,
     callLog: true,
     csvCampaigns: true,
     webhooks: true,

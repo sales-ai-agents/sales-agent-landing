@@ -1,14 +1,8 @@
-import type { CallOutcome, CallLog } from "@dashboard/types";
+import type { CallOutcome } from "@dashboard/types";
 
 export interface OutcomeConfig {
   label: string;
   variant: "success" | "warning" | "secondary" | "destructive";
-}
-
-interface OutcomeDisplay {
-  label: string;
-  badgeClass: string;
-  icon: string;
 }
 
 const OUTCOME_MAP: Record<string, OutcomeConfig> = {
@@ -30,32 +24,4 @@ const DEFAULT_CONFIG: OutcomeConfig = { label: "Немає", variant: "secondary
 export const getOutcomeConfig = (outcome: CallOutcome | null): OutcomeConfig => {
   if (!outcome) return DEFAULT_CONFIG;
   return OUTCOME_MAP[outcome] ?? { ...DEFAULT_CONFIG, label: outcome };
-};
-
-export const getOutcomeDisplay = (call: CallLog): OutcomeDisplay => {
-  if (call.meeting_scheduled) {
-    return { label: "Ціль досягнута", badgeClass: "bg-success/15/80 text-success", icon: "✓" };
-  }
-
-  switch (call.outcome) {
-    case "не відповів":
-    case "немає часу":
-    case "нейтрально":
-    case "скинув":
-    case "погано чути":
-    case "не дійшли до людини":
-    case "не з'єдналось":
-      return { label: "Без відповіді", badgeClass: "bg-muted text-muted-foreground", icon: "–" };
-    case "передзвонити":
-      return { label: "Передано", badgeClass: "bg-warning/10 text-warning", icon: "↗" };
-    case "відмова":
-    case "не цікаво":
-      return { label: "Помилка", badgeClass: "bg-destructive/80 text-white", icon: "!" };
-    default:
-      return {
-        label: call.outcome ?? "В процесі",
-        badgeClass: "bg-muted text-muted-foreground",
-        icon: "–",
-      };
-  }
 };

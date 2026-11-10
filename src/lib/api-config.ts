@@ -21,8 +21,13 @@ export const API_ENDPOINTS = {
   // App (authenticated)
   APP_STATS: `${API_BASE}/app/stats`,
   APP_CALLS: `${API_BASE}/app/calls`,
+  APP_CALL_RESULTS: `${API_BASE}/app/call-results`,
+  APP_CALL_RESULTS_SEEN: `${API_BASE}/app/call-results/seen`,
   APP_CALLS_EXPORT: `${API_BASE}/app/calls/export`,
   APP_AGENTS: `${API_BASE}/app/agents`,
+  APP_CAMPAIGNS: `${API_BASE}/app/campaigns`,
+  APP_CAMPAIGNS_CONTROL: `${API_BASE}/app/campaigns/control`,
+  APP_VERIFICATION: `${API_BASE}/app/verification`,
   APP_VOICES: `${API_BASE}/app/voices`,
   APP_NUMBERS: `${API_BASE}/app/numbers`,
   APP_NUMBERS_POOL: `${API_BASE}/app/numbers/pool`,
@@ -32,6 +37,7 @@ export const API_ENDPOINTS = {
   APP_CONTACT_BASES: `${API_BASE}/app/contact-bases`,
   APP_CONTACTS: `${API_BASE}/app/contacts`,
   APP_CONTACTS_UPLOAD: `${API_BASE}/app/contacts/upload`,
+  APP_CONTACTS_UPLOAD_PREVIEW: `${API_BASE}/app/contacts/upload/preview`,
   APP_CONTACTS_EXPORT: `${API_BASE}/app/contacts/export`,
   APP_TEST_CALL: `${API_BASE}/app/agents/test-call`,
 
@@ -42,6 +48,8 @@ export const API_ENDPOINTS = {
   APP_INTEGRATIONS_GOOGLE_SHEETS_PREVIEW: `${API_BASE}/app/integrations/google-sheets/preview`,
   APP_INTEGRATIONS_GOOGLE_SHEETS_IMPORT: `${API_BASE}/app/integrations/google-sheets/import`,
   APP_CONTACTS_EXPORT_PREVIEW: `${API_BASE}/app/contacts/export/preview`,
+  APP_INTEGRATIONS_CRM: `${API_BASE}/app/integrations/crm`,
+  APP_INTEGRATIONS_CRM_TEST: `${API_BASE}/app/integrations/crm/test`,
   APP_WEBHOOKS: `${API_BASE}/app/webhooks`,
   APP_WEBHOOK_DELIVERIES: `${API_BASE}/app/webhooks/deliveries`,
   APP_API_KEYS: `${API_BASE}/app/api-keys`,
@@ -114,6 +122,18 @@ export const apiUrl = {
 
     const qs = sp.toString();
 
+    return qs ? `${url}?${qs}` : url;
+  },
+  callResults: (params?: { limit?: number; offset?: number; unseen?: boolean }) => {
+    const url = API_ENDPOINTS.APP_CALL_RESULTS;
+    if (!params) return url;
+
+    const sp = new URLSearchParams();
+    if (params.limit !== undefined) sp.set("limit", String(params.limit));
+    if (params.offset !== undefined) sp.set("offset", String(params.offset));
+    if (params.unseen) sp.set("unseen", "1");
+
+    const qs = sp.toString();
     return qs ? `${url}?${qs}` : url;
   },
   contacts: (params?: { search?: string; tag?: string }) => {

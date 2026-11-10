@@ -25,7 +25,7 @@ export const SectionCalls = ({ form }: SectionCallsProps) => {
     <section className="space-y-4">
       <div>
         <h2 className="text-lg font-medium">Дзвінки</h2>
-        <p className="mt-3 text-sm">Тип дзвінків</p>
+        <p className="mt-3 text-sm">Напрямок дзвінків</p>
       </div>
 
       <Controller
@@ -33,7 +33,7 @@ export const SectionCalls = ({ form }: SectionCallsProps) => {
         name="callDirection"
         render={({ field }) => (
           <RadioGroup
-            aria-label="Тип дзвінків"
+            aria-label="Напрямок дзвінків"
             value={field.value}
             onValueChange={(value) => field.onChange(value as CallDirection)}
             className="grid grid-cols-1 gap-4 sm:grid-cols-2"

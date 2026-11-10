@@ -34,6 +34,7 @@ import {
   useUpdateTeamMemberRole,
   useRemoveTeamMember,
 } from "@dashboard/hooks";
+import { TEAM_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/mutation-error";
 import type { TeamRole } from "@dashboard/types";
 
@@ -72,7 +73,7 @@ export const Team = () => {
           setInviteEmail("");
           setInviteName("");
         },
-        onError: (err) => handleMutationError(err),
+        onError: (err) => handleMutationError(err, TEAM_ERROR_MESSAGES),
       }
     );
   }, [inviteMember, inviteEmail, inviteName, inviteRole]);
@@ -83,7 +84,7 @@ export const Team = () => {
         { id, role },
         {
           onSuccess: () => toast.success("Роль оновлено"),
-          onError: (err) => handleMutationError(err),
+          onError: (err) => handleMutationError(err, TEAM_ERROR_MESSAGES),
         }
       );
     },
@@ -94,7 +95,7 @@ export const Team = () => {
     (id: number) => {
       removeMember.mutate(id, {
         onSuccess: () => toast.success("Користувача видалено"),
-        onError: (err) => handleMutationError(err),
+        onError: (err) => handleMutationError(err, TEAM_ERROR_MESSAGES),
       });
     },
     [removeMember]

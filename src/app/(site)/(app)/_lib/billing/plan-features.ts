@@ -1,8 +1,9 @@
 import { formatNumber } from "@/lib/utils";
 import type { BillingPlan } from "@dashboard/types";
 
-import { getPlanCapabilities } from "./plan-capabilities";
-import type { PlanCapabilities } from "./plan-capabilities";
+import { formatPlanNumbers } from "./plan-numbers";
+
+type Feature = string | null;
 
 const formatMinutesFeature = (plan: BillingPlan): string =>
   `${formatNumber(plan.minutes)} хвилин AI-агента`;
@@ -10,22 +11,15 @@ const formatMinutesFeature = (plan: BillingPlan): string =>
 const formatAgentsFeature = (plan: BillingPlan, singular: string): string =>
   plan.agents === 0 ? "Необмежено ШІ-агентів" : singular;
 
-const formatPhoneFeature = ({ phoneNumbers }: PlanCapabilities): string =>
-  phoneNumbers === 1 ? "1 телефонний номер" : `До ${phoneNumbers} телефонних номерів`;
-
-const formatBalanceFeature = ({ startingBalanceUsd }: PlanCapabilities): string =>
-  `$${startingBalanceUsd} стартового балансу на дзвінки`;
-
-const buildFeatures = (plan: BillingPlan): string[] => {
-  const capabilities = getPlanCapabilities(plan);
+const buildFeatures = (plan: BillingPlan): Feature[] => {
+  const numbers = formatPlanNumbers(plan);
 
   switch (plan.key) {
     case "start":
       return [
         formatMinutesFeature(plan),
         formatAgentsFeature(plan, `${plan.agents} ШІ-агент`),
-        formatPhoneFeature(capabilities),
-        formatBalanceFeature(capabilities),
+        numbers,
         "Журнал дзвінків",
         "Перегляд результатів розмов",
         "Базове налаштування сценарію",
@@ -35,8 +29,7 @@ const buildFeatures = (plan: BillingPlan): string[] => {
         "Все з тарифу Start",
         formatMinutesFeature(plan),
         formatAgentsFeature(plan, `До ${plan.agents} ШІ-агентів`),
-        formatPhoneFeature(capabilities),
-        formatBalanceFeature(capabilities),
+        numbers,
         "CSV-кампанії",
         "Webhooks",
         "Кілька сценаріїв дзвінків",
@@ -46,8 +39,7 @@ const buildFeatures = (plan: BillingPlan): string[] => {
         "Все з тарифу Business",
         formatMinutesFeature(plan),
         formatAgentsFeature(plan, `До ${plan.agents} ШІ-агентів`),
-        formatPhoneFeature(capabilities),
-        formatBalanceFeature(capabilities),
+        numbers,
         "Усі доступні інтеграції",
         "Пріоритетна підтримка",
         "Підключення до бізнес-процесів",
@@ -56,8 +48,10 @@ const buildFeatures = (plan: BillingPlan): string[] => {
       return [
         `${formatNumber(plan.minutes)} хв розмов`,
         formatAgentsFeature(plan, `До ${plan.agents} ШІ-агентів`),
+        numbers,
       ];
   }
 };
 
-export const getPlanFeatures = (plan: BillingPlan): string[] => buildFeatures(plan);
+export const getPlanFeatures = (plan: BillingPlan): string[] =>
+  buildFeatures(plan).filter((feature): feature is string => feature !== null);

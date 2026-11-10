@@ -1,3 +1,5 @@
+import type { CallResult } from "./call-result";
+import type { CrmProvider } from "./integration";
 import type { CallFieldType } from "@/lib/call-config/schema";
 
 export type CallOutcome =
@@ -32,6 +34,8 @@ export interface CallLog {
   duration_sec: number | null;
   billed_sec: number | null;
   manager_note: string | null;
+  result?: CallResult | null;
+  result_seen?: boolean;
   sla_state: SlaState | null;
   sla_minutes_left: number | null;
 }
@@ -140,14 +144,20 @@ export interface StatsResponse {
   by_day: DayStats[];
 }
 
-export type CrmSyncState = "not_configured" | "pending" | "synced" | "failed";
+export type CrmSyncState =
+  "not_configured" | "not_queued" | "pending" | "synced" | "failed" | "skipped";
 
 export interface CrmStatus {
   configured: boolean;
-  provider: string | null;
+  provider: CrmProvider | null;
+  provider_name: string | null;
   state: CrmSyncState;
   synced_at: string | null;
   error: string | null;
+  attempts: number;
+  will_retry: boolean;
+  external_id: string | null;
+  external_url: string | null;
   can_retry: boolean;
 }
 
