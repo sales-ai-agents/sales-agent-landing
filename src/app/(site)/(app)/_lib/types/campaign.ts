@@ -1,4 +1,4 @@
-export type CampaignStatus = "running" | "paused" | "stopped";
+export type CampaignStatus = "running" | "paused" | "stopped" | "done";
 export type CampaignAction = "pause" | "resume" | "stop";
 
 export interface Campaign {

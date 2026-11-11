@@ -27,19 +27,15 @@ const STATUS_VIEWS: Record<CampaignStatus, StatusView> = {
   running: { label: "Йде", variant: "success" },
   paused: { label: "Пауза", variant: "warning" },
   stopped: { label: "Зупинено", variant: "secondary" },
+  done: { label: "Завершено", variant: "secondary" },
 };
 
 const CONTROLLABLE_STATUSES: ReadonlySet<string> = new Set<CampaignStatus>(["running", "paused"]);
 
-const FINISHED_VIEW: StatusView = { label: "Завершено", variant: "secondary" };
 const UNKNOWN_VIEW: StatusView = { label: "Статус невідомий", variant: "secondary" };
 
-const isKnownStatus = (status: string): status is CampaignStatus => status in STATUS_VIEWS;
-
-const resolveStatusView = ({ status, finished_at: finishedAt }: Campaign): StatusView => {
-  if (isKnownStatus(status)) return STATUS_VIEWS[status];
-  return finishedAt ? FINISHED_VIEW : UNKNOWN_VIEW;
-};
+const resolveStatusView = ({ status }: Campaign): StatusView =>
+  STATUS_VIEWS[status as CampaignStatus] ?? UNKNOWN_VIEW;
 
 const PERCENT = 100;
 

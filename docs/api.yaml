@@ -5919,7 +5919,15 @@ components:
         account_id: { type: integer }
         agent_id: { type: integer }
         name: { type: string }
-        status: { type: string, enum: [running, paused, stopped] }
+        status:
+          type: string
+          enum: [running, paused, stopped, done]
+          description: >
+            `done` — обдзвін пройшов усю базу й завершився сам (ставить
+            сервер, не кнопка). Раніше тут його не було, і кабінет падав на
+            сторінці агентів, щойно в акаунта завершувався перший обдзвін.
+            Невідомий статус малюй нейтральним бейджем, а не помилкою:
+            набір може розширитись.
         total: { type: integer, description: скільки номерів у обдзвоні }
         done: { type: integer, description: скільки вже обдзвонено }
         created_at: { type: string }

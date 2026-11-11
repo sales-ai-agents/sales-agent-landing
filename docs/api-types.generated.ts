@@ -8176,8 +8176,11 @@ export interface components {
             account_id?: number;
             agent_id?: number;
             name?: string;
-            /** @enum {string} */
-            status?: "running" | "paused" | "stopped";
+            /**
+             * @description `done` — обдзвін пройшов усю базу й завершився сам (ставить сервер, не кнопка). Раніше тут його не було, і кабінет падав на сторінці агентів, щойно в акаунта завершувався перший обдзвін. Невідомий статус малюй нейтральним бейджем, а не помилкою: набір може розширитись.
+             * @enum {string}
+             */
+            status?: "running" | "paused" | "stopped" | "done";
             /** @description скільки номерів у обдзвоні */
             total?: number;
             /** @description скільки вже обдзвонено */
