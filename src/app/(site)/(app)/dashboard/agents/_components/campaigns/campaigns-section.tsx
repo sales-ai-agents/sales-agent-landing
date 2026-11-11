@@ -8,6 +8,7 @@ import { ApiError } from "@/lib/api-client";
 import { CAMPAIGN_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/mutation-error";
 import { ConfirmDialog } from "@/components/dashboard/confirm-dialog";
+import { useAccountTimeZone } from "@/lib/hooks";
 import { formatDateShort, formatNumber } from "@/lib/utils";
 import { useCampaigns, useControlCampaign } from "@dashboard/hooks";
 import type { Campaign, CampaignAction, CampaignStatus } from "@dashboard/types";
@@ -28,6 +29,18 @@ const STATUS_VIEWS: Record<CampaignStatus, StatusView> = {
   stopped: { label: "Зупинено", variant: "secondary" },
 };
 
+const CONTROLLABLE_STATUSES: ReadonlySet<string> = new Set<CampaignStatus>(["running", "paused"]);
+
+const FINISHED_VIEW: StatusView = { label: "Завершено", variant: "secondary" };
+const UNKNOWN_VIEW: StatusView = { label: "Статус невідомий", variant: "secondary" };
+
+const isKnownStatus = (status: string): status is CampaignStatus => status in STATUS_VIEWS;
+
+const resolveStatusView = ({ status, finished_at: finishedAt }: Campaign): StatusView => {
+  if (isKnownStatus(status)) return STATUS_VIEWS[status];
+  return finishedAt ? FINISHED_VIEW : UNKNOWN_VIEW;
+};
+
 const PERCENT = 100;
 
 const calcProgress = ({ done, total }: Campaign): number =>
@@ -36,6 +49,7 @@ const calcProgress = ({ done, total }: Campaign): number =>
 export const CampaignsSection = () => {
   const { data: campaigns = [] } = useCampaigns();
   const controlCampaign = useControlCampaign();
+  const timeZone = useAccountTimeZone();
 
   const [stopTarget, setStopTarget] = useState<Campaign | null>(null);
   const [blockCode, setBlockCode] = useState<CampaignBlockCode | null>(null);
@@ -71,7 +85,7 @@ export const CampaignsSection = () => {
 
       <ul className="space-y-3">
         {campaigns.map((campaign) => {
-          const status = STATUS_VIEWS[campaign.status];
+          const status = resolveStatusView(campaign);
           const isBusy = pendingId === campaign.id;
 
           return (
@@ -83,7 +97,7 @@ export const CampaignsSection = () => {
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold">{campaign.name}</p>
                   <p className="text-muted-foreground text-xs">
-                    Запущено {formatDateShort(campaign.created_at)}
+                    Запущено {formatDateShort(campaign.created_at, timeZone)}
                   </p>
                 </div>
                 <Badge variant={status.variant}>{status.label}</Badge>
@@ -96,7 +110,7 @@ export const CampaignsSection = () => {
                 </span>
               </div>
 
-              {campaign.status !== "stopped" && (
+              {CONTROLLABLE_STATUSES.has(campaign.status) && (
                 <div className="flex flex-wrap gap-2">
                   {campaign.status === "running" ? (
                     <Button

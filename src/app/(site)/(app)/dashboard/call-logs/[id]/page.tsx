@@ -15,6 +15,7 @@ import {
   useCrmStatus,
   useMarkResultsSeen,
 } from "@dashboard/hooks";
+import { useAccountTimeZone } from "@/lib/hooks";
 import { handleMutationError } from "@/lib/mutation-error";
 import { getOutcomeConfig } from "@/app/(site)/(app)/_lib/call-outcome";
 import {
@@ -25,7 +26,6 @@ import {
   formatDateTime,
   cn,
 } from "@/lib/utils";
-import { formatTranscriptTime } from "@/app/(site)/(app)/dashboard/call-logs/_lib/utils";
 import { InfoField } from "@/app/(site)/(app)/dashboard/call-logs/_components/info-field";
 import { CallResultCard } from "@/app/(site)/(app)/dashboard/call-logs/_components/call-result-card";
 import { CrmStatusPanel } from "@/app/(site)/(app)/dashboard/call-logs/_components/crm-status-panel";
@@ -63,6 +63,7 @@ const CallDetailPage = () => {
 
   const { data: call, isLoading, error, refetch } = useCallDetail(callId);
   const { data: agents = [] } = useAgents();
+  const timeZone = useAccountTimeZone();
   const { data: crm } = useCrmStatus(callId);
   const saveNote = useSaveNote(callId);
   const { mutate: markResultsSeen } = useMarkResultsSeen();
@@ -106,7 +107,7 @@ const CallDetailPage = () => {
         <div>
           <h1 className="text-2xl font-bold">Деталі дзвінка</h1>
           <p className="text-muted-foreground text-sm">
-            {formatDateShort(call.created_at)} - {formatTime(call.created_at)}
+            {formatDateShort(call.created_at, timeZone)} - {formatTime(call.created_at, timeZone)}
           </p>
         </div>
         <a
@@ -169,9 +170,6 @@ const CallDetailPage = () => {
               <div className="space-y-4">
                 {call.transcript.map((msg, i) => (
                   <div key={`${msg.role}-${i}`} className="flex gap-3">
-                    <span className="text-muted-foreground shrink-0 font-mono text-xs">
-                      {formatTranscriptTime(i, call.duration_sec)}
-                    </span>
                     <span
                       className={cn(
                         "text-xs font-semibold",
@@ -214,7 +212,7 @@ const CallDetailPage = () => {
             />
             {call.manager_note_at && (
               <p className="text-muted-foreground mt-1 text-xs">
-                Останнє оновлення: {formatDateTime(call.manager_note_at)}
+                Останнє оновлення: {formatDateTime(call.manager_note_at, timeZone)}
               </p>
             )}
             <Button

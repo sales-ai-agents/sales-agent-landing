@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ChevronDown, KeyRound, Send, Trash2 } from "lucide-react";
 
 import { Badge, Button, Switch } from "@/components/ui";
+import { useAccountTimeZone } from "@/lib/hooks";
 import { cn, formatDateShort, formatDateTime } from "@/lib/utils";
 import type { Webhook } from "@dashboard/types";
 import { useWebhookActions } from "./use-webhook-actions";
@@ -23,12 +24,13 @@ const NEVER_DELIVERED = "ще не було";
 
 export const WebhookRow = ({ webhook, onSecretRevealed }: WebhookRowProps) => {
   const actions = useWebhookActions(webhook, onSecretRevealed);
+  const timeZone = useAccountTimeZone();
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
   const [isLogOpen, setIsLogOpen] = useState(false);
 
   const deliveriesId = `webhook-deliveries-${webhook.id}`;
   const lastDelivery = webhook.last_delivered_at
-    ? formatDateTime(webhook.last_delivered_at)
+    ? formatDateTime(webhook.last_delivered_at, timeZone)
     : NEVER_DELIVERED;
 
   const closeConfirm = (): void => setConfirmAction(null);
@@ -41,7 +43,8 @@ export const WebhookRow = ({ webhook, onSecretRevealed }: WebhookRowProps) => {
             {webhook.url}
           </p>
           <p className="text-muted-foreground text-xs">
-            Додано {formatDateShort(webhook.created_at)} · Остання доставка: {lastDelivery}
+            Додано {formatDateShort(webhook.created_at, timeZone)} · Остання доставка:{" "}
+            {lastDelivery}
           </p>
           {webhook.failed > 0 && (
             <Badge variant="warning">Невдалих доставок: {webhook.failed}</Badge>

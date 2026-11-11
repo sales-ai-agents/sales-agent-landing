@@ -38,10 +38,12 @@ import {
   DIRECTION_LABELS,
   STATUS_LABELS,
   formatDailyCap,
+  formatNumberHours,
   resolveCallerIdBadge,
   resolveNumberTypeLabel,
 } from "../_lib/labels";
 import { DeleteNumberDialog } from "./delete-number-dialog";
+import { NumberScheduleDialog } from "./number-schedule-dialog";
 
 interface NumbersTableProps {
   numbers: AgentNumber[];
@@ -81,6 +83,20 @@ const CallerIdBadge = ({ callerId }: { callerId: boolean }) => {
       </Tooltip>
     </TooltipProvider>
   );
+};
+
+const NumberActions = ({ number }: { number: AgentNumber }) => (
+  <div className="flex items-center gap-1">
+    {number.direction !== "inbound" && <NumberScheduleDialog number={number} />}
+    <DeleteNumberDialog id={number.id} phone={number.phone} source={number.source} />
+  </div>
+);
+
+const NumberLimits = ({ number }: { number: AgentNumber }) => {
+  const details = [formatNumberHours(number), formatDailyCap(number.daily_cap)].filter(Boolean);
+  if (details.length === 0) return null;
+
+  return <div className="text-muted-foreground text-xs">{details.join(" · ")}</div>;
 };
 
 const UnassignedWarning = () => (
@@ -176,15 +192,12 @@ export const NumbersTable = ({ numbers, agents }: NumbersTableProps) => {
       columnHelper.display({
         id: "direction",
         header: "Напрямок",
-        cell: ({ row }) => {
-          const dailyCap = formatDailyCap(row.original.daily_cap);
-          return (
-            <div>
-              <div>{DIRECTION_LABELS[row.original.direction]}</div>
-              {dailyCap && <div className="text-muted-foreground text-xs">{dailyCap}</div>}
-            </div>
-          );
-        },
+        cell: ({ row }) => (
+          <div>
+            <div>{DIRECTION_LABELS[row.original.direction]}</div>
+            <NumberLimits number={row.original} />
+          </div>
+        ),
       }),
       columnHelper.accessor("status", {
         header: "Статус",
@@ -193,13 +206,7 @@ export const NumbersTable = ({ numbers, agents }: NumbersTableProps) => {
       columnHelper.display({
         id: "actions",
         header: "Дії",
-        cell: ({ row }) => (
-          <DeleteNumberDialog
-            id={row.original.id}
-            phone={row.original.phone}
-            source={row.original.source}
-          />
-        ),
+        cell: ({ row }) => <NumberActions number={row.original} />,
       }),
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -216,8 +223,6 @@ export const NumbersTable = ({ numbers, agents }: NumbersTableProps) => {
     <div className="border-border bg-card overflow-hidden rounded-xl border">
       <div className="divide-border divide-y md:hidden">
         {numbers.map((number) => {
-          const dailyCap = formatDailyCap(number.daily_cap);
-
           return (
             <div key={number.id} className="flex flex-col gap-3 p-4">
               <div className="flex items-start justify-between gap-3">
@@ -229,7 +234,7 @@ export const NumbersTable = ({ numbers, agents }: NumbersTableProps) => {
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
                   <CallerIdBadge callerId={number.caller_id} />
-                  <DeleteNumberDialog id={number.id} phone={number.phone} source={number.source} />
+                  <NumberActions number={number} />
                 </div>
               </div>
               <div className="space-y-1.5">
@@ -237,10 +242,8 @@ export const NumbersTable = ({ numbers, agents }: NumbersTableProps) => {
                 {renderAgentCell(number)}
               </div>
               <div className="text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 text-xs">
-                <span>
-                  Напрямок: {DIRECTION_LABELS[number.direction]}
-                  {dailyCap ? ` · ${dailyCap}` : ""}
-                </span>
+                <span>Напрямок: {DIRECTION_LABELS[number.direction]}</span>
+                <NumberLimits number={number} />
                 <span>Статус: {STATUS_LABELS[number.status]}</span>
               </div>
             </div>

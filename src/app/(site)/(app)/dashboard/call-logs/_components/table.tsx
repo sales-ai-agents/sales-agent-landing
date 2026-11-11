@@ -22,6 +22,7 @@ import {
 import { CallResultCell } from "@/components/dashboard/call-result-cell";
 import { formatDuration, formatSlaMinutes, formatDateShort, formatTime, cn } from "@/lib/utils";
 import type { CallLog, Agent, SlaState } from "@dashboard/types";
+import { useAccountTimeZone } from "@/lib/hooks";
 import { resolveAgentName } from "../_lib/utils";
 
 const columnHelper = createColumnHelper<CallLog>();
@@ -65,6 +66,7 @@ interface CallCardProps {
 }
 
 const CallCard = ({ call, agents, showSla }: CallCardProps) => {
+  const timeZone = useAccountTimeZone();
   const agentName = resolveAgentName(call.agent_id, agents);
   const minutes = call.billed_sec ? `${(call.billed_sec / 60).toFixed(1)} хв` : "—";
 
@@ -87,7 +89,7 @@ const CallCard = ({ call, agents, showSla }: CallCardProps) => {
       </div>
       <div className="text-muted-foreground mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
         <span>
-          {formatDateShort(call.created_at)} {formatTime(call.created_at)}
+          {formatDateShort(call.created_at, timeZone)} {formatTime(call.created_at, timeZone)}
         </span>
         <span>Тривалість: {call.duration_sec ? formatDuration(call.duration_sec) : "—"}</span>
         <span>Витрачено: {minutes}</span>
@@ -97,6 +99,7 @@ const CallCard = ({ call, agents, showSla }: CallCardProps) => {
 };
 
 export const Table = ({ data, agents, pageCount, slaMinutes }: TableProps) => {
+  const timeZone = useAccountTimeZone();
   const router = useRouter();
   const showSla = slaMinutes !== undefined ? slaMinutes > 0 : true;
 
@@ -108,8 +111,8 @@ export const Table = ({ data, agents, pageCount, slaMinutes }: TableProps) => {
           const value = info.getValue();
           return (
             <div className="text-sm">
-              <div>{formatDateShort(value)}</div>
-              <div className="text-muted-foreground text-xs">{formatTime(value)}</div>
+              <div>{formatDateShort(value, timeZone)}</div>
+              <div className="text-muted-foreground text-xs">{formatTime(value, timeZone)}</div>
             </div>
           );
         },
@@ -169,7 +172,7 @@ export const Table = ({ data, agents, pageCount, slaMinutes }: TableProps) => {
     );
 
     return cols;
-  }, [agents, showSla]);
+  }, [agents, showSla, timeZone]);
 
   const table = useReactTable({
     data,

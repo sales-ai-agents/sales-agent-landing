@@ -31,9 +31,9 @@ const view = (
   needsReconnect = false
 ): CrmStatusView => ({ tone, title, description, retryLabel, needsReconnect });
 
-const describeSynced = (crm: CrmStatus, providerName: string): CrmStatusView => {
+const describeSynced = (crm: CrmStatus, providerName: string, timeZone?: string): CrmStatusView => {
   const reference = formatCrmReference(crm.external_id);
-  const syncedAt = crm.synced_at ? formatDateTime(crm.synced_at) : null;
+  const syncedAt = crm.synced_at ? formatDateTime(crm.synced_at, timeZone) : null;
   const noLink = crm.external_url ? null : `у ${providerName} прямого посилання немає`;
   const description = [syncedAt, noLink].filter(Boolean).join(" · ") || null;
 
@@ -77,7 +77,7 @@ export const CALL_IN_PROGRESS_VIEW: CrmStatusView = view(
   SEND_LABEL
 );
 
-export const describeCrmStatus = (crm: CrmStatus): CrmStatusView | null => {
+export const describeCrmStatus = (crm: CrmStatus, timeZone?: string): CrmStatusView | null => {
   if (!crm.configured || crm.state === "not_configured") return null;
 
   const providerName = crm.provider_name ?? DEFAULT_PROVIDER_NAME;
@@ -85,7 +85,7 @@ export const describeCrmStatus = (crm: CrmStatus): CrmStatusView | null => {
 
   switch (crm.state) {
     case "synced":
-      return describeSynced(crm, providerName);
+      return describeSynced(crm, providerName, timeZone);
     case "pending":
       return view("pending", "Надсилаємо...", "Зазвичай до 10 секунд");
     case "failed":

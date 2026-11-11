@@ -12,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui";
+import { useAccountTimeZone } from "@/lib/hooks";
 import { cn, formatDateTime } from "@/lib/utils";
 import { useWebhookDeliveries } from "@dashboard/hooks";
 import { DELIVERY_STATUS_CONFIG } from "../../_lib/webhook-labels";
@@ -24,6 +25,7 @@ const DELIVERIES_LIMIT = 20;
 const EMPTY_VALUE = "—";
 
 export const WebhookDeliveries = ({ webhookId }: WebhookDeliveriesProps) => {
+  const timeZone = useAccountTimeZone();
   const {
     data: deliveries = [],
     isLoading,
@@ -65,7 +67,7 @@ export const WebhookDeliveries = ({ webhookId }: WebhookDeliveriesProps) => {
 
       {deliveries.length === 0 ? (
         <p className="text-muted-foreground border-border rounded-lg border border-dashed p-4 text-center text-sm">
-          Доставок поки немає. Вони з&apos;являться після першого завершеного дзвінка або тесту.
+          Доставок поки немає. Вони з&apos;являться після першого завершеного дзвінка.
         </p>
       ) : (
         <div className="border-border overflow-hidden rounded-lg border">
@@ -87,7 +89,7 @@ export const WebhookDeliveries = ({ webhookId }: WebhookDeliveriesProps) => {
                 return (
                   <TableRow key={delivery.id}>
                     <TableCell className="px-3 py-2 text-xs whitespace-nowrap">
-                      {formatDateTime(delivery.created_at)}
+                      {formatDateTime(delivery.created_at, timeZone)}
                     </TableCell>
                     <TableCell className="px-3 py-2 font-mono text-xs">{delivery.event}</TableCell>
                     <TableCell className="px-3 py-2">

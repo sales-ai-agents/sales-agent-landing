@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Button, buttonVariants } from "@/components/ui";
 import { ApiError } from "@/lib/api-client";
 import { CRM_ERROR_MESSAGES } from "@/lib/error-messages";
+import { useAccountTimeZone } from "@/lib/hooks";
 import { handleMutationError } from "@/lib/mutation-error";
 import { cn } from "@/lib/utils";
 import { useCrmRetry } from "@dashboard/hooks";
@@ -50,9 +51,10 @@ const TONE_STYLES: Record<CrmStatusTone, ToneStyle> = {
 
 export const CrmStatusPanel = ({ callId, crm }: CrmStatusPanelProps) => {
   const crmRetry = useCrmRetry();
+  const timeZone = useAccountTimeZone();
   const [isCallInProgress, setIsCallInProgress] = useState(false);
 
-  const view = isCallInProgress ? CALL_IN_PROGRESS_VIEW : describeCrmStatus(crm);
+  const view = isCallInProgress ? CALL_IN_PROGRESS_VIEW : describeCrmStatus(crm, timeZone);
   if (!view) return null;
 
   const { icon: Icon, iconClassName, wrapperClassName } = TONE_STYLES[view.tone];

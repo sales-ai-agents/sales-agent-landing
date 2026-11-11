@@ -15,6 +15,7 @@ export {
   useEmailConfirm,
 } from "./use-auth";
 
+export { useAccountTimeZone } from "./use-account-time-zone";
 export { useRequireAuth } from "./use-require-auth";
 
 export { useThemeColors } from "./use-theme-colors";

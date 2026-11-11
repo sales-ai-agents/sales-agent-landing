@@ -5,21 +5,22 @@ import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 
+import { Skeleton } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { DASHBOARD_NAV_ITEMS, DASHBOARD_SETTINGS_ITEM } from "@/lib/constants";
 import { useStats } from "@dashboard/hooks";
 
 export const Sidebar = () => {
   const pathname = usePathname();
-  const { data: stats } = useStats();
+  const { data: stats, isLoading: isStatsLoading } = useStats();
 
   const isNavActive = (href: string): boolean => {
     if (href === "/dashboard") return pathname === "/dashboard";
     return pathname === href || pathname.startsWith(href + "/");
   };
 
-  const planLabel = stats?.plan ?? "trial";
-  const isTrialPlan = planLabel === "trial";
+  const planLabel = stats?.plan ?? "—";
+  const isTrialPlan = stats?.plan === "trial";
 
   return (
     <aside className="bg-primary/5 hidden w-56 shrink-0 flex-col rounded-3xl p-4 transition-all duration-200 md:flex">
@@ -83,7 +84,12 @@ export const Sidebar = () => {
 
       <div className="border-muted-foreground/30 mt-4 rounded-xl border bg-white p-3">
         <p className="text-muted-foreground text-xs font-normal uppercase">Тариф</p>
-        {isTrialPlan ? (
+        {isStatsLoading ? (
+          <div className="mt-1 space-y-2" aria-busy="true" aria-label="Завантажуємо тариф">
+            <Skeleton className="h-5 w-24" />
+            <Skeleton className="h-3 w-20" />
+          </div>
+        ) : isTrialPlan ? (
           <>
             <p className="mt-1 text-sm font-bold tracking-tight uppercase">3 дні безкоштовно</p>
             <Link

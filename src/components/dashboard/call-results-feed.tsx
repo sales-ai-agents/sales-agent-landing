@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 
 import { Button, Skeleton } from "@/components/ui";
+import { useAccountTimeZone } from "@/lib/hooks";
 import { cn, formatTime } from "@/lib/utils";
 import { useCallResultsFeed, useMarkResultsSeen } from "@dashboard/hooks";
 import type { CallResultItem } from "@dashboard/types";
@@ -15,12 +16,13 @@ interface CallResultsFeedProps {
 
 interface FeedItemProps {
   item: CallResultItem;
+  timeZone: string | undefined;
   onOpen: (item: CallResultItem) => void;
 }
 
 const SKELETON_ROWS = 4;
 
-const FeedItem = ({ item, onOpen }: FeedItemProps) => (
+const FeedItem = ({ item, timeZone, onOpen }: FeedItemProps) => (
   <li>
     <Link
       href={`/dashboard/call-logs/${item.call_id}`}
@@ -36,7 +38,9 @@ const FeedItem = ({ item, onOpen }: FeedItemProps) => (
           {item.result.title}
         </p>
         <p className="text-muted-foreground mt-0.5 text-xs">
-          {[item.agent_name, formatTime(item.created_at), item.phone].filter(Boolean).join(" · ")}
+          {[item.agent_name, formatTime(item.created_at, timeZone), item.phone]
+            .filter(Boolean)
+            .join(" · ")}
         </p>
       </div>
       {!item.seen && (
@@ -52,6 +56,7 @@ export const CallResultsFeed = ({ onNavigate }: CallResultsFeedProps) => {
   const [unseenOnly, setUnseenOnly] = useState(false);
   const feed = useCallResultsFeed(unseenOnly, true);
   const markSeen = useMarkResultsSeen();
+  const timeZone = useAccountTimeZone();
 
   const items = feed.data?.pages.flatMap((page) => page.items) ?? [];
   const unseenCount = feed.data?.pages[0]?.unseen ?? 0;
@@ -128,7 +133,7 @@ export const CallResultsFeed = ({ onNavigate }: CallResultsFeedProps) => {
         {items.length > 0 && (
           <ul className="divide-border divide-y">
             {items.map((item) => (
-              <FeedItem key={item.call_id} item={item} onOpen={handleOpen} />
+              <FeedItem key={item.call_id} item={item} timeZone={timeZone} onOpen={handleOpen} />
             ))}
           </ul>
         )}

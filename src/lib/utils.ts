@@ -89,10 +89,25 @@ export function formatRelativeTime(dateStr: string): string {
   return formatDistanceToNow(date, { addSuffix: true, locale: uk });
 }
 
-export function formatDateShort(iso: string): string {
+const validTimeZones = new Set<string>();
+
+function resolveTimeZone(timeZone: string | null | undefined): string | undefined {
+  if (!timeZone) return undefined;
+  if (validTimeZones.has(timeZone)) return timeZone;
+
+  try {
+    new Intl.DateTimeFormat(DATE_LOCALE, { timeZone });
+    validTimeZones.add(timeZone);
+    return timeZone;
+  } catch {
+    return undefined;
+  }
+}
+
+export function formatDateShort(iso: string, timeZone?: string | null): string {
   const date = parseServerDate(iso);
   if (!date) return "—";
-  return date.toLocaleDateString(DATE_LOCALE);
+  return date.toLocaleDateString(DATE_LOCALE, { timeZone: resolveTimeZone(timeZone) });
 }
 
 export function formatDateLong(iso: string): string {
@@ -105,16 +120,20 @@ export function formatDateLong(iso: string): string {
   });
 }
 
-export function formatTime(iso: string): string {
+export function formatTime(iso: string, timeZone?: string | null): string {
   const date = parseServerDate(iso);
   if (!date) return "—";
-  return date.toLocaleTimeString(DATE_LOCALE, { hour: "2-digit", minute: "2-digit" });
+  return date.toLocaleTimeString(DATE_LOCALE, {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: resolveTimeZone(timeZone),
+  });
 }
 
-export function formatDateTime(iso: string): string {
+export function formatDateTime(iso: string, timeZone?: string | null): string {
   const date = parseServerDate(iso);
   if (!date) return "—";
-  return date.toLocaleString(DATE_LOCALE);
+  return date.toLocaleString(DATE_LOCALE, { timeZone: resolveTimeZone(timeZone) });
 }
 
 export function formatMonthYear(iso: string): string {

@@ -1,3 +1,4 @@
+import { formatHour } from "./number-schedule";
 import type { AgentNumber, NumberDirection, NumberStatus } from "@dashboard/types";
 
 export const DIRECTION_LABELS: Record<NumberDirection, string> = {
@@ -44,6 +45,9 @@ const CALLER_ID_INBOUND_ONLY: CallerIdBadge = {
 
 export const resolveCallerIdBadge = (callerId: boolean): CallerIdBadge =>
   callerId ? CALLER_ID_VISIBLE : CALLER_ID_INBOUND_ONLY;
+
+export const formatNumberHours = ({ hour_from: from, hour_to: to }: AgentNumber): string | null =>
+  from > 0 || to > 0 ? `${formatHour(from)}–${formatHour(to)}` : null;
 
 export const formatDailyCap = (dailyCap: number): string | null =>
   dailyCap > 0 ? `${dailyCap} дзвінків/день` : null;
