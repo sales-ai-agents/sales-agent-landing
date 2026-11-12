@@ -3053,7 +3053,9 @@ body:has(.c4u) {
   user-select: none;
 }
 @media (max-width: 1100px) {
-  .c4u .demo-grid,
+  .c4u .demo-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
   .c4u .builder,
   .c4u .faq,
   .c4u .vid,

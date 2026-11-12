@@ -92,33 +92,29 @@ export function SocialLoginButtons() {
         <div className="bg-border h-px flex-1" />
       </div>
 
-      <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-between">
+      <div className="flex flex-col items-center gap-3">
         {showGoogle && (
-          <div className="flex-1">
-            <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-              <GoogleLogin
-                text="continue_with"
-                width="100%"
-                logo_alignment="center"
-                onSuccess={handleGoogleSuccess}
-                onError={() => toast.error("Не вдалося увійти через Google.")}
-              />
-            </GoogleOAuthProvider>
-          </div>
+          <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+            <GoogleLogin
+              text="continue_with"
+              width={320}
+              logo_alignment="center"
+              onSuccess={handleGoogleSuccess}
+              onError={() => toast.error("Не вдалося увійти через Google.")}
+            />
+          </GoogleOAuthProvider>
         )}
         {showGitHub && (
-          <div className="flex-1">
-            <Button
-              type="button"
-              variant="outline"
-              className="hover:bg-primary/5 hover:border-primary/20 h-10 w-full rounded-[0.25rem] px-3"
-              disabled={socialLogin.isPending}
-              onClick={initiateGitHubLogin}
-            >
-              <GitHubIcon />
-              <span className="text-muted-foreground text-sm font-normal">Продовжити з GitHub</span>
-            </Button>
-          </div>
+          <Button
+            type="button"
+            variant="outline"
+            className="hover:bg-primary/5 hover:border-primary/20 h-10 w-full max-w-80 rounded-[0.25rem] px-3"
+            disabled={socialLogin.isPending}
+            onClick={initiateGitHubLogin}
+          >
+            <GitHubIcon />
+            <span className="text-muted-foreground text-sm font-normal">Продовжити з GitHub</span>
+          </Button>
         )}
       </div>
     </div>
