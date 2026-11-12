@@ -1,12 +1,22 @@
 import { cn } from "@/lib/utils";
+import { trackProps } from "@/components/landing/click-tracking";
 import { SIGN_UP_URL } from "@/components/landing/data";
 import type { PricingCopy, PricingPlanCopy } from "@/components/landing/copy/types";
 import { CheckIcon } from "@/components/landing/icons";
 import { Arrow, CopyHeading, MetaRow } from "@/components/landing/typography";
 
-function PlanCard({ plan, perMonth }: { plan: PricingPlanCopy; perMonth: string }) {
+const DEFAULT_HIGHLIGHTED_FEATURES: readonly number[] = [0];
+
+const PLAN_VARIANT_CLASS = {
+  trial: "trial",
+  featured: "hot",
+} as const;
+
+function PlanCard({ plan }: { plan: PricingPlanCopy }) {
+  const highlighted = plan.highlightedFeatures ?? DEFAULT_HIGHLIGHTED_FEATURES;
+
   return (
-    <div className={cn("plan", plan.featured && "hot")} data-r="">
+    <div className={cn("plan", plan.variant && PLAN_VARIANT_CLASS[plan.variant])} data-r="">
       <div className="plan-top">
         <span className="mono">{plan.tagline}</span>
         {plan.badge ? <span className="badge">{plan.badge}</span> : null}
@@ -14,25 +24,29 @@ function PlanCard({ plan, perMonth }: { plan: PricingPlanCopy; perMonth: string 
       <h3 className="t1">{plan.name}</h3>
       <div className="price">
         <b className="t1">{plan.price}</b>
-        <span>{perMonth}</span>
+        <span>{plan.period}</span>
       </div>
       <p className="sub">{plan.subtitle}</p>
       <ul>
         {plan.features.map((feature, index) => (
-          <li key={feature} className={index === 0 ? "hl" : undefined}>
+          <li key={feature} className={highlighted.includes(index) ? "hl" : undefined}>
             <CheckIcon />
             {feature}
           </li>
         ))}
       </ul>
-      <a className={cn("btn", `btn-${plan.ctaTone}`)} href={SIGN_UP_URL}>
+      <a
+        className={cn("btn", `btn-${plan.ctaTone}`)}
+        href={SIGN_UP_URL}
+        {...trackProps("pricing_plan_click", { plan: plan.id })}
+      >
         {plan.ctaLabel}
-        {plan.ctaTone === "white" ? (
+        {plan.ctaTone === "ghost" ? null : (
           <>
             {" "}
             <Arrow />
           </>
-        ) : null}
+        )}
       </a>
     </div>
   );
@@ -49,9 +63,9 @@ export function PricingSection({ copy }: { copy: PricingCopy }) {
             {copy.lead}
           </p>
         </div>
-        <div className="plans">
+        <div className="plans plans--4">
           {copy.plans.map((plan) => (
-            <PlanCard key={plan.id} plan={plan} perMonth={copy.perMonth} />
+            <PlanCard key={plan.id} plan={plan} />
           ))}
         </div>
         <p className="plans-note" data-r="">

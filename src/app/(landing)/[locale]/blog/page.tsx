@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BlogFilter } from "@/components/blog/blog-filter";
 import { buildBlogIndexGraph } from "@/components/blog/structured-data";
+import { trackProps } from "@/components/landing/click-tracking";
 import { getLandingCopy } from "@/components/landing/copy";
 import { LandingFooter } from "@/components/landing/landing-footer";
 import { LandingNav } from "@/components/landing/landing-nav";
@@ -9,7 +10,7 @@ import { Arrow, MetaRow } from "@/components/landing/typography";
 import { JsonLd } from "@/components/landing/json-ld";
 import { getPosts } from "@/content/blog/posts";
 import { isLocale, type Locale } from "@/lib/i18n/config";
-import { blogPath, blogUrl, landingPath, languageAlternates } from "@/lib/i18n/paths";
+import { blogPath, blogUrl, homePath, languageAlternates } from "@/lib/i18n/paths";
 import { buildOgImage, buildOgLocales, INDEXABLE_ROBOTS } from "@/lib/seo";
 import { SITE_NAME } from "@/lib/site";
 
@@ -59,7 +60,7 @@ function BlogIndex({ locale }: { locale: Locale }) {
 
   return (
     <>
-      <LandingNav basePath={landingPath(locale)} />
+      <LandingNav basePath={homePath(locale)} />
       <main id="main">
         <section className="blog-hero">
           <div className="wrap">
@@ -86,7 +87,11 @@ function BlogIndex({ locale }: { locale: Locale }) {
               </div>
               <div>
                 <p>{page.ctaText}</p>
-                <a className="btn btn-white" href={`${landingPath(locale)}#top`}>
+                <a
+                  className="btn btn-white"
+                  href={`${homePath(locale)}#top`}
+                  {...trackProps("blog_cta_click", { location: "blog_index" })}
+                >
                   {page.ctaButton} <Arrow />
                 </a>
               </div>
@@ -94,7 +99,7 @@ function BlogIndex({ locale }: { locale: Locale }) {
           </div>
         </section>
       </main>
-      <LandingFooter locale={locale} basePath={landingPath(locale)} />
+      <LandingFooter locale={locale} basePath={homePath(locale)} />
       <JsonLd data={buildBlogIndexGraph(locale)} />
     </>
   );

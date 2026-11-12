@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { apiPost, apiGet, apiPatch, apiDelete, ApiError } from "@/lib/api-client";
 import { API_ENDPOINTS } from "@/lib/api-config";
+import { trackEvent } from "@/lib/analytics";
 import { setAuthToken, clearAuthToken } from "@/lib/auth-token";
 import type {
   Account,
@@ -47,6 +48,7 @@ export const useLogin = () => {
     onSuccess: (data) => {
       if (data.token) setAuthToken(data.token);
       queryClient.setQueryData<Account>(AUTH_QUERY_KEY, data.account);
+      trackEvent("login", { method: "email" });
     },
   });
 };
@@ -59,6 +61,7 @@ export const useRegister = () => {
     onSuccess: (data) => {
       if (data.token) setAuthToken(data.token);
       queryClient.setQueryData<Account>(AUTH_QUERY_KEY, data.account);
+      trackEvent("sign_up", { method: "email" });
     },
   });
 };
@@ -83,9 +86,10 @@ export const useSocialLogin = () => {
 
   return useMutation<AuthResponse, ApiError, SocialLoginParams>({
     mutationFn: (params) => apiPost<AuthResponse>(API_ENDPOINTS.AUTH_SOCIAL, params),
-    onSuccess: (data) => {
+    onSuccess: (data, params) => {
       if (data.token) setAuthToken(data.token);
       queryClient.setQueryData<Account>(AUTH_QUERY_KEY, data.account);
+      trackEvent("login", { method: params.provider });
     },
   });
 };

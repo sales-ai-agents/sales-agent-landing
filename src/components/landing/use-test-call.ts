@@ -33,8 +33,7 @@ export function useTestCall(location: string) {
       setInvalid(true);
       return;
     }
-    trackEvent("test_call_start", { location });
-    requestCall(digits);
+    requestCall(digits, { onSuccess: () => trackEvent("test_call_start", { location }) });
   };
 
   const status = resolveStatus(invalid, Boolean(errorMessage), isSuccess);

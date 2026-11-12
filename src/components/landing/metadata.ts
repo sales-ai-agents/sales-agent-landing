@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { getLandingCopy } from "@/components/landing/copy";
 import type { Locale } from "@/lib/i18n/config";
-import { landingPath, landingUrl, languageAlternates } from "@/lib/i18n/paths";
-import { buildOgImage, buildOgLocales, LANDING_ROBOTS } from "@/lib/seo";
+import { homePath, homeUrl, languageAlternates } from "@/lib/i18n/paths";
+import { buildOgImage, buildOgLocales, INDEXABLE_ROBOTS } from "@/lib/seo";
 import { BRAND_ALTERNATE_NAMES, SITE_NAME } from "@/lib/site";
 
 export const buildLandingMetadata = (locale: Locale): Metadata => {
   const { seo } = getLandingCopy(locale);
-  const url = landingUrl(locale);
+  const url = homeUrl(locale);
   const image = buildOgImage(seo.ogImageAlt);
 
   return {
@@ -20,10 +20,10 @@ export const buildLandingMetadata = (locale: Locale): Metadata => {
     publisher: SITE_NAME,
     category: "business",
     alternates: {
-      canonical: landingPath(locale),
-      languages: languageAlternates(landingUrl),
+      canonical: homePath(locale),
+      languages: languageAlternates(homeUrl),
     },
-    robots: LANDING_ROBOTS,
+    robots: INDEXABLE_ROBOTS,
     openGraph: {
       type: "website",
       title: seo.title,

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
+import { trackProps } from "@/components/landing/click-tracking";
 import { SIGN_UP_URL, VIDEO_ID } from "@/components/landing/data";
 import { useLandingCopy } from "@/components/landing/copy/provider";
 import { CheckIcon, PlayIcon, StrokeIcon } from "@/components/landing/icons";
@@ -100,7 +101,11 @@ export function VideoPlayer() {
             </button>
           ))}
         </div>
-        <a className="btn btn-blue" href={SIGN_UP_URL}>
+        <a
+          className="btn btn-blue"
+          href={SIGN_UP_URL}
+          {...trackProps("signup_click", { location: "landing_video" })}
+        >
           {video.signUp} <Arrow />
         </a>
       </div>

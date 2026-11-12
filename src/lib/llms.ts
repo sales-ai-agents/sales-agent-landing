@@ -3,14 +3,8 @@ import { getPosts } from "@/content/blog/posts";
 import type { BlogPost, PostBlock } from "@/content/blog/types";
 import { LEGAL_PAGE_LIST } from "@/lib/constants";
 import { LOCALES, type Locale } from "@/lib/i18n/config";
-import { blogPath, landingPath, localizedPath, postPath, postUrl } from "@/lib/i18n/paths";
-import {
-  BRAND_ALTERNATE_NAMES,
-  LANDING_IS_PUBLIC,
-  SITE_CONTACT,
-  SITE_NAME,
-  SITE_URL,
-} from "@/lib/site";
+import { blogPath, homePath, localizedPath, postPath, postUrl } from "@/lib/i18n/paths";
+import { BRAND_ALTERNATE_NAMES, SITE_CONTACT, SITE_NAME, SITE_URL } from "@/lib/site";
 
 const FULL_TEXT_PATH = "/llms-full.txt";
 
@@ -56,7 +50,7 @@ const buildLocaleSections = (locale: Locale): string[] => {
 
   return [
     `### ${llms.languageName}`,
-    ...(LANDING_IS_PUBLIC ? [link(SITE_NAME, landingPath(locale), client.nav.links.demo)] : []),
+    link(SITE_NAME, homePath(locale), [llms.pricing, llms.faq].join(", ")),
     link(client.nav.links.blog, blogPath(locale), blog.index.description),
     ...getPosts(locale).map((post) => link(post.title, postPath(locale, post.slug), post.excerpt)),
     link(llms.fullTitle, fullTextPath(locale), [llms.pricing, llms.faq, llms.blog].join(", ")),
@@ -97,7 +91,7 @@ export const buildLlmsFullTxt = (locale: Locale): string => {
     `## ${llms.pricing}`,
     ...pricing.plans.map(
       (plan) =>
-        `### ${plan.name} — ${plan.price}/${llms.perMonth}\n${plan.subtitle}\n${plan.features.map((feature) => `- ${feature}`).join("\n")}`
+        `### ${plan.name} — ${plan.price} ${plan.period}\n${plan.subtitle}\n${plan.features.map((feature) => `- ${feature}`).join("\n")}`
     ),
     `## ${llms.faq}`,
     ...faq.items.map((item) => `### ${item.question}\n${item.answer}`),

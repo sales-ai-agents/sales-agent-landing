@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { AnchorLink } from "@/components/landing/anchor-link";
+import { trackProps } from "@/components/landing/click-tracking";
 import { useLandingCopy } from "@/components/landing/copy/provider";
 import { cn } from "@/lib/utils";
 import { NAV_ITEMS, resolveNavHref, SIGN_IN_URL } from "@/components/landing/data";
@@ -66,7 +67,12 @@ export function LandingNav({ basePath = "" }: LandingNavProps) {
           <a className="nav-login" href={SIGN_IN_URL}>
             {copy.nav.login}
           </a>
-          <AnchorLink className="btn btn-blue" href={`${basePath}#top`} data-focus-phone="">
+          <AnchorLink
+            className="btn btn-blue"
+            href={`${basePath}#top`}
+            data-focus-phone=""
+            {...trackProps("test_call_start_click", { location: "landing_nav" })}
+          >
             {copy.nav.testCall}
           </AnchorLink>
         </div>

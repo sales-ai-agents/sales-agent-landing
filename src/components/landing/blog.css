@@ -341,6 +341,7 @@
   background: var(--blue-soft);
 }
 .c4u .prose {
+  padding: 0 40px;
   font-size: 19px;
   line-height: 1.68;
   color: #262a33;

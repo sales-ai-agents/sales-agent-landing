@@ -31,16 +31,6 @@ export {
   InputGroupTextarea,
 } from "./input-group";
 export {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-  CarouselDots,
-  useCarousel,
-  type CarouselApi,
-} from "./carousel";
-export {
   Dialog,
   DialogTrigger,
   DialogContent,
@@ -114,7 +104,6 @@ export {
   SheetTitle,
   SheetDescription,
 } from "./sheet";
-export { Slider } from "./slider";
 export { Toaster } from "./sonner";
 export { Switch } from "./switch";
 export { Tabs, TabsList, TabsTrigger, TabsContent } from "./tabs";

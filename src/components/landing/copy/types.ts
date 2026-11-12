@@ -166,24 +166,27 @@ export interface VideoSectionCopy extends SectionIntro {
   readonly metaRight: string;
 }
 
-export type PlanCtaTone = "ghost" | "white";
+export type PlanCtaTone = "ghost" | "white" | "blue";
+
+export type PlanVariant = "trial" | "featured";
 
 export interface PricingPlanCopy {
   readonly id: string;
   readonly tagline: string;
   readonly name: string;
   readonly price: string;
+  readonly period: string;
   readonly subtitle: string;
   readonly features: readonly string[];
+  readonly highlightedFeatures?: readonly number[];
   readonly ctaLabel: string;
   readonly ctaTone: PlanCtaTone;
-  readonly featured?: boolean;
+  readonly variant?: PlanVariant;
   readonly badge?: string;
 }
 
 export interface PricingCopy extends SectionIntro {
   readonly metaRight: string;
-  readonly perMonth: string;
   readonly plans: readonly PricingPlanCopy[];
   readonly note: string;
 }
@@ -219,7 +222,14 @@ export interface FaqItemCopy {
   readonly answer: string;
 }
 
+export interface FaqCardCopy {
+  readonly kicker: string;
+  readonly title: string;
+  readonly action: string;
+}
+
 export interface FaqCopy extends SectionIntro {
+  readonly card: FaqCardCopy;
   readonly items: readonly FaqItemCopy[];
 }
 
@@ -288,7 +298,6 @@ export interface LlmsCopy {
   readonly summary: string;
   readonly fullTitle: string;
   readonly pricing: string;
-  readonly perMonth: string;
   readonly faq: string;
   readonly blog: string;
   readonly category: string;

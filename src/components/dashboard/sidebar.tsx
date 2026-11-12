@@ -24,7 +24,7 @@ export const Sidebar = () => {
 
   return (
     <aside className="bg-primary/5 hidden w-56 shrink-0 flex-col rounded-3xl p-4 transition-all duration-200 md:flex">
-      <div className="flex h-10 items-center gap-3 px-1">
+      <Link href="/dashboard" className="flex h-10 items-center gap-3 px-1">
         <Image
           src="/image/Logo.svg"
           alt="Calls4u.ai"
@@ -39,7 +39,7 @@ export const Sidebar = () => {
           height={18}
           className="h-auto w-auto"
         />
-      </div>
+      </Link>
 
       <nav id="onboarding-sidebar-nav" className="mt-10 flex flex-1 flex-col">
         <div className="space-y-1">

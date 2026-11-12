@@ -16,14 +16,15 @@ A web platform that enables small business owners (auto repair shops, beauty sal
 
 | Route Group | Strategy | Reason |
 |-------------|----------|--------|
-| `(marketing)/*` | SSG (Static Site Generation) | SEO/GEO critical, content rarely changes |
+| `(landing)/[locale]/*` | SSG (Static Site Generation) | SEO/GEO critical, content rarely changes |
+| `(legal)/*` | SSG (Static Site Generation) | Legal documents, rarely change |
 | `(app)/dashboard/*` | CSR (Client-Side Rendering) | Authenticated, dynamic data |
 
 ### Why Next.js App Router
 
 - Server Components for zero-JS landing page (Core Web Vitals)
 - Built-in Metadata API for SEO/GEO (structured data, Open Graph, JSON-LD)
-- Route Groups for `(marketing)` and `(app)` separation
+- Route Groups for `(landing)`, `(legal)` and `(app)` separation
 - Middleware for auth guards on dashboard routes
 - Image optimization out of the box
 
@@ -68,7 +69,7 @@ A web platform that enables small business owners (auto repair shops, beauty sal
 
 1. **Server Components by default** — "use client" only when interactivity is needed
 2. **All UI from shadcn/ui** — no custom CSS unless absolutely necessary
-3. **SEO/GEO first** for marketing pages — semantic HTML, JSON-LD, Metadata API
+3. **SEO/GEO first** for public pages — semantic HTML, JSON-LD, Metadata API
 4. **Mobile-first responsive** (375px → 1440px)
 5. **Accessibility**: Radix primitives + ARIA labels + keyboard navigation
 6. **Strict TypeScript**: Zod schemas for all data boundaries, types centralized in `src/types/`

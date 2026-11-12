@@ -271,7 +271,7 @@ switch (status) {
 ```typescript
 // ✅ Server component (default) — no directive needed
 // Use for: data fetching, metadata, static content, SEO-critical pages
-// ALL marketing pages should be Server Components unless they need interactivity
+// ALL public pages should be Server Components unless they need interactivity
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -302,7 +302,7 @@ export default Counter
 
 | Route Group | Strategy | "use client" |
 |-------------|----------|--------------|
-| `(marketing)/*` | SSG (Static) | Only in interactive sections (calculator, audio, navbar scroll) |
+| `(landing)/[locale]/*` | SSG (Static) | Only in interactive sections (audio demo, builder, navbar scroll) |
 | `(app)/dashboard/*` | CSR (Dynamic) | Yes — all dashboard pages are client-rendered |
 
 **Rules**:
@@ -311,7 +311,7 @@ export default Counter
 - Add "use client" only when you need: hooks, event handlers, browser APIs
 - Keep "use client" boundary as low in the tree as possible
 - Page components should be server components when possible
-- Marketing section components that are purely presentational should NOT have "use client"
+- Landing section components that are purely presentational should NOT have "use client"
 
 ### Component Structure
 
@@ -541,10 +541,10 @@ const badgeVariants = cva(
 );
 ```
 
-### SEO/GEO Patterns (Marketing Pages)
+### SEO/GEO Patterns (Public Pages)
 
 ```typescript
-// ✅ Use Next.js Metadata API for every marketing page
+// ✅ Use Next.js Metadata API for every public page
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

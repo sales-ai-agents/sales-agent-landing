@@ -36,20 +36,20 @@ A web platform that enables small business owners to create AI-powered voice age
 
 | Route Group | Strategy | Reason |
 |-------------|----------|--------|
-| `(site)/(marketing)/*` | SSG (Static Site Generation) | SEO/GEO critical, content rarely changes |
+| `(landing)/[locale]`, `(landing)/[locale]/blog/*` | SSG (Static Site Generation) | Landing (`/`, `/ru`, `/en`) and blog: own root layout, minimal CSS/JS, SEO/GEO critical |
+| `(site)/(legal)/*` | SSG (Static Site Generation) | Legal documents, Tailwind layout |
 | `(site)/(app)/dashboard/*` | CSR (Client-Side Rendering) | Authenticated, dynamic data |
-| `(landing)/landing`, `(landing)/blog/*` | SSG (Static Site Generation) | New landing and blog: own root layout, minimal CSS/JS |
 
 ### Project Structure
 
 ```
 src/
 ├── app/
-│   ├── (site)/                 # Root layout #1: Tailwind, providers, marketing + dashboard + auth
+│   ├── (site)/                 # Root layout #1: Tailwind, providers, dashboard + auth + legal
 │   │   ├── (app)/dashboard/    # Authenticated dashboard (agents, call-logs, contacts, settings)
 │   │   ├── (auth)/             # Sign-in, sign-up, password reset
-│   │   └── (marketing)/        # Public marketing pages
-│   ├── (landing)/              # Root layout #2: standalone landing + blog (calls4u.css only)
+│   │   └── (legal)/            # Offer, terms, privacy, cookie, refund, contacts
+│   ├── (landing)/              # Root layout #2: localized landing + blog (calls4u.css only)
 │   ├── globals.css             # Global styles (Tailwind)
 │   ├── global-not-found.tsx    # 404 for unmatched URLs (multiple root layouts)
 │   ├── llms.txt/               # llms.txt for AI crawlers
@@ -58,11 +58,12 @@ src/
 │   └── sitemap.ts              # SEO sitemap generation
 ├── components/
 │   ├── dashboard/              # Dashboard-specific components (sidebar, header, charts, dialogs)
-│   ├── landing/                # New landing sections, motion, dialogs and calls4u.css
+│   ├── landing/                # Landing sections, copy (uk/ru/en), motion, dialogs and calls4u.css
 │   ├── blog/                   # Blog index/article components
-│   ├── marketing/              # Marketing page sections (hero, FAQ, industries, builder, etc.)
+│   ├── legal/                  # Legal document view, header and footer
 │   └── ui/                     # Reusable UI primitives (shadcn-style)
 ├── content/blog/{uk,ru,en}/    # Blog posts per locale (typed content blocks)
+├── content/legal/              # Legal documents (typed content blocks) and metadata builder
 ├── lib/                        # Utilities, schemas, constants, API config, shared hooks (lib/hooks), i18n (lib/i18n)
 ├── types/                      # Centralized TypeScript type definitions
 └── fonts/                      # Custom fonts (Actay Wide, Gilroy)
@@ -89,7 +90,7 @@ pnpm install
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to see the marketing landing page.
+Open [http://localhost:3000](http://localhost:3000) to see the landing page.
 
 ### Build
 

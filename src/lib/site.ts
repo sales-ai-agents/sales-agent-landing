@@ -25,6 +25,3 @@ export const BRAND_ALTERNATE_NAMES = [
 
 export const SITE_ORGANIZATION_ID = `${SITE_URL}/#organization`;
 export const SITE_WEBSITE_ID = `${SITE_URL}/#website`;
-
-export const LANDING_IS_PUBLIC = false;
-export const LANDING_PATH = "/landing";

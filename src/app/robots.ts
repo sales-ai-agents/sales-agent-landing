@@ -2,7 +2,14 @@ import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site";
 
 const PRIVATE_PATHS = ["/dashboard/", "/api/"];
-const AUTH_PATHS = ["/sign-in/", "/sign-up/"];
+const AUTH_PATHS = [
+  "/sign-in/",
+  "/sign-up/",
+  "/forgot-password/",
+  "/email-confirm/",
+  "/email-confirmed/",
+  "/auth/",
+];
 
 const AI_CRAWLERS = [
   "GPTBot",

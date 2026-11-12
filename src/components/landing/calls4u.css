@@ -3337,3 +3337,302 @@ html.lenis {
 html.lenis.lenis-stopped {
   overflow: clip;
 }
+
+.c4u {
+  --panel-a: linear-gradient(165deg, #f9fbff 0%, #eef3ff 55%, #e1e9ff 100%);
+  --panel-b: linear-gradient(180deg, #f3f4f7 0%, #eceef2 100%);
+  --word-live: "24/7";
+  --word-scenarios: "сценарії";
+  --word-builder: "агент";
+  --word-dashboard: "кабінет";
+  --word-integrations: "crm";
+  --word-video: "відео";
+  --word-pricing: "тарифи";
+  --word-security: "дані";
+  --word-blog: "блог";
+  --word-faq: "faq";
+}
+.c4u:lang(ru) {
+  --word-scenarios: "сценарии";
+  --word-dashboard: "кабинет";
+  --word-video: "видео";
+  --word-pricing: "тарифы";
+  --word-security: "данные";
+}
+.c4u:lang(en) {
+  --word-scenarios: "scenarios";
+  --word-builder: "agent";
+  --word-dashboard: "dashboard";
+  --word-video: "video";
+  --word-pricing: "plans";
+  --word-security: "data";
+  --word-blog: "blog";
+}
+.c4u .how {
+  background: transparent;
+}
+.c4u .sec,
+.c4u .hs {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+}
+.c4u .sec::before,
+.c4u .hs::before {
+  content: "";
+  position: absolute;
+  inset: 6px 12px;
+  z-index: -2;
+  border-radius: clamp(24px, 3vw, 44px);
+  background: var(--panel, var(--panel-b));
+  pointer-events: none;
+}
+.c4u .sec::after,
+.c4u .hs::after {
+  content: var(--word, "") / "";
+  position: absolute;
+  z-index: -1;
+  bottom: calc(6px - 0.2em);
+  left: var(--word-left, auto);
+  right: var(--word-right, -0.04em);
+  font-family: var(--f-display);
+  font-variation-settings: var(--d-vs);
+  font-weight: 500;
+  font-size: clamp(150px, 21vw, 380px);
+  line-height: 0.8;
+  letter-spacing: -0.075em;
+  white-space: nowrap;
+  color: #fff;
+  pointer-events: none;
+  user-select: none;
+  -webkit-mask-image: linear-gradient(180deg, #000 30%, #0000 92%);
+  mask-image: linear-gradient(180deg, #000 30%, #0000 92%);
+}
+.c4u .sec--intro {
+  --word: var(--word-live);
+  --panel: var(--panel-b);
+  --word-left: auto;
+  --word-right: -0.04em;
+}
+.c4u .hs {
+  --word: var(--word-scenarios);
+  --panel: var(--panel-a);
+  --word-left: -0.04em;
+  --word-right: auto;
+}
+.c4u #builder {
+  --word: var(--word-builder);
+  --panel: var(--panel-b);
+  --word-left: auto;
+  --word-right: -0.04em;
+}
+.c4u #control {
+  --word: var(--word-dashboard);
+  --panel: var(--panel-a);
+  --word-left: -0.04em;
+  --word-right: auto;
+}
+.c4u .sec--flush:not(#video) {
+  --word: var(--word-integrations);
+  --panel: var(--panel-b);
+  --word-left: auto;
+  --word-right: -0.04em;
+}
+.c4u #video {
+  --word: var(--word-video);
+  --panel: var(--panel-a);
+  --word-left: -0.04em;
+  --word-right: auto;
+}
+.c4u #pricing {
+  --word: var(--word-pricing);
+  --panel: var(--panel-b);
+  --word-left: auto;
+  --word-right: -0.04em;
+}
+.c4u #security {
+  --word: var(--word-security);
+  --panel: linear-gradient(165deg, #eaf0ff 0%, #d9e4ff 55%, #c6d6ff 100%);
+  --word-left: -0.04em;
+  --word-right: auto;
+}
+.c4u #blog {
+  --word: var(--word-blog);
+  --panel: var(--panel-b);
+  --word-left: auto;
+  --word-right: -0.04em;
+}
+.c4u #faq {
+  --word: var(--word-faq);
+  --panel: var(--panel-a);
+  --word-left: -0.04em;
+  --word-right: auto;
+}
+.c4u .hs .sc--soft {
+  background: linear-gradient(165deg, #dfe8ff 0%, #cddbff 100%);
+}
+.c4u #security .scard {
+  background: #fff;
+}
+.c4u #security .scard .ic {
+  background: var(--blue-soft);
+}
+.c4u #security .trust span {
+  background: #ffffffb3;
+}
+.c4u #blog .post {
+  background: #fff;
+}
+.c4u #blog .cv-vs {
+  background: linear-gradient(165deg, #eef3ff 0%, #dfe8ff 100%);
+}
+.c4u .sec--flush {
+  padding-top: clamp(56px, 6vw, 96px);
+}
+@media (max-width: 720px) {
+  .c4u .sec::before,
+  .c4u .hs::before {
+    inset: 4px 8px;
+    border-radius: 26px;
+  }
+  .c4u .sec > .wrap,
+  .c4u .hs > .wrap {
+    padding-inline: 24px;
+  }
+  .c4u .sec::after,
+  .c4u .hs::after {
+    font-size: 34vw;
+    bottom: calc(4px - 0.2em);
+  }
+}
+
+.c4u .plans--4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.c4u .plans--4 .plan h3 {
+  white-space: nowrap;
+  font-size: calc(clamp(36px, 3.2vw, 54px) * var(--d-scale));
+}
+.c4u .plans--4 .price b {
+  font-size: calc(clamp(52px, 4.8vw, 84px) * var(--d-scale));
+}
+.c4u .plans--4 .price span {
+  white-space: nowrap;
+}
+.c4u .plans--4 .plan-top {
+  min-height: 28px;
+}
+.c4u .plans--4 .plan-top .mono {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.c4u .plans--4 .badge {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+.c4u .plan.trial {
+  box-shadow:
+    0 0 0 1.5px var(--blue),
+    0 30px 70px -40px rgba(22, 89, 255, 0.55);
+}
+.c4u .plan.trial .plan-top .mono {
+  color: var(--blue);
+}
+.c4u .plan.trial .badge {
+  gap: 7px;
+  background: var(--blue);
+  color: #fff;
+}
+.c4u .plan.trial .badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+}
+.c4u .plan.trial .price b {
+  color: var(--blue);
+}
+.c4u .plan.trial .btn {
+  box-shadow: 0 18px 40px -16px rgba(22, 89, 255, 0.7);
+}
+@media (max-width: 1100px) {
+  .c4u .plans--4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 720px) {
+  .c4u .plans--4 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.c4u .faq-card {
+  display: block;
+  position: relative;
+  margin-top: clamp(32px, 4vw, 56px);
+  max-width: 440px;
+  aspect-ratio: 1 / 1.08;
+  border-radius: 28px;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--paper);
+  color: #fff;
+}
+.c4u .faq-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(6, 24, 110, 0.88) 0%, rgba(6, 24, 110, 0) 58%);
+}
+.c4u .faq-card img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.2s var(--ease);
+}
+.c4u .faq-card:hover img {
+  transform: scale(1.04);
+}
+.c4u .faq-card-in {
+  position: absolute;
+  z-index: 1;
+  left: 24px;
+  right: 24px;
+  bottom: 22px;
+  display: grid;
+  gap: 10px;
+}
+.c4u .faq-card-in .mono {
+  color: rgba(255, 255, 255, 0.72);
+}
+.c4u .faq-card-in b {
+  font-family: var(--f-display);
+  font-weight: var(--d-weight);
+  letter-spacing: var(--d-track2);
+  font-variation-settings: var(--d-vs);
+  font-size: calc(clamp(22px, 1.9vw, 30px) * var(--d-scale2));
+  line-height: 1.05;
+}
+.c4u .faq-card-go {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+.c4u .faq-card-go .arr {
+  transition: transform 0.3s;
+}
+.c4u .faq-card:hover .arr {
+  transform: translateX(4px);
+}
+@media (max-width: 1100px) {
+  .c4u .faq-card {
+    max-width: none;
+  }
+}

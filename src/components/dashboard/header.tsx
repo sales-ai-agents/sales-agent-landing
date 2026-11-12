@@ -56,7 +56,7 @@ export const DashboardHeader = () => {
         </SheetTrigger>
         <SheetContent side="left" className="w-72">
           <SheetTitle>
-            <div className="flex items-center gap-2 p-2">
+            <Link href="/dashboard" className="flex items-center gap-2 p-2">
               <Image
                 src="/image/Logo.svg"
                 alt="Calls4U logo"
@@ -71,7 +71,7 @@ export const DashboardHeader = () => {
                 height={20}
                 className="h-auto w-auto"
               />
-            </div>
+            </Link>
           </SheetTitle>
           <nav className="space-y-1">
             {DASHBOARD_NAV_ITEMS.map((item) => {

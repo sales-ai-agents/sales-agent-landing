@@ -1,4 +1,4 @@
-import { LANDING_IS_PUBLIC, LANDING_PATH, SITE_URL } from "@/lib/site";
+import { SITE_URL } from "@/lib/site";
 import { DEFAULT_LOCALE, LOCALES, LOCALE_META, X_DEFAULT_HREFLANG, type Locale } from "./config";
 
 export const BLOG_BASE_PATH = "/blog";
@@ -18,9 +18,9 @@ export const localizedUrl = (locale: Locale, path: string): string => {
   return localized === ROOT_PATH ? SITE_URL : `${SITE_URL}${localized}`;
 };
 
-export const landingPath = (locale: Locale): string => localizedPath(locale, LANDING_PATH);
+export const homePath = (locale: Locale): string => localizedPath(locale, ROOT_PATH);
 
-export const landingUrl = (locale: Locale): string => localizedUrl(locale, LANDING_PATH);
+export const homeUrl = (locale: Locale): string => localizedUrl(locale, ROOT_PATH);
 
 export const blogPath = (locale: Locale): string => localizedPath(locale, BLOG_BASE_PATH);
 
@@ -33,9 +33,6 @@ export const postUrl = (locale: Locale, slug: string): string =>
   localizedUrl(locale, `${BLOG_BASE_PATH}/${slug}`);
 
 export const rssPath = (locale: Locale): string => `${blogPath(locale)}/rss.xml`;
-
-export const homeUrl = (locale: Locale): string =>
-  LANDING_IS_PUBLIC || locale !== DEFAULT_LOCALE ? landingUrl(locale) : SITE_URL;
 
 export const languageAlternates = (urlFor: (locale: Locale) => string): Record<string, string> => ({
   ...Object.fromEntries(LOCALES.map((locale) => [LOCALE_META[locale].hreflang, urlFor(locale)])),

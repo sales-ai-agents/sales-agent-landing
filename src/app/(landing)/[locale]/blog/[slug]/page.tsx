@@ -6,6 +6,7 @@ import { ArticleToc } from "@/components/blog/article-toc";
 import { CopyLinkButton } from "@/components/blog/copy-link-button";
 import { ReadingProgress } from "@/components/blog/reading-progress";
 import { buildPostGraph } from "@/components/blog/structured-data";
+import { trackProps } from "@/components/landing/click-tracking";
 import { getLandingCopy } from "@/components/landing/copy";
 import { FinalCtaSection } from "@/components/landing/final-cta-section";
 import { LandingFooter } from "@/components/landing/landing-footer";
@@ -17,7 +18,7 @@ import { JsonLd } from "@/components/landing/json-ld";
 import { formatPostDate, getPostBySlug, getPostSlugs, getRelatedPosts } from "@/content/blog/posts";
 import { isLocale } from "@/lib/i18n/config";
 import { formatMessage } from "@/lib/i18n/format";
-import { blogPath, landingPath, languageAlternates, postPath, postUrl } from "@/lib/i18n/paths";
+import { blogPath, homePath, languageAlternates, postPath, postUrl } from "@/lib/i18n/paths";
 import { buildOgImage, buildOgLocales, INDEXABLE_ROBOTS } from "@/lib/seo";
 import { SITE_NAME } from "@/lib/site";
 
@@ -79,12 +80,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const copy = getLandingCopy(locale);
   const article = copy.blog.article;
   const readTime = formatMessage(copy.client.blog.readTime, { minutes: post.readMinutes });
-  const startTest = `${landingPath(locale)}#top`;
+  const startTest = `${homePath(locale)}#top`;
 
   return (
     <>
       <ReadingProgress />
-      <LandingNav basePath={landingPath(locale)} />
+      <LandingNav basePath={homePath(locale)} />
       <main id="main">
         <header className="art-head wrap">
           <nav className="crumbs mono" aria-label={article.crumbsLabel}>
@@ -119,7 +120,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               <span className="mono">{article.bottomCtaKicker}</span>
               <b>{article.bottomCtaTitle}</b>
               <p>{article.bottomCtaText}</p>
-              <a className="btn btn-white" href={startTest}>
+              <a
+                className="btn btn-white"
+                href={startTest}
+                {...trackProps("blog_cta_click", { location: "article_bottom", slug })}
+              >
                 {article.ctaButton} <Arrow />
               </a>
             </div>
@@ -129,7 +134,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               <span className="mono">{article.sideCtaKicker}</span>
               <b>{article.sideCtaTitle}</b>
               <p>{article.sideCtaText}</p>
-              <a className="btn btn-white" href={startTest}>
+              <a
+                className="btn btn-white"
+                href={startTest}
+                {...trackProps("blog_cta_click", { location: "article_side", slug })}
+              >
                 {article.sideCtaButton} <Arrow />
               </a>
             </div>
@@ -160,7 +169,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
         <FinalCtaSection copy={copy.finalCta} />
       </main>
-      <LandingFooter locale={locale} basePath={landingPath(locale)} />
+      <LandingFooter locale={locale} basePath={homePath(locale)} />
       <JsonLd data={buildPostGraph(locale, post)} />
     </>
   );

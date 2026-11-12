@@ -1,3 +1,4 @@
+import { trackProps } from "@/components/landing/click-tracking";
 import { SIGN_UP_URL } from "@/components/landing/data";
 import type { BuilderSectionCopy } from "@/components/landing/copy/types";
 import { BuilderCard } from "@/components/landing/builder-card";
@@ -45,7 +46,11 @@ export function BuilderSection({ copy }: { copy: BuilderSectionCopy }) {
                 </li>
               ))}
             </ul>
-            <a className="btn btn-blue" href={SIGN_UP_URL}>
+            <a
+              className="btn btn-blue"
+              href={SIGN_UP_URL}
+              {...trackProps("signup_click", { location: "landing_builder" })}
+            >
               {copy.signUp} <Arrow />
             </a>
           </div>

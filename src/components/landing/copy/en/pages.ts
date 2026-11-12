@@ -81,6 +81,11 @@ export const EN_FAQ: FaqCopy = {
   meta: "(12) FAQ",
   heading: [["Questions"], ["and ", { em: "answers" }]],
   lead: "Can't find an answer? Give us a call and we will reply within one business day.",
+  card: {
+    kicker: "Faster than email",
+    title: "Ask the agent: it will call you back in 20 seconds",
+    action: "Test call",
+  },
   items: [
     {
       question: "What is Calls4U and how does it work?",
@@ -130,7 +135,7 @@ export const EN_FAQ: FaqCopy = {
     {
       question: "How much does it cost?",
       answer:
-        "From $29 per month. You pay only for the talk minutes you use, and all scenarios, CRM integrations and a test balance are already included in the plans.",
+        "You can start for free: Trial gives you 20 talk minutes with no card. Paid plans start at $29 per month. You pay only for the talk minutes you use, and all scenarios, CRM integrations and a test balance are already included in the plans.",
     },
   ],
 };
@@ -190,7 +195,6 @@ export const EN_LLMS: LlmsCopy = {
     "Calls4U is a voice AI agent that phones your customers for you: it confirms appointments, sends visit reminders, clarifies orders, qualifies leads and writes the outcome to your CRM. Launch in one day, no developers needed.",
   fullTitle: "Calls4U: full description",
   pricing: "Pricing",
-  perMonth: "mo",
   faq: "FAQ",
   blog: "Blog",
   category: "Category",

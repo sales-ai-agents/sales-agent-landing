@@ -42,7 +42,7 @@ core_principles:
   - CRITICAL: DO NOT OVERTHINK if task provides instruction follow it
   - CRITICAL: Read Next.js docs in node_modules/next/dist/docs/ when unsure about API usage
   - CRITICAL: Server Components by default — only use "use client" when interactivity is needed
-  - CRITICAL: SEO/GEO first for marketing pages — semantic HTML, JSON-LD, Next.js Metadata API
+  - CRITICAL: SEO/GEO first for public pages — semantic HTML, JSON-LD, Next.js Metadata API
   - Numbered Options - Always use numbered lists when presenting choices to the user
 
 project_context:
@@ -50,7 +50,7 @@ project_context:
   target_users: Small business owners (auto repair, dental, salon, retail, e-commerce)
   core_ux: Visit → Listen → Create an Agent. No technical jargon.
   rendering:
-    marketing: SSG (Static Site Generation) for SEO/GEO
+    landing: SSG (Static Site Generation) for SEO/GEO
     dashboard: CSR (Client-Side Rendering) for authenticated dynamic data
   deployment: Docker + Nginx + GitHub Actions to VPS (planned)
   current_phase: MVP — landing page and dashboard UI complete, auth and backend integration next

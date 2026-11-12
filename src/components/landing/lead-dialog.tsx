@@ -60,7 +60,6 @@ export function LeadDialog({ open, source, onClose }: FormDialogProps) {
       setValidationError(parsed.error.issues[0]?.message ?? null);
       return;
     }
-    trackEvent("lead_form_submit", { location: source });
     try {
       await submitLeadAsync({
         name: parsed.data.name,
@@ -69,6 +68,7 @@ export function LeadDialog({ open, source, onClose }: FormDialogProps) {
         contact: parsed.data.contact || undefined,
         source_page: source,
       });
+      trackEvent("lead_form_submit", { location: source });
       setValues(EMPTY_VALUES);
       setSubmitted(true);
     } catch {

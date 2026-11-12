@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { BackToTop } from "@/components/landing/back-to-top";
+import { ClickTracker } from "@/components/landing/click-tracker";
 import { LANDING_FONT_CLASSES } from "@/components/landing/fonts";
 import { FormDialogProvider } from "@/components/landing/form-dialog-provider";
 import "@/components/landing/calls4u.css";
@@ -18,6 +19,7 @@ export function LandingShell({ animated = false, children }: LandingShellProps) 
       <FormDialogProvider>
         {children}
         <BackToTop />
+        <ClickTracker />
       </FormDialogProvider>
     </div>
   );

@@ -1,3 +1,4 @@
+import { trackProps } from "@/components/landing/click-tracking";
 import { SIGN_UP_URL } from "@/components/landing/data";
 import type { HeroCopy } from "@/components/landing/copy/types";
 import { HeroCallCard } from "@/components/landing/hero-call-card";
@@ -66,7 +67,11 @@ export function HeroSection({ copy }: { copy: HeroCopy }) {
                 {copy.leadRest}
               </p>
               <div className="hero-btns">
-                <a className="btn btn-blue" href={SIGN_UP_URL}>
+                <a
+                  className="btn btn-blue"
+                  href={SIGN_UP_URL}
+                  {...trackProps("signup_click", { location: "landing_hero" })}
+                >
                   {copy.signUp} <Arrow />
                 </a>
                 <a className="btn btn-ghost" href="#demo">

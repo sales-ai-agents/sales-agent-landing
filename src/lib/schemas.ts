@@ -221,35 +221,5 @@ export type ContactFormData = z.infer<typeof contactSchema>;
 
 export const FEEDBACK_MESSAGE_MAX_LENGTH = 1000;
 
-export const feedbackSchema = z.object({
-  message: z
-    .string()
-    .trim()
-    .min(10, "Опишіть детальніше, щонайменше 10 символів")
-    .max(FEEDBACK_MESSAGE_MAX_LENGTH, `Максимум ${FEEDBACK_MESSAGE_MAX_LENGTH} символів`),
-  email: z.email("Введіть коректну електронну адресу"),
-  marketingConsent: z
-    .boolean()
-    .refine((value) => value, "Щоб продовжити, підтвердіть згоду на отримання повідомлень"),
-});
-
-export type FeedbackFormData = z.infer<typeof feedbackSchema>;
-
 export const LEAD_FIELD_MAX_LENGTH = 500;
 export const UA_SUBSCRIBER_DIGITS = 9;
-
-export const leadSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1, "Введіть ім'я")
-    .max(LEAD_FIELD_MAX_LENGTH, `Максимум ${LEAD_FIELD_MAX_LENGTH} символів`),
-  phone: z
-    .string()
-    .length(UA_SUBSCRIBER_DIGITS, "Введіть коректний номер телефону")
-    .regex(/^\d+$/, "Введіть коректний номер телефону"),
-  niche: z.string().trim().max(LEAD_FIELD_MAX_LENGTH).optional(),
-  contact: z.string().trim().max(LEAD_FIELD_MAX_LENGTH).optional(),
-});
-
-export type LeadFormData = z.infer<typeof leadSchema>;

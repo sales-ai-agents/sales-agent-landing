@@ -55,9 +55,9 @@ export function FeedbackDialog({ open, source, onClose }: FormDialogProps) {
       setValidationError(parsed.error.issues[0]?.message ?? null);
       return;
     }
-    trackEvent("feedback_form_submit", { location: source });
     try {
       await submitFeedbackAsync({ ...parsed.data, source_page: source });
+      trackEvent("feedback_form_submit", { location: source });
       setValues(EMPTY_VALUES);
       setSubmitted(true);
     } catch {

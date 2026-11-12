@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Phone, TrendingUp, Clock, ShieldCheck } from "lucide-react";
 
 const BENEFITS = [
@@ -31,7 +32,7 @@ interface AuthMarketingPanelProps {
 export function AuthMarketingPanel({ variant = "sign-in" }: AuthMarketingPanelProps) {
   return (
     <div className="bg-primary/5 relative flex w-full flex-col items-center justify-center overflow-hidden p-8 xl:p-12">
-      <div className="flex items-center gap-3">
+      <Link href="/" prefetch={false} className="flex items-center gap-3" aria-label="Calls4U">
         <Image
           src="/image/Logo.svg"
           alt="Calls4u.ai logo"
@@ -46,7 +47,7 @@ export function AuthMarketingPanel({ variant = "sign-in" }: AuthMarketingPanelPr
           height={32}
           className="h-8 w-auto"
         />
-      </div>
+      </Link>
 
       <div className="mt-10">
         {variant === "sign-in" && (

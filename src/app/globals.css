@@ -39,7 +39,6 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-input-border: var(--input-border);
-  --color-slider-track: var(--slider-track);
   --color-stroke-muted: var(--stroke-muted);
   --color-ring: var(--ring);
 
@@ -60,9 +59,6 @@
 
   --font-body: var(--font-inter), sans-serif;
   --font-display: var(--font-actay-wide), sans-serif;
-  --font-gilroy: var(--font-gilroy-face), sans-serif;
-
-  --animate-marquee: marquee 30s linear infinite;
 
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
@@ -71,15 +67,6 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
-}
-
-@keyframes marquee {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
 }
 
 :root {
@@ -119,7 +106,6 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --input-border: oklch(0.72 0 0);
-  --slider-track: oklch(0.87 0 0);
   --stroke-muted: oklch(0.903 0 0);
   --ring: var(--primary);
 
@@ -174,7 +160,6 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --input-border: oklch(1 0 0 / 25%);
-  --slider-track: oklch(1 0 0 / 20%);
   --stroke-muted: oklch(1 0 0 / 15%);
   --ring: var(--primary);
 

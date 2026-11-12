@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { AnchorLink } from "@/components/landing/anchor-link";
+import { trackProps } from "@/components/landing/click-tracking";
 import { getLandingCopy } from "@/components/landing/copy";
 import {
   CONTACT_EMAIL,
@@ -56,8 +57,18 @@ export function LandingFooter({ locale, basePath = "" }: LandingFooterProps) {
           </div>
           <div>
             <span className="mono">{footer.contactsTitle}</span>
-            <a href={CONTACT_PHONE_HREF}>{CONTACT_PHONE_LABEL}</a>
-            <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+            <a
+              href={CONTACT_PHONE_HREF}
+              {...trackProps("contact_click", { method: "phone", location: "landing_footer" })}
+            >
+              {CONTACT_PHONE_LABEL}
+            </a>
+            <a
+              href={`mailto:${CONTACT_EMAIL}`}
+              {...trackProps("contact_click", { method: "email", location: "landing_footer" })}
+            >
+              {CONTACT_EMAIL}
+            </a>
             <FormDialogTrigger kind="lead" source="landing_footer" className="foot-link">
               {footer.leaveRequest}
             </FormDialogTrigger>

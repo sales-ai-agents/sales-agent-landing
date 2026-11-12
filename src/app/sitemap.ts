@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 import { getLatestUpdate, getPostBySlug, getPostSlugs } from "@/content/blog/posts";
 import { LEGAL_PAGE_LIST } from "@/lib/constants";
 import { LOCALES, type Locale } from "@/lib/i18n/config";
-import { blogUrl, landingUrl, languageAlternates, postUrl } from "@/lib/i18n/paths";
-import { LANDING_IS_PUBLIC, SITE_URL } from "@/lib/site";
+import { blogUrl, homeUrl, languageAlternates, postUrl } from "@/lib/i18n/paths";
+import { SITE_URL } from "@/lib/site";
 
 type SitemapEntry = MetadataRoute.Sitemap[number];
 
@@ -27,13 +27,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.5,
   }));
 
-  const landingRoutes = LANDING_IS_PUBLIC
-    ? localizedEntries(landingUrl, () => ({
-        lastModified,
-        changeFrequency: "weekly",
-        priority: 1,
-      }))
-    : [];
+  const homeRoutes = localizedEntries(homeUrl, () => ({
+    lastModified,
+    changeFrequency: "weekly",
+    priority: 1,
+  }));
 
   const blogIndexRoutes = localizedEntries(blogUrl, () => ({
     lastModified: getLatestUpdate(),
@@ -52,11 +50,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     )
   );
 
-  return [
-    { url: SITE_URL, lastModified, changeFrequency: "weekly", priority: 1 },
-    ...landingRoutes,
-    ...blogIndexRoutes,
-    ...postRoutes,
-    ...legalRoutes,
-  ];
+  return [...homeRoutes, ...blogIndexRoutes, ...postRoutes, ...legalRoutes];
 }

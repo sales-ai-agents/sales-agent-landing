@@ -13,14 +13,14 @@ import {
 } from "@/lib/site";
 import { getLandingCopy } from "@/components/landing/copy";
 import type { Locale } from "@/lib/i18n/config";
-import { landingUrl } from "@/lib/i18n/paths";
+import { homeUrl } from "@/lib/i18n/paths";
 
 const CURRENCY_SYMBOL = "$";
 const SIGN_UP_URL = `${SITE_URL}/sign-up`;
 
 export const buildLandingGraph = (locale: Locale): object => {
   const copy = getLandingCopy(locale);
-  const url = landingUrl(locale);
+  const url = homeUrl(locale);
   const webpageId = `${url}#webpage`;
   const softwareId = `${url}#software`;
   const breadcrumbId = `${url}#breadcrumb`;
