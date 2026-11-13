@@ -10,6 +10,17 @@ export const SITE_CONTACT = {
   telegram: "https://t.me/calls4u_ai",
 } as const;
 
+export const SITE_SOCIAL = {
+  linkedin: "https://www.linkedin.com/company/calls4u-ai",
+  instagram: "https://www.instagram.com/calls4u.ai/",
+} as const;
+
+export const SITE_SAME_AS = [
+  SITE_CONTACT.telegram,
+  SITE_SOCIAL.linkedin,
+  SITE_SOCIAL.instagram,
+] as const;
+
 export const BRAND_ALTERNATE_NAMES = [
   "Calls 4U",
   "Calls4You",
@@ -22,6 +33,8 @@ export const BRAND_ALTERNATE_NAMES = [
   "Калс4Ю",
   "Коллс фо Ю",
 ] as const;
+
+export const LANDING_UPDATED_AT = "2026-11-12";
 
 export const SITE_ORGANIZATION_ID = `${SITE_URL}/#organization`;
 export const SITE_WEBSITE_ID = `${SITE_URL}/#website`;

@@ -14,22 +14,6 @@ export const EN_SEO: SeoCopy = {
     "Calls4U is a voice AI agent that confirms appointments, sends visit reminders, clarifies orders and writes results to your CRM. Test call in 20 seconds, launch in 1 day.",
   socialDescription:
     "An AI agent that phones your customers for you: appointments, reminders, orders, leads. Results go to your CRM. Launch in 1 day, no developers.",
-  keywords: [
-    "AI voice agent",
-    "AI calling agent",
-    "outbound call automation",
-    "voice AI for business",
-    "automated appointment confirmation calls",
-    "appointment reminder calls",
-    "AI call center agent",
-    "AI phone agent for small business",
-    "Ukraine AI voice agent",
-    "AI cold calling",
-    "lead qualification calls",
-    "AI phone assistant",
-    "automated phone calls to customers",
-    "voice AI CRM integration",
-  ],
   ogImageAlt: "Calls4U: voice AI agent for customer calls",
   organizationDescription:
     "Calls4U is a platform of voice AI agents that phone customers on behalf of a business: they confirm appointments, remind about visits, clarify orders and write the result to your CRM.",
@@ -51,7 +35,7 @@ export const EN_SEO: SeoCopy = {
 
 export const EN_FOOTER: FooterCopy = {
   about:
-    "An AI agent for routine calls: it confirms appointments and passes the result to your CRM or a manager.",
+    "Calls4U is an AI agent for routine calls: it confirms appointments and passes the result to your CRM or a manager.",
   navTitle: "Navigation",
   documentsTitle: "Documents",
   documentsNote: "Legal documents are available in Ukrainian.",

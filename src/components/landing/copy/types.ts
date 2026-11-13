@@ -18,7 +18,6 @@ export interface SeoCopy {
   readonly title: string;
   readonly description: string;
   readonly socialDescription: string;
-  readonly keywords: readonly string[];
   readonly ogImageAlt: string;
   readonly organizationDescription: string;
   readonly pageDescription: string;

@@ -5,6 +5,7 @@ import {
   SITE_LOGO_URL,
   SITE_NAME,
   SITE_ORGANIZATION_ID,
+  SITE_SAME_AS,
   SITE_URL,
   SITE_WEBSITE_ID,
 } from "@/lib/site";
@@ -33,7 +34,7 @@ export const buildOrganizationNode = (description: string): object => ({
   description,
   email: SITE_CONTACT.email,
   telephone: SITE_CONTACT.phone,
-  sameAs: [SITE_CONTACT.telegram],
+  sameAs: SITE_SAME_AS,
   knowsLanguage: LOCALES,
   areaServed: { "@type": "Country", name: "Ukraine" },
   contactPoint: [

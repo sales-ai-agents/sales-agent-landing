@@ -7,7 +7,7 @@ import type {
 } from "@/components/landing/copy/types";
 
 export const EN_HERO: HeroCopy = {
-  srTitle: "AI agent calls for you",
+  srTitle: "Calls4U — AI agent calls for you",
   titleLines: ["AI agent", "calls", " for you"],
   metaLeft: "(01) Voice AI agent",
   metaCenter: "Ukraine · Calls 24/7",

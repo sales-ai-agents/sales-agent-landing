@@ -9,6 +9,8 @@ export const CONTACT_PHONE_HREF = "tel:+380914810542";
 export const CONTACT_PHONE_LABEL = "+380 (91) 481 05 42";
 export const CONTACT_EMAIL = "salesagentswork@gmail.com";
 export const VIDEO_ID = "_DNyhjh_eIo";
+export const VIDEO_UPLOADED_AT = "2026-10-30T06:42:46Z";
+export const VIDEO_DURATION = "PT8M8S";
 
 export type Speaker = "agent" | "client";
 

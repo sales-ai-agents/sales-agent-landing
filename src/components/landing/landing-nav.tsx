@@ -50,7 +50,7 @@ export function LandingNav({ basePath = "" }: LandingNavProps) {
           <Image
             className="word"
             src="/image/calls4u.svg"
-            alt="calls4u"
+            alt="Calls4U"
             width={99}
             height={22}
             loading="eager"

@@ -12,6 +12,7 @@ import {
 } from "@/components/landing/data";
 import { FormDialogTrigger } from "@/components/landing/form-dialog-trigger";
 import type { Locale } from "@/lib/i18n/config";
+import { SITE_SOCIAL } from "@/lib/site";
 
 interface LandingFooterProps {
   locale: Locale;
@@ -31,7 +32,7 @@ export function LandingFooter({ locale, basePath = "" }: LandingFooterProps) {
               <Image
                 className="word"
                 src="/image/calls4u.svg"
-                alt="calls4u"
+                alt="Calls4U"
                 width={99}
                 height={22}
               />
@@ -68,6 +69,12 @@ export function LandingFooter({ locale, basePath = "" }: LandingFooterProps) {
               {...trackProps("contact_click", { method: "email", location: "landing_footer" })}
             >
               {CONTACT_EMAIL}
+            </a>
+            <a href={SITE_SOCIAL.linkedin} target="_blank" rel="me noopener noreferrer">
+              LinkedIn
+            </a>
+            <a href={SITE_SOCIAL.instagram} target="_blank" rel="me noopener noreferrer">
+              Instagram
             </a>
             <FormDialogTrigger kind="lead" source="landing_footer" className="foot-link">
               {footer.leaveRequest}

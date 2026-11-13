@@ -3,7 +3,7 @@ import { getLandingCopy } from "@/components/landing/copy";
 import type { Locale } from "@/lib/i18n/config";
 import { homePath, homeUrl, languageAlternates } from "@/lib/i18n/paths";
 import { buildOgImage, buildOgLocales, INDEXABLE_ROBOTS } from "@/lib/seo";
-import { BRAND_ALTERNATE_NAMES, SITE_NAME } from "@/lib/site";
+import { SITE_NAME } from "@/lib/site";
 
 export const buildLandingMetadata = (locale: Locale): Metadata => {
   const { seo } = getLandingCopy(locale);
@@ -13,7 +13,6 @@ export const buildLandingMetadata = (locale: Locale): Metadata => {
   return {
     title: { absolute: seo.title },
     description: seo.description,
-    keywords: [SITE_NAME, ...BRAND_ALTERNATE_NAMES, ...seo.keywords],
     applicationName: SITE_NAME,
     authors: [{ name: SITE_NAME }],
     creator: SITE_NAME,

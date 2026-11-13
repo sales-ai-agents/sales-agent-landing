@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { DEFAULT_LOCALE, LOCALE_META } from "@/lib/i18n/config";
-import { buildOgImage, GEO_META, INDEXABLE_ROBOTS } from "@/lib/seo";
+import { buildOgImage, INDEXABLE_ROBOTS } from "@/lib/seo";
 import { SITE_NAME } from "@/lib/site";
 import type { LegalDocument } from "./types";
 
@@ -12,7 +12,6 @@ export const buildLegalMetadata = (document: LegalDocument): Metadata => {
     description: document.metaDescription,
     alternates: { canonical: document.slug },
     robots: INDEXABLE_ROBOTS,
-    other: GEO_META,
     openGraph: {
       type: "article",
       title: document.metaTitle,

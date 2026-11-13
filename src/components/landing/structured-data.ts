@@ -12,10 +12,12 @@ import {
   SITE_WEBSITE_ID,
 } from "@/lib/site";
 import { getLandingCopy } from "@/components/landing/copy";
+import { VIDEO_DURATION, VIDEO_ID, VIDEO_UPLOADED_AT } from "@/components/landing/data";
 import type { Locale } from "@/lib/i18n/config";
 import { homeUrl } from "@/lib/i18n/paths";
 
 const CURRENCY_SYMBOL = "$";
+const VIDEO_THUMBNAIL_PATH = "/image/landing/preview.webp";
 const SIGN_UP_URL = `${SITE_URL}/sign-up`;
 
 export const buildLandingGraph = (locale: Locale): object => {
@@ -24,6 +26,7 @@ export const buildLandingGraph = (locale: Locale): object => {
   const webpageId = `${url}#webpage`;
   const softwareId = `${url}#software`;
   const breadcrumbId = `${url}#breadcrumb`;
+  const videoId = `${url}#video`;
 
   const webPage = {
     "@type": "WebPage",
@@ -36,6 +39,20 @@ export const buildLandingGraph = (locale: Locale): object => {
     about: { "@id": softwareId },
     breadcrumb: { "@id": breadcrumbId },
     primaryImageOfPage: { "@type": "ImageObject", url: `${SITE_URL}${SITE_OG_IMAGE}` },
+    video: { "@id": videoId },
+  };
+
+  const video = {
+    "@type": "VideoObject",
+    "@id": videoId,
+    name: copy.client.video.iframeTitle,
+    description: copy.video.lead,
+    thumbnailUrl: `${SITE_URL}${VIDEO_THUMBNAIL_PATH}`,
+    uploadDate: VIDEO_UPLOADED_AT,
+    duration: VIDEO_DURATION,
+    embedUrl: `https://www.youtube.com/embed/${VIDEO_ID}`,
+    inLanguage: "uk",
+    publisher: { "@id": SITE_ORGANIZATION_ID },
   };
 
   const software = {
@@ -91,6 +108,7 @@ export const buildLandingGraph = (locale: Locale): object => {
     buildWebsiteNode(locale),
     webPage,
     software,
+    video,
     faq,
     howTo,
     buildBreadcrumbNode(breadcrumbId, [{ name: copy.seo.breadcrumbHome, url }]),

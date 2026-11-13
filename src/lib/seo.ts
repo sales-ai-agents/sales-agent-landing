@@ -16,11 +16,6 @@ export const INDEXABLE_ROBOTS: NonNullable<Metadata["robots"]> = {
 
 export const NOINDEX_ROBOTS: NonNullable<Metadata["robots"]> = { index: false, follow: false };
 
-export const GEO_META = {
-  "geo.region": "UA",
-  "geo.placename": "Ukraine",
-} as const;
-
 export const buildOgImage = (alt: string) =>
   ({
     url: SITE_OG_IMAGE,

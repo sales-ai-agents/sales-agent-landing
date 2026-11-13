@@ -37,14 +37,14 @@ export function HeroSection({ copy }: { copy: HeroCopy }) {
           </span>
         </div>
 
-        <h1 className="hero-title t1">
-          <span className="sr-only">{copy.srTitle}</span>
-          <span className="ln" aria-hidden="true">
+        <h1 className="sr-only">{copy.srTitle}</h1>
+        <div className="hero-title t1" aria-hidden="true">
+          <span className="ln">
             <span>
               <SplitLetters text={first} startIndex={firstOffset} />
             </span>
           </span>
-          <span className="ln" aria-hidden="true">
+          <span className="ln">
             <span>
               <em>
                 <SplitLetters text={second} startIndex={secondOffset} />
@@ -53,7 +53,7 @@ export function HeroSection({ copy }: { copy: HeroCopy }) {
               <SplitLetters text={third} startIndex={thirdOffset} />
             </span>
           </span>
-        </h1>
+        </div>
 
         <div className="hero-grid">
           <div className="hero-left">

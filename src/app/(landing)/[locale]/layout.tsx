@@ -6,10 +6,9 @@ import { getClientCopy } from "@/components/landing/copy";
 import { LandingCopyProvider } from "@/components/landing/copy/provider";
 import { LandingProviders } from "@/components/landing/providers";
 import { isLocale, LOCALES, LOCALE_META } from "@/lib/i18n/config";
-import { GEO_META } from "@/lib/seo";
 import { SITE_URL } from "@/lib/site";
 
-export const metadata: Metadata = { metadataBase: new URL(SITE_URL), other: GEO_META };
+export const metadata: Metadata = { metadataBase: new URL(SITE_URL) };
 
 export const dynamicParams = false;
 

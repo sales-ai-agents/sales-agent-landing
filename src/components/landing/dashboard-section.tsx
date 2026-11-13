@@ -20,7 +20,7 @@ function DashSidebar({ copy }: { copy: DashboardCopy }) {
     <aside className="dash-side">
       <div className="dash-logo">
         <Image src="/image/Logo.svg" alt="" width={39} height={40} />
-        <Image className="word" src="/image/calls4u.svg" alt="calls4u" width={99} height={22} />
+        <Image className="word" src="/image/calls4u.svg" alt="Calls4U" width={99} height={22} />
       </div>
       <nav className="dash-nav" aria-label={copy.menuLabel}>
         {copy.sidebar.map((item, index) => (

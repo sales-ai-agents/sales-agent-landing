@@ -4,7 +4,7 @@ import type { BlogPost, PostBlock } from "@/content/blog/types";
 import { LEGAL_PAGE_LIST } from "@/lib/constants";
 import { LOCALES, type Locale } from "@/lib/i18n/config";
 import { blogPath, homePath, localizedPath, postPath, postUrl } from "@/lib/i18n/paths";
-import { BRAND_ALTERNATE_NAMES, SITE_CONTACT, SITE_NAME, SITE_URL } from "@/lib/site";
+import { BRAND_ALTERNATE_NAMES, SITE_CONTACT, SITE_NAME, SITE_SOCIAL, SITE_URL } from "@/lib/site";
 
 const FULL_TEXT_PATH = "/llms-full.txt";
 
@@ -79,6 +79,8 @@ export const buildLlmsTxt = (): string => {
     `- Email: ${SITE_CONTACT.email}`,
     `- Phone: ${SITE_CONTACT.phone}`,
     `- Telegram: ${SITE_CONTACT.telegram}`,
+    `- LinkedIn: ${SITE_SOCIAL.linkedin}`,
+    `- Instagram: ${SITE_SOCIAL.instagram}`,
   ].join("\n\n");
 };
 
