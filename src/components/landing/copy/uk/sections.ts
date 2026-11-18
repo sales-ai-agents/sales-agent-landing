@@ -25,6 +25,7 @@ export const UK_HERO: HeroCopy = {
 };
 
 export const UK_DEMO: DemoSectionCopy = {
+  ribbonAlt: "Синя хвиля",
   meta: "(02) Послухайте самі",
   metaRight: "Реальні сценарії розмов",
   heading: [["Не презентація,"], ["а ", { em: "живий дзвінок" }]],

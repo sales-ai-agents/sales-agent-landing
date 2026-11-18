@@ -33,6 +33,7 @@ export const buildOgLocales = (locale: Locale, available: readonly Locale[] = LO
 });
 
 const META_TITLE_MAX_LENGTH = 70;
+const META_DESCRIPTION_MAX_LENGTH = 160;
 const TITLE_SEPARATOR = " | ";
 const ELLIPSIS = "…";
 
@@ -42,6 +43,9 @@ const truncateAtWord = (value: string, maxLength: number): string => {
   const lastSpace = value.lastIndexOf(" ", limit);
   return `${value.slice(0, lastSpace > 0 ? lastSpace : limit).trimEnd()}${ELLIPSIS}`;
 };
+
+export const fitDescription = (description: string): string =>
+  truncateAtWord(description, META_DESCRIPTION_MAX_LENGTH);
 
 export const fitTitle = (title: string, brand: string): string => {
   const branded = `${title}${TITLE_SEPARATOR}${brand}`;

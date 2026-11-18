@@ -24,6 +24,7 @@ import { VideoSection } from "@/components/landing/video-section";
 import { isLocale } from "@/lib/i18n/config";
 
 export const dynamic = "force-static";
+export const dynamicParams = false;
 
 interface HomePageProps {
   params: Promise<{ locale: string }>;

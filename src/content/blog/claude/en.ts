@@ -10,7 +10,7 @@ import type { ClaudePage } from "./types";
 export const CLAUDE_PAGE_EN: ClaudePage = {
   metaTitle: "Calls4U for Claude: calls, reports and voice agents from the chat",
   metaDescription:
-    "The Calls4U connector for Claude: review calls and post-call reports, set up AI voice agents, manage contacts and bookings, and start test calls or call campaigns in plain language.",
+    "Calls4U connector for Claude: review calls and reports, set up AI voice agents, manage contacts and bookings, and run campaigns in plain language.",
   title: "Calls4U for Claude: calls, reports and voice agents from the chat",
   crumb: "Claude",
   lead: [

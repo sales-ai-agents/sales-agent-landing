@@ -35,7 +35,12 @@ export function FaqSection({ copy }: { copy: FaqCopy }) {
               data-r=""
               {...trackProps("test_call_start_click", { location: "landing_faq" })}
             >
-              <Image {...FAQ_CARD_IMAGE} alt="" sizes={FAQ_CARD_SIZES} />
+              <Image
+                {...FAQ_CARD_IMAGE}
+                alt={copy.card.imageAlt}
+                aria-hidden="true"
+                sizes={FAQ_CARD_SIZES}
+              />
               <span className="faq-card-in">
                 <span className="mono">{copy.card.kicker}</span>
                 <b>{copy.card.title}</b>

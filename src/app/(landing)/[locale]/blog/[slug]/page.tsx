@@ -26,7 +26,13 @@ import {
 import { isLocale } from "@/lib/i18n/config";
 import { formatMessage } from "@/lib/i18n/format";
 import { blogPath, homePath, languageAlternates, postPath, postUrl } from "@/lib/i18n/paths";
-import { buildOgImage, buildOgLocales, fitTitle, INDEXABLE_ROBOTS } from "@/lib/seo";
+import {
+  buildOgImage,
+  buildOgLocales,
+  fitDescription,
+  fitTitle,
+  INDEXABLE_ROBOTS,
+} from "@/lib/seo";
 import { SITE_NAME } from "@/lib/site";
 
 const RELATED_POSTS_COUNT = 3;
@@ -52,7 +58,7 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
 
   return {
     title: { absolute: fitTitle(post.metaTitle ?? post.title, copy.blog.name) },
-    description: post.excerpt,
+    description: fitDescription(post.excerpt),
     alternates: {
       canonical: postPath(locale, slug),
       languages: languageAlternates((candidate) => postUrl(candidate, slug), locales),

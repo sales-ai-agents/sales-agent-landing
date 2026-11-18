@@ -55,7 +55,7 @@ export function VideoPlayer() {
             >
               <Image
                 src="/image/landing/preview.webp"
-                alt=""
+                alt={video.previewAlt}
                 width={1280}
                 height={720}
                 sizes="(max-width: 1100px) 100vw, 56vw"

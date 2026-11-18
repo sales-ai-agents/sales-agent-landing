@@ -26,10 +26,10 @@ interface PostCoverArtProps {
 
 export function PostCoverArt({ cover, copy }: PostCoverArtProps) {
   if (typeof cover === "string") return <EmbeddedCoverArt cover={cover} copy={copy} />;
-  return <RemoteCoverArt cover={cover} />;
+  return <RemoteCoverArt cover={cover} copy={copy} />;
 }
 
-function RemoteCoverArt({ cover }: { cover: RemoteCover }) {
+function RemoteCoverArt({ cover, copy }: { cover: RemoteCover; copy: CoversCopy }) {
   const { variant, label, big, caption, left, right, bubbles = [] } = cover;
   const labelNode = <span className="cv-label">{label}</span>;
 
@@ -70,7 +70,7 @@ function RemoteCoverArt({ cover }: { cover: RemoteCover }) {
     case "photo":
       return (
         <div className="cv cv-photo">
-          <Image src={COVER_PHOTO_SRC} alt="" fill sizes={COVER_PHOTO_SIZES} />
+          <Image src={COVER_PHOTO_SRC} alt={copy.photoAlt} fill sizes={COVER_PHOTO_SIZES} />
           {labelNode}
           <b>{big}</b>
         </div>
@@ -123,7 +123,7 @@ function EmbeddedCoverArt({ cover, copy }: EmbeddedCoverArtProps) {
     case "crm":
       return (
         <div className="cv cv-photo">
-          <Image src={COVER_PHOTO_SRC} alt="" fill sizes={COVER_PHOTO_SIZES} />
+          <Image src={COVER_PHOTO_SRC} alt={copy.photoAlt} fill sizes={COVER_PHOTO_SIZES} />
           <span className="cv-label">{copy.crm.label}</span>
           <b>{copy.crm.value}</b>
         </div>

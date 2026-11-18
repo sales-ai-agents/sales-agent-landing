@@ -7,7 +7,7 @@ export const scenariosPost: BlogPost = {
   cover: "five",
   title: "5 Call Scenarios to Hand Over to an AI Voice Agent Today",
   excerpt:
-    "Appointment confirmation calls, reminders, order verification: here is which conversations an AI voice agent handles without a manager, and how to launch them in a single day.",
+    "Appointment confirmations, reminders, order checks: which conversations an AI voice agent handles without a manager and how to launch them in one day.",
   publishedAt: "2026-09-02",
   updatedAt: "2026-09-02",
   blocks: [

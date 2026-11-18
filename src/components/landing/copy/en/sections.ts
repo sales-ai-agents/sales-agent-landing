@@ -25,6 +25,7 @@ export const EN_HERO: HeroCopy = {
 };
 
 export const EN_DEMO: DemoSectionCopy = {
+  ribbonAlt: "Blue wave",
   meta: "(02) Hear it yourself",
   metaRight: "Real call scenarios",
   heading: [["Not a presentation,"], ["but a ", { em: "live call" }]],

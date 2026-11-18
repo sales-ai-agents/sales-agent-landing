@@ -166,6 +166,7 @@ export const RU_CLIENT: ClientCopy = {
   video: {
     iframeTitle: "Видео Calls4U: где бизнес теряет клиентов на звонках",
     startLabel: "Смотреть видео: где бизнес теряет деньги на звонках",
+    previewAlt: "Видео Calls4U о потерянных звонках",
     missedTitle: "Пропущенный звонок",
     missedTime: "Сегодня, 19:42",
     callbackTitle: "ИИ-агент перезвонил",
@@ -222,6 +223,7 @@ export const RU_CLIENT: ClientCopy = {
     copyLink: "Скопировать ссылку",
     copied: "Скопировано ✓",
     covers: {
+      photoAlt: "Мастер автосервиса с клиенткой",
       five: {
         label: "Гайд · 5 сценариев",
         agent: "Подтверждаем вашу запись на завтра в 14:00?",

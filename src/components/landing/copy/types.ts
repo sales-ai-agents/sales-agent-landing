@@ -41,6 +41,7 @@ export interface HeroCopy {
 
 export interface DemoSectionCopy extends SectionIntro {
   readonly metaRight: string;
+  readonly ribbonAlt: string;
 }
 
 export interface StatCardCopy {
@@ -222,6 +223,7 @@ export interface FaqItemCopy {
 }
 
 export interface FaqCardCopy {
+  readonly imageAlt: string;
   readonly kicker: string;
   readonly title: string;
   readonly action: string;
@@ -233,6 +235,7 @@ export interface FaqCopy extends SectionIntro {
 }
 
 export interface FinalCtaCopy extends SectionIntro {
+  readonly handsetAlt: string;
   readonly demoWithManager: string;
 }
 

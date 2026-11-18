@@ -13,7 +13,7 @@ export function FinalCtaSection({ copy }: { copy: FinalCtaCopy }) {
           <span className="rip" />
           <Image
             src="/image/landing/handset-b.webp"
-            alt=""
+            alt={copy.handsetAlt}
             width={863}
             height={1200}
             sizes="290px"

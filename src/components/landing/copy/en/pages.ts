@@ -11,7 +11,7 @@ import type {
 export const EN_SEO: SeoCopy = {
   title: "Calls4U: Voice AI Agent for Customer Calls and CRM",
   description:
-    "Calls4U is a voice AI agent that confirms appointments, sends visit reminders, clarifies orders and writes results to your CRM. Test call in 20 seconds, launch in 1 day.",
+    "Calls4U is a voice AI agent that confirms appointments, sends visit reminders, clarifies orders and writes results to your CRM. Test call in 20 seconds.",
   socialDescription:
     "An AI agent that phones your customers for you: appointments, reminders, orders, leads. Results go to your CRM. Launch in 1 day, no developers.",
   ogImageAlt: "Calls4U: voice AI agent for customer calls",
@@ -67,6 +67,7 @@ export const EN_FAQ: FaqCopy = {
   heading: [["Questions"], ["and ", { em: "answers" }]],
   lead: "Can't find an answer? Give us a call and we will reply within one business day.",
   card: {
+    imageAlt: "Clinic receptionist with headset",
     kicker: "Faster than email",
     title: "Ask the agent: it will call you back in 20 seconds",
     action: "Test call",
@@ -126,6 +127,7 @@ export const EN_FAQ: FaqCopy = {
 };
 
 export const EN_FINAL_CTA: FinalCtaCopy = {
+  handsetAlt: "Telephone handset",
   meta: "(13) Your move",
   heading: [["Try it"], [{ em: "yourself" }]],
   lead: "Enter your number and the agent will call in 20 seconds. One scenario and your phone are all you need for a first test.",

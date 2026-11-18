@@ -15,6 +15,8 @@ import { blogPath, blogUrl, claudePath, homePath, languageAlternates } from "@/l
 import { buildOgImage, buildOgLocales, INDEXABLE_ROBOTS } from "@/lib/seo";
 import { SITE_NAME } from "@/lib/site";
 
+export const dynamicParams = false;
+
 interface BlogPageProps {
   params: Promise<{ locale: string }>;
 }

@@ -112,6 +112,7 @@ export interface VideoChapterCopy {
 export interface VideoPlayerCopy {
   readonly iframeTitle: string;
   readonly startLabel: string;
+  readonly previewAlt: string;
   readonly missedTitle: string;
   readonly missedTime: string;
   readonly callbackTitle: string;
@@ -154,6 +155,7 @@ export interface DialogsCopy {
 }
 
 export interface CoversCopy {
+  readonly photoAlt: string;
   readonly five: { readonly label: string; readonly agent: string; readonly client: string };
   readonly econ: { readonly label: string; readonly amount: string; readonly caption: string };
   readonly vs: { readonly label: string; readonly left: string; readonly right: string };

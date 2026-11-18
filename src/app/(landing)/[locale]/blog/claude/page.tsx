@@ -27,6 +27,8 @@ import { isLocale } from "@/lib/i18n/config";
 import { buildOgImage, buildOgLocales, fitTitle, INDEXABLE_ROBOTS } from "@/lib/seo";
 import { SITE_NAME } from "@/lib/site";
 
+export const dynamicParams = false;
+
 interface ClaudeConnectorPageProps {
   params: Promise<{ locale: string }>;
 }

@@ -10,7 +10,7 @@ export function DemoSection({ copy }: { copy: DemoSectionCopy }) {
         <Image
           className="slab-ribbon"
           src="/image/landing/wave-ribbon.webp"
-          alt=""
+          alt={copy.ribbonAlt}
           aria-hidden="true"
           width={1800}
           height={977}
