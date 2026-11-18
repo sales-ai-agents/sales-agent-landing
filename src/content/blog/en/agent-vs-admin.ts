@@ -6,6 +6,7 @@ export const agentVsAdminPost: BlogPost = {
   readMinutes: 6,
   cover: "vs",
   title: "AI Voice Agent vs. Receptionist: An Honest Comparison for Salons and Clinics",
+  metaTitle: "AI Voice Agent vs. Receptionist: An Honest Comparison",
   excerpt:
     "Where people are irreplaceable, and where an agent works faster, more accurately, and without days off. And why the best setup is both.",
   publishedAt: "2026-09-16",

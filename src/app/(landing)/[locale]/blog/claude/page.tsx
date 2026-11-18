@@ -24,7 +24,7 @@ import {
   languageAlternates,
 } from "@/lib/i18n/paths";
 import { isLocale } from "@/lib/i18n/config";
-import { buildOgImage, buildOgLocales, INDEXABLE_ROBOTS } from "@/lib/seo";
+import { buildOgImage, buildOgLocales, fitTitle, INDEXABLE_ROBOTS } from "@/lib/seo";
 import { SITE_NAME } from "@/lib/site";
 
 interface ClaudeConnectorPageProps {
@@ -35,10 +35,11 @@ export async function generateMetadata({ params }: ClaudeConnectorPageProps): Pr
   const { locale } = await params;
   if (!isLocale(locale)) return {};
   const page = getClaudePage(locale);
-  const image = buildOgImage(getLandingCopy(locale).seo.ogImageAlt);
+  const copy = getLandingCopy(locale);
+  const image = buildOgImage(copy.seo.ogImageAlt);
 
   return {
-    title: page.metaTitle,
+    title: { absolute: fitTitle(page.metaTitle, copy.blog.name) },
     description: page.metaDescription,
     alternates: { canonical: claudePath(locale), languages: languageAlternates(claudeUrl) },
     robots: INDEXABLE_ROBOTS,

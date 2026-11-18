@@ -48,6 +48,7 @@ export interface BlogPostSummary {
 }
 
 export interface BlogPost extends BlogPostSummary {
+  readonly metaTitle?: string;
   readonly keywords?: readonly string[];
   readonly blocks: readonly PostBlock[];
 }
