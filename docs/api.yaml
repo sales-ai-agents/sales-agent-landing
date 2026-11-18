@@ -125,6 +125,11 @@ tags:
     description: >
       Форми лендінгу. Без токена, з браузера, CORS відкритий.
       Це не кабінет: захист — троттлінг по IP, не авторизація.
+  - name: blog
+    description: >
+      Блог для сайту: опубліковані статті, RSS. Без токена, CORS відкритий,
+      відповіді кешовані (ETag). Нова стаття з'являється після «Опублікувати»
+      в Telegram — бекенд сам смикає revalidation сайту (див. docs/blog.md).
 
 paths:
   /auth/providers:
@@ -4184,7 +4189,8 @@ paths:
                   ok: { type: boolean }
                   packs:
                     type: array
-                    description: пакети хвилин для «Купити хвилини»
+                    description: "ЗНЯТО 16.11.2026: завжди порожній — замість пакетів баланс"
+                    deprecated: true
                     items:
                       type: object
                       properties:
@@ -4266,13 +4272,28 @@ paths:
                         numbers:
                           {
                             type: integer,
-                            description: "скільки номерів можна підключити; 0 = без обмеження",
+                            description: "скільки номерів включено; 0 = без обмеження",
                           }
                         pool_numbers:
                           {
                             type: integer,
-                            description: "з них від Calls4U (з пулу); на PRO 5 при numbers = 0",
+                            description: "з них від Calls4U (з пулу): Start 1, Pro/Pro+ 3. Понад це — $5/міс з балансу",
                           }
+                        balance_usd:
+                          type: number
+                          description: >
+                            До скількох доповнюється баланс при кожній оплаті
+                            періоду ($5 Start, $20 Pro). Не «додається»: лишилось
+                            $9 — докладаємо $11 до $20. Підпис на картці: «$20
+                            балансу на дзвінки».
+                        chatbot: { type: boolean, description: "тариф включає чат-бота (Pro+)" }
+                        coming_soon:
+                          type: boolean
+                          description: >
+                            Тариф видно, але купити ще не можна (Pro+ — поки
+                            немає чат-бота). Кнопку малювати «Незабаром»;
+                            checkout на нього відповість `plan_unavailable`.
+                  balance_usd: { type: number, description: "скільки зараз на балансі" }
         "401": { description: не авторизований }
 
   /app/billing/receipt:
@@ -4453,8 +4474,15 @@ paths:
   /app/billing/topup:
     post:
       tags: [billing]
-      summary: Купити пакет хвилин
+      summary: Купити пакет хвилин (ЗНЯТО 16.11.2026)
+      deprecated: true
       description: |
+        **Пакетів більше немає — замість них баланс** (`POST
+        /app/billing/balance/topup`). Ручка відповідає `410
+        packs_discontinued`, а `packs` у `GET /app/billing/plans` порожній.
+        Уже куплені хвилини (`bonus_minutes`) лишаються в силі.
+
+        Як було раніше:
         Екран «Купити хвилини». Пакети — у `GET /app/billing/plans` → `packs`.
         Той самий шлях, що й тариф: віддаємо `payment_url`, ведеш людину
         на WayForPay, вебхук зараховує.
@@ -4493,6 +4521,9 @@ paths:
           description: "`unknown_pack` · `invalid_json`"
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "410":
+          description: "`packs_discontinued` — пакетів більше немає (16.11.2026), поповнюйте баланс: `POST /app/billing/balance/topup`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
         "502":
           description: "`payment_provider_error`"
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
@@ -4587,7 +4618,12 @@ paths:
                       одразу знала, який рахунок опитувати в
                       `GET /app/billing/status`. Сам редірект робить
                       WayForPay, не ми.
-        "400": { description: "unknown_plan — невідомий тариф" }
+        "400":
+          description: >
+            `unknown_plan` — невідомий тариф · `plan_unavailable` — тариф
+            зараз не продається: Pro+ (`coming_soon: true`, чекає чат-бота)
+            або знятий з продажу BUSINESS (його можуть лише продовжити ті,
+            у кого він уже є).
         "401": { description: не авторизований }
         "502": { description: "payment_provider_error — рахунок не створився" }
         "503":
@@ -4679,6 +4715,105 @@ paths:
         "400": { description: "invoice_id_required" }
         "401": { description: не авторизований }
         "404": { description: рахунок не знайдено або чужий }
+
+  /app/billing/balance:
+    get:
+      tags: [billing]
+      summary: Баланс — гроші на рахунку й куди вони пішли
+      description: |
+        Баланс у доларах. Звідки береться:
+        * при кожній оплаті тарифу доповнюється **до** `plan_balance_usd`
+          ($5 Start, $20 Pro): лишилось $9 — докладаємо $11 до $20;
+        * поповнення клієнтом (`POST /app/billing/balance/topup`).
+
+        На що йде:
+        * хвилини, коли скінчились хвилини тарифу й куплених пакетів, — по
+          `minute_price_usd` за хвилину. Дзвінок пускається, поки на балансі
+          є хоч на одну хвилину; списання — після дзвінка, тож баланс може
+          трохи піти в мінус;
+        * кожен номер понад тариф — `extra_number_price_usd` на 30 днів.
+          Не вистачило на продовження — номер зупиняється (`is_active:
+          false`, `extra_suspended: true` у списку номерів) і оживає сам
+          після поповнення.
+
+        `ledger` — останні 50 рухів, найновіші зверху. `kind`:
+        `plan_refill` (доповнення тарифом) · `topup` (поповнення) ·
+        `minutes` (хвилини понад тариф, `minutes` — скільки) · `number`
+        (номер понад тариф) · `admin` (ручне коригування).
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  balance_usd: { type: number, examples: [12.4] }
+                  minute_price_usd: { type: number, examples: [0.1] }
+                  extra_number_price_usd: { type: number, examples: [5] }
+                  plan_balance_usd:
+                    { type: number, description: "до скількох доповнює тариф; 0 — тріал" }
+                  topup_options_usd:
+                    { type: array, items: { type: integer }, examples: [[5, 10, 20, 50, 100]] }
+                  ledger:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: integer }
+                        amount_usd: { type: number, description: "+ зарахування, − списання" }
+                        kind: { type: string, enum: [plan_refill, topup, minutes, number, admin] }
+                        minutes: { type: integer, nullable: true }
+                        note: { type: string, examples: ["7 хв понад тариф × $0.1"] }
+                        balance_after_usd: { type: number }
+                        created_at: { type: string }
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /app/billing/balance/topup:
+    post:
+      tags: [billing]
+      summary: Поповнити баланс
+      description: >
+        Рахунок у гривнях за курсом НБУ на суму в доларах — як і тарифи.
+        Далі так само, як з оплатою тарифу: `payment_url` відкрити, після
+        повернення опитувати `/app/billing/status?invoice_id=…`. Гроші
+        зараховує вебхук WayForPay; зупинені номери понад тариф після цього
+        оживають самі, якщо вистачає.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount_usd]
+              properties:
+                amount_usd: { type: integer, enum: [5, 10, 20, 50, 100] }
+                return_url: { type: string }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  invoice_id: { type: string }
+                  payment_url: { type: string }
+                  amount_usd: { type: integer }
+                  amount_uah: { type: number }
+                  usd_rate: { type: number }
+          description: Рахунок створено
+        "400":
+          description: "`bad_amount` (з полем `allowed`) · `invalid_json`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "502":
+          description: "`payment_provider_error`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "503":
+          description: "`payments_unavailable` · `rate_unavailable`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
 
   /app/billing/history:
     get:
@@ -5242,6 +5377,284 @@ paths:
           description: "`not_found` — немає такого обдзвону в цього акаунта"
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
 
+  /blog/posts:
+    get:
+      tags: [blog]
+      summary: Опубліковані статті блогу (нові зверху)
+      description: |
+        Публічно, без авторизації, CORS відкритий. Лише статті, які адмін
+        опублікував; чернеток тут немає ніколи.
+
+        Відповідь кешована: `Cache-Control: public, max-age=60,
+        stale-while-revalidate=600` і `ETag` — з `If-None-Match` прийде 304.
+        Статті, зашиті у фронт (missed-calls, scenarios, …), сюди не входять:
+        фронт показує їх разом із цими, а їхні слаги бекенд ніколи не займе.
+      security: []
+      parameters:
+        - {
+            name: category,
+            in: query,
+            schema: { type: string, enum: [guides, economics, comparison, instructions, myths] },
+          }
+        - {
+            name: limit,
+            in: query,
+            schema: { type: integer, minimum: 1, maximum: 100, default: 20 },
+          }
+        - { name: offset, in: query, schema: { type: integer, minimum: 0, default: 0 } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  items: { type: array, items: { $ref: "#/components/schemas/BlogPostSummary" } }
+                  total: { type: integer }
+                  limit: { type: integer }
+                  offset: { type: integer }
+                  categories:
+                    type: array
+                    description: Усі категорії з кількістю опублікованих — для фільтра «Усі · Гайди 2 · …»
+                    items:
+                      type: object
+                      properties:
+                        key: { type: string }
+                        label: { type: string }
+                        count: { type: integer }
+        "304":
+          description: Не змінилось з `If-None-Match`
+        "400":
+          description: "`bad_category` — невідома категорія (у відповіді є `categories` — список дозволених)"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /blog/posts/{slug}:
+    get:
+      tags: [blog]
+      summary: Одна опублікована стаття
+      description: |
+        Стаття — типізовані блоки, ті самі, з яких зібрані статті сайту:
+        `lead` → `p.lead-p`, `h2` (з `id` = `section-N`, як у змісті),
+        `p`, `ul`, `quote` → `blockquote`, `formula` → `div.formula`,
+        `note` → `div.note`, `dialog` → `div.dialog`. Текст — звичайні
+        рядки без розмітки: рендерити як текст, не як HTML.
+
+        `related` — до трьох статей: спершу з тієї ж категорії.
+      security: []
+      parameters:
+        - { name: slug, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  post: { $ref: "#/components/schemas/BlogPost" }
+                  related: { type: array, items: { $ref: "#/components/schemas/BlogPostSummary" } }
+        "304":
+          description: Не змінилось з `If-None-Match`
+        "404":
+          description: "`not_found` — немає такої опублікованої статті (чернетка, знята чи неіснуюча) → notFound()"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /blog/rss.xml:
+    get:
+      tags: [blog]
+      summary: RSS 2.0 — 50 останніх статей
+      description: |
+        `application/rss+xml`. `atom:link rel=self` вказує на
+        `https://www.calls4u.ai/blog/rss.xml` — зробіть туди rewrite на цю ручку.
+      security: []
+      responses:
+        "200":
+          description: RSS
+          content: { application/rss+xml: { schema: { type: string } } }
+        "304":
+          description: Не змінилось з `If-None-Match`
+
+  /admin/blog/posts:
+    get:
+      tags: [admin]
+      summary: Усі статті блогу, з чернетками
+      description: Під `X-Admin-Token`. Основна модерація — кнопки в Telegram; це для адмінки.
+      security: []
+      parameters:
+        - {
+            name: status,
+            in: query,
+            schema:
+              { type: string, enum: [all, draft, published, rejected, archived], default: all },
+          }
+        - {
+            name: limit,
+            in: query,
+            schema: { type: integer, minimum: 1, maximum: 100, default: 50 },
+          }
+        - { name: offset, in: query, schema: { type: integer, minimum: 0, default: 0 } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  items: { type: array, items: { $ref: "#/components/schemas/BlogAdminItem" } }
+                  total: { type: integer }
+        "400":
+          description: "`bad_status`"
+        "403":
+          description: "`forbidden` — невірний або відсутній X-Admin-Token"
+        "503":
+          description: "`admin_api_disabled` — ADMIN_API_TOKEN не заданий на сервері"
+
+  /admin/blog/posts/{post_id}:
+    get:
+      tags: [admin]
+      summary: Будь-яка стаття повністю (і чернетка) — для перегляду в адмінці
+      description: Під `X-Admin-Token`. `post` — поля BlogAdminItem разом із BlogPost.
+      security: []
+      parameters:
+        - { name: post_id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  post: { $ref: "#/components/schemas/BlogPost" }
+        "403":
+          description: "`forbidden`"
+        "404":
+          description: "`not_found`"
+        "503":
+          description: "`admin_api_disabled`"
+
+  /admin/blog/posts/{post_id}/{action}:
+    post:
+      tags: [admin]
+      summary: Опублікувати, зняти з публікації або відхилити
+      description: |
+        Під `X-Admin-Token`. Ті самі переходи, що й кнопки в Telegram:
+        `publish` (чернетка чи знята → на сайті), `unpublish` (→ знята),
+        `reject` (чернетка → відхилена). Після publish/unpublish бекенд сам
+        смикає revalidation сайту.
+      security: []
+      parameters:
+        - { name: post_id, in: path, required: true, schema: { type: integer } }
+        - {
+            name: action,
+            in: path,
+            required: true,
+            schema: { type: string, enum: [publish, unpublish, reject] },
+          }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  post: { $ref: "#/components/schemas/BlogAdminItem" }
+        "400":
+          description: "`bad_action`"
+        "403":
+          description: "`forbidden`"
+        "404":
+          description: "`not_found`"
+        "409":
+          description: "`bad_state` — стаття вже в іншому стані (поле `status`): хтось вирішив раніше"
+        "503":
+          description: "`admin_api_disabled`"
+
+  /admin/blog/generate:
+    post:
+      tags: [admin]
+      summary: Написати чернетку зараз
+      description: |
+        Під `X-Admin-Token`. Відповідає одразу (`started: true`); стаття
+        пишеться 1–3 хвилини, картка з переглядом прийде адмінам у Telegram.
+        Без `topic` — наступна тема з черги (порожня — робот запропонує сам).
+      security: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                topic: { type: string, maxLength: 300 }
+                category:
+                  { type: string, enum: [guides, economics, comparison, instructions, myths] }
+      responses:
+        "200":
+          description: OK — генерацію запущено
+        "400":
+          description: "`invalid_json` · `bad_category`"
+        "403":
+          description: "`forbidden`"
+        "409":
+          description: "`busy` — уже пишеться інша стаття"
+        "503":
+          description: "`admin_api_disabled`"
+
+  /admin/blog/topics:
+    get:
+      tags: [admin]
+      summary: Черга тем
+      description: Під `X-Admin-Token`. Теми від людей ідуть раніше за запропоновані роботом.
+      security: []
+      parameters:
+        - {
+            name: status,
+            in: query,
+            schema: { type: string, enum: [queued, generating, used, dropped], default: queued },
+          }
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: "`bad_status`"
+        "403":
+          description: "`forbidden`"
+        "503":
+          description: "`admin_api_disabled`"
+    post:
+      tags: [admin]
+      summary: Додати тему в чергу
+      description: Під `X-Admin-Token`. Те саме, що `/blog_topic` у Telegram.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [topic]
+              properties:
+                topic: { type: string, minLength: 5, maxLength: 300 }
+                category:
+                  { type: string, enum: [guides, economics, comparison, instructions, myths] }
+      responses:
+        "200":
+          description: "OK — `id` нової теми"
+        "400":
+          description: "`invalid_json` · `bad_topic` · `bad_category`"
+        "403":
+          description: "`forbidden`"
+        "503":
+          description: "`admin_api_disabled`"
+
 components:
   securitySchemes:
     cookieAuth:
@@ -5476,6 +5889,98 @@ components:
               key: { type: string }
               label: { type: string }
               value: { type: string }
+
+    BlogCover:
+      type: object
+      description: |
+        Обкладинка — один із наявних видів фронту (клас `cv cv-{variant}`).
+        Поля за видом: `econ` — big + caption; `five` — big + bubbles (agent,
+        client); `vs` — left + right; `myth`, `script`, `photo` — big
+        (для `photo` картинку бере фронт). `label` — підпис зверху, завжди.
+      properties:
+        variant: { type: string, enum: [econ, five, vs, myth, script, photo] }
+        label: { type: string }
+        big: { type: string }
+        caption: { type: string }
+        left: { type: string }
+        right: { type: string }
+        bubbles:
+          type: array
+          items:
+            type: object
+            properties:
+              role: { type: string, enum: [agent, client] }
+              text: { type: string }
+
+    BlogBlock:
+      type: object
+      required: [type]
+      properties:
+        type: { type: string, enum: [lead, h2, p, ul, quote, formula, note, dialog] }
+        text: { type: string, description: "усі типи, крім ul і dialog" }
+        id: { type: string, description: "лише h2: section-1, section-2, … — якір для змісту" }
+        items: { type: array, items: { type: string }, description: лише ul }
+        messages:
+          type: array
+          description: лише dialog
+          items:
+            type: object
+            properties:
+              role: { type: string, enum: [agent, client] }
+              text: { type: string }
+
+    BlogPostSummary:
+      type: object
+      properties:
+        slug: { type: string }
+        url: { type: string, description: абсолютна канонічна адреса на сайті }
+        title: { type: string }
+        description: { type: string, description: meta description і підзаголовок картки }
+        category: { type: string, enum: [guides, economics, comparison, instructions, myths] }
+        category_label:
+          { type: string, description: "Гайди · Економіка · Порівняння · Інструкції · Міфи" }
+        cover: { $ref: "#/components/schemas/BlogCover" }
+        reading_minutes: { type: integer }
+        author: { type: string }
+        published_at: { type: [string, "null"], format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    BlogPost:
+      allOf:
+        - $ref: "#/components/schemas/BlogPostSummary"
+        - type: object
+          properties:
+            blocks: { type: array, items: { $ref: "#/components/schemas/BlogBlock" } }
+            toc:
+              type: array
+              description: Зміст — `id` і текст кожного h2
+              items:
+                type: object
+                properties:
+                  id: { type: string }
+                  label: { type: string }
+            keywords:
+              { type: array, items: { type: string }, description: для meta keywords і JSON-LD }
+            words: { type: integer }
+
+    BlogAdminItem:
+      allOf:
+        - $ref: "#/components/schemas/BlogPostSummary"
+        - type: object
+          properties:
+            id: { type: integer }
+            status: { type: string, enum: [draft, published, rejected, archived] }
+            topic: { type: string }
+            words: { type: integer }
+            source:
+              {
+                type: string,
+                description: "auto — розклад; requested — попросили (Telegram чи адмінка)",
+              }
+            model: { type: string }
+            reviewed_by: { type: string }
+            review_note: { type: string }
+            created_at: { type: string, format: date-time }
 
     Error:
       type: object

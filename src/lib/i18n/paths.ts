@@ -3,6 +3,8 @@ import { DEFAULT_LOCALE, LOCALES, LOCALE_META, X_DEFAULT_HREFLANG, type Locale }
 
 export const BLOG_BASE_PATH = "/blog";
 
+export const CLAUDE_PAGE_SLUG = "claude";
+
 const ROOT_PATH = "/";
 
 export const localePrefix = (locale: Locale): string =>
@@ -32,9 +34,16 @@ export const postPath = (locale: Locale, slug: string): string =>
 export const postUrl = (locale: Locale, slug: string): string =>
   localizedUrl(locale, `${BLOG_BASE_PATH}/${slug}`);
 
+export const claudePath = (locale: Locale): string => postPath(locale, CLAUDE_PAGE_SLUG);
+
+export const claudeUrl = (locale: Locale): string => postUrl(locale, CLAUDE_PAGE_SLUG);
+
 export const rssPath = (locale: Locale): string => `${blogPath(locale)}/rss.xml`;
 
-export const languageAlternates = (urlFor: (locale: Locale) => string): Record<string, string> => ({
-  ...Object.fromEntries(LOCALES.map((locale) => [LOCALE_META[locale].hreflang, urlFor(locale)])),
+export const languageAlternates = (
+  urlFor: (locale: Locale) => string,
+  locales: readonly Locale[] = LOCALES
+): Record<string, string> => ({
+  ...Object.fromEntries(locales.map((locale) => [LOCALE_META[locale].hreflang, urlFor(locale)])),
   [X_DEFAULT_HREFLANG]: urlFor(DEFAULT_LOCALE),
 });

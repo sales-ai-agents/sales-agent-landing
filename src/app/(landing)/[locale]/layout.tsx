@@ -10,8 +10,6 @@ import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = { metadataBase: new URL(SITE_URL) };
 
-export const dynamicParams = false;
-
 export function generateStaticParams(): { locale: string }[] {
   return LOCALES.map((locale) => ({ locale }));
 }

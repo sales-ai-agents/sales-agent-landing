@@ -1,9 +1,10 @@
 import { getLandingCopy } from "@/components/landing/copy";
-import { getPosts } from "@/content/blog/posts";
+import { getClaudePage } from "@/content/blog/claude";
+import { getPosts, getPostsWithBlocks } from "@/content/blog/posts";
 import type { BlogPost, PostBlock } from "@/content/blog/types";
 import { LEGAL_PAGE_LIST } from "@/lib/constants";
 import { LOCALES, type Locale } from "@/lib/i18n/config";
-import { blogPath, homePath, localizedPath, postPath, postUrl } from "@/lib/i18n/paths";
+import { blogPath, claudePath, homePath, localizedPath, postPath, postUrl } from "@/lib/i18n/paths";
 import { BRAND_ALTERNATE_NAMES, SITE_CONTACT, SITE_NAME, SITE_SOCIAL, SITE_URL } from "@/lib/site";
 
 const FULL_TEXT_PATH = "/llms-full.txt";
@@ -45,23 +46,27 @@ const postToMarkdown = (post: BlogPost, locale: Locale): string => {
 
 const fullTextPath = (locale: Locale): string => localizedPath(locale, FULL_TEXT_PATH);
 
-const buildLocaleSections = (locale: Locale): string[] => {
+const buildLocaleSections = async (locale: Locale): Promise<string[]> => {
   const { llms, client, blog } = getLandingCopy(locale);
+  const claudePage = getClaudePage(locale);
+  const posts = await getPosts(locale);
 
   return [
     `### ${llms.languageName}`,
     link(SITE_NAME, homePath(locale), [llms.pricing, llms.faq].join(", ")),
     link(client.nav.links.blog, blogPath(locale), blog.index.description),
-    ...getPosts(locale).map((post) => link(post.title, postPath(locale, post.slug), post.excerpt)),
+    ...posts.map((post) => link(post.title, postPath(locale, post.slug), post.excerpt)),
+    link(claudePage.title, claudePath(locale), claudePage.metaDescription),
     link(llms.fullTitle, fullTextPath(locale), [llms.pricing, llms.faq, llms.blog].join(", ")),
   ];
 };
 
-export const buildLlmsTxt = (): string => {
+export const buildLlmsTxt = async (): Promise<string> => {
   const english = getLandingCopy("en").llms.summary;
   const others = LOCALES.filter((locale) => locale !== "en").map(
     (locale) => getLandingCopy(locale).llms.summary
   );
+  const localeSections = await Promise.all(LOCALES.map(buildLocaleSections));
 
   return [
     `# ${SITE_NAME}`,
@@ -72,7 +77,7 @@ export const buildLlmsTxt = (): string => {
     link("Home", "/", "product, demo, pricing, FAQ"),
     link("Sitemap", "/sitemap.xml", "all pages"),
     "## Blog and full text by language",
-    ...LOCALES.flatMap(buildLocaleSections),
+    ...localeSections.flat(),
     "## Legal",
     ...LEGAL_PAGE_LIST.map((page) => link(page.label, page.href, "document (Ukrainian)")),
     "## Contact",
@@ -84,8 +89,9 @@ export const buildLlmsTxt = (): string => {
   ].join("\n\n");
 };
 
-export const buildLlmsFullTxt = (locale: Locale): string => {
+export const buildLlmsFullTxt = async (locale: Locale): Promise<string> => {
   const { llms, pricing, faq } = getLandingCopy(locale);
+  const posts = await getPostsWithBlocks(locale);
 
   return [
     `# ${llms.fullTitle}`,
@@ -98,6 +104,6 @@ export const buildLlmsFullTxt = (locale: Locale): string => {
     `## ${llms.faq}`,
     ...faq.items.map((item) => `### ${item.question}\n${item.answer}`),
     `# ${llms.blog}`,
-    ...getPosts(locale).map((post) => postToMarkdown(post, locale)),
+    ...posts.map((post) => postToMarkdown(post, locale)),
   ].join("\n\n");
 };

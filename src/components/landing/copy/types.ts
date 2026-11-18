@@ -246,6 +246,7 @@ export interface FooterCopy {
   readonly documentsNote: string;
   readonly contactsTitle: string;
   readonly leaveRequest: string;
+  readonly claudeLink: string;
   readonly rights: string;
   readonly tagline: string;
   readonly documents: Readonly<Record<FooterDocumentId, string>>;
@@ -267,6 +268,10 @@ export interface BlogIndexCopy {
   readonly ctaAccent: string;
   readonly ctaText: string;
   readonly ctaButton: string;
+  readonly claudeKicker: string;
+  readonly claudeTitle: string;
+  readonly claudeText: string;
+  readonly claudeButton: string;
 }
 
 export interface BlogArticleCopy {

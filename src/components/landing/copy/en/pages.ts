@@ -41,6 +41,7 @@ export const EN_FOOTER: FooterCopy = {
   documentsNote: "Legal documents are available in Ukrainian.",
   contactsTitle: "Contacts",
   leaveRequest: "Leave a request",
+  claudeLink: "Calls4U for Claude",
   rights: "All rights reserved.",
   tagline: "Built so your managers can focus on sales.",
   documents: {
@@ -155,6 +156,10 @@ export const EN_BLOG_PAGES: BlogPagesCopy = {
     ctaText:
       "Enter your number on the home page and the agent will call in 20 seconds to show how a conversation with your customers sounds.",
     ctaButton: "Start a test call",
+    claudeKicker: "Integration",
+    claudeTitle: "Calls4U for Claude",
+    claudeText: "Review calls, set up agents and start campaigns right from the Claude chat.",
+    claudeButton: "How to connect",
   },
   article: {
     crumbsLabel: "Breadcrumb",

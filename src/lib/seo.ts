@@ -25,11 +25,11 @@ export const buildOgImage = (alt: string) =>
     alt,
   }) as const;
 
-export const buildOgLocales = (locale: Locale) => ({
+export const buildOgLocales = (locale: Locale, available: readonly Locale[] = LOCALES) => ({
   locale: LOCALE_META[locale].ogLocale,
-  alternateLocale: LOCALES.filter((candidate) => candidate !== locale).map(
-    (candidate) => LOCALE_META[candidate].ogLocale
-  ),
+  alternateLocale: available
+    .filter((candidate) => candidate !== locale)
+    .map((candidate) => LOCALE_META[candidate].ogLocale),
 });
 
 export const isoDate = (value: string): string => new Date(value).toISOString();

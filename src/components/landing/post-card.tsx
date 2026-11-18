@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import type { BlogClientCopy } from "@/components/landing/copy/client-types";
-import type { BlogPost } from "@/content/blog/types";
+import type { BlogPostSummary } from "@/content/blog/types";
 import type { Locale } from "@/lib/i18n/config";
 import { formatMessage } from "@/lib/i18n/format";
 import { postPath } from "@/lib/i18n/paths";
@@ -11,7 +11,7 @@ import { Arrow, NoWrapAiTerms } from "@/components/landing/typography";
 export type PostCardVariant = "default" | "post--feat" | "post--row";
 
 interface PostCardProps {
-  post: BlogPost;
+  post: BlogPostSummary;
   locale: Locale;
   copy: BlogClientCopy;
   variant?: PostCardVariant;

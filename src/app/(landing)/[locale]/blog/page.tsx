@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BlogFilter } from "@/components/blog/blog-filter";
 import { buildBlogIndexGraph } from "@/components/blog/structured-data";
@@ -10,7 +11,7 @@ import { Arrow, MetaRow } from "@/components/landing/typography";
 import { JsonLd } from "@/components/landing/json-ld";
 import { getPosts } from "@/content/blog/posts";
 import { isLocale, type Locale } from "@/lib/i18n/config";
-import { blogPath, blogUrl, homePath, languageAlternates } from "@/lib/i18n/paths";
+import { blogPath, blogUrl, claudePath, homePath, languageAlternates } from "@/lib/i18n/paths";
 import { buildOgImage, buildOgLocales, INDEXABLE_ROBOTS } from "@/lib/seo";
 import { SITE_NAME } from "@/lib/site";
 
@@ -54,8 +55,9 @@ export default async function BlogPage({ params }: BlogPageProps) {
   return <BlogIndex locale={locale} />;
 }
 
-function BlogIndex({ locale }: { locale: Locale }) {
+async function BlogIndex({ locale }: { locale: Locale }) {
   const { blog } = getLandingCopy(locale);
+  const posts = await getPosts(locale);
   const page = blog.index;
 
   return (
@@ -76,7 +78,19 @@ function BlogIndex({ locale }: { locale: Locale }) {
                 {page.introLead}
               </p>
             </div>
-            <BlogFilter posts={getPosts(locale)} />
+            <BlogFilter posts={posts} />
+            <section className="blog-claude" aria-labelledby="blog-claude-title" data-r="">
+              <div>
+                <span className="mono">{page.claudeKicker}</span>
+                <h2 id="blog-claude-title" className="t2">
+                  {page.claudeTitle}
+                </h2>
+                <p>{page.claudeText}</p>
+              </div>
+              <Link className="btn btn-dark" href={claudePath(locale)}>
+                {page.claudeButton} <Arrow />
+              </Link>
+            </section>
             <div className="blog-cta" data-r="">
               <div>
                 <span className="mono">{page.ctaKicker}</span>
@@ -100,7 +114,7 @@ function BlogIndex({ locale }: { locale: Locale }) {
         </section>
       </main>
       <LandingFooter locale={locale} basePath={homePath(locale)} />
-      <JsonLd data={buildBlogIndexGraph(locale)} />
+      <JsonLd data={buildBlogIndexGraph(locale, posts)} />
     </>
   );
 }

@@ -16,7 +16,7 @@ export async function GET(
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
 
-  return new Response(buildLlmsFullTxt(locale), {
+  return new Response(await buildLlmsFullTxt(locale), {
     headers: { "Content-Type": "text/plain; charset=utf-8" },
   });
 }

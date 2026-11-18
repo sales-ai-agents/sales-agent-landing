@@ -1,8 +1,9 @@
 import { getLandingCopy } from "@/components/landing/copy";
-import { getPosts } from "@/content/blog/posts";
-import type { BlogPost } from "@/content/blog/types";
+import { CLAUDE_PAGE_UPDATED_AT } from "@/content/blog/claude";
+import type { ClaudePage } from "@/content/blog/claude/types";
+import type { BlogPost, BlogPostSummary } from "@/content/blog/types";
 import type { Locale } from "@/lib/i18n/config";
-import { blogUrl, homeUrl, postUrl } from "@/lib/i18n/paths";
+import { blogUrl, claudeUrl, homeUrl, postUrl } from "@/lib/i18n/paths";
 import { isoDate } from "@/lib/seo";
 import { SITE_OG_IMAGE, SITE_ORGANIZATION_ID, SITE_URL, SITE_WEBSITE_ID } from "@/lib/site";
 import {
@@ -60,6 +61,7 @@ export const buildPostGraph = (locale: Locale, post: BlogPost): object => {
       publisher: { "@id": SITE_ORGANIZATION_ID },
       inLanguage: locale,
       articleSection: post.category,
+      ...(post.keywords?.length ? { keywords: post.keywords.join(", ") } : {}),
       wordCount: countWords(post),
       timeRequired: `PT${post.readMinutes}M`,
       isPartOf: { "@type": "Blog", "@id": `${blogPageUrl}#blog`, name: copy.blog.name },
@@ -72,7 +74,37 @@ export const buildPostGraph = (locale: Locale, post: BlogPost): object => {
   ]);
 };
 
-export const buildBlogIndexGraph = (locale: Locale): object => {
+export const buildClaudePageGraph = (locale: Locale, page: ClaudePage): object => {
+  const copy = getLandingCopy(locale);
+  const url = claudeUrl(locale);
+  const pageId = `${url}#webpage`;
+  const breadcrumbId = `${url}#breadcrumb`;
+
+  return buildGraph([
+    buildOrganizationNode(copy.seo.organizationDescription),
+    buildWebsiteNode(locale),
+    {
+      "@type": "WebPage",
+      "@id": pageId,
+      url,
+      name: page.metaTitle,
+      description: page.metaDescription,
+      inLanguage: locale,
+      dateModified: isoDate(CLAUDE_PAGE_UPDATED_AT),
+      isPartOf: { "@id": SITE_WEBSITE_ID },
+      publisher: { "@id": SITE_ORGANIZATION_ID },
+      breadcrumb: { "@id": breadcrumbId },
+      primaryImageOfPage: { "@type": "ImageObject", url: OG_IMAGE_URL },
+    },
+    buildBreadcrumbNode(breadcrumbId, [
+      { name: copy.seo.breadcrumbHome, url: homeUrl(locale) },
+      { name: copy.blog.index.heading, url: blogUrl(locale) },
+      { name: page.title, url },
+    ]),
+  ]);
+};
+
+export const buildBlogIndexGraph = (locale: Locale, posts: readonly BlogPostSummary[]): object => {
   const copy = getLandingCopy(locale);
   const url = blogUrl(locale);
   const pageId = `${url}#webpage`;
@@ -99,7 +131,7 @@ export const buildBlogIndexGraph = (locale: Locale): object => {
       name: copy.blog.name,
       inLanguage: locale,
       publisher: { "@id": SITE_ORGANIZATION_ID },
-      blogPost: getPosts(locale).map((post) => ({
+      blogPost: posts.map((post) => ({
         "@type": "BlogPosting",
         "@id": `${postUrl(locale, post.slug)}#article`,
         headline: post.title,

@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site";
 
-const PRIVATE_PATHS = ["/dashboard/", "/api/"];
+const PRIVATE_PATHS = ["/dashboard/", "/api/", "/internal/"];
 const AUTH_PATHS = [
   "/sign-in/",
   "/sign-up/",

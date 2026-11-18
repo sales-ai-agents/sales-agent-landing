@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useLandingCopy } from "@/components/landing/copy/provider";
-import type { BlogPost } from "@/content/blog/types";
+import type { BlogPostSummary } from "@/content/blog/types";
 import { PostCard } from "@/components/landing/post-card";
 
 interface BlogFilterProps {
-  posts: readonly BlogPost[];
+  posts: readonly BlogPostSummary[];
 }
 
 export function BlogFilter({ posts }: BlogFilterProps) {

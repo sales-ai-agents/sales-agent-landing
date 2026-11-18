@@ -12,6 +12,7 @@ import {
 } from "@/components/landing/data";
 import { FormDialogTrigger } from "@/components/landing/form-dialog-trigger";
 import type { Locale } from "@/lib/i18n/config";
+import { claudePath } from "@/lib/i18n/paths";
 import { SITE_SOCIAL } from "@/lib/site";
 
 interface LandingFooterProps {
@@ -46,6 +47,7 @@ export function LandingFooter({ locale, basePath = "" }: LandingFooterProps) {
                 {client.nav.links[item.id]}
               </AnchorLink>
             ))}
+            <a href={claudePath(locale)}>{footer.claudeLink}</a>
           </div>
           <div>
             <span className="mono">{footer.documentsTitle}</span>

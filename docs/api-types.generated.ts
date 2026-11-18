@@ -6304,7 +6304,10 @@ export interface paths {
                     content: {
                         "application/json": {
                             ok?: boolean;
-                            /** @description пакети хвилин для «Купити хвилини» */
+                            /**
+                             * @deprecated
+                             * @description ЗНЯТО 16.11.2026: завжди порожній — замість пакетів баланс
+                             */
                             packs?: {
                                 key?: string;
                                 minutes?: number;
@@ -6359,11 +6362,19 @@ export interface paths {
                                 minutes?: number;
                                 /** @description 0 = без обмеження */
                                 agents?: number;
-                                /** @description скільки номерів можна підключити; 0 = без обмеження */
+                                /** @description скільки номерів включено; 0 = без обмеження */
                                 numbers?: number;
-                                /** @description з них від Calls4U (з пулу); на PRO 5 при numbers = 0 */
+                                /** @description з них від Calls4U (з пулу): Start 1, Pro/Pro+ 3. Понад це — $5/міс з балансу */
                                 pool_numbers?: number;
+                                /** @description До скількох доповнюється баланс при кожній оплаті періоду ($5 Start, $20 Pro). Не «додається»: лишилось $9 — докладаємо $11 до $20. Підпис на картці: «$20 балансу на дзвінки». */
+                                balance_usd?: number;
+                                /** @description тариф включає чат-бота (Pro+) */
+                                chatbot?: boolean;
+                                /** @description Тариф видно, але купити ще не можна (Pro+ — поки немає чат-бота). Кнопку малювати «Незабаром»; checkout на нього відповість `plan_unavailable`. */
+                                coming_soon?: boolean;
                             }[];
+                            /** @description скільки зараз на балансі */
+                            balance_usd?: number;
                         };
                     };
                 };
@@ -6663,8 +6674,15 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Купити пакет хвилин
-         * @description Екран «Купити хвилини». Пакети — у `GET /app/billing/plans` → `packs`.
+         * Купити пакет хвилин (ЗНЯТО 16.11.2026)
+         * @deprecated
+         * @description **Пакетів більше немає — замість них баланс** (`POST
+         *     /app/billing/balance/topup`). Ручка відповідає `410
+         *     packs_discontinued`, а `packs` у `GET /app/billing/plans` порожній.
+         *     Уже куплені хвилини (`bonus_minutes`) лишаються в силі.
+         *
+         *     Як було раніше:
+         *     Екран «Купити хвилини». Пакети — у `GET /app/billing/plans` → `packs`.
          *     Той самий шлях, що й тариф: віддаємо `payment_url`, ведеш людину
          *     на WayForPay, вебхук зараховує.
          *
@@ -6718,6 +6736,15 @@ export interface paths {
                     };
                 };
                 401: components["responses"]["Unauthorized"];
+                /** @description `packs_discontinued` — пакетів більше немає (16.11.2026), поповнюйте баланс: `POST /app/billing/balance/topup` */
+                410: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
                 /** @description `payment_provider_error` */
                 502: {
                     headers: {
@@ -6822,7 +6849,7 @@ export interface paths {
                         };
                     };
                 };
-                /** @description unknown_plan — невідомий тариф */
+                /** @description `unknown_plan` — невідомий тариф · `plan_unavailable` — тариф зараз не продається: Pro+ (`coming_soon: true`, чекає чат-бота) або знятий з продажу BUSINESS (його можуть лише продовжити ті, у кого він уже є). */
                 400: {
                     headers: {
                         [name: string]: unknown;
@@ -6953,6 +6980,178 @@ export interface paths {
         };
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/app/billing/balance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Баланс — гроші на рахунку й куди вони пішли
+         * @description Баланс у доларах. Звідки береться:
+         *     * при кожній оплаті тарифу доповнюється **до** `plan_balance_usd`
+         *       ($5 Start, $20 Pro): лишилось $9 — докладаємо $11 до $20;
+         *     * поповнення клієнтом (`POST /app/billing/balance/topup`).
+         *
+         *     На що йде:
+         *     * хвилини, коли скінчились хвилини тарифу й куплених пакетів, — по
+         *       `minute_price_usd` за хвилину. Дзвінок пускається, поки на балансі
+         *       є хоч на одну хвилину; списання — після дзвінка, тож баланс може
+         *       трохи піти в мінус;
+         *     * кожен номер понад тариф — `extra_number_price_usd` на 30 днів.
+         *       Не вистачило на продовження — номер зупиняється (`is_active:
+         *       false`, `extra_suspended: true` у списку номерів) і оживає сам
+         *       після поповнення.
+         *
+         *     `ledger` — останні 50 рухів, найновіші зверху. `kind`:
+         *     `plan_refill` (доповнення тарифом) · `topup` (поповнення) ·
+         *     `minutes` (хвилини понад тариф, `minutes` — скільки) · `number`
+         *     (номер понад тариф) · `admin` (ручне коригування).
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            ok?: boolean;
+                            /** @example 12.4 */
+                            balance_usd?: number;
+                            /** @example 0.1 */
+                            minute_price_usd?: number;
+                            /** @example 5 */
+                            extra_number_price_usd?: number;
+                            /** @description до скількох доповнює тариф; 0 — тріал */
+                            plan_balance_usd?: number;
+                            /**
+                             * @example [
+                             *       5,
+                             *       10,
+                             *       20,
+                             *       50,
+                             *       100
+                             *     ]
+                             */
+                            topup_options_usd?: number[];
+                            ledger?: {
+                                id?: number;
+                                /** @description + зарахування, − списання */
+                                amount_usd?: number;
+                                /** @enum {string} */
+                                kind?: "plan_refill" | "topup" | "minutes" | "number" | "admin";
+                                minutes?: number | null;
+                                /** @example 7 хв понад тариф × $0.1 */
+                                note?: string;
+                                balance_after_usd?: number;
+                                created_at?: string;
+                            }[];
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/app/billing/balance/topup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Поповнити баланс
+         * @description Рахунок у гривнях за курсом НБУ на суму в доларах — як і тарифи. Далі так само, як з оплатою тарифу: `payment_url` відкрити, після повернення опитувати `/app/billing/status?invoice_id=…`. Гроші зараховує вебхук WayForPay; зупинені номери понад тариф після цього оживають самі, якщо вистачає.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @enum {integer} */
+                        amount_usd: 5 | 10 | 20 | 50 | 100;
+                        return_url?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Рахунок створено */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            ok?: boolean;
+                            invoice_id?: string;
+                            payment_url?: string;
+                            amount_usd?: number;
+                            amount_uah?: number;
+                            usd_rate?: number;
+                        };
+                    };
+                };
+                /** @description `bad_amount` (з полем `allowed`) · `invalid_json` */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                /** @description `payment_provider_error` */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description `payments_unavailable` · `rate_unavailable` */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -7786,6 +7985,598 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/blog/posts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Опубліковані статті блогу (нові зверху)
+         * @description Публічно, без авторизації, CORS відкритий. Лише статті, які адмін
+         *     опублікував; чернеток тут немає ніколи.
+         *
+         *     Відповідь кешована: `Cache-Control: public, max-age=60,
+         *     stale-while-revalidate=600` і `ETag` — з `If-None-Match` прийде 304.
+         *     Статті, зашиті у фронт (missed-calls, scenarios, …), сюди не входять:
+         *     фронт показує їх разом із цими, а їхні слаги бекенд ніколи не займе.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    category?: "guides" | "economics" | "comparison" | "instructions" | "myths";
+                    limit?: number;
+                    offset?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            ok?: boolean;
+                            items?: components["schemas"]["BlogPostSummary"][];
+                            total?: number;
+                            limit?: number;
+                            offset?: number;
+                            /** @description Усі категорії з кількістю опублікованих — для фільтра «Усі · Гайди 2 · …» */
+                            categories?: {
+                                key?: string;
+                                label?: string;
+                                count?: number;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Не змінилось з `If-None-Match` */
+                304: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description `bad_category` — невідома категорія (у відповіді є `categories` — список дозволених) */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/blog/posts/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Одна опублікована стаття
+         * @description Стаття — типізовані блоки, ті самі, з яких зібрані статті сайту:
+         *     `lead` → `p.lead-p`, `h2` (з `id` = `section-N`, як у змісті),
+         *     `p`, `ul`, `quote` → `blockquote`, `formula` → `div.formula`,
+         *     `note` → `div.note`, `dialog` → `div.dialog`. Текст — звичайні
+         *     рядки без розмітки: рендерити як текст, не як HTML.
+         *
+         *     `related` — до трьох статей: спершу з тієї ж категорії.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    slug: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            ok?: boolean;
+                            post?: components["schemas"]["BlogPost"];
+                            related?: components["schemas"]["BlogPostSummary"][];
+                        };
+                    };
+                };
+                /** @description Не змінилось з `If-None-Match` */
+                304: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description `not_found` — немає такої опублікованої статті (чернетка, знята чи неіснуюча) → notFound() */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/blog/rss.xml": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * RSS 2.0 — 50 останніх статей
+         * @description `application/rss+xml`. `atom:link rel=self` вказує на
+         *     `https://www.calls4u.ai/blog/rss.xml` — зробіть туди rewrite на цю ручку.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description RSS */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/rss+xml": string;
+                    };
+                };
+                /** @description Не змінилось з `If-None-Match` */
+                304: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/blog/posts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Усі статті блогу, з чернетками
+         * @description Під `X-Admin-Token`. Основна модерація — кнопки в Telegram; це для адмінки.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    status?: "all" | "draft" | "published" | "rejected" | "archived";
+                    limit?: number;
+                    offset?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            ok?: boolean;
+                            items?: components["schemas"]["BlogAdminItem"][];
+                            total?: number;
+                        };
+                    };
+                };
+                /** @description `bad_status` */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description `forbidden` — невірний або відсутній X-Admin-Token */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description `admin_api_disabled` — ADMIN_API_TOKEN не заданий на сервері */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/blog/posts/{post_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Будь-яка стаття повністю (і чернетка) — для перегляду в адмінці
+         * @description Під `X-Admin-Token`. `post` — поля BlogAdminItem разом із BlogPost.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    post_id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            ok?: boolean;
+                            post?: components["schemas"]["BlogPost"];
+                        };
+                    };
+                };
+                /** @description `forbidden` */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description `not_found` */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description `admin_api_disabled` */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/blog/posts/{post_id}/{action}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Опублікувати, зняти з публікації або відхилити
+         * @description Під `X-Admin-Token`. Ті самі переходи, що й кнопки в Telegram:
+         *     `publish` (чернетка чи знята → на сайті), `unpublish` (→ знята),
+         *     `reject` (чернетка → відхилена). Після publish/unpublish бекенд сам
+         *     смикає revalidation сайту.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    post_id: number;
+                    action: "publish" | "unpublish" | "reject";
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            ok?: boolean;
+                            post?: components["schemas"]["BlogAdminItem"];
+                        };
+                    };
+                };
+                /** @description `bad_action` */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description `forbidden` */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description `not_found` */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description `bad_state` — стаття вже в іншому стані (поле `status`): хтось вирішив раніше */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description `admin_api_disabled` */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/blog/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Написати чернетку зараз
+         * @description Під `X-Admin-Token`. Відповідає одразу (`started: true`); стаття
+         *     пишеться 1–3 хвилини, картка з переглядом прийде адмінам у Telegram.
+         *     Без `topic` — наступна тема з черги (порожня — робот запропонує сам).
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        topic?: string;
+                        /** @enum {string} */
+                        category?: "guides" | "economics" | "comparison" | "instructions" | "myths";
+                    };
+                };
+            };
+            responses: {
+                /** @description OK — генерацію запущено */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description `invalid_json` · `bad_category` */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description `forbidden` */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description `busy` — уже пишеться інша стаття */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description `admin_api_disabled` */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/blog/topics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Черга тем
+         * @description Під `X-Admin-Token`. Теми від людей ідуть раніше за запропоновані роботом.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    status?: "queued" | "generating" | "used" | "dropped";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description `bad_status` */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description `forbidden` */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description `admin_api_disabled` */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        /**
+         * Додати тему в чергу
+         * @description Під `X-Admin-Token`. Те саме, що `/blog_topic` у Telegram.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        topic: string;
+                        /** @enum {string} */
+                        category?: "guides" | "economics" | "comparison" | "instructions" | "myths";
+                    };
+                };
+            };
+            responses: {
+                /** @description OK — `id` нової теми */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description `invalid_json` · `bad_topic` · `bad_category` */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description `forbidden` */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description `admin_api_disabled` */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -7929,6 +8720,86 @@ export interface components {
                 value?: string;
             }[];
         } | null;
+        /**
+         * @description Обкладинка — один із наявних видів фронту (клас `cv cv-{variant}`).
+         *     Поля за видом: `econ` — big + caption; `five` — big + bubbles (agent,
+         *     client); `vs` — left + right; `myth`, `script`, `photo` — big
+         *     (для `photo` картинку бере фронт). `label` — підпис зверху, завжди.
+         */
+        BlogCover: {
+            /** @enum {string} */
+            variant?: "econ" | "five" | "vs" | "myth" | "script" | "photo";
+            label?: string;
+            big?: string;
+            caption?: string;
+            left?: string;
+            right?: string;
+            bubbles?: {
+                /** @enum {string} */
+                role?: "agent" | "client";
+                text?: string;
+            }[];
+        };
+        BlogBlock: {
+            /** @enum {string} */
+            type: "lead" | "h2" | "p" | "ul" | "quote" | "formula" | "note" | "dialog";
+            /** @description усі типи, крім ul і dialog */
+            text?: string;
+            /** @description лише h2: section-1, section-2, … — якір для змісту */
+            id?: string;
+            /** @description лише ul */
+            items?: string[];
+            /** @description лише dialog */
+            messages?: {
+                /** @enum {string} */
+                role?: "agent" | "client";
+                text?: string;
+            }[];
+        };
+        BlogPostSummary: {
+            slug?: string;
+            /** @description абсолютна канонічна адреса на сайті */
+            url?: string;
+            title?: string;
+            /** @description meta description і підзаголовок картки */
+            description?: string;
+            /** @enum {string} */
+            category?: "guides" | "economics" | "comparison" | "instructions" | "myths";
+            /** @description Гайди · Економіка · Порівняння · Інструкції · Міфи */
+            category_label?: string;
+            cover?: components["schemas"]["BlogCover"];
+            reading_minutes?: number;
+            author?: string;
+            /** Format: date-time */
+            published_at?: string | null;
+            /** Format: date-time */
+            updated_at?: string;
+        };
+        BlogPost: components["schemas"]["BlogPostSummary"] & {
+            blocks?: components["schemas"]["BlogBlock"][];
+            /** @description Зміст — `id` і текст кожного h2 */
+            toc?: {
+                id?: string;
+                label?: string;
+            }[];
+            /** @description для meta keywords і JSON-LD */
+            keywords?: string[];
+            words?: number;
+        };
+        BlogAdminItem: components["schemas"]["BlogPostSummary"] & {
+            id?: number;
+            /** @enum {string} */
+            status?: "draft" | "published" | "rejected" | "archived";
+            topic?: string;
+            words?: number;
+            /** @description auto — розклад; requested — попросили (Telegram чи адмінка) */
+            source?: string;
+            model?: string;
+            reviewed_by?: string;
+            review_note?: string;
+            /** Format: date-time */
+            created_at?: string;
+        };
         Error: {
             /** @constant */
             ok?: false;

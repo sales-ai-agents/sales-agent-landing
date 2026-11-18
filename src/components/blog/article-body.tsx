@@ -2,7 +2,7 @@ import { Fragment } from "react";
 import type { PostBlock } from "@/content/blog/types";
 import { NoWrapAiTerms } from "@/components/landing/typography";
 
-const getHeadingId = (position: number): string => `section-${position}`;
+export const getHeadingId = (position: number): string => `section-${position}`;
 
 export const getHeadings = (blocks: readonly PostBlock[]): { id: string; label: string }[] =>
   blocks

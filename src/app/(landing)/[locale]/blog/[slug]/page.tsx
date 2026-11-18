@@ -2,20 +2,27 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArticleBody, getHeadings } from "@/components/blog/article-body";
+import { ArticleBottomCta, ArticleSideCta } from "@/components/blog/article-cta";
 import { ArticleToc } from "@/components/blog/article-toc";
 import { CopyLinkButton } from "@/components/blog/copy-link-button";
 import { ReadingProgress } from "@/components/blog/reading-progress";
 import { buildPostGraph } from "@/components/blog/structured-data";
-import { trackProps } from "@/components/landing/click-tracking";
 import { getLandingCopy } from "@/components/landing/copy";
 import { FinalCtaSection } from "@/components/landing/final-cta-section";
 import { LandingFooter } from "@/components/landing/landing-footer";
 import { LandingNav } from "@/components/landing/landing-nav";
 import { PostCard } from "@/components/landing/post-card";
 import { PostCoverArt } from "@/components/landing/post-cover";
-import { Arrow, MetaRow, NoWrapAiTerms } from "@/components/landing/typography";
+import { MetaRow, NoWrapAiTerms } from "@/components/landing/typography";
 import { JsonLd } from "@/components/landing/json-ld";
-import { formatPostDate, getPostBySlug, getPostSlugs, getRelatedPosts } from "@/content/blog/posts";
+import {
+  formatPostDate,
+  getEmbeddedSlugs,
+  getPostBySlug,
+  getPostLocales,
+  getPosts,
+  getRelatedPosts,
+} from "@/content/blog/posts";
 import { isLocale } from "@/lib/i18n/config";
 import { formatMessage } from "@/lib/i18n/format";
 import { blogPath, homePath, languageAlternates, postPath, postUrl } from "@/lib/i18n/paths";
@@ -28,17 +35,18 @@ interface ArticlePageProps {
   params: Promise<{ locale: string; slug: string }>;
 }
 
-export const dynamicParams = false;
+export const dynamicParams = true;
 
 export function generateStaticParams(): { slug: string }[] {
-  return getPostSlugs().map((slug) => ({ slug }));
+  return getEmbeddedSlugs().map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
   const { locale, slug } = await params;
   if (!isLocale(locale)) return {};
-  const post = getPostBySlug(locale, slug);
+  const post = await getPostBySlug(locale, slug);
   if (!post) return {};
+  const locales = getPostLocales(slug);
   const image = buildOgImage(getLandingCopy(locale).seo.ogImageAlt);
 
   return {
@@ -46,8 +54,9 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
     description: post.excerpt,
     alternates: {
       canonical: postPath(locale, slug),
-      languages: languageAlternates((candidate) => postUrl(candidate, slug)),
+      languages: languageAlternates((candidate) => postUrl(candidate, slug), locales),
     },
+    keywords: post.keywords ? [...post.keywords] : undefined,
     robots: INDEXABLE_ROBOTS,
     openGraph: {
       type: "article",
@@ -60,7 +69,7 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
       modifiedTime: post.updatedAt,
       section: post.category,
       authors: [SITE_NAME],
-      ...buildOgLocales(locale),
+      ...buildOgLocales(locale, locales),
     },
     twitter: {
       card: "summary_large_image",
@@ -74,13 +83,13 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const { locale, slug } = await params;
   if (!isLocale(locale)) notFound();
-  const post = getPostBySlug(locale, slug);
+  const post = await getPostBySlug(locale, slug);
   if (!post) notFound();
 
+  const relatedPosts = getRelatedPosts(await getPosts(locale), post, RELATED_POSTS_COUNT);
   const copy = getLandingCopy(locale);
   const article = copy.blog.article;
   const readTime = formatMessage(copy.client.blog.readTime, { minutes: post.readMinutes });
-  const startTest = `${homePath(locale)}#top`;
 
   return (
     <>
@@ -116,32 +125,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           <ArticleToc items={getHeadings(post.blocks)} />
           <article className="prose" data-article-body="">
             <ArticleBody blocks={post.blocks} speakers={copy.client.speakers} />
-            <div className="art-cta">
-              <span className="mono">{article.bottomCtaKicker}</span>
-              <b>{article.bottomCtaTitle}</b>
-              <p>{article.bottomCtaText}</p>
-              <a
-                className="btn btn-white"
-                href={startTest}
-                {...trackProps("blog_cta_click", { location: "article_bottom", slug })}
-              >
-                {article.ctaButton} <Arrow />
-              </a>
-            </div>
+            <ArticleBottomCta locale={locale} slug={slug} />
           </article>
           <aside className="art-side">
-            <div className="side-cta">
-              <span className="mono">{article.sideCtaKicker}</span>
-              <b>{article.sideCtaTitle}</b>
-              <p>{article.sideCtaText}</p>
-              <a
-                className="btn btn-white"
-                href={startTest}
-                {...trackProps("blog_cta_click", { location: "article_side", slug })}
-              >
-                {article.sideCtaButton} <Arrow />
-              </a>
-            </div>
+            <ArticleSideCta locale={locale} slug={slug} />
             <div className="share">
               <CopyLinkButton />
             </div>
@@ -155,7 +142,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               right={<Link href={blogPath(locale)}>{article.allArticles}</Link>}
             />
             <div className="posts">
-              {getRelatedPosts(locale, post, RELATED_POSTS_COUNT).map((related) => (
+              {relatedPosts.map((related) => (
                 <PostCard
                   key={related.slug}
                   post={related}

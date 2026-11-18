@@ -22,3 +22,5 @@ export const section = (
 ): LegalSection => ({ heading, blocks });
 
 export const UPDATED_NOTE = "Дата останнього оновлення: у процесі публікації";
+
+export const updatedOn = (date: string): string => `Дата останнього оновлення: ${date}`;

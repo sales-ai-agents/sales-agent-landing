@@ -41,6 +41,7 @@ export const UK_FOOTER: FooterCopy = {
   documentsNote: "",
   contactsTitle: "Контакти",
   leaveRequest: "Залишити заявку",
+  claudeLink: "Calls4U у Claude",
   rights: "Всі права захищені.",
   tagline: "Зроблено, щоб ваші менеджери займались продажами.",
   documents: {
@@ -155,6 +156,11 @@ export const UK_BLOG_PAGES: BlogPagesCopy = {
     ctaText:
       "Введіть номер на головній — агент зателефонує за 20 секунд і покаже, як звучить розмова з вашими клієнтами.",
     ctaButton: "Запустити тестовий дзвінок",
+    claudeKicker: "Інтеграція",
+    claudeTitle: "Calls4U у Claude",
+    claudeText:
+      "Переглядайте дзвінки, налаштовуйте агентів і запускайте обдзвони просто з чату Claude.",
+    claudeButton: "Як підключити",
   },
   article: {
     crumbsLabel: "Навігаційний ланцюжок",

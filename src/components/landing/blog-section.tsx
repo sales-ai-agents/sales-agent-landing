@@ -15,8 +15,8 @@ interface BlogSectionProps {
   cardCopy: BlogClientCopy;
 }
 
-export function BlogSection({ locale, copy, cardCopy }: BlogSectionProps) {
-  const [featured, ...rest] = getPosts(locale).slice(0, HOME_POST_COUNT);
+export async function BlogSection({ locale, copy, cardCopy }: BlogSectionProps) {
+  const [featured, ...rest] = (await getPosts(locale)).slice(0, HOME_POST_COUNT);
 
   return (
     <section className="sec how" id="blog">
