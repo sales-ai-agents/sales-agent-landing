@@ -29,7 +29,14 @@ export function LandingFooter({ locale, basePath = "" }: LandingFooterProps) {
         <div className="foot-top">
           <div>
             <AnchorLink href={basePath ? basePath : "#top"} className="foot-logo">
-              <Image className="ic" src="/image/Logo.svg" alt="" width={39} height={40} />
+              <Image
+                className="ic"
+                src="/image/Logo.svg"
+                alt="Calls4U logo"
+                aria-hidden="true"
+                width={39}
+                height={40}
+              />
               <Image
                 className="word"
                 src="/image/calls4u.svg"

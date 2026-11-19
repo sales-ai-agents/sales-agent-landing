@@ -17,7 +17,7 @@ export function LegalHeader() {
           />
           <Image
             src="/image/calls4u.svg"
-            alt=""
+            alt="Calls4U"
             width={90}
             height={24}
             className="hidden h-auto w-auto sm:block"

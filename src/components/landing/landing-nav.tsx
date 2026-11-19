@@ -46,7 +46,14 @@ export function LandingNav({ basePath = "" }: LandingNavProps) {
     <header className={cn("nav", scrolled && "scrolled", hidden && "hide")}>
       <div className="wrap">
         <AnchorLink href={topHref} className="logo" aria-label="Calls4U">
-          <Image src="/image/Logo.svg" alt="" width={39} height={40} loading="eager" />
+          <Image
+            src="/image/Logo.svg"
+            alt="Calls4U logo"
+            aria-hidden="true"
+            width={39}
+            height={40}
+            loading="eager"
+          />
           <Image
             className="word"
             src="/image/calls4u.svg"
