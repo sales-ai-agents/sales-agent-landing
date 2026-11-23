@@ -9,7 +9,7 @@ import type {
 } from "@/components/landing/copy/types";
 
 export const UK_SEO: SeoCopy = {
-  title: "Calls4U: голосовий ШІ-агент для дзвінків і CRM",
+  title: "Calls4U — голосовий ШІ-агент для дзвінків",
   description:
     "Calls4U — голосовий ШІ-агент: підтверджує записи, нагадує про візити, уточнює замовлення й передає результат у CRM. Тестовий дзвінок за 20 секунд.",
   socialDescription:

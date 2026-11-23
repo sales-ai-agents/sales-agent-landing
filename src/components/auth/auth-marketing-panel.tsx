@@ -89,7 +89,7 @@ export function AuthMarketingPanel({ variant = "sign-in" }: AuthMarketingPanelPr
   return (
     <aside className="from-card via-primary/5 to-primary/20 hidden flex-col gap-6 bg-linear-to-br p-10 lg:flex">
       <Link href="/" prefetch={false} className="flex items-center gap-3" aria-label="Calls4U">
-        <Image src="/image/Logo.svg" alt="" width={34} height={34} />
+        <Image src="/image/Logo.svg" alt="Calls4U" width={34} height={34} />
         <Image src="/image/calls4u.svg" alt="calls4u" width={90} height={21} />
       </Link>
       <h2 className="font-heading [&_em]:text-primary text-4xl [&_em]:not-italic">{heading}</h2>

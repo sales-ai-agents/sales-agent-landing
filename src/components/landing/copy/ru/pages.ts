@@ -9,7 +9,7 @@ import type {
 } from "@/components/landing/copy/types";
 
 export const RU_SEO: SeoCopy = {
-  title: "Calls4U: голосовой ИИ-агент для звонков и CRM",
+  title: "Calls4U — голосовой ИИ-агент для звонков",
   description:
     "Calls4U — голосовой ИИ-агент: подтверждает записи, напоминает о визитах, уточняет заказы и передаёт результат в CRM. Тестовый звонок за 20 секунд.",
   socialDescription:

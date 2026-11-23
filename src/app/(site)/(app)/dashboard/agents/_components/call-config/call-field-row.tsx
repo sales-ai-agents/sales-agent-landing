@@ -47,10 +47,10 @@ export const CallFieldRow = ({
   const errorId = `call-field-error-${field.id}`;
 
   return (
-    <li className="border-border bg-background flex flex-col gap-3 rounded-lg border p-3 lg:flex-row lg:items-start">
+    <li className="border-border bg-background flex flex-col gap-3 rounded-lg border p-3 lg:flex-row lg:items-center">
       <div className="min-w-0 flex-1 space-y-1">
         <Input
-          className="h-8"
+          className="h-11"
           value={field.label}
           maxLength={CALL_FIELD_LABEL_MAX_LENGTH}
           placeholder="Назва поля"

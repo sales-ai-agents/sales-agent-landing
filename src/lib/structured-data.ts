@@ -36,7 +36,6 @@ export const buildOrganizationNode = (description: string): object => ({
   telephone: SITE_CONTACT.phone,
   sameAs: SITE_SAME_AS,
   knowsLanguage: LOCALES,
-  areaServed: { "@type": "Country", name: "Ukraine" },
   contactPoint: [
     {
       "@type": "ContactPoint",

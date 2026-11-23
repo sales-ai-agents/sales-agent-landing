@@ -50,6 +50,7 @@ export const buildLandingGraph = (locale: Locale): object => {
     thumbnailUrl: `${SITE_URL}${VIDEO_THUMBNAIL_PATH}`,
     uploadDate: VIDEO_UPLOADED_AT,
     duration: VIDEO_DURATION,
+    contentUrl: `https://www.youtube.com/watch?v=${VIDEO_ID}`,
     embedUrl: `https://www.youtube.com/embed/${VIDEO_ID}`,
     inLanguage: "uk",
     publisher: { "@id": SITE_ORGANIZATION_ID },

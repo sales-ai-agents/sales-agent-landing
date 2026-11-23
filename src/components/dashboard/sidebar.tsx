@@ -65,7 +65,7 @@ export const Sidebar = () => {
   return (
     <aside className="bg-card sticky top-0 hidden h-screen w-64 shrink-0 flex-col gap-6 p-5 md:flex">
       <Link href="/dashboard" className="flex h-10 items-center gap-3 px-2" aria-label="Calls4U">
-        <Image src="/image/Logo.svg" alt="" width={30} height={30} />
+        <Image src="/image/Logo.svg" alt="Calls4U" width={30} height={30} />
         <Image src="/image/calls4u.svg" alt="calls4u" width={80} height={19} />
       </Link>
       <nav
