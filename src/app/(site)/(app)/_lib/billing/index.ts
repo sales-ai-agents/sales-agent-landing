@@ -5,6 +5,5 @@ export {
   getPlanCapabilities,
   formatIntegrations,
   formatSupport,
-  POPULAR_PLAN_KEY,
   DEFAULT_AUTO_RENEW,
 } from "./plan-capabilities";

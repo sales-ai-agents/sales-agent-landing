@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { QueryKey, UseQueryResult } from "@tanstack/react-query";
 
-import { apiGet, apiPost, apiDelete } from "@/lib/api-client";
+import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api-client";
 import { API_ENDPOINTS, apiUrl } from "@/lib/api-config";
 import { resolvePaymentOutcome } from "@dashboard/payment-status";
 import type {
@@ -13,8 +13,10 @@ import type {
   PaymentStatusResponse,
   PaymentHistoryResponse,
   BillingPaymentMethodResponse,
-  TopUpRequest,
-  TopUpResponse,
+  BalanceAlertRequest,
+  BalanceResponse,
+  BalanceTopUpRequest,
+  BalanceTopUpResponse,
 } from "@dashboard/types";
 
 const STATUS_POLL_INTERVAL_MS = 5000;
@@ -67,12 +69,29 @@ export const useCheckout = () => {
   });
 };
 
-export const useTopUp = () => {
+const BALANCE_KEY = ["billing", "balance"] as const;
+
+export const useBalance = () => {
+  return useQuery<BalanceResponse>({
+    queryKey: BALANCE_KEY,
+    queryFn: () => apiGet<BalanceResponse>(API_ENDPOINTS.APP_BILLING_BALANCE),
+  });
+};
+
+export const useBalanceTopUp = () => {
+  return useMutation<BalanceTopUpResponse, Error, BalanceTopUpRequest>({
+    mutationFn: (params) =>
+      apiPost<BalanceTopUpResponse>(API_ENDPOINTS.APP_BILLING_BALANCE_TOPUP, params),
+  });
+};
+
+export const useUpdateBalanceAlert = () => {
   const queryClient = useQueryClient();
-  return useMutation<TopUpResponse, Error, TopUpRequest>({
-    mutationFn: (params) => apiPost<TopUpResponse>(API_ENDPOINTS.APP_BILLING_TOPUP, params),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["billing", "history"] });
+
+  return useMutation<BalanceResponse, Error, BalanceAlertRequest>({
+    mutationFn: (params) => apiPatch<BalanceResponse>(API_ENDPOINTS.APP_BILLING_BALANCE, params),
+    onSuccess: (data) => {
+      queryClient.setQueryData(BALANCE_KEY, data);
     },
   });
 };

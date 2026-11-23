@@ -1,20 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { Bot, Info, Pause, Play, Rocket } from "lucide-react";
-
+import { Info, Mic, Pause, Pencil, PhoneOutgoing, Play } from "lucide-react";
 import {
-  Badge,
   Button,
-  buttonVariants,
-  Progress,
+  Card,
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
+  buttonVariants,
 } from "@/components/ui";
+import { VoiceWave } from "@/components/dashboard";
+import { cn, formatMinutesUsed, formatNumber, formatTimeSaved } from "@/lib/utils";
 import type { Agent } from "@dashboard/types";
-import { cn, formatNumber, formatTimeSaved, formatMinutesUsed } from "@/lib/utils";
+import { AgentIdentity } from "./agent-identity";
 
 export interface AgentCardProps {
   agent: Agent;
@@ -23,140 +22,126 @@ export interface AgentCardProps {
   onStartCampaign: () => void;
 }
 
-interface StatItemProps {
-  label: string;
-  value: string;
-  highlight?: boolean;
-}
-
-const StatItem = ({ label, value, highlight = false }: StatItemProps) => {
-  return (
-    <div className="min-w-0">
-      <p className="text-muted-foreground text-xs">{label}</p>
-      <p className={`truncate text-lg font-semibold ${highlight ? "text-primary" : ""}`}>{value}</p>
-    </div>
-  );
-};
-
-const TEST_TOOLTIP_READY = "Дзвінок надійде на ваш номер — клієнтам ми не телефонуватимемо";
+const TEST_TOOLTIP_READY = "Дзвінок надійде на ваш номер - клієнтам ми не телефонуватимемо";
 
 const CAN_TEST_REASON_LABELS: Record<string, string> = {
   no_instructions: "Додайте інструкції агенту, щоб здійснити тестовий дзвінок",
-  minutes_exhausted: "Хвилини вичерпано — поповніть тариф",
+  minutes_exhausted: "Хвилини вичерпано — поповніть рахунок",
   plan_expired: "Строк тарифу вийшов — продовжіть підписку",
   calls_blocked: "Дзвінки зупинені — зверніться до підтримки",
 };
 
+const WAVE_BARS = 40;
+const PERCENT = 100;
+
+const Metric = ({ label, value }: { label: string; value: string }) => (
+  <div className="flex flex-col gap-1">
+    <span className="caption text-muted-foreground">{label}</span>
+    <b className="font-heading text-2xl">{value}</b>
+  </div>
+);
+
+const AgentMetrics = ({ stats }: { stats: Agent["stats"] }) => {
+  const efficiency = stats?.efficiency_pct;
+  const minutesShare = stats?.minutes_share_pct;
+  return (
+    <>
+      <div className="grid grid-cols-3 gap-3">
+        <Metric label="Усього дзвінків" value={formatNumber(stats?.total_calls ?? 0)} />
+        <Metric
+          label="Ефективність"
+          value={efficiency != null ? `${Math.round(efficiency)}%` : "—"}
+        />
+        <Metric label="Заощаджено часу" value={formatTimeSaved(stats?.talk_minutes_saved ?? 0)} />
+      </div>
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-muted-foreground">Використано хвилин</span>
+          <span className="font-mono">
+            <b>{formatMinutesUsed(stats?.minutes_used ?? 0)}</b>{" "}
+            <span className="text-muted-foreground">
+              · {minutesShare != null ? `${Math.round(minutesShare)}%` : "—"}
+            </span>
+          </span>
+        </div>
+        <VoiceWave fraction={(minutesShare ?? 0) / PERCENT} bars={WAVE_BARS} />
+      </div>
+    </>
+  );
+};
+
+const TestButton = ({
+  canTest,
+  tooltip,
+  onTest,
+}: {
+  canTest: boolean;
+  tooltip: string;
+  onTest: () => void;
+}) => (
+  <Tooltip>
+    <TooltipTrigger
+      render={
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          aria-disabled={!canTest}
+          onClick={canTest ? onTest : undefined}
+          className={cn(!canTest && "cursor-default opacity-50")}
+        />
+      }
+    >
+      <Mic aria-hidden="true" />
+      Тестувати
+      <Info className="size-3 opacity-60" aria-hidden="true" />
+    </TooltipTrigger>
+    <TooltipContent>{tooltip}</TooltipContent>
+  </Tooltip>
+);
+
 export const AgentCard = ({ agent, onToggle, onTest, onStartCampaign }: AgentCardProps) => {
   const isActive = agent.is_active;
-  const stats = agent.stats;
   const canTest = agent.can_test ?? false;
   const testReason = agent.can_test_reason ?? null;
-
-  const totalCalls = stats?.total_calls ?? 0;
-  const efficiencyPct = stats?.efficiency_pct;
-  const minutesUsed = stats?.minutes_used ?? 0;
-  const minutesSharePct = stats?.minutes_share_pct;
-  const talkMinutesSaved = stats?.talk_minutes_saved ?? 0;
-
-  const efficiencyLabel =
-    efficiencyPct !== null && efficiencyPct !== undefined ? `${Math.round(efficiencyPct)}%` : "—";
-  const minutesShareLabel =
-    minutesSharePct !== null && minutesSharePct !== undefined
-      ? `${Math.round(minutesSharePct)}%`
-      : "0%";
+  const tooltip = canTest
+    ? TEST_TOOLTIP_READY
+    : ((testReason && CAN_TEST_REASON_LABELS[testReason]) ??
+      CAN_TEST_REASON_LABELS.no_instructions);
 
   return (
-    <div className="border-border bg-background rounded-2xl border p-5">
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
-          <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-lg">
-            <Bot className="text-primary h-5 w-5" />
-          </div>
-          <div>
-            <p className="text-sm font-semibold">{agent.name}</p>
-          </div>
-        </div>
-        <Badge
-          variant="outline"
-          className={cn(
-            "shrink-0",
-            isActive ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive"
-          )}
-        >
-          <span className={cn("mr-1", isActive ? "text-success" : "text-destructive")}>●</span>
-          {isActive ? "Активний" : "Неактивний"}
-        </Badge>
-      </div>
-
-      <div className="mt-4 grid grid-cols-3 gap-2">
-        <StatItem label="Усього дзвінків" value={formatNumber(totalCalls)} />
-        <StatItem label="Ефективність" value={efficiencyLabel} highlight />
-        <StatItem label="Заощаджено часу" value={formatTimeSaved(talkMinutesSaved)} />
-      </div>
-
-      <div className="mt-4">
-        <p className="text-muted-foreground text-xs">Використано хвилин</p>
-        <div className="mt-1 flex items-center gap-3">
-          <span className="shrink-0 text-sm font-semibold">{formatMinutesUsed(minutesUsed)}</span>
-          <Progress value={minutesSharePct ?? 0} className="w-full" />
-          <span className="text-muted-foreground shrink-0 text-xs">{minutesShareLabel}</span>
-        </div>
-      </div>
-
-      <div className="mt-4 flex flex-wrap gap-2">
+    <Card className="flex flex-col gap-5 p-6">
+      <AgentIdentity name={agent.name} id={agent.id} isActive={isActive} />
+      <AgentMetrics stats={agent.stats} />
+      <div className="mt-auto flex flex-wrap items-center gap-2">
         <Link
+          className={buttonVariants({ variant: "ghost", size: "sm" })}
           href={`/dashboard/agents/${agent.id}/edit`}
-          className={buttonVariants({ variant: "outline", size: "sm" })}
         >
+          <Pencil aria-hidden="true" />
           Редагувати
         </Link>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  variant="outline"
-                  size="sm"
-                  aria-disabled={!canTest}
-                  onClick={canTest ? onTest : undefined}
-                  className={cn(!canTest && "bg-muted cursor-default opacity-50")}
-                >
-                  Тестувати
-                  {!canTest && (
-                    <Info className="text-muted-foreground ml-1 size-3.5" aria-hidden="true" />
-                  )}
-                </Button>
-              }
-            />
-            <TooltipContent side="bottom">
-              {canTest
-                ? TEST_TOOLTIP_READY
-                : ((testReason && CAN_TEST_REASON_LABELS[testReason]) ??
-                  CAN_TEST_REASON_LABELS.no_instructions)}
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <TestButton canTest={canTest} tooltip={tooltip} onTest={onTest} />
         {agent.call_direction === "outbound" && (
-          <Button variant="outline" size="sm" onClick={onStartCampaign}>
-            <Rocket className="mr-1 h-3 w-3" aria-hidden="true" />
+          <Button type="button" variant="ghost" size="sm" onClick={onStartCampaign}>
+            <PhoneOutgoing aria-hidden="true" />
             Запустити обдзвін
           </Button>
         )}
-        <Button variant="ghost" size="sm" onClick={onToggle}>
+        <Button type="button" variant="ghost" size="sm" onClick={onToggle}>
           {isActive ? (
             <>
-              <Pause className="mr-1 h-3 w-3" />
+              <Pause aria-hidden="true" />
               Пауза
             </>
           ) : (
             <>
-              <Play className="mr-1 h-3 w-3" />
+              <Play aria-hidden="true" />
               Активувати
             </>
           )}
         </Button>
       </div>
-    </div>
+    </Card>
   );
 };

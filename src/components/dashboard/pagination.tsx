@@ -1,7 +1,6 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-
 import { Button } from "@/components/ui";
 import { formatNumber, getPageIndex } from "@/lib/utils";
 
@@ -13,6 +12,8 @@ interface PaginationProps {
   itemLabel?: string;
 }
 
+const VISIBLE_PAGES = 5;
+
 export const Pagination = ({
   total,
   pageSize,
@@ -23,64 +24,66 @@ export const Pagination = ({
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
   const startRow = total > 0 ? currentPage * pageSize + 1 : 0;
   const endRow = Math.min((currentPage + 1) * pageSize, total);
+  const lastVisible = getPageIndex(currentPage, pageCount, VISIBLE_PAGES - 1);
 
   return (
-    <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
-      <p className="text-muted-foreground order-2 text-sm sm:order-1">
+    <div className="text-muted-foreground flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
+      <span>
         {total > 0
           ? `Показано ${startRow}-${endRow} з ${formatNumber(total)} ${itemLabel}`
           : "Немає результатів"}
-      </p>
-      <div className="order-1 flex items-center gap-1 sm:order-2">
+      </span>
+      <div className="flex items-center gap-1">
         <Button
-          variant="outline"
-          size="icon"
-          className="size-8"
+          type="button"
+          variant="ghost"
+          size="icon-sm"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 0}
           aria-label="Попередня сторінка"
         >
-          <ChevronLeft className="size-4" />
+          <ChevronLeft aria-hidden="true" />
         </Button>
-
-        {Array.from({ length: Math.min(pageCount, 5) }).map((_, i) => {
-          const pageIndex = getPageIndex(currentPage, pageCount, i);
+        {Array.from({ length: Math.min(pageCount, VISIBLE_PAGES) }).map((_, index) => {
+          const pageIndex = getPageIndex(currentPage, pageCount, index);
+          const isCurrent = pageIndex === currentPage;
           return (
             <Button
               key={pageIndex}
-              variant={pageIndex === currentPage ? "default" : "outline"}
-              size="icon"
-              className="size-8"
+              type="button"
+              variant={isCurrent ? "default" : "ghost"}
+              size="icon-sm"
+              aria-current={isCurrent ? "true" : undefined}
               onClick={() => onPageChange(pageIndex)}
             >
               {pageIndex + 1}
             </Button>
           );
         })}
-
-        {pageCount > 5 && getPageIndex(currentPage, pageCount, 4) < pageCount - 1 && (
+        {pageCount > VISIBLE_PAGES && lastVisible < pageCount - 1 && (
           <>
-            <span className="text-muted-foreground px-1 text-sm">…</span>
+            <span aria-hidden="true" className="px-1">
+              …
+            </span>
             <Button
-              variant="outline"
-              size="icon"
-              className="size-8"
+              type="button"
+              variant="ghost"
+              size="icon-sm"
               onClick={() => onPageChange(pageCount - 1)}
             >
               {pageCount}
             </Button>
           </>
         )}
-
         <Button
-          variant="outline"
-          size="icon"
-          className="size-8"
+          type="button"
+          variant="ghost"
+          size="icon-sm"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage >= pageCount - 1}
           aria-label="Наступна сторінка"
         >
-          <ChevronRight className="size-4" />
+          <ChevronRight aria-hidden="true" />
         </Button>
       </div>
     </div>

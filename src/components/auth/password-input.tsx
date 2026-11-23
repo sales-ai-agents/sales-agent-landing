@@ -4,6 +4,7 @@ import * as React from "react";
 import { Eye, EyeOff } from "lucide-react";
 
 import { Input } from "@/components/ui";
+import { cn } from "@/lib/utils";
 
 interface PasswordInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type"> {
   className?: string;
@@ -17,7 +18,7 @@ const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
       <div className="relative">
         <Input
           type={visible ? "text" : "password"}
-          className={`h-11 rounded-lg pr-10 ${className ?? ""}`}
+          className={cn("pr-12", className)}
           ref={ref}
           {...props}
         />

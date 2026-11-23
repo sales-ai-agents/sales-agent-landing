@@ -16,7 +16,7 @@ import {
 } from "@/lib/schemas";
 import { CONTACT_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/mutation-error";
-import { useCreateContact } from "@dashboard/hooks";
+import { useContacts, useCreateContact } from "@dashboard/hooks";
 import { DIRECTION_ICONS } from "../../_components/direction-icons";
 import { ContactPicker } from "../../_components/contact-picker";
 
@@ -34,11 +34,13 @@ export const StepCallType = ({ form }: StepCallTypeProps) => {
   const [showAddContact, setShowAddContact] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const createContact = useCreateContact();
+  const { data: contactsData } = useContacts();
+  const tagOptions = (contactsData?.tags ?? []).map(({ tag }) => tag);
 
   const isOutbound = watch("callDirection") === "outbound";
 
-  const handleCreateContact = (data: ContactFormData): void => {
-    createContact.mutate(data, {
+  const handleCreateContact = (data: ContactFormData, tags: string[]): void => {
+    createContact.mutate(tags.length > 0 ? { ...data, tags } : data, {
       onSuccess: () => {
         toast.success("Контакт додано");
         setShowAddContact(false);
@@ -128,7 +130,11 @@ export const StepCallType = ({ form }: StepCallTypeProps) => {
       )}
 
       {showAddContact && (
-        <AddContactDialog onSubmit={handleCreateContact} onClose={() => setShowAddContact(false)} />
+        <AddContactDialog
+          tagOptions={tagOptions}
+          onSubmit={handleCreateContact}
+          onClose={() => setShowAddContact(false)}
+        />
       )}
       {showImport && <ImportContactsDialog onClose={() => setShowImport(false)} />}
     </div>

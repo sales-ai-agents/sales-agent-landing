@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import { Info } from "lucide-react";
-
-import { Button } from "@/components/ui";
-import { pluralizeNumbers } from "@/lib/utils";
+import { Alert, AlertDescription, AlertTitle, buttonVariants } from "@/components/ui";
+import { cn, formatUsd, pluralizeNumbers } from "@/lib/utils";
 
 interface TariffBannerProps {
   limit: number;
@@ -13,6 +12,8 @@ interface TariffBannerProps {
   poolLimit?: number;
   poolUsed?: number;
   canClaim?: boolean;
+  nextIsExtra?: boolean;
+  extraPriceUsd?: number | null;
 }
 
 const formatCount = (count: number): string => `${count} ${pluralizeNumbers(count)}`;
@@ -24,6 +25,8 @@ export const TariffBanner = ({
   poolLimit,
   poolUsed,
   canClaim,
+  nextIsExtra,
+  extraPriceUsd,
 }: TariffBannerProps) => {
   const isUnlimited = limit === 0;
 
@@ -35,7 +38,7 @@ export const TariffBanner = ({
     ? `Підключено ${formatCount(used)}`
     : canAdd
       ? `Підключено ${used} з ${limit}. Ви можете додати ще ${formatCount(limit - used)}`
-      : `Підключено ${used} з ${limit}. Щоб додати більше, оберіть вищий тариф`;
+      : `Підключено ${used} з ${limit}`;
 
   const showPool = typeof poolLimit === "number" && poolLimit > 0;
   const poolSubtitle = showPool
@@ -44,24 +47,27 @@ export const TariffBanner = ({
       : `Номерів від Calls4U у тарифі — до ${poolLimit}. Ліміт досягнуто`
     : null;
 
+  const extraNote = nextIsExtra
+    ? `Наступний номер коштує ${extraPriceUsd ? formatUsd(extraPriceUsd) : "окремо"}/міс і списується з балансу`
+    : null;
+
   return (
-    <div className="bg-primary/10 flex items-center justify-between gap-4 rounded-lg p-4">
-      <div className="flex items-start gap-3">
-        <Info className="text-primary mt-0.5 h-5 w-5 shrink-0" />
-        <div>
-          <p className="text-sm font-medium">{title}</p>
-          <p className="text-muted-foreground text-xs">{subtitle}</p>
-          {poolSubtitle && <p className="text-muted-foreground mt-0.5 text-xs">{poolSubtitle}</p>}
-        </div>
+    <Alert variant="info" className="flex items-center gap-3">
+      <Info aria-hidden="true" />
+      <div className="flex flex-1 flex-col gap-0.5">
+        <AlertTitle className="line-clamp-none">{title}</AlertTitle>
+        <AlertDescription>
+          <p>{subtitle}</p>
+          {poolSubtitle && <p>{poolSubtitle}</p>}
+          {extraNote && <p className="text-foreground font-medium">{extraNote}</p>}
+        </AlertDescription>
       </div>
-      <Button
-        variant="outline"
-        size="sm"
-        nativeButton={false}
-        render={<Link href="/dashboard/billing" />}
+      <Link
+        className={cn(buttonVariants({ variant: "secondary", size: "sm" }))}
+        href="/dashboard/balance"
       >
-        Налаштувати
-      </Button>
-    </div>
+        Баланс
+      </Link>
+    </Alert>
   );
 };

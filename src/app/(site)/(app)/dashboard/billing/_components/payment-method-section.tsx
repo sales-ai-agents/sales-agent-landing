@@ -3,6 +3,7 @@
 import { AlertTriangle, CreditCard, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { SectionCard } from "@/components/dashboard";
 import { Button } from "@/components/ui";
 import { ApiError } from "@/lib/api-client";
 import { cn, formatDateShort } from "@/lib/utils";
@@ -44,18 +45,16 @@ export const PaymentMethodSection = ({
   };
 
   return (
-    <section className="border-border bg-background rounded-2xl border p-6">
-      <h2 className="text-muted-foreground mb-4 text-sm font-medium">Спосіб оплати</h2>
-
+    <SectionCard title="Спосіб оплати">
       {isLoading ? (
-        <div className="border-border text-muted-foreground flex items-center justify-center gap-2 rounded-lg border p-6 text-sm">
+        <div className="border-border text-muted-foreground flex items-center justify-center gap-2 rounded-2xl border p-6 text-sm">
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
           <span>Завантаження способу оплати...</span>
         </div>
       ) : isError ? (
-        <div className="border-destructive/30 bg-destructive/5 flex flex-col justify-between gap-3 rounded-lg border p-4 sm:flex-row sm:items-center">
+        <div className="border-destructive/30 bg-destructive/5 flex flex-col justify-between gap-3 rounded-2xl border p-4 sm:flex-row sm:items-center">
           <div className="flex items-center gap-3">
-            <AlertTriangle className="text-destructive h-5 w-5 shrink-0" />
+            <AlertTriangle className="text-destructive h-5 w-5 shrink-0" aria-hidden="true" />
             <div>
               <p className="text-destructive text-sm font-medium">
                 Не вдалося завантажити спосіб оплати
@@ -70,15 +69,15 @@ export const PaymentMethodSection = ({
           </Button>
         </div>
       ) : (
-        <div className="border-border flex flex-col justify-between gap-4 rounded-lg border p-4 sm:flex-row sm:items-center">
+        <div className="border-border flex flex-col justify-between gap-4 rounded-2xl border p-4 sm:flex-row sm:items-center">
           <div className="flex items-center gap-4">
             <div
               className={cn(
-                "flex shrink-0 items-center justify-center rounded-lg px-5 py-3",
+                "flex shrink-0 items-center justify-center rounded-2xl px-5 py-3",
                 hasSavedCard ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
               )}
             >
-              <CreditCard className="h-6 w-6" />
+              <CreditCard className="h-6 w-6" aria-hidden="true" />
             </div>
             <div>
               <p className="text-sm font-medium">
@@ -120,6 +119,6 @@ export const PaymentMethodSection = ({
           </div>
         </div>
       )}
-    </section>
+    </SectionCard>
   );
 };

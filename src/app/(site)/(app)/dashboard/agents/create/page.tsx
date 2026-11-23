@@ -4,10 +4,11 @@ import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { Button, Card } from "@/components/ui";
+import { PageHead } from "@/components/dashboard";
 import {
   createAgentSchema,
   type CreateAgentFormData,
@@ -40,6 +41,7 @@ const DEFAULT_VALUES: CreateAgentFormData = {
   callsPerDay: 20,
   numberId: DEFAULT_NUMBER_ID,
   instructions: "",
+  reportFields: "",
   callType: null,
   callFields: [],
   testPhone: "",
@@ -116,6 +118,7 @@ const CreateAgentPage = () => {
         name: data.name,
         voice: data.voice,
         instructions: data.instructions,
+        ...(data.reportFields && { report_fields: data.reportFields }),
         ...(data.callType && { call_type: data.callType }),
         call_fields: toApiCallFields(data.callFields),
       },
@@ -152,34 +155,27 @@ const CreateAgentPage = () => {
   const submitLabel = isLastStep ? "Створити агента" : "Далі";
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Назад">
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div>
-          <h1 className="font-display text-2xl font-bold">Створити нового агента</h1>
-          <p className="text-muted-foreground text-sm">
-            Крок {currentStep + 1} з {totalSteps}
-          </p>
-        </div>
-      </div>
-
-      <StepIndicator currentStep={currentStep} totalSteps={totalSteps} />
-
-      <form onSubmit={handleSubmit} noValidate className="space-y-6">
-        <div className="border-border bg-background rounded-2xl border p-4 sm:p-6">
-          {renderStep()}
-        </div>
-
-        <div className="flex justify-between">
-          <Button type="button" variant="outline" size="sm" onClick={handleBack}>
-            <ArrowLeft className="mr-1.5 h-4 w-4" />
+    <div className="flex flex-col gap-6">
+      <PageHead
+        word="агент"
+        title="Створити нового агента"
+        description={`Крок ${currentStep + 1} з ${totalSteps}`}
+        actions={<StepIndicator currentStep={currentStep} totalSteps={totalSteps} />}
+      />
+      <form
+        onSubmit={handleSubmit}
+        noValidate
+        className="mx-auto flex w-full max-w-3xl flex-col gap-4"
+      >
+        <Card className="p-6">{renderStep()}</Card>
+        <div className="flex items-center justify-between gap-3">
+          <Button type="button" variant="ghost" onClick={handleBack}>
+            <ArrowLeft aria-hidden="true" />
             Назад
           </Button>
-          <Button type="submit" size="sm" disabled={createAgent.isPending || !stepValid}>
+          <Button type="submit" disabled={createAgent.isPending || !stepValid}>
             {createAgent.isPending ? "Створення..." : submitLabel}
-            {!isLastStep && <ArrowRight className="ml-1.5 h-4 w-4" />}
+            {!isLastStep && <ArrowRight aria-hidden="true" />}
           </Button>
         </div>
       </form>

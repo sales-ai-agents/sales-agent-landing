@@ -1,8 +1,8 @@
 import { Check, ShieldCheck } from "lucide-react";
 
-import { Badge, Button, Checkbox, DialogTitle, Separator } from "@/components/ui";
+import { Button, Checkbox, DialogTitle, Separator } from "@/components/ui";
 import { cn } from "@/lib/utils";
-import { getPlanFeatures, POPULAR_PLAN_KEY } from "@dashboard/billing";
+import { getPlanFeatures } from "@dashboard/billing";
 import type { BillingPeriod, BillingPlan } from "@dashboard/types";
 
 interface CheckoutSummaryStepProps {
@@ -68,7 +68,6 @@ interface SelectedPlanCardProps {
 
 const SelectedPlanCard = ({ plan, priceUsd, isYear, onChange }: SelectedPlanCardProps) => {
   const features = getPlanFeatures(plan);
-  const isPopular = plan.key === POPULAR_PLAN_KEY;
 
   return (
     <div className="border-border/60 bg-muted/20 flex flex-col rounded-xl border p-6">
@@ -80,12 +79,6 @@ const SelectedPlanCard = ({ plan, priceUsd, isYear, onChange }: SelectedPlanCard
       </div>
 
       <h3 className="mt-4 text-2xl font-bold tracking-wide uppercase">{plan.title}</h3>
-
-      {isPopular && (
-        <Badge className="bg-primary/10 text-primary hover:bg-primary/10 mt-3 w-fit rounded-full px-4 font-normal">
-          Найпопулярніший
-        </Badge>
-      )}
 
       <div className="mt-4 flex items-baseline gap-1.5">
         <span className="text-3xl font-semibold">${priceUsd}</span>

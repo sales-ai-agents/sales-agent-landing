@@ -1,9 +1,9 @@
-import { LEGAL_PAGES } from "@/lib/constants";
+import { CLAUDE_CONNECTOR_URL, LEGAL_PAGES } from "@/lib/constants";
 import { SITE_CONTACT, SITE_URL } from "@/lib/site";
 
 import type { RichLink } from "./types";
 
-export const CONNECTOR_URL = "https://api.calls4u.ai/webhook/mcp";
+export const CONNECTOR_URL = CLAUDE_CONNECTOR_URL;
 
 export const SIGN_UP_LINK: RichLink = { label: "calls4u.ai", href: SITE_URL };
 

@@ -5,6 +5,9 @@ import { AlertTriangle, History, Loader2 } from "lucide-react";
 
 import {
   Button,
+  Card,
+  CardHeader,
+  CardTitle,
   Table,
   TableBody,
   TableCell,
@@ -36,8 +39,10 @@ export const PaymentHistorySection = ({
   const visiblePayments = showAll ? payments : payments.slice(0, INITIAL_PAYMENT_COUNT);
 
   return (
-    <section className="border-border bg-background rounded-2xl border p-4 sm:p-6">
-      <h2 className="text-muted-foreground mb-4 text-sm font-medium">Історія платежів</h2>
+    <Card className="gap-0 overflow-hidden p-0">
+      <CardHeader className="border-b">
+        <CardTitle>Історія платежів</CardTitle>
+      </CardHeader>
 
       {isLoading ? (
         <div className="text-muted-foreground flex flex-col items-center justify-center gap-2 py-8">
@@ -45,8 +50,8 @@ export const PaymentHistorySection = ({
           <p className="text-sm">Завантаження історії платежів...</p>
         </div>
       ) : isError ? (
-        <div className="border-destructive/30 bg-destructive/5 flex flex-col items-center justify-center gap-3 rounded-lg border p-6 text-center">
-          <AlertTriangle className="text-destructive h-8 w-8" />
+        <div className="border-destructive/30 bg-destructive/5 m-6 flex flex-col items-center justify-center gap-3 rounded-2xl border p-6 text-center">
+          <AlertTriangle className="text-destructive h-8 w-8" aria-hidden="true" />
           <div>
             <p className="text-destructive text-sm font-medium">
               Не вдалося завантажити історію платежів
@@ -59,7 +64,7 @@ export const PaymentHistorySection = ({
         </div>
       ) : payments.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-2 py-8">
-          <History className="text-muted-foreground h-10 w-10" />
+          <History className="text-muted-foreground h-10 w-10" aria-hidden="true" />
           <p className="text-sm font-semibold">Платежів ще немає</p>
           <p className="text-muted-foreground text-xs">
             Тут відображатиметься історія ваших платежів
@@ -67,7 +72,7 @@ export const PaymentHistorySection = ({
         </div>
       ) : (
         <>
-          <div className="divide-border divide-y sm:hidden">
+          <div className="divide-border divide-y px-6 sm:hidden">
             {visiblePayments.map((payment) => (
               <PaymentCard key={payment.id} payment={payment} />
             ))}
@@ -93,19 +98,15 @@ export const PaymentHistorySection = ({
           </div>
 
           {payments.length > INITIAL_PAYMENT_COUNT && (
-            <div className="mt-3 text-center">
-              <button
-                type="button"
-                className="text-primary cursor-pointer text-sm hover:underline"
-                onClick={() => setShowAll((visible) => !visible)}
-              >
+            <div className="border-t py-3 text-center">
+              <Button variant="link" size="sm" onClick={() => setShowAll((visible) => !visible)}>
                 {showAll ? "Приховати" : "Показати більше"}
-              </button>
+              </Button>
             </div>
           )}
         </>
       )}
-    </section>
+    </Card>
   );
 };
 

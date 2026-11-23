@@ -7,6 +7,7 @@ import { Button, Input, Label } from "@/components/ui";
 import { useChangePassword } from "@/lib/hooks";
 import { AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/mutation-error";
+import { SettingsSection } from "./settings-section";
 
 export const Password = () => {
   const [newPassword, setNewPassword] = useState("");
@@ -34,54 +35,44 @@ export const Password = () => {
   };
 
   return (
-    <section className="border-border bg-background rounded-2xl border p-5">
-      <h2 className="text-base font-semibold">Змінити пароль</h2>
-      <div className="mt-4 space-y-4">
-        <div className="space-y-1">
-          <Label htmlFor="current-password" className="text-xs">
-            Поточний пароль
-          </Label>
-          <Input
-            id="current-password"
-            type="password"
-            placeholder="••••••••"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-          />
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="new-password" className="text-xs">
-            Новий пароль
-          </Label>
-          <Input
-            id="new-password"
-            type="password"
-            placeholder="••••••••"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-          />
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="confirm-password" className="text-xs">
-            Підтвердити новий пароль
-          </Label>
-          <Input
-            id="confirm-password"
-            type="password"
-            placeholder="••••••••"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
-        </div>
+    <SettingsSection title="Змінити пароль">
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="current-password">Поточний пароль</Label>
+        <Input
+          id="current-password"
+          type="password"
+          placeholder="••••••••"
+          value={currentPassword}
+          onChange={(e) => setCurrentPassword(e.target.value)}
+        />
+      </div>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="new-password">Новий пароль</Label>
+        <Input
+          id="new-password"
+          type="password"
+          placeholder="••••••••"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+        />
+      </div>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="confirm-password">Підтвердити новий пароль</Label>
+        <Input
+          id="confirm-password"
+          type="password"
+          placeholder="••••••••"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+        />
       </div>
       <Button
-        size="sm"
-        className="mt-4"
+        className="self-start"
         onClick={handleChange}
         disabled={!canSubmit || changePassword.isPending}
       >
         {changePassword.isPending ? "Оновлення..." : "Оновити пароль"}
       </Button>
-    </section>
+    </SettingsSection>
   );
 };

@@ -1,5 +1,5 @@
+import { Fragment } from "react";
 import { Check } from "lucide-react";
-
 import { cn } from "@/lib/utils";
 
 interface StepIndicatorProps {
@@ -7,36 +7,33 @@ interface StepIndicatorProps {
   totalSteps: number;
 }
 
-export const StepIndicator = ({ currentStep, totalSteps }: StepIndicatorProps) => {
-  return (
-    <div className="flex items-center justify-center">
-      {Array.from({ length: totalSteps }).map((_, index) => {
-        const isCompleted = index < currentStep;
-        const isCurrent = index === currentStep;
-
-        return (
-          <div key={index} className="flex items-center">
-            <div
+export const StepIndicator = ({ currentStep, totalSteps }: StepIndicatorProps) => (
+  <div className="flex items-center gap-2" aria-hidden="true">
+    {Array.from({ length: totalSteps }).map((_, index) => {
+      const isDone = index < currentStep;
+      const isCurrent = index === currentStep;
+      return (
+        <Fragment key={index}>
+          {index > 0 && (
+            <span
               className={cn(
-                "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-medium transition-colors",
-                isCompleted || isCurrent
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground"
+                "h-0.5 w-6 rounded-full",
+                isDone || isCurrent ? "bg-primary" : "bg-border"
               )}
-            >
-              {isCompleted ? <Check className="h-4 w-4" /> : index + 1}
-            </div>
-            {index < totalSteps - 1 && (
-              <div
-                className={cn(
-                  "mx-2 h-0.5 min-w-9 flex-1",
-                  index < currentStep ? "bg-primary" : "bg-muted-foreground"
-                )}
-              />
+            />
+          )}
+          <span
+            className={cn(
+              "grid size-8 place-items-center rounded-full border text-sm font-medium",
+              isCurrent && "border-primary bg-primary text-primary-foreground",
+              isDone && "border-primary bg-primary text-primary-foreground",
+              !isDone && !isCurrent && "border-border bg-card text-muted-foreground"
             )}
-          </div>
-        );
-      })}
-    </div>
-  );
-};
+          >
+            {isDone ? <Check className="size-4" /> : index + 1}
+          </span>
+        </Fragment>
+      );
+    })}
+  </div>
+);

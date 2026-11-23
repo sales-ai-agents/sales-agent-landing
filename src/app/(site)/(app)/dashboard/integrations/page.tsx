@@ -1,8 +1,10 @@
 "use client";
 
-import { PageError, PageLoading } from "@/components/dashboard";
+import { PageError, PageHead, PageLoading } from "@/components/dashboard";
 import { useIntegrations } from "@dashboard/hooks";
 
+import { ApiKeysSection } from "./_components/api-keys-section";
+import { ClaudeConnectorCard } from "./_components/claude-connector-card";
 import { GoogleSheetsCard } from "./_components/google-sheets-card";
 import { GenericIntegrationCard } from "./_components/generic-integration-card";
 import { CrmCard } from "./_components/crm/crm-card";
@@ -29,13 +31,14 @@ const IntegrationsPage = () => {
   );
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Інтеграції</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Підключайте сервіси для автоматизації та передачі даних
-        </p>
-      </div>
+    <div className="flex flex-col gap-6">
+      <PageHead
+        word="інтеграції"
+        title="Інтеграції"
+        description="Підключайте сервіси для автоматизації та передачі даних"
+      />
+
+      <ClaudeConnectorCard />
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {availableIntegrations.map((integration) => {
@@ -64,6 +67,9 @@ const IntegrationsPage = () => {
 
         <div className="md:col-span-2">
           <WebhookCard />
+        </div>
+        <div className="md:col-span-2">
+          <ApiKeysSection />
         </div>
       </div>
     </div>

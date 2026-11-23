@@ -92,7 +92,7 @@ const PaymentStatusChecker = ({
 const ConfirmingState = () => (
   <StatusLayout>
     <Loader2 className="text-primary h-12 w-12 animate-spin" aria-hidden="true" />
-    <h1 className="font-display text-2xl font-bold">Підтверджуємо оплату…</h1>
+    <h1 className="font-heading text-2xl">Підтверджуємо оплату…</h1>
     <p className="text-muted-foreground">Зачекайте, це займе кілька секунд.</p>
   </StatusLayout>
 );
@@ -107,7 +107,7 @@ const RedirectingState = () => (
 const ProcessingState = () => (
   <StatusLayout>
     <Clock className="text-primary h-12 w-12" aria-hidden="true" />
-    <h1 className="font-display text-2xl font-bold">Платіж обробляється</h1>
+    <h1 className="font-heading text-2xl">Платіж обробляється</h1>
     <p className="text-muted-foreground">
       Тариф увімкнеться автоматично, щойно банк підтвердить оплату — зазвичай хвилина, іноді до
       10–15 хвилин. Можете закрити сторінку: ми покажемо статус у кабінеті.
@@ -119,7 +119,7 @@ const ProcessingState = () => (
 const ErrorState = () => (
   <StatusLayout>
     <XCircle className="text-destructive h-12 w-12" aria-hidden="true" />
-    <h1 className="font-display text-2xl font-bold">Не вдалося перевірити оплату</h1>
+    <h1 className="font-heading text-2xl">Не вдалося перевірити оплату</h1>
     <p className="text-muted-foreground">
       Статус оплати тимчасово недоступний. Спробуйте оновити сторінку за хвилину.
     </p>
@@ -130,7 +130,7 @@ const ErrorState = () => (
 const FailedState = () => (
   <StatusLayout>
     <XCircle className="text-destructive h-12 w-12" aria-hidden="true" />
-    <h1 className="font-display text-2xl font-bold">Оплата не пройшла</h1>
+    <h1 className="font-heading text-2xl">Оплата не пройшла</h1>
     <p className="text-muted-foreground">Кошти не списано. Перевірте картку та спробуйте ще раз.</p>
     <Link href={BILLING_ROUTE}>
       <Button className="mt-2 gap-2">
@@ -144,7 +144,7 @@ const FailedState = () => (
 const AccountMismatchState = () => (
   <StatusLayout>
     <XCircle className="text-warning h-12 w-12" aria-hidden="true" />
-    <h1 className="font-display text-2xl font-bold">Інший акаунт</h1>
+    <h1 className="font-heading text-2xl">Інший акаунт</h1>
     <p className="text-muted-foreground">
       Ви увійшли не в той акаунт, з якого починали оплату. Увійдіть у правильний акаунт, щоб
       побачити статус платежу.
@@ -161,7 +161,7 @@ const AccountMismatchState = () => (
 const RefundedState = () => (
   <StatusLayout>
     <RotateCcw className="text-muted-foreground h-12 w-12" aria-hidden="true" />
-    <h1 className="font-display text-2xl font-bold">Платіж повернено</h1>
+    <h1 className="font-heading text-2xl">Платіж повернено</h1>
     <p className="text-muted-foreground">
       Кошти повернулися на вашу картку. Щоб активувати тариф, оплатіть ще раз.
     </p>
@@ -178,7 +178,7 @@ const PaidState = ({ data }: { data: PaymentStatusResponse }) => (
   <StatusLayout>
     <CheckCircle className="text-success h-12 w-12" aria-hidden="true" />
     <div className="space-y-1">
-      <h1 className="font-display text-2xl font-bold">Оплата успішна</h1>
+      <h1 className="font-heading text-2xl">Оплата успішна</h1>
       <p className="text-muted-foreground">Тариф активовано.</p>
     </div>
 

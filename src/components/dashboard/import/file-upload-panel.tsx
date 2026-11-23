@@ -6,7 +6,8 @@ import { Info, Upload } from "lucide-react";
 
 import { Button } from "@/components/ui";
 
-const ACCEPTED_FILE_EXTENSIONS = ".csv";
+const SUPPORTED_EXTENSIONS = [".csv", ".xlsx"] as const;
+const ACCEPTED_FILE_EXTENSIONS = SUPPORTED_EXTENSIONS.join(",");
 const BYTES_IN_KILOBYTE = 1024;
 
 interface FileUploadPanelProps {
@@ -16,7 +17,7 @@ interface FileUploadPanelProps {
 
 const isSupportedFile = (file: File): boolean => {
   const name = file.name.toLowerCase();
-  return name.endsWith(".csv");
+  return SUPPORTED_EXTENSIONS.some((extension) => name.endsWith(extension));
 };
 
 const formatFileSize = (bytes: number): string => {
@@ -81,7 +82,7 @@ export const FileUploadPanel = ({ file, onFileChange }: FileUploadPanelProps) =>
         >
           Вибрати файл
         </Button>
-        <p className="text-muted-foreground mt-4 text-xs">Підтримуваний формат: CSV</p>
+        <p className="text-muted-foreground mt-4 text-xs">Підтримувані формати: CSV, XLSX</p>
         <p className="text-muted-foreground text-xs">Максимальний розмір файлу: 10 МБ</p>
         <input
           ref={inputRef}

@@ -29,6 +29,7 @@ export const API_ENDPOINTS = {
   APP_CAMPAIGNS_CONTROL: `${API_BASE}/app/campaigns/control`,
   APP_VERIFICATION: `${API_BASE}/app/verification`,
   APP_VOICES: `${API_BASE}/app/voices`,
+  APP_AGENT_TEMPLATES: `${API_BASE}/app/agent-templates`,
   APP_NUMBERS: `${API_BASE}/app/numbers`,
   APP_NUMBERS_POOL: `${API_BASE}/app/numbers/pool`,
   APP_NUMBERS_CLAIM: `${API_BASE}/app/numbers/claim`,
@@ -62,7 +63,8 @@ export const API_ENDPOINTS = {
   // Billing
   APP_BILLING_PLANS: `${API_BASE}/app/billing/plans`,
   APP_BILLING_CHECKOUT: `${API_BASE}/app/billing/checkout`,
-  APP_BILLING_TOPUP: `${API_BASE}/app/billing/topup`,
+  APP_BILLING_BALANCE: `${API_BASE}/app/billing/balance`,
+  APP_BILLING_BALANCE_TOPUP: `${API_BASE}/app/billing/balance/topup`,
   APP_BILLING_AUTO_RENEW: `${API_BASE}/app/billing/auto-renew`,
   APP_BILLING_STATUS: `${API_BASE}/app/billing/status`,
   APP_BILLING_HISTORY: `${API_BASE}/app/billing/history`,
@@ -80,6 +82,12 @@ export const API_ENDPOINTS = {
 } as const;
 
 export const apiUrl = {
+  stats: (params: { days: number; agent_id?: number; number_id?: number }) => {
+    const sp = new URLSearchParams({ days: String(params.days) });
+    if (params.agent_id) sp.set("agent_id", String(params.agent_id));
+    if (params.number_id) sp.set("number_id", String(params.number_id));
+    return `${API_ENDPOINTS.APP_STATS}?${sp.toString()}`;
+  },
   agent: (id: number | string) => `${API_ENDPOINTS.APP_AGENTS}/${id}`,
   voiceSample: (voiceKey: string) =>
     `${API_ENDPOINTS.APP_VOICES}/${encodeURIComponent(voiceKey)}/sample`,
@@ -136,13 +144,14 @@ export const apiUrl = {
     const qs = sp.toString();
     return qs ? `${url}?${qs}` : url;
   },
-  contacts: (params?: { search?: string; tag?: string }) => {
+  contacts: (params?: { search?: string; tag?: string; base_id?: number }) => {
     const url = API_ENDPOINTS.APP_CONTACTS;
     if (!params) return url;
 
     const sp = new URLSearchParams();
     if (params.search) sp.set("search", params.search);
     if (params.tag) sp.set("tag", params.tag);
+    if (params.base_id !== undefined) sp.set("base_id", String(params.base_id));
 
     const qs = sp.toString();
     return qs ? `${url}?${qs}` : url;
@@ -158,6 +167,7 @@ export const apiUrl = {
     date_to?: string;
     status?: string;
     agent_id?: number;
+    number_id?: number;
     phone?: string;
   }) => {
     const url = API_ENDPOINTS.APP_CALLS_EXPORT;
@@ -167,6 +177,7 @@ export const apiUrl = {
     if (params.date_to) sp.set("date_to", params.date_to);
     if (params.status) sp.set("status", params.status);
     if (params.agent_id !== undefined) sp.set("agent_id", String(params.agent_id));
+    if (params.number_id !== undefined) sp.set("number_id", String(params.number_id));
     if (params.phone) sp.set("phone", params.phone);
     const qs = sp.toString();
     return qs ? `${url}?${qs}` : url;

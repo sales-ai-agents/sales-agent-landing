@@ -9,6 +9,7 @@ import { toast } from "sonner";
 
 import {
   Button,
+  Card,
   Dialog,
   DialogClose,
   DialogContent,
@@ -18,7 +19,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui";
-import { PageLoading } from "@/components/dashboard";
+import { PageHead, PageLoading } from "@/components/dashboard";
 import {
   editAgentSchema,
   type EditAgentFormData,
@@ -60,6 +61,7 @@ const buildDefaultValues = (agent: AgentDetail): EditAgentFormData => ({
   callsPerDay: agent.calls_per_day,
   numberId: agent.number_id ?? DEFAULT_NUMBER_ID,
   instructions: agent.instructions,
+  reportFields: agent.report_fields ?? "",
   callType: agent.call_type ?? null,
   callFields: agent.call_fields ?? [],
 });
@@ -108,62 +110,65 @@ const EditAgentForm = ({ agent }: { agent: AgentDetail }) => {
   }, [deleteAgent, agent.id, router]);
 
   return (
-    <div className="border-border bg-background mx-auto max-w-4xl space-y-8 rounded-2xl border p-6 sm:p-8">
-      <header className="space-y-1">
-        <h1 className="text-xl font-bold">Редагувати агента</h1>
-        <p className="text-muted-foreground text-sm">Керуйте вашими голосовими ШІ-агентами</p>
-      </header>
+    <div className="flex flex-col gap-6">
+      <PageHead
+        word="агент"
+        title="Редагувати агента"
+        description="Керуйте вашими голосовими ШІ-агентами"
+        tone="b"
+      />
+      <Card className="mx-auto flex w-full max-w-4xl flex-col gap-6 p-6">
+        <AgentHeader name={agent.name} id={agent.id} isActive={agent.is_active} />
 
-      <AgentHeader name={agent.name} id={agent.id} isActive={agent.is_active} />
+        <form onSubmit={form.handleSubmit(handleSave)} noValidate className="space-y-8">
+          <SectionBasics form={form} voices={voices} />
+          <SectionCalls form={form} />
+          {isOutbound && <SectionSchedule form={form} />}
+          <SectionNumber form={form} numbers={numbers} />
+          <SectionInstructions form={form} />
 
-      <form onSubmit={form.handleSubmit(handleSave)} noValidate className="space-y-8">
-        <SectionBasics form={form} voices={voices} />
-        <SectionCalls form={form} />
-        {isOutbound && <SectionSchedule form={form} />}
-        <SectionNumber form={form} numbers={numbers} />
-        <SectionInstructions form={form} />
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+            <Dialog>
+              <DialogTrigger
+                render={
+                  <Button type="button" variant="ghost" className="text-destructive">
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Видалити агента
+                  </Button>
+                }
+              />
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Видалити агента?</DialogTitle>
+                  <DialogDescription>
+                    Цю дію неможливо скасувати. Агент та вся його історія дзвінків будуть видалені
+                    назавжди.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <DialogClose render={<Button variant="outline" />}>Скасувати</DialogClose>
+                  <Button
+                    variant="destructive"
+                    onClick={handleDelete}
+                    disabled={deleteAgent.isPending}
+                  >
+                    {deleteAgent.isPending ? "Видалення..." : "Видалити"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-          <Dialog>
-            <DialogTrigger
-              render={
-                <Button type="button" variant="ghost" className="text-destructive">
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Видалити агента
-                </Button>
-              }
-            />
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Видалити агента?</DialogTitle>
-                <DialogDescription>
-                  Цю дію неможливо скасувати. Агент та вся його історія дзвінків будуть видалені
-                  назавжди.
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter>
-                <DialogClose render={<Button variant="outline" />}>Скасувати</DialogClose>
-                <Button
-                  variant="destructive"
-                  onClick={handleDelete}
-                  disabled={deleteAgent.isPending}
-                >
-                  {deleteAgent.isPending ? "Видалення..." : "Видалити"}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-
-          <div className="flex items-center gap-3">
-            <Button type="button" variant="outline" onClick={() => router.back()}>
-              Скасувати
-            </Button>
-            <Button type="submit" disabled={updateAgent.isPending}>
-              {updateAgent.isPending ? "Збереження..." : "Зберегти зміни"}
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button type="button" variant="outline" onClick={() => router.back()}>
+                Скасувати
+              </Button>
+              <Button type="submit" disabled={updateAgent.isPending}>
+                {updateAgent.isPending ? "Збереження..." : "Зберегти зміни"}
+              </Button>
+            </div>
           </div>
-        </div>
-      </form>
+        </form>
+      </Card>
     </div>
   );
 };

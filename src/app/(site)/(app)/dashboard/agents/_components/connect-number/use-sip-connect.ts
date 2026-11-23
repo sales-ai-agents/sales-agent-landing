@@ -1,10 +1,6 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-
-import { ApiError } from "@/lib/api-client";
 import { NUMBER_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/mutation-error";
 import {
@@ -30,7 +26,6 @@ const findSipNumberByPhone = (numbers: AgentNumber[], phone: string): AgentNumbe
   numbers.find((number) => number.source === "sip" && number.phone === phone);
 
 export const useSipConnect = ({ agentId, onVerified }: UseSipConnectOptions = {}) => {
-  const router = useRouter();
   const [phone, setPhone] = useState("");
   const [numberId, setNumberId] = useState<number | null>(null);
 
@@ -102,14 +97,7 @@ export const useSipConnect = ({ agentId, onVerified }: UseSipConnectOptions = {}
       { source: "sip", phone: normalizedPhone, agent_id: agentId, direction: "inbound" },
       {
         onSuccess: (created) => issueTrunk(created.id),
-        onError: (error) => {
-          if (error instanceof ApiError && error.code === "number_limit") {
-            toast.error(NUMBER_ERROR_MESSAGES.number_limit ?? error.hint);
-            router.push("/dashboard/billing");
-            return;
-          }
-          handleMutationError(error, NUMBER_ERROR_MESSAGES);
-        },
+        onError: (error) => handleMutationError(error, NUMBER_ERROR_MESSAGES),
       }
     );
   };

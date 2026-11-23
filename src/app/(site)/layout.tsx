@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Geologica, Inter, JetBrains_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import { Providers } from "@/app/providers";
 import { Toaster } from "@/components/ui";
@@ -11,6 +11,20 @@ import "@/app/globals.css";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin", "cyrillic"],
+});
+
+const geologica = Geologica({
+  variable: "--font-geologica",
+  subsets: ["latin", "cyrillic"],
+  weight: "variable",
+  axes: ["CRSV", "SHRP"],
+  preload: false,
+});
+
+const jetBrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
+  subsets: ["latin", "cyrillic"],
+  preload: false,
 });
 
 const actayWideBold = localFont({
@@ -38,7 +52,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="uk" className={`${inter.variable} ${actayWideBold.variable}`}>
+    <html
+      lang="uk"
+      className={`${inter.variable} ${actayWideBold.variable} ${geologica.variable} ${jetBrainsMono.variable}`}
+    >
       <body suppressHydrationWarning>
         <GoogleAnalytics />
         <Providers>{children}</Providers>

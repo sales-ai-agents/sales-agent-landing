@@ -1,9 +1,8 @@
 "use client";
 
-import { Check, LucideShoppingCart, PhoneForwarded, Server } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-
-import { Button } from "@/components/ui";
+import { Check, PhoneForwarded, Server, ShoppingCart, type LucideIcon } from "lucide-react";
+import { Badge, Button, Card } from "@/components/ui";
+import { cn } from "@/lib/utils";
 import { ConnectNumberDialog, type ConnectMethod } from "../../agents/_components/connect-number";
 
 interface ConnectMethodsProps {
@@ -44,67 +43,52 @@ const METHOD_CARDS: MethodCard[] = [
   {
     method: "buy",
     title: "Отримати номер у Calls4U",
-    description:
-      "Входить у ваш тариф. Працює одразу на вхідні й вихідні, і клієнти бачать саме його.",
-    icon: LucideShoppingCart,
-    features: ["Входить у ваш тариф", "Вхідні та вихідні дзвінки", "Клієнти бачать саме цей номер"],
+    description: "Номер Calls4U працює одразу на вхідні й вихідні, і клієнти бачать саме його.",
+    icon: ShoppingCart,
+    features: ["Готовий одразу", "Вхідні та вихідні дзвінки", "Клієнти бачать саме цей номер"],
     cta: "Отримати номер",
   },
 ];
 
-export const ConnectMethods = ({ onConnected }: ConnectMethodsProps) => {
+const MethodTile = ({ card, onConnected }: { card: MethodCard; onConnected: () => void }) => {
+  const Icon = card.icon;
   return (
-    <section className="space-y-4">
-      <div>
-        <h2 className="text-xl font-medium">Як підключити номер?</h2>
-        <p className="text-muted-foreground text-sm">
-          Оберіть спосіб, який підходить для вашого бізнесу
-        </p>
+    <Card className={cn("flex flex-col gap-4 p-6", card.method === "buy" && "ring-primary ring-2")}>
+      <div className="flex items-start justify-between gap-2">
+        <span className="bg-primary/10 text-primary grid size-11 place-items-center rounded-full">
+          <Icon className="size-5" aria-hidden="true" />
+        </span>
+        {card.method === "buy" && <Badge variant="secondary">Рекомендуємо</Badge>}
       </div>
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        {METHOD_CARDS.map((card) => (
-          <div
-            key={card.method}
-            className="border-border bg-background flex flex-col gap-6 rounded-xl border p-5"
-          >
-            <div className="space-y-4">
-              <span className="bg-primary/10 flex h-20 w-20 items-center justify-center rounded-xl">
-                <card.icon className="text-primary h-11 w-11" />
-              </span>
-              <h3 className="font-medium">{card.title}</h3>
-              <p className="text-muted-foreground text-sm">{card.description}</p>
-            </div>
-
-            <ul className="space-y-3">
-              {card.features.map((feature) => (
-                <li key={feature} className="flex items-center gap-3 text-sm">
-                  <span className="bg-success flex h-4 w-4 shrink-0 items-center justify-center rounded-full">
-                    <Check className="text-primary-foreground h-2.5 w-2.5" />
-                  </span>
-                  <span className="text-muted-foreground">{feature}</span>
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-auto">
-              <ConnectNumberDialog
-                initialMethod={card.method}
-                onConnected={onConnected}
-                trigger={
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="border-primary/50 text-primary w-full"
-                  >
-                    {card.cta}
-                  </Button>
-                }
-              />
-            </div>
-          </div>
+      <h3 className="font-heading text-xl">{card.title}</h3>
+      <p className="text-muted-foreground text-sm">{card.description}</p>
+      <ul className="flex flex-1 flex-col gap-2 text-sm">
+        {card.features.map((feature) => (
+          <li key={feature} className="flex items-start gap-2">
+            <Check className="text-success mt-0.5 size-4 shrink-0" aria-hidden="true" />
+            {feature}
+          </li>
         ))}
-      </div>
-    </section>
+      </ul>
+      <ConnectNumberDialog
+        initialMethod={card.method}
+        onConnected={onConnected}
+        trigger={<Button variant="outline">{card.cta}</Button>}
+      />
+    </Card>
   );
 };
+
+export const ConnectMethods = ({ onConnected }: ConnectMethodsProps) => (
+  <section className="flex flex-col gap-4">
+    <div className="flex flex-col gap-1 px-1 pt-2">
+      <h2 className="font-heading text-3xl">Як підключити номер?</h2>
+      <p className="text-muted-foreground">Оберіть спосіб, який підходить для вашого бізнесу</p>
+    </div>
+    <div className="grid gap-4 lg:grid-cols-3">
+      {METHOD_CARDS.map((card) => (
+        <MethodTile key={card.method} card={card} onConnected={onConnected} />
+      ))}
+    </div>
+  </section>
+);

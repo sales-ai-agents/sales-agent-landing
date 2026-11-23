@@ -96,7 +96,7 @@ export default function EmailConfirmPage() {
       </div>
 
       <div className="space-y-6">
-        <div className="bg-primary/5 flex items-start gap-3 rounded-lg p-4">
+        <div className="bg-primary/5 flex items-start gap-3 rounded-2xl p-4">
           <div className="bg-primary/10 flex h-9 w-9 shrink-0 items-center justify-center rounded-md">
             <Mail className="text-primary h-5 w-5" />
           </div>
@@ -121,7 +121,7 @@ export default function EmailConfirmPage() {
           >
             <InputOTPGroup className="gap-2">
               {Array.from({ length: 6 }).map((_, i) => (
-                <InputOTPSlot key={i} index={i} className="h-12 w-12 rounded-lg border text-base" />
+                <InputOTPSlot key={i} index={i} className="h-12 w-12 rounded-xl border text-base" />
               ))}
             </InputOTPGroup>
           </InputOTP>
@@ -137,7 +137,8 @@ export default function EmailConfirmPage() {
         <Button
           type="button"
           variant="outline"
-          className="h-11 w-full rounded-lg text-base"
+          className="w-full"
+          size="lg"
           onClick={handleResend}
           disabled={emailCode.isPending || cooldown > 0 || emailConfirm.isPending}
         >

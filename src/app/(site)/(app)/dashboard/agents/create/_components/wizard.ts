@@ -15,7 +15,7 @@ const STEP_FIELDS: Record<WizardStep, (keyof CreateAgentFormData)[]> = {
   callType: ["contactIds"],
   schedule: [],
   number: ["numberId"],
-  instructions: ["instructions", "callType", "callFields"],
+  instructions: ["instructions", "reportFields", "callType", "callFields"],
 };
 
 const ALL_STEPS: WizardStep[] = ["basics", "callType", "schedule", "number", "instructions"];

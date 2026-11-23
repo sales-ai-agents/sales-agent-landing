@@ -1,20 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
+import { Pencil, Search, Trash2 } from "lucide-react";
+import { TagBadge } from "@/components/dashboard";
 import {
-  useReactTable,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  flexRender,
-  createColumnHelper,
-  type SortingState,
-  type OnChangeFn,
-} from "@tanstack/react-table";
-import { ArrowUpDown, Trash2 } from "lucide-react";
-
-import {
+  Badge,
   Button,
   Switch,
   Table as UiTable,
@@ -24,236 +13,164 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui";
-import { cn, formatDateShort } from "@/lib/utils";
-import type { Contact, ConsentStatus } from "@dashboard/types";
-import { getTagColor, formatConsentLabel, formatLastCallResult } from "../_lib/utils";
-import { ContactCard } from "./contact-card";
-
-const columnHelper = createColumnHelper<Contact>();
+import { formatDateShort } from "@/lib/utils";
+import type { Contact } from "@dashboard/types";
+import { formatConsentLabel, formatLastCallResult } from "../_lib/utils";
 
 interface TableProps {
   data: Contact[];
-  pageSize: number;
-  globalFilter: string;
-  onGlobalFilterChange: (value: string) => void;
-  sorting: SortingState;
-  onSortingChange: OnChangeFn<SortingState>;
+  search: string;
   onDelete: (id: number) => void;
+  onEditTags: (contact: Contact) => void;
   onToggleDoNotCall: (id: number, current: boolean) => void;
-  onToggleConsent?: (id: number, current: ConsentStatus) => void;
+  onToggleConsent: (id: number, current: Contact["consent"]) => void;
 }
 
-export const Table = ({
-  data,
-  pageSize,
-  globalFilter,
-  onGlobalFilterChange,
-  sorting,
-  onSortingChange,
+const COLUMN_COUNT = 7;
+
+const normalize = (value: string): string => value.toLowerCase().replace(/\s/g, "");
+
+const matchesSearch = (contact: Contact, search: string): boolean => {
+  const query = normalize(search);
+  if (!query) return true;
+  return normalize(contact.name).includes(query) || normalize(contact.phone).includes(query);
+};
+
+const EmptyRow = () => (
+  <TableRow>
+    <TableCell colSpan={COLUMN_COUNT}>
+      <div className="text-muted-foreground flex flex-col items-center gap-2 py-10">
+        <span className="bg-muted grid size-12 place-items-center rounded-full">
+          <Search className="size-5" aria-hidden="true" />
+        </span>
+        <b className="text-foreground">Нічого не знайдено</b>
+      </div>
+    </TableCell>
+  </TableRow>
+);
+
+interface ContactRowProps {
+  contact: Contact;
+  onDelete: (id: number) => void;
+  onEditTags: (contact: Contact) => void;
+  onToggleDoNotCall: (id: number, current: boolean) => void;
+  onToggleConsent: (id: number, current: Contact["consent"]) => void;
+}
+
+const ConsentCell = ({
+  contact,
+  onToggleConsent,
+}: Pick<ContactRowProps, "contact" | "onToggleConsent">) => {
+  if (contact.consent === "") return <span className="text-muted-foreground">—</span>;
+  const consent = formatConsentLabel(contact.consent);
+  return (
+    <div className="flex flex-col items-start gap-1">
+      <button
+        type="button"
+        className="cursor-pointer rounded-full"
+        onClick={() => onToggleConsent(contact.id, contact.consent)}
+        aria-label="Змінити згоду на дзвінки"
+      >
+        <Badge variant={contact.consent === "granted" ? "success" : "warning"} dot>
+          {consent.label}
+        </Badge>
+      </button>
+      {contact.consent_at && (
+        <span className="text-muted-foreground text-xs">
+          {formatDateShort(contact.consent_at)}
+          {contact.consent_source ? ` · ${contact.consent_source}` : ""}
+        </span>
+      )}
+    </div>
+  );
+};
+
+const LastActionCell = ({ contact }: { contact: Contact }) => {
+  if (!contact.last_call_at) return <span className="text-muted-foreground">—</span>;
+  return (
+    <div className="flex flex-col">
+      <b>{formatLastCallResult(contact.last_call_result) || "—"}</b>
+      <span className="text-muted-foreground text-xs">{formatDateShort(contact.last_call_at)}</span>
+    </div>
+  );
+};
+
+const ContactRow = ({
+  contact,
   onDelete,
+  onEditTags,
   onToggleDoNotCall,
   onToggleConsent,
-}: TableProps) => {
-  const columns = useMemo(
-    () => [
-      columnHelper.accessor("name", {
-        header: ({ column }) => (
-          <button
-            className="flex items-center gap-1 font-medium"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Ім&apos;я
-            <ArrowUpDown className="h-3 w-3" />
-          </button>
-        ),
-        cell: (info) => <span className="font-medium">{info.getValue()}</span>,
-      }),
-      columnHelper.accessor("phone", {
-        header: "Телефон",
-        cell: (info) => <span className="text-muted-foreground">{info.getValue()}</span>,
-      }),
-      columnHelper.accessor("tags", {
-        header: "Теги",
-        cell: (info) => {
-          const tags = info.getValue() ?? [];
-          if (tags.length === 0) return <span className="text-muted-foreground">—</span>;
-          return (
-            <div className="flex flex-wrap gap-1">
-              {tags.map((tag) => {
-                const color = getTagColor(tag);
-                return (
-                  <span
-                    key={tag}
-                    className={cn(
-                      "inline-block rounded px-2 py-0.5 text-xs font-normal",
-                      color.bg,
-                      color.text
-                    )}
-                  >
-                    {tag}
-                  </span>
-                );
-              })}
-            </div>
-          );
-        },
-        enableSorting: false,
-      }),
-      columnHelper.accessor("consent", {
-        header: "Згода",
-        cell: (info) => {
-          const value = info.getValue();
-          const consentAt = info.row.original.consent_at;
-          const consentSource = info.row.original.consent_source;
-          if (value === "") return <span className="text-muted-foreground">—</span>;
-          const { label, color, dot } = formatConsentLabel(value);
-          return (
-            <div>
-              <span className={cn("inline-flex items-center gap-1.5 text-xs", color)}>
-                <span className={cn("inline-block h-1.5 w-1.5 rounded-full", dot)} />
-                {label}
-              </span>
-              {consentAt && (
-                <p className="text-muted-foreground mt-0.5 text-xs">
-                  {formatDateShort(consentAt)}
-                  {consentSource ? ` · ${consentSource}` : ""}
-                </p>
-              )}
-            </div>
-          );
-        },
-        enableSorting: false,
-        meta: { className: "hidden lg:table-cell" },
-      }),
-      columnHelper.accessor("last_call_at", {
-        header: "Остання дія",
-        cell: (info) => {
-          const date = info.getValue();
-          const result = info.row.original.last_call_result;
-          if (!date) return <span className="text-muted-foreground">—</span>;
-          const formatted = formatDateShort(date);
-          const resultLabel = formatLastCallResult(result);
-          return (
-            <div className="text-xs leading-relaxed">
-              <p>{formatted}</p>
-              {resultLabel && <p className="text-muted-foreground">{resultLabel}</p>}
-            </div>
-          );
-        },
-        meta: { className: "hidden lg:table-cell" },
-      }),
-      columnHelper.accessor("do_not_call", {
-        header: "Не дзвонити",
-        cell: (info) => (
-          <Switch
-            checked={info.getValue()}
-            onCheckedChange={() => onToggleDoNotCall(info.row.original.id, info.getValue())}
-            aria-label="Не дзвонити"
-            className="bg-muted"
-          />
-        ),
-        enableSorting: false,
-        meta: { className: "hidden md:table-cell" },
-      }),
-      columnHelper.display({
-        id: "actions",
-        header: () => <span className="sr-only">Дії</span>,
-        cell: ({ row }) => (
-          <div className="flex justify-end">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-destructive h-8 w-8"
-              onClick={() => onDelete(row.original.id)}
-              aria-label="Видалити контакт"
-            >
-              <Trash2 className="h-3 w-3" />
-            </Button>
-          </div>
-        ),
-      }),
-    ],
-    [onDelete, onToggleDoNotCall]
-  );
+}: ContactRowProps) => (
+  <TableRow>
+    <TableCell className="font-medium">{contact.name || "—"}</TableCell>
+    <TableCell className="tabular-nums">{contact.phone}</TableCell>
+    <TableCell>
+      <div className="flex flex-wrap items-center gap-1">
+        {(contact.tags ?? []).map((tag) => (
+          <TagBadge key={tag} tag={tag} />
+        ))}
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-xs"
+          onClick={() => onEditTags(contact)}
+          aria-label="Редагувати теги"
+        >
+          <Pencil aria-hidden="true" />
+        </Button>
+      </div>
+    </TableCell>
+    <TableCell>
+      <ConsentCell contact={contact} onToggleConsent={onToggleConsent} />
+    </TableCell>
+    <TableCell>
+      <LastActionCell contact={contact} />
+    </TableCell>
+    <TableCell>
+      <Switch
+        checked={contact.do_not_call}
+        onCheckedChange={() => onToggleDoNotCall(contact.id, contact.do_not_call)}
+        aria-label={`Не дзвонити ${contact.name || contact.phone}`}
+      />
+    </TableCell>
+    <TableCell>
+      <Button
+        type="button"
+        variant="destructive"
+        size="icon-xs"
+        onClick={() => onDelete(contact.id)}
+        aria-label="Видалити контакт"
+      >
+        <Trash2 aria-hidden="true" />
+      </Button>
+    </TableCell>
+  </TableRow>
+);
 
-  const table = useReactTable({
-    data,
-    columns,
-    state: { globalFilter, sorting },
-    onGlobalFilterChange,
-    onSortingChange,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    initialState: { pagination: { pageSize } },
-  });
-
-  const rows = table.getRowModel().rows;
-
+export const Table = ({ data, search, ...handlers }: TableProps) => {
+  const rows = data.filter((contact) => matchesSearch(contact, search));
   return (
-    <>
-      <div className="divide-border divide-y sm:hidden">
-        {rows.length === 0 ? (
-          <p className="text-muted-foreground px-4 py-12 text-center text-sm">Нічого не знайдено</p>
-        ) : (
-          rows.map((row) => (
-            <ContactCard
-              key={row.id}
-              contact={row.original}
-              onDelete={onDelete}
-              onToggleDoNotCall={onToggleDoNotCall}
-              onToggleConsent={onToggleConsent}
-            />
-          ))
-        )}
-      </div>
-
-      <div className="hidden sm:block">
-        <UiTable>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="bg-muted/50">
-                {headerGroup.headers.map((header) => {
-                  const meta = header.column.columnDef.meta as { className?: string } | undefined;
-                  return (
-                    <TableHead key={header.id} className={cn("px-4", meta?.className)}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="text-muted-foreground px-4 py-12 text-center"
-                >
-                  Нічого не знайдено
-                </TableCell>
-              </TableRow>
-            ) : (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => {
-                    const meta = cell.column.columnDef.meta as { className?: string } | undefined;
-                    return (
-                      <TableCell key={cell.id} className={cn("px-4 py-3", meta?.className)}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </UiTable>
-      </div>
-    </>
+    <UiTable>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Ім&apos;я</TableHead>
+          <TableHead>Телефон</TableHead>
+          <TableHead>Теги</TableHead>
+          <TableHead>Згода</TableHead>
+          <TableHead>Остання дія</TableHead>
+          <TableHead>Не дзвонити</TableHead>
+          <TableHead>
+            <span className="sr-only">Дії</span>
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {rows.length === 0 && <EmptyRow />}
+        {rows.map((contact) => (
+          <ContactRow key={contact.id} contact={contact} {...handlers} />
+        ))}
+      </TableBody>
+    </UiTable>
   );
 };

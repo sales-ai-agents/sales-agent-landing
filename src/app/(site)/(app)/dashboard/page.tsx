@@ -2,232 +2,163 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Phone, Clock, Target, ChevronRight } from "lucide-react";
+import { subDays } from "date-fns";
 
+import { Clock, Phone, Target, Upload } from "lucide-react";
 import {
-  Progress,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui";
-import { CallsChart, PageError, PageLoading } from "@/components/dashboard";
-import { useStats, useAgents, useCallLogs } from "@dashboard/hooks";
-import { formatNumber, formatTimeSaved } from "@/lib/utils";
-import { KpiCard } from "./_components/kpi-card";
-import { ChartLegend } from "./_components/chart-legend";
+  PageError,
+  PageHead,
+  PageLoading,
+  ProgressRing,
+  SectionCard,
+  StatCard,
+} from "@/components/dashboard";
+import { Button, buttonVariants } from "@/components/ui";
+import { useAgents, useBalance, useCallLogs, useStats } from "@dashboard/hooks";
+import { apiUrl } from "@/lib/api-config";
+import { cn, formatNumber } from "@/lib/utils";
+import { toDateString } from "./call-logs/_lib/utils";
+import { ActivityCard } from "./_components/activity-card";
 import { AgentEfficiencyRow } from "./_components/agent-efficiency-row";
-import { RecentCallRow } from "./_components/recent-call-row";
-import { RecentCallCard } from "./_components/recent-call-card";
+import { MinutesTile } from "./_components/minutes-tile";
+import { OverviewFilters, type OverviewFilterState } from "./_components/overview-filters";
+import { RecentCallsCard } from "./_components/recent-calls-card";
+import { Sparkline } from "./_components/sparkline";
+import { WeekBars } from "./_components/week-bars";
 
-const PERIOD_OPTIONS = [
-  { label: "7 днів", value: 7 },
-  { label: "30 днів", value: 30 },
-  { label: "90 днів", value: 90 },
-] as const;
+const RECENT_CALLS_LIMIT = 4;
+const EFFICIENCY_AGENTS_LIMIT = 3;
+const MINUTES_PER_HOUR = 60;
+const PERCENT = 100;
+const DEFAULT_FILTERS: OverviewFilterState = { days: 7, agentId: 0, numberId: 0 };
 
-const DashboardPage = () => {
-  const [days, setDays] = useState(7);
-
-  const { data: stats, isLoading: statsLoading, error, refetch } = useStats(days);
-  const { data: agents = [] } = useAgents({ stats: true });
-  const { data: callsData } = useCallLogs({ limit: 4 });
-
-  if (statsLoading) return <PageLoading message="Завантажуємо статистику..." />;
-  if (error) return <PageError message={error.message} onRetry={refetch} />;
-
-  const minutesUsed = stats?.minutes_used ?? 0;
-  const minutesLimit = stats?.minutes_limit ?? 1000;
-  const minutesLeft = stats?.minutes_left ?? minutesLimit;
-  const usagePercent = minutesLimit > 0 ? (minutesUsed / minutesLimit) * 100 : 0;
-
-  const totalCalls = stats?.period?.total_calls ?? 0;
-  const successfulCalls = stats?.period?.successful_calls ?? 0;
-  const deltaTotalCalls = stats?.delta_pct?.total_calls ?? null;
-  const deltaSuccessfulCalls = stats?.delta_pct?.successful_calls ?? null;
-  const talkMinutesSaved = stats?.period?.talk_minutes_saved ?? 0;
-  const deltaTalkMinutesSaved = stats?.delta_pct?.talk_minutes_saved ?? null;
-
-  const daysEstimate =
-    minutesUsed > 0 && stats?.period_days
-      ? Math.round(minutesLeft / (minutesUsed / stats.period_days))
-      : null;
-
-  const recentCalls = callsData?.calls ?? [];
-  const selectedLabel = PERIOD_OPTIONS.find((opt) => opt.value === days)?.label;
-
+const SavedTime = ({ minutes }: { minutes: number }) => {
+  const hours = Math.floor(minutes / MINUTES_PER_HOUR);
+  const rest = Math.round(minutes % MINUTES_PER_HOUR);
+  if (hours === 0) {
+    return (
+      <>
+        {rest} <small>хв</small>
+      </>
+    );
+  }
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Огляд</h1>
-          <p className="text-muted-foreground text-sm">Статистика роботи ваших ШІ-агентів</p>
-        </div>
-      </div>
-
-      <Select value={String(days)} onValueChange={(val) => setDays(Number(val))}>
-        <SelectTrigger className="bg-card">
-          <SelectValue className="px-10">{selectedLabel}</SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          {PERIOD_OPTIONS.map((opt) => (
-            <SelectItem key={opt.value} value={String(opt.value)}>
-              {opt.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      <div
-        id="onboarding-stats-cards"
-        className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
-      >
-        <div className="border-primary/35 bg-card col-span-1 rounded-xl border p-5 sm:col-span-2 lg:col-span-1">
-          <p className="text-xs font-medium tracking-wide uppercase">Використання хвилин</p>
-          <div className="mt-3 flex items-baseline gap-1">
-            <span className="text-4xl font-semibold">{minutesUsed}</span>
-            <span className="text-muted-foreground text-lg">/ {minutesLimit} хв</span>
-          </div>
-          <Progress value={usagePercent} className="bg-muted mt-3 rounded-full" />
-          <p className="text-muted-foreground mt-3 text-xs">Залишилось {minutesLeft} хв</p>
-          <p className="text-muted-foreground text-xs">
-            Вистачить ще на{" "}
-            <span className="text-foreground font-medium">~{daysEstimate ?? "—"} днів</span>
-          </p>
-          <Link
-            href="/dashboard/billing"
-            className="text-primary mt-4 inline-flex items-center gap-1 text-sm font-medium"
-          >
-            Докупити хвилини
-            <ChevronRight className="h-4 w-4" />
-          </Link>
-        </div>
-
-        <KpiCard
-          icon={<Phone className="text-success h-4 w-4" />}
-          iconBg="bg-success/15"
-          title="Усього дзвінків"
-          value={formatNumber(totalCalls)}
-          subtitle={`За останні ${days} днів`}
-          delta={deltaTotalCalls}
-          periodLabel={`проти попередніх ${days} днів`}
-        />
-
-        <KpiCard
-          icon={<Clock className="text-primary h-4 w-4" />}
-          iconBg="bg-primary/10"
-          title="Заощаджено часу"
-          value={formatTimeSaved(talkMinutesSaved)}
-          subtitle={`За останні ${days} днів`}
-          delta={deltaTalkMinutesSaved}
-          periodLabel={deltaTalkMinutesSaved !== null ? `проти попередніх ${days} днів` : ""}
-        />
-
-        <KpiCard
-          icon={<Target className="text-warning h-4 w-4" />}
-          iconBg="bg-warning/15"
-          title="Досягнуто цілі"
-          value={formatNumber(successfulCalls)}
-          subtitle={
-            totalCalls > 0
-              ? `${((successfulCalls / totalCalls) * 100).toFixed(1)}% від усіх дзвінків`
-              : "0% від усіх дзвінків"
-          }
-          delta={deltaSuccessfulCalls}
-          periodLabel={`проти попередніх ${days} днів`}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="border-border bg-background rounded-xl border p-5 lg:col-span-2">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-base font-medium">Активність дзвінків</h2>
-            <ChartLegend />
-          </div>
-          <CallsChart data={stats?.by_day} />
-        </div>
-
-        <div className="border-primary/35 bg-background rounded-xl border p-5">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xs font-medium tracking-wide uppercase">Ефективність агентів</h2>
-            <Link href="/dashboard/agents" className="text-primary text-xs font-medium">
-              Усі агенти →
-            </Link>
-          </div>
-          <div className="space-y-5">
-            {agents.slice(0, 3).map((agent, index) => (
-              <AgentEfficiencyRow key={agent.id} agent={agent} index={index} />
-            ))}
-            {agents.length === 0 && (
-              <p className="text-muted-foreground text-sm">Немає створених агентів</p>
-            )}
-          </div>
-          {agents.length > 0 && (
-            <Link
-              href="/dashboard/agents"
-              className="bg-muted text-muted-foreground hover:bg-muted/70 mt-8 flex items-center justify-center rounded-xl py-2 text-sm transition-colors"
-            >
-              Перейти до всіх агентів
-            </Link>
-          )}
-        </div>
-      </div>
-
-      <div>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-base font-medium">Останні дзвінки</h2>
-          <Link href="/dashboard/call-logs" className="text-muted-foreground text-sm">
-            Усі дзвінки →
-          </Link>
-        </div>
-        <div className="border-border bg-card overflow-hidden rounded-xl border">
-          <div className="hidden sm:block">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="px-4">Клієнт</TableHead>
-                  <TableHead className="px-4">Агент</TableHead>
-                  <TableHead className="px-4">Тривалість</TableHead>
-                  <TableHead className="px-4">Результат</TableHead>
-                  <TableHead className="px-4">Час</TableHead>
-                  <TableHead className="w-8 px-2" />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recentCalls.map((call) => (
-                  <RecentCallRow key={call.id} call={call} agents={agents} />
-                ))}
-                {recentCalls.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-muted-foreground px-4 py-6 text-center">
-                      Дзвінків поки немає
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-          <div className="sm:hidden">
-            {recentCalls.map((call) => (
-              <RecentCallCard key={call.id} call={call} agents={agents} />
-            ))}
-            {recentCalls.length === 0 && (
-              <p className="text-muted-foreground px-4 py-6 text-center text-sm">
-                Дзвінків поки немає
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
+    <>
+      {hours} <small>год</small> {rest} <small>хв</small>
+    </>
   );
 };
 
+const DashboardPage = () => {
+  const [filters, setFilters] = useState<OverviewFilterState>(DEFAULT_FILTERS);
+  const { days, agentId, numberId } = filters;
+
+  const stats = useStats(days, { agent_id: agentId, number_id: numberId });
+  const { data: balance } = useBalance();
+  const { data: agents = [] } = useAgents({ stats: true, days });
+  const { data: callsData } = useCallLogs({
+    limit: RECENT_CALLS_LIMIT,
+    ...(agentId && { agent_id: agentId }),
+  });
+
+  if (stats.isLoading) return <PageLoading message="Завантажуємо статистику..." />;
+  if (stats.error) return <PageError message={stats.error.message} onRetry={stats.refetch} />;
+  if (!stats.data) return null;
+
+  const { data } = stats;
+  const recentCalls = callsData?.calls ?? [];
+  const totalCalls = data.period.total_calls;
+  const goals = data.period.successful_calls;
+  const goalsPercent = totalCalls > 0 ? (goals / totalCalls) * PERCENT : 0;
+  const previousLabel = `проти попередніх ${days} днів`;
+  const averageCost =
+    data.avg_call_usd === null ? "—" : `$${data.avg_call_usd.toFixed(2).replace(".", ",")}`;
+
+  const handleExport = (): void => {
+    const exportUrl = apiUrl.callsExport({
+      date_from: toDateString(subDays(new Date(), days - 1)),
+      date_to: toDateString(new Date()),
+      ...(agentId && { agent_id: agentId }),
+      ...(numberId && { number_id: numberId }),
+    });
+    window.open(exportUrl, "_blank", "noopener,noreferrer");
+  };
+
+  return (
+    <div className="flex flex-col gap-6">
+      <PageHead
+        word="огляд"
+        title="Огляд"
+        description="Статистика роботи ваших ШІ-агентів"
+        actions={
+          <Button variant="outline" onClick={handleExport}>
+            <Upload aria-hidden="true" />
+            Експорт за фільтром
+          </Button>
+        }
+      />
+      <OverviewFilters value={filters} onChange={setFilters} />
+      <div id="onboarding-stats-cards" className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <MinutesTile stats={data} balance={balance} />
+        <StatCard
+          icon={Phone}
+          title="Усього дзвінків"
+          value={formatNumber(totalCalls)}
+          subtitle={`Середня вартість дзвінка: ${averageCost}`}
+          delta={data.delta_pct.total_calls}
+          deltaLabel={previousLabel}
+          footer={<WeekBars days={data.by_day} />}
+        />
+        <StatCard
+          icon={Clock}
+          title="Заощаджено часу"
+          value={<SavedTime minutes={data.period.talk_minutes_saved} />}
+          subtitle={`За останні ${days} днів`}
+          delta={data.delta_pct.talk_minutes_saved}
+          deltaLabel={previousLabel}
+          footer={<Sparkline days={data.by_day} />}
+        />
+        <StatCard
+          icon={Target}
+          tone="warning"
+          title="Досягнуто цілі"
+          value={formatNumber(goals)}
+          subtitle={`${goalsPercent.toFixed(1).replace(".", ",")}% від усіх дзвінків`}
+          delta={data.delta_pct.successful_calls}
+          deltaLabel={previousLabel}
+          corner={<ProgressRing percent={goalsPercent} />}
+        />
+      </div>
+      <div className="grid gap-4 xl:grid-cols-[2fr_1fr]">
+        <ActivityCard data={data.by_day} />
+        <SectionCard
+          caption="Ефективність агентів"
+          action={
+            <Link
+              className="text-primary text-sm font-medium hover:underline"
+              href="/dashboard/agents"
+            >
+              Усі агенти →
+            </Link>
+          }
+          contentClassName="flex flex-col gap-4"
+        >
+          {agents.slice(0, EFFICIENCY_AGENTS_LIMIT).map((agent, index) => (
+            <AgentEfficiencyRow key={agent.id} agent={agent} index={index} />
+          ))}
+          {agents.length === 0 && (
+            <p className="text-muted-foreground text-sm">Немає створених агентів</p>
+          )}
+          <Link
+            className={cn(buttonVariants({ variant: "outline" }), "mt-2 w-full")}
+            href="/dashboard/agents"
+          >
+            Перейти до всіх агентів
+          </Link>
+        </SectionCard>
+      </div>
+      <RecentCallsCard calls={recentCalls} agents={agents} />
+    </div>
+  );
+};
 export default DashboardPage;

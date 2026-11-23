@@ -105,7 +105,7 @@ export const CONTACT_ERROR_MESSAGES: ErrorMessageMap = {
 export const NUMBER_ERROR_MESSAGES: ErrorMessageMap = {
   number_unavailable:
     "Номер уже підключений або не схожий на телефонний. Перевірте написання або зверніться до підтримки.",
-  number_limit: "Ваш тариф не дозволяє більше номерів. Оберіть вищий тариф.",
+  number_limit: "Досягнуто ліміт номерів для вашого акаунта.",
   pool_empty: "Зараз немає вільних номерів — ми вже замовляємо нові. Спробуйте переадресацію.",
   agent_not_found: "Агента не знайдено.",
   bad_source: "Невірний спосіб підключення номера.",
@@ -187,7 +187,7 @@ export const CRM_ERROR_MESSAGES: ErrorMessageMap = {
 
 export const CONTACTS_IMPORT_ERROR_MESSAGES: ErrorMessageMap = {
   empty_file: "Файл порожній.",
-  unreadable_file: "Не вдалося прочитати файл. Збережіть його як CSV і спробуйте ще раз.",
+  unreadable_file: "Не вдалося прочитати файл. Збережіть його як CSV або XLSX і спробуйте ще раз.",
   no_valid_phones: "У файлі не знайдено жодного коректного номера телефону.",
   consent_source_required: "Вкажіть, звідки згода на дзвінки.",
   invalid_json: "Некоректні дані запиту.",

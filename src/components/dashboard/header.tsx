@@ -1,171 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { Menu, Plus } from "lucide-react";
-import { useRouter, usePathname } from "next/navigation";
-
-import {
-  Button,
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-  SheetTitle,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  Avatar,
-  AvatarFallback,
-} from "@/components/ui";
-import { cn, getInitials } from "@/lib/utils";
-import { DASHBOARD_NAV_ITEMS } from "@/lib/constants";
-import { useLogout, useMe } from "@/lib/hooks";
+import { Plus } from "lucide-react";
+import { buttonVariants } from "@/components/ui";
+import { BalancePill } from "./balance-pill";
 import { CallResultsBell } from "./call-results-bell";
+import { UserMenu } from "./user-menu";
 
-export const DashboardHeader = () => {
-  const pathname = usePathname();
-  const router = useRouter();
-  const { data: account } = useMe();
-  const logout = useLogout();
-
-  const isNavActive = (href: string): boolean => {
-    if (href === "/dashboard") return pathname === "/dashboard";
-    return pathname === href || pathname.startsWith(href + "/");
-  };
-
-  const handleLogout = (): void => {
-    logout.mutate(undefined, {
-      onSettled: () => router.push("/sign-in"),
-    });
-  };
-
-  const displayName = account?.name ?? "Користувач";
-  const displayEmail = account?.email ?? "";
-  const initials = getInitials(displayName);
-
-  return (
-    <header className="mb-6 flex items-center gap-3">
-      <Sheet>
-        <SheetTrigger
-          render={
-            <Button variant="ghost" size="icon" className="md:hidden" aria-label="Відкрити меню" />
-          }
-        >
-          <Menu className="h-5 w-5" />
-        </SheetTrigger>
-        <SheetContent side="left" className="w-72">
-          <SheetTitle>
-            <Link href="/dashboard" className="flex items-center gap-2 p-2">
-              <Image
-                src="/image/Logo.svg"
-                alt="Calls4U logo"
-                width={32}
-                height={32}
-                className="h-auto w-auto"
-              />
-              <Image
-                src="/image/calls4u.svg"
-                alt="Calls4U"
-                width={80}
-                height={20}
-                className="h-auto w-auto"
-              />
-            </Link>
-          </SheetTitle>
-          <nav className="space-y-1">
-            {DASHBOARD_NAV_ITEMS.map((item) => {
-              const Icon = item.icon;
-              const active = isNavActive(item.href);
-
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium",
-                    active ? "bg-primary/5 text-primary" : "text-muted-foreground"
-                  )}
-                >
-                  <Icon className="h-5 w-5" />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-        </SheetContent>
-      </Sheet>
-
-      <Link href="/dashboard" className="flex items-center gap-2 md:hidden" aria-label="Calls4U">
-        <Image
-          src="/image/Logo.svg"
-          alt="Calls4U logo"
-          width={32}
-          height={32}
-          className="h-8 w-auto"
-        />
-        <Image
-          src="/image/calls4u.svg"
-          alt="Calls4U"
-          width={80}
-          height={18}
-          className="h-auto w-auto"
-        />
-      </Link>
-
-      <div className="hidden flex-1 md:block" />
-
-      <div className="ml-auto flex items-center gap-3 sm:gap-6">
-        <CallResultsBell />
-
-        <Link id="onboarding-create-agent-btn" href="/dashboard/agents/create" className="shrink-0">
-          <Button size="icon" className="sm:hidden" aria-label="Новий агент">
-            <Plus className="h-4 w-4" />
-          </Button>
-          <Button className="hidden sm:inline-flex">
-            <Plus className="mr-2 h-4 w-4" />
-            Новий агент
-          </Button>
-        </Link>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            className="cursor-pointer rounded-full focus:outline-none"
-            aria-label="Меню користувача"
-          >
-            <Avatar>
-              <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="min-w-50 rounded-xl p-4">
-            <div className="mb-2 p-1">
-              <p className="text-sm font-medium">{displayName}</p>
-              <p className="text-muted-foreground truncate text-xs">{displayEmail}</p>
-            </div>
-            <DropdownMenuItem
-              className="text-muted-foreground cursor-pointer"
-              onClick={() => router.push("/dashboard/settings")}
-            >
-              Профіль
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="text-muted-foreground cursor-pointer"
-              onClick={() => router.push("/dashboard/billing")}
-            >
-              Тарифи і оплата
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="text-muted-foreground cursor-pointer"
-              onClick={handleLogout}
-              disabled={logout.isPending}
-            >
-              Вийти
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    </header>
-  );
-};
+export const DashboardHeader = () => (
+  <header className="flex flex-wrap items-center justify-end gap-3 px-4 py-4 md:px-8">
+    <BalancePill />
+    <CallResultsBell />
+    <Link
+      id="onboarding-create-agent-btn"
+      className={buttonVariants({ size: "default" })}
+      href="/dashboard/agents/create"
+    >
+      <Plus aria-hidden="true" />
+      <span>Новий агент</span>
+    </Link>
+    <UserMenu />
+  </header>
+);

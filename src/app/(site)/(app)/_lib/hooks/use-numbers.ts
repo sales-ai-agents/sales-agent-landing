@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api-client";
 import { API_ENDPOINTS, apiUrl } from "@/lib/api-config";
+import { useBalance } from "./use-billing";
 import type {
   NumbersResponse,
   NumberPool,
@@ -48,6 +49,8 @@ export interface NumbersClaimMeta {
   can_claim: boolean;
   pool_limit: number;
   pool_used: number;
+  next_is_extra: boolean;
+  extra_price_usd: number | null;
 }
 
 export const useNumbersMeta = () => {
@@ -72,8 +75,16 @@ export const useNumbersClaimMeta = () => {
       can_claim: typeof data.can_claim === "boolean" ? data.can_claim : true,
       pool_limit: typeof data.pool_limit === "number" ? data.pool_limit : 0,
       pool_used: typeof data.pool_used === "number" ? data.pool_used : 0,
+      next_is_extra: data.next_is_extra === true,
+      extra_price_usd: typeof data.extra_price_usd === "number" ? data.extra_price_usd : null,
     }),
   });
+};
+
+export const useExtraNumberPrice = (): number | null => {
+  const { data: claimMeta } = useNumbersClaimMeta();
+  const { data: balance } = useBalance();
+  return claimMeta?.extra_price_usd ?? balance?.extra_number_price_usd ?? null;
 };
 
 export interface OutboundCallerId {
@@ -101,7 +112,11 @@ export const useNumberPool = (enabled = true) => {
     queryKey: NUMBERS_POOL_KEY,
     queryFn: async () => {
       const data = await apiGet<NumberPoolResponse>(API_ENDPOINTS.APP_NUMBERS_POOL);
-      return { available: data.available, available_by_kind: data.available_by_kind };
+      return {
+        available: data.available,
+        available_by_kind: data.available_by_kind,
+        numbers_by_kind: data.numbers_by_kind ?? {},
+      };
     },
     staleTime: 60 * 1000,
     enabled,
@@ -123,7 +138,7 @@ export const useClaimNumber = () => {
     mutationFn: async (params: ClaimNumberParams): Promise<ClaimNumberResponse> => {
       return apiPost<ClaimNumberResponse>(API_ENDPOINTS.APP_NUMBERS_CLAIM, params);
     },
-    onSuccess: () => {
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: NUMBERS_KEY });
     },
   });

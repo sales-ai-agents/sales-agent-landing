@@ -65,7 +65,7 @@ export default function SignInPage() {
             id="email"
             type="email"
             placeholder="you@example.com"
-            className="h-11 rounded-lg"
+
             {...register("email")}
           />
           {errors.email && (
@@ -102,11 +102,7 @@ export default function SignInPage() {
           </Link>
         </div>
 
-        <Button
-          type="submit"
-          className="bg-primary hover:bg-primary/90 h-11 w-full rounded-lg text-base font-semibold text-white"
-          disabled={login.isPending}
-        >
+        <Button type="submit" className="w-full" size="lg" disabled={login.isPending}>
           {login.isPending ? "Вхід..." : "Увійти"}
         </Button>
       </form>

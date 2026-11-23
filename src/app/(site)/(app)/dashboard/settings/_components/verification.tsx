@@ -1,6 +1,7 @@
 "use client";
 
 import { useForm } from "react-hook-form";
+import { TriangleAlert } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -18,6 +19,7 @@ import {
 import { ApiError } from "@/lib/api-client";
 import { VERIFICATION_ERROR_MESSAGES, resolveErrorMessage } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/mutation-error";
+import { SettingsSection } from "./settings-section";
 import { formatNumber } from "@/lib/utils";
 import { useSubmitVerification, useVerification } from "@dashboard/hooks";
 import type { Verification, VerificationLevel } from "@dashboard/types";
@@ -108,9 +110,9 @@ const VerificationForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="mt-4 space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-1.5">
+        <div className="flex flex-col gap-2">
           <Label htmlFor={NAME_FIELD_ID}>Назва юрособи або ФОП</Label>
           <Input
             id={NAME_FIELD_ID}
@@ -126,7 +128,7 @@ const VerificationForm = () => {
           )}
         </div>
 
-        <div className="space-y-1.5">
+        <div className="flex flex-col gap-2">
           <Label htmlFor={CODE_FIELD_ID}>ЄДРПОУ (8 цифр) або ІПН (10)</Label>
           <Input
             id={CODE_FIELD_ID}
@@ -154,18 +156,18 @@ const VerificationForm = () => {
 };
 
 const VerificationDetails = ({ verification }: { verification: Verification }) => (
-  <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+  <dl className="grid gap-3 text-sm sm:grid-cols-2">
     <div>
-      <dt className="text-muted-foreground text-xs">Юрособа</dt>
+      <dt className="caption text-muted-foreground">Юрособа</dt>
       <dd className="font-medium">{verification.legal_name}</dd>
     </div>
     <div>
-      <dt className="text-muted-foreground text-xs">Код</dt>
+      <dt className="caption text-muted-foreground">Код</dt>
       <dd className="font-medium">{verification.legal_code}</dd>
     </div>
     {verification.daily_outbound_limit > 0 && (
       <div>
-        <dt className="text-muted-foreground text-xs">Вихідних на добу</dt>
+        <dt className="caption text-muted-foreground">Вихідних на добу</dt>
         <dd className="font-medium">до {formatNumber(verification.daily_outbound_limit)}</dd>
       </div>
     )}
@@ -175,28 +177,27 @@ const VerificationDetails = ({ verification }: { verification: Verification }) =
 export const VerificationSection = () => {
   const { data: verification, isLoading } = useVerification();
 
-  if (isLoading) return <Skeleton className="h-40 w-full rounded-2xl" />;
+  if (isLoading) return <Skeleton className="h-40 w-full rounded-3xl" />;
   if (!verification) return null;
 
   const view = LEVEL_VIEWS[verification.level];
   const canSubmit = verification.level === "unverified";
 
   return (
-    <section id="verification" className="border-border bg-background rounded-2xl border p-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-base font-semibold">Підтвердження юрособи</h2>
-        <Badge variant={view.variant}>{view.label}</Badge>
-      </div>
-      <p className="text-muted-foreground mt-1 text-xs">{view.description}</p>
-
+    <SettingsSection
+      id="verification"
+      title="Підтвердження юрособи"
+      description={view.description}
+      action={<Badge variant={view.variant}>{view.label}</Badge>}
+    >
       {canSubmit && verification.note && (
-        <Alert variant="warning" className="mt-4">
+        <Alert variant="warning">
+          <TriangleAlert aria-hidden="true" />
           <AlertTitle>Попередню заявку не підтверджено</AlertTitle>
           <AlertDescription>{verification.note}</AlertDescription>
         </Alert>
       )}
-
       {canSubmit ? <VerificationForm /> : <VerificationDetails verification={verification} />}
-    </section>
+    </SettingsSection>
   );
 };

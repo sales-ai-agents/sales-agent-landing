@@ -1,39 +1,41 @@
 "use client";
 
-import { useMemo } from "react";
 import Link from "next/link";
-import {
-  createColumnHelper,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import { AlertTriangle, Info } from "lucide-react";
 import { toast } from "sonner";
 
+import { TriangleAlert } from "lucide-react";
 import {
+  Badge,
+  Card,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Switch,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  type BadgeProps,
 } from "@/components/ui";
 import { handleMutationError } from "@/lib/mutation-error";
 import { NUMBER_ERROR_MESSAGES } from "@/lib/error-messages";
 import { cn } from "@/lib/utils";
 import { useUpdateNumber } from "@dashboard/hooks";
-import type { Agent, AgentNumber } from "@dashboard/types";
-
+import type {
+  Agent,
+  AgentNumber,
+  NumberDirection,
+  NumberSource,
+  NumberStatus,
+  UpdateNumberParams,
+} from "@dashboard/types";
 import {
   DIRECTION_LABELS,
   STATUS_LABELS,
@@ -52,231 +54,213 @@ interface NumbersTableProps {
 
 const UNASSIGNED_VALUE = "0";
 const UNASSIGNED_LABEL = "Вибрати агента";
-const columnHelper = createColumnHelper<AgentNumber>();
+const DIRECTIONS: NumberDirection[] = ["inbound", "outbound", "both"];
+const HEADINGS = [
+  "Номер",
+  "Відображення",
+  "Призначений агент",
+  "Напрямок",
+  "Статус",
+  "Активний",
+  "Дії",
+];
 
-const renderAgentLabel = (value: string | null, agents: Agent[]): string => {
-  const agent = agents.find((item) => String(item.id) === value);
-  return agent?.name ?? UNASSIGNED_LABEL;
+type BadgeVariant = NonNullable<BadgeProps["variant"]>;
+
+const SOURCE_CHIPS: Record<NumberSource, { label: string; variant: BadgeVariant }> = {
+  assigned: { label: "Наш номер", variant: "secondary" },
+  forward: { label: "Переадресація", variant: "warning" },
+  sip: { label: "Свій SIP", variant: "muted" },
 };
 
-const CallerIdBadge = ({ callerId }: { callerId: boolean }) => {
-  const badge = resolveCallerIdBadge(callerId);
-  const label = (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium",
-        badge.className
-      )}
-    >
-      {badge.label}
-      {badge.hint && <Info className="h-3 w-3" />}
-    </span>
-  );
-
-  if (!badge.hint) return label;
-
-  return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger render={<span className="cursor-help">{label}</span>} />
-        <TooltipContent side="top">{badge.hint}</TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  );
+const STATUS_VARIANTS: Record<NumberStatus, BadgeVariant> = {
+  ready: "success",
+  verification_required: "warning",
+  disabled: "muted",
 };
 
-const NumberActions = ({ number }: { number: AgentNumber }) => (
-  <div className="flex items-center gap-1">
-    {number.direction !== "inbound" && <NumberScheduleDialog number={number} />}
-    <DeleteNumberDialog id={number.id} phone={number.phone} source={number.source} />
-  </div>
-);
+const renderAgentLabel = (value: string | null, agents: Agent[]): string =>
+  agents.find((item) => String(item.id) === value)?.name ?? UNASSIGNED_LABEL;
 
 const NumberLimits = ({ number }: { number: AgentNumber }) => {
   const details = [formatNumberHours(number), formatDailyCap(number.daily_cap)].filter(Boolean);
   if (details.length === 0) return null;
-
-  return <div className="text-muted-foreground text-xs">{details.join(" · ")}</div>;
+  return <div className="text-muted-foreground mt-1 text-xs">{details.join(" · ")}</div>;
 };
 
-const UnassignedWarning = () => (
-  <p className="text-destructive flex items-center gap-1.5 text-xs font-medium">
-    <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-    Дзвінки на цей номер не прийматимуться.
-  </p>
+type UpdateHandler = (number: AgentNumber, params: UpdateNumberParams, message: string) => void;
+
+interface AgentCellProps {
+  number: AgentNumber;
+  agents: Agent[];
+  onAssign: (number: AgentNumber, value: string | null) => void;
+}
+
+const AgentCell = ({ number, agents, onAssign }: AgentCellProps) => {
+  const hasAgents = agents.length > 0;
+  return (
+    <TableCell className="max-w-60">
+      <Select
+        value={number.agent_id ? String(number.agent_id) : UNASSIGNED_VALUE}
+        onValueChange={(value) => onAssign(number, value)}
+        disabled={!hasAgents}
+      >
+        <SelectTrigger className="w-full" aria-label={`Агент на номері ${number.phone}`}>
+          <SelectValue>{(value) => renderAgentLabel(value, agents)}</SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={UNASSIGNED_VALUE}>{UNASSIGNED_LABEL}</SelectItem>
+          {agents.map((agent) => (
+            <SelectItem key={agent.id} value={String(agent.id)}>
+              {agent.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      {!hasAgents && (
+        <p className="text-muted-foreground mt-1.5 text-xs whitespace-normal">
+          Спершу{" "}
+          <Link className="text-primary hover:underline" href="/dashboard/agents/create">
+            створіть агента
+          </Link>
+          , щоб призначити його на номер.
+        </p>
+      )}
+      {hasAgents && number.agent_id === 0 && (
+        <p className="text-destructive mt-1.5 flex items-center gap-1.5 text-xs">
+          <TriangleAlert className="size-3.5" aria-hidden="true" />
+          Виберіть агента
+        </p>
+      )}
+    </TableCell>
+  );
+};
+
+const DirectionCell = ({ number, onUpdate }: { number: AgentNumber; onUpdate: UpdateHandler }) => (
+  <TableCell>
+    <Tabs
+      value={number.direction}
+      onValueChange={(value) => {
+        if (value !== number.direction) {
+          onUpdate(number, { direction: value as NumberDirection }, "Напрямок оновлено");
+        }
+      }}
+      className={cn(!number.is_active && "opacity-50")}
+    >
+      <TabsList aria-label={`Напрямок номера ${number.phone}`} className="h-9">
+        {DIRECTIONS.map((direction) => (
+          <TabsTrigger key={direction} value={direction} className="px-3 text-xs">
+            {DIRECTION_LABELS[direction]}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    </Tabs>
+    <NumberLimits number={number} />
+  </TableCell>
 );
 
-const NoAgentsNotice = () => (
-  <p className="text-muted-foreground text-xs">
-    Спершу{" "}
-    <Link
-      href="/dashboard/agents/create"
-      className="text-primary font-medium underline-offset-2 hover:underline"
-    >
-      створіть агента
-    </Link>
-    , щоб призначити його на номер.
-  </p>
-);
+interface NumberRowProps {
+  number: AgentNumber;
+  agents: Agent[];
+  onUpdate: UpdateHandler;
+  onAssign: (number: AgentNumber, value: string | null) => void;
+}
+
+const NumberRow = ({ number, agents, onUpdate, onAssign }: NumberRowProps) => {
+  const source = SOURCE_CHIPS[number.source];
+  const callerId = resolveCallerIdBadge(number.caller_id);
+  return (
+    <TableRow>
+      <TableCell>
+        <b className="tabular-nums">{number.phone}</b>
+        <br />
+        <span className="text-muted-foreground text-xs">
+          {number.provider || resolveNumberTypeLabel(number)}
+        </span>
+      </TableCell>
+      <TableCell>
+        <Badge variant={source.variant} title={callerId.hint ?? callerId.label}>
+          {source.label}
+        </Badge>
+      </TableCell>
+      <AgentCell number={number} agents={agents} onAssign={onAssign} />
+      <DirectionCell number={number} onUpdate={onUpdate} />
+      <TableCell>
+        <Badge variant={STATUS_VARIANTS[number.status]} dot>
+          {STATUS_LABELS[number.status]}
+        </Badge>
+      </TableCell>
+      <TableCell>
+        <label className="flex items-center gap-2 text-sm font-medium">
+          <Switch
+            checked={number.is_active}
+            aria-label={`Номер ${number.phone} активний`}
+            onCheckedChange={(checked) =>
+              onUpdate(
+                number,
+                { is_active: checked },
+                checked ? "Номер увімкнено" : "Номер вимкнено"
+              )
+            }
+          />
+          {number.is_active ? "Так" : "Ні"}
+        </label>
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-1">
+          {number.direction !== "inbound" && <NumberScheduleDialog number={number} />}
+          <DeleteNumberDialog id={number.id} phone={number.phone} source={number.source} />
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+};
 
 export const NumbersTable = ({ numbers, agents }: NumbersTableProps) => {
   const updateNumber = useUpdateNumber();
-  const hasAgents = agents.length > 0;
 
-  const handleAssign = (number: AgentNumber, value: string | null): void => {
-    if (value === null) return;
-
-    const currentValue = number.agent_id ? String(number.agent_id) : UNASSIGNED_VALUE;
-    if (value === currentValue) return;
-
+  const update: UpdateHandler = (number, params, successMessage) => {
     updateNumber.mutate(
-      { id: number.id, agent_id: Number(value) },
+      { id: number.id, ...params },
       {
-        onSuccess: () => toast.success("Агента оновлено"),
+        onSuccess: () => toast.success(successMessage),
         onError: (error) => handleMutationError(error, NUMBER_ERROR_MESSAGES),
       }
     );
   };
 
-  const renderAgentSelect = (number: AgentNumber) => (
-    <Select
-      value={number.agent_id ? String(number.agent_id) : UNASSIGNED_VALUE}
-      onValueChange={(value) => handleAssign(number, value)}
-      disabled={!hasAgents}
-    >
-      <SelectTrigger className="w-full">
-        <SelectValue>{(value) => renderAgentLabel(value, agents)}</SelectValue>
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value={UNASSIGNED_VALUE}>{UNASSIGNED_LABEL}</SelectItem>
-        {agents.map((agent) => (
-          <SelectItem key={agent.id} value={String(agent.id)}>
-            {agent.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-
-  const renderAgentCell = (number: AgentNumber) => (
-    <div className="flex flex-col gap-1.5 md:max-w-xs">
-      {renderAgentSelect(number)}
-      {!hasAgents && <NoAgentsNotice />}
-      {hasAgents && number.agent_id === 0 && <UnassignedWarning />}
-    </div>
-  );
-
-  const columns = useMemo(
-    () => [
-      columnHelper.accessor("phone", {
-        header: "Номер",
-        cell: ({ row }) => (
-          <div>
-            <div className="font-medium">{row.original.phone}</div>
-            <div className="text-muted-foreground text-xs">
-              {resolveNumberTypeLabel(row.original)}
-            </div>
-          </div>
-        ),
-      }),
-      columnHelper.display({
-        id: "caller-id",
-        header: "Відображення",
-        cell: ({ row }) => <CallerIdBadge callerId={row.original.caller_id} />,
-      }),
-      columnHelper.display({
-        id: "agent",
-        header: "Призначений агент",
-        cell: ({ row }) => renderAgentCell(row.original),
-      }),
-      columnHelper.display({
-        id: "direction",
-        header: "Напрямок",
-        cell: ({ row }) => (
-          <div>
-            <div>{DIRECTION_LABELS[row.original.direction]}</div>
-            <NumberLimits number={row.original} />
-          </div>
-        ),
-      }),
-      columnHelper.accessor("status", {
-        header: "Статус",
-        cell: ({ row }) => <span className="text-sm">{STATUS_LABELS[row.original.status]}</span>,
-      }),
-      columnHelper.display({
-        id: "actions",
-        header: "Дії",
-        cell: ({ row }) => <NumberActions number={row.original} />,
-      }),
-    ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [agents]
-  );
-
-  const table = useReactTable({
-    data: numbers,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-  });
+  const handleAssign = (number: AgentNumber, value: string | null): void => {
+    if (value === null) return;
+    const currentValue = number.agent_id ? String(number.agent_id) : UNASSIGNED_VALUE;
+    if (value === currentValue) return;
+    update(number, { agent_id: Number(value) }, "Агента оновлено");
+  };
 
   return (
-    <div className="border-border bg-card overflow-hidden rounded-xl border">
-      <div className="divide-border divide-y md:hidden">
-        {numbers.map((number) => {
-          return (
-            <div key={number.id} className="flex flex-col gap-3 p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="truncate font-medium">{number.phone}</p>
-                  <p className="text-muted-foreground truncate text-xs">
-                    {resolveNumberTypeLabel(number)}
-                  </p>
-                </div>
-                <div className="flex shrink-0 items-center gap-1">
-                  <CallerIdBadge callerId={number.caller_id} />
-                  <NumberActions number={number} />
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <p className="text-muted-foreground text-xs">Призначений агент</p>
-                {renderAgentCell(number)}
-              </div>
-              <div className="text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 text-xs">
-                <span>Напрямок: {DIRECTION_LABELS[number.direction]}</span>
-                <NumberLimits number={number} />
-                <span>Статус: {STATUS_LABELS[number.status]}</span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="hidden md:block">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="px-4 font-normal">
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                ))}
-              </TableRow>
+    <Card className="overflow-hidden p-0">
+      <Table className="min-w-225">
+        <TableHeader>
+          <TableRow>
+            {HEADINGS.map((heading) => (
+              <TableHead key={heading}>{heading}</TableHead>
             ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className="px-4 py-3 align-top">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {numbers.map((number) => (
+            <NumberRow
+              key={number.id}
+              number={number}
+              agents={agents}
+              onUpdate={update}
+              onAssign={handleAssign}
+            />
+          ))}
+        </TableBody>
+      </Table>
+      <p className="text-muted-foreground border-t px-4 py-3 text-sm">
+        Показано 1-{numbers.length} з {numbers.length} номерів
+      </p>
+    </Card>
   );
 };

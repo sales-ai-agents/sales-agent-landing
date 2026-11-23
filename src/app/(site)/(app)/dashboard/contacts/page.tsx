@@ -1,20 +1,22 @@
 "use client";
 
 import { useState, useCallback, useMemo } from "react";
-import type { SortingState } from "@tanstack/react-table";
-import { Search, Users, Phone, BarChart3, Upload, Plus, Download } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button, Input } from "@/components/ui";
+import { Download, Plus, Search, Upload, Users } from "lucide-react";
 import {
   PageError,
   PageLoading,
+  PageHead,
+  PageEmpty,
+  FilterSelect,
   AddContactDialog,
   ImportContactsDialog,
   ExportContactsDialog,
-  PageEmpty,
 } from "@/components/dashboard";
+import { Button, Card, Input } from "@/components/ui";
 import {
+  useContactBases,
   useContacts,
   useCreateContact,
   useDeleteContact,
@@ -22,52 +24,55 @@ import {
 } from "@dashboard/hooks";
 import { CONTACT_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/mutation-error";
-import { formatNumber, cn } from "@/lib/utils";
+import { formatNumber } from "@/lib/utils";
 import type { ContactFormData } from "@/lib/schemas";
-import type { ConsentStatus } from "@dashboard/types";
+import type { ConsentStatus, Contact } from "@dashboard/types";
+import { ContactStats } from "./_components/contact-stats";
 import { Table } from "./_components/table";
-import { ContactKpiCard } from "./_components/contact-kpi-card";
+import { CreateTagDialog } from "./_components/create-tag-dialog";
+import { EditTagsDialog } from "./_components/edit-tags-dialog";
+import { TagFilterBar } from "./_components/tag-filter-bar";
+
+const NO_BASE = 0;
 
 const ContactsPage = () => {
-  const { data, isLoading, error, refetch } = useContacts();
+  const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [baseId, setBaseId] = useState(NO_BASE);
+  const { data, isLoading, error, refetch } = useContacts({
+    tag: activeTag ?? undefined,
+    baseId: baseId === NO_BASE ? undefined : baseId,
+  });
+  const { data: bases = [] } = useContactBases();
 
   const createContact = useCreateContact();
   const deleteContact = useDeleteContact();
   const updateContact = useUpdateContact();
 
-  const contacts = useMemo(() => {
-    return data?.contacts ?? [];
-  }, [data?.contacts]);
-
+  const contacts = useMemo(() => data?.contacts ?? [], [data?.contacts]);
+  const serverTags = useMemo(() => data?.tags ?? [], [data?.tags]);
   const contactStats = data?.stats;
 
   const [globalFilter, setGlobalFilter] = useState("");
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [draftTags, setDraftTags] = useState<string[]>([]);
+  const [editingContact, setEditingContact] = useState<Contact | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showTagDialog, setShowTagDialog] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
 
-  const tagCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    for (const contact of contacts) {
-      for (const tag of contact.tags ?? []) {
-        counts[tag] = (counts[tag] ?? 0) + 1;
-      }
-    }
-    return counts;
-  }, [contacts]);
-
-  const allTags = useMemo(() => Object.keys(tagCounts).sort(), [tagCounts]);
-
-  const filteredContacts = useMemo(() => {
-    if (!activeTag) return contacts;
-    return contacts.filter((c) => c.tags?.includes(activeTag));
-  }, [contacts, activeTag]);
+  const persistedTagNames = useMemo(() => serverTags.map(({ tag }) => tag), [serverTags]);
+  const pendingDraftTags = useMemo(
+    () => draftTags.filter((tag) => !persistedTagNames.includes(tag)),
+    [draftTags, persistedTagNames]
+  );
+  const tagOptions = useMemo(
+    () => [...persistedTagNames, ...pendingDraftTags],
+    [persistedTagNames, pendingDraftTags]
+  );
 
   const handleAddContact = useCallback(
-    (formData: ContactFormData) => {
-      createContact.mutate(formData, {
+    (formData: ContactFormData, tags: string[]) => {
+      createContact.mutate(tags.length > 0 ? { ...formData, tags } : formData, {
         onSuccess: () => {
           toast.success("Контакт додано");
           setShowAddDialog(false);
@@ -112,161 +117,149 @@ const ContactsPage = () => {
     [updateContact]
   );
 
+  const handleSaveTags = useCallback(
+    (tags: string[]) => {
+      if (!editingContact) return;
+      updateContact.mutate(
+        { id: editingContact.id, tags },
+        {
+          onSuccess: () => {
+            toast.success("Теги оновлено");
+            setEditingContact(null);
+          },
+          onError: (err) => handleMutationError(err, CONTACT_ERROR_MESSAGES),
+        }
+      );
+    },
+    [editingContact, updateContact]
+  );
+
+  const handleCreateTag = useCallback((tag: string) => {
+    setDraftTags((current) => [...current, tag]);
+    setShowTagDialog(false);
+  }, []);
+
   if (isLoading) return <PageLoading message="Завантажуємо контакти..." />;
   if (error) return <PageError message={error.message} onRetry={refetch} />;
-  if (!contacts.length) {
-    return (
-      <PageEmpty
-        icon={Phone}
-        title="Контактів ще немає"
-        description={
-          <>
-            <p className="text-muted-foreground mt-1 text-lg">Додайте перший контакт, щоб почати</p>
-            <div className="mt-4 flex flex-col justify-center gap-3 sm:flex-row">
-              <Button variant="outline" onClick={() => setShowUploadDialog(true)}>
-                <Upload className="mr-2 h-4 w-4" />
-                Імпорт контактів
-              </Button>
-              <Button onClick={() => setShowAddDialog(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Додати контакт
-              </Button>
-            </div>
-            {showAddDialog && (
-              <AddContactDialog
-                onSubmit={handleAddContact}
-                onClose={() => setShowAddDialog(false)}
-              />
-            )}
-            {showUploadDialog && (
-              <ImportContactsDialog onClose={() => setShowUploadDialog(false)} />
-            )}
-          </>
-        }
-      />
-    );
-  }
 
-  const totalContacts = contactStats?.total_contacts ?? contacts.length;
-  const processedThisMonth = contactStats?.processed_this_month ?? 0;
-  const conversionPct = contactStats?.conversion_pct;
-
-  const processedSubtitle =
-    totalContacts > 0
-      ? `${((processedThisMonth / totalContacts) * 100).toFixed(1)}% від загальної бази`
-      : "від загальної бази";
-
-  const conversionValue =
-    conversionPct !== null && conversionPct !== undefined
-      ? `${conversionPct.toFixed(1).replace(".", ",")}%`
-      : "—";
+  const totalContacts = contactStats?.total_contacts ?? 0;
+  const actions = (
+    <>
+      <Button type="button" variant="outline" onClick={() => setShowExportDialog(true)}>
+        <Download aria-hidden="true" />
+        Експорт CSV
+      </Button>
+      <Button type="button" variant="outline" onClick={() => setShowUploadDialog(true)}>
+        <Upload aria-hidden="true" />
+        Імпорт контактів
+      </Button>
+      <Button type="button" onClick={() => setShowAddDialog(true)}>
+        <Plus aria-hidden="true" />
+        Додати контакт
+      </Button>
+    </>
+  );
+  const isEmptyAccount = totalContacts === 0 && !activeTag && baseId === NO_BASE;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Контакти</h1>
-          <p className="text-muted-foreground text-sm">
-            Керуйте базою контактів для дзвінків ШІ-агента
-          </p>
-        </div>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 lg:flex lg:w-auto">
-          <Button variant="outline" className="px-6" onClick={() => setShowExportDialog(true)}>
-            <Download className="mr-2 h-4 w-4" />
-            Експорт CSV
-          </Button>
-          <Button variant="outline" className="px-6" onClick={() => setShowUploadDialog(true)}>
-            <Upload className="mr-2 h-4 w-4" />
-            Імпорт контактів
-          </Button>
-          <Button onClick={() => setShowAddDialog(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Додати контакт
-          </Button>
-        </div>
-      </div>
+    <div className="flex flex-col gap-6">
+      <PageHead
+        word="контакти"
+        title="Контакти"
+        description="Керуйте базою контактів для дзвінків ШІ-агента"
+        actions={isEmptyAccount ? undefined : actions}
+      />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <ContactKpiCard
-          icon={<Users className="text-primary h-6 w-6" />}
-          iconBg="bg-primary/10"
-          title="Усього контактів"
-          value={formatNumber(totalContacts)}
-          subtitle="Вся ваша база контактів"
+      {isEmptyAccount ? (
+        <PageEmpty
+          icon={Users}
+          title="Контактів ще немає"
+          description={<p>Додайте перший контакт, щоб почати</p>}
+          action={actions}
         />
-        <ContactKpiCard
-          icon={<Phone className="text-success h-6 w-6" />}
-          iconBg="bg-success/15"
-          title="Оброблено цього місяця"
-          value={`${formatNumber(processedThisMonth)} / ${formatNumber(totalContacts)}`}
-          subtitle={processedSubtitle}
-        />
-        <ContactKpiCard
-          icon={<BarChart3 className="text-primary h-6 w-6" />}
-          iconBg="bg-primary/10"
-          title="Конверсія в цільову дію"
-          value={conversionValue}
-          subtitle="Цільові дії / Всі дзвінки"
-        />
-      </div>
-
-      <div className="relative w-full max-w-full sm:max-w-sm">
-        <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-        <Input
-          aria-label="Пошук контактів"
-          placeholder="Пошук контактів за ім'ям або телефоном..."
-          value={globalFilter}
-          onChange={(e) => setGlobalFilter(e.target.value)}
-          className="pl-9"
-        />
-      </div>
-
-      <div className="border-border bg-card flex flex-wrap gap-2 rounded-lg border px-4 py-2">
-        <Button
-          onClick={() => setActiveTag(null)}
-          variant="outline"
-          className={cn(
-            "items-center gap-1.5 border px-3 py-1.5 text-xs",
-            !activeTag
-              ? "border-primary bg-primary/5 text-primary"
-              : "border-border text-muted-foreground"
-          )}
-        >
-          Усі контакти <span className="font-semibold">{contacts.length}</span>
-        </Button>
-        {allTags.map((tag) => (
-          <Button
-            key={tag}
-            variant="outline"
-            onClick={() => setActiveTag(activeTag === tag ? null : tag)}
-            className={cn(
-              "items-center gap-1.5 text-xs",
-              activeTag === tag
-                ? "border-primary bg-primary/5 text-primary"
-                : "border-border text-muted-foreground"
+      ) : (
+        <>
+          <ContactStats
+            total={totalContacts}
+            processedThisMonth={contactStats?.processed_this_month ?? 0}
+            conversionPct={contactStats?.conversion_pct}
+          />
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative min-w-64 flex-1">
+              <Search
+                className="text-muted-foreground pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2"
+                aria-hidden="true"
+              />
+              <Input
+                type="search"
+                className="pl-10"
+                value={globalFilter}
+                onChange={(event) => setGlobalFilter(event.target.value)}
+                placeholder="Пошук контактів за ім'ям або телефоном..."
+                aria-label="Пошук контактів"
+              />
+            </div>
+            {bases.length > 0 && (
+              <FilterSelect
+                label="База контактів"
+                allLabel="Усі бази"
+                value={baseId}
+                options={bases.map((base) => ({
+                  value: base.id,
+                  label: `${base.title} (${formatNumber(base.contacts)})`,
+                }))}
+                onChange={setBaseId}
+              />
             )}
-          >
-            {tag} <span className="font-semibold">{tagCounts[tag]}</span>
-          </Button>
-        ))}
-      </div>
+          </div>
 
-      <div className="border-border bg-background overflow-hidden rounded-xl border">
-        <Table
-          data={filteredContacts}
-          pageSize={filteredContacts.length}
-          globalFilter={globalFilter}
-          onGlobalFilterChange={setGlobalFilter}
-          sorting={sorting}
-          onSortingChange={setSorting}
-          onDelete={handleDeleteContact}
-          onToggleDoNotCall={handleToggleDoNotCall}
-          onToggleConsent={handleToggleConsent}
-        />
-      </div>
+          <TagFilterBar
+            totalContacts={totalContacts}
+            tags={serverTags}
+            draftTags={pendingDraftTags}
+            activeTag={activeTag}
+            onSelect={setActiveTag}
+            onCreate={() => setShowTagDialog(true)}
+          />
+
+          <Card className="overflow-hidden p-0">
+            <Table
+              data={contacts}
+              search={globalFilter}
+              onDelete={handleDeleteContact}
+              onEditTags={setEditingContact}
+              onToggleDoNotCall={handleToggleDoNotCall}
+              onToggleConsent={handleToggleConsent}
+            />
+            <p className="text-muted-foreground px-4 py-3 text-sm">
+              Показано {contacts.length} з {formatNumber(totalContacts)} контактів
+            </p>
+          </Card>
+        </>
+      )}
 
       {showAddDialog && (
-        <AddContactDialog onSubmit={handleAddContact} onClose={() => setShowAddDialog(false)} />
+        <AddContactDialog
+          tagOptions={tagOptions}
+          onSubmit={handleAddContact}
+          onClose={() => setShowAddDialog(false)}
+        />
+      )}
+      {showTagDialog && (
+        <CreateTagDialog
+          existingTags={tagOptions}
+          onCreate={handleCreateTag}
+          onClose={() => setShowTagDialog(false)}
+        />
+      )}
+      {editingContact && (
+        <EditTagsDialog
+          contact={editingContact}
+          tagOptions={tagOptions}
+          isSaving={updateContact.isPending}
+          onSave={handleSaveTags}
+          onClose={() => setEditingContact(null)}
+        />
       )}
       {showUploadDialog && <ImportContactsDialog onClose={() => setShowUploadDialog(false)} />}
       {showExportDialog && (

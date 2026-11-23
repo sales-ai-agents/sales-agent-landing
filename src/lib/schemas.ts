@@ -7,10 +7,13 @@ import {
   type CallField,
   type CallTypeId,
 } from "@/lib/call-config/schema";
+import { PASSWORD_MIN_LENGTH } from "@/lib/password-rules";
+
+const PASSWORD_LENGTH_MESSAGE = `Пароль має містити щонайменше ${PASSWORD_MIN_LENGTH} символів`;
 
 export const signInSchema = z.object({
   email: z.email("Введіть коректну електронну адресу"),
-  password: z.string().min(8, "Пароль має містити щонайменше 8 символів"),
+  password: z.string().min(PASSWORD_MIN_LENGTH, PASSWORD_LENGTH_MESSAGE),
 });
 
 export type SignInFormData = z.infer<typeof signInSchema>;
@@ -18,11 +21,7 @@ export type SignInFormData = z.infer<typeof signInSchema>;
 export const signUpSchema = z.object({
   name: z.string().min(2, "Ім'я має містити щонайменше 2 символи"),
   email: z.email("Введіть коректну електронну адресу"),
-  password: z
-    .string()
-    .min(8, "Пароль має містити щонайменше 8 символів")
-    .regex(/[0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/, "Має містити цифру або спецсимвол")
-    .regex(/[A-ZА-ЯІЇЄҐ]/, "Має містити велику літеру"),
+  password: z.string().min(PASSWORD_MIN_LENGTH, PASSWORD_LENGTH_MESSAGE),
   termsAccepted: z
     .boolean()
     .refine((value) => value, "Щоб продовжити, підтвердіть згоду з умовами"),
@@ -37,15 +36,11 @@ export const forgotPasswordSchema = z.object({
 
 export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
-const strongPassword = z
-  .string()
-  .min(8, "Пароль має містити щонайменше 8 символів")
-  .regex(/[0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/, "Має містити цифру або спецсимвол")
-  .regex(/[A-ZА-ЯІЇЄҐ]/, "Має містити велику літеру");
+const newPassword = z.string().min(PASSWORD_MIN_LENGTH, PASSWORD_LENGTH_MESSAGE);
 
 export const resetPasswordSchema = z
   .object({
-    password: strongPassword,
+    password: newPassword,
     confirmPassword: z.string().min(1, "Підтвердіть пароль"),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -62,6 +57,7 @@ export const emailConfirmSchema = z.object({
 export type EmailConfirmFormData = z.infer<typeof emailConfirmSchema>;
 
 export const INSTRUCTIONS_MAX_LENGTH = 4000;
+export const REPORT_FIELDS_MAX_LENGTH = 500;
 
 export const CALL_DIRECTIONS = ["inbound", "outbound"] as const;
 export type CallDirection = (typeof CALL_DIRECTIONS)[number];
@@ -121,6 +117,9 @@ const agentConfigShape = {
     .string()
     .min(1, "Інструкції обов'язкові")
     .max(INSTRUCTIONS_MAX_LENGTH, `Максимум ${INSTRUCTIONS_MAX_LENGTH} символів`),
+  reportFields: z
+    .string()
+    .max(REPORT_FIELDS_MAX_LENGTH, `Максимум ${REPORT_FIELDS_MAX_LENGTH} символів`),
   callType: z.enum(CALL_TYPE_IDS).nullable(),
   callFields: callFieldsSchema,
 };
@@ -177,6 +176,7 @@ export interface AgentApiPayload {
   name: string;
   voice: string;
   instructions: string;
+  report_fields: string;
   call_type: CallTypeId | null;
   call_fields: CallField[];
   call_direction: CallDirection;
@@ -197,6 +197,7 @@ export const toAgentApiPayload = (
     name: data.name,
     voice: data.voice,
     instructions: data.instructions,
+    report_fields: data.reportFields,
     call_type: data.callType,
     call_fields: toApiCallFields(data.callFields),
     call_direction: data.callDirection,

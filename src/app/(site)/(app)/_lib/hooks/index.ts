@@ -10,7 +10,9 @@ export {
 export {
   useBillingPlans,
   useCheckout,
-  useTopUp,
+  useBalance,
+  useBalanceTopUp,
+  useUpdateBalanceAlert,
   useAutoRenew,
   usePaymentStatus,
   useBillingHistory,
@@ -31,6 +33,7 @@ export {
   useNumbers,
   useNumbersMeta,
   useNumbersClaimMeta,
+  useExtraNumberPrice,
   useOutboundCallerId,
   useNumberPool,
   useSipAddresses,
@@ -45,6 +48,7 @@ export type { NumbersAllowance, NumbersClaimMeta, OutboundCallerId } from "./use
 export { useStats } from "./use-stats";
 export { usePreviewContacts, useUploadContacts } from "./use-upload-contacts";
 export { useVoices } from "./use-voices";
+export { useAgentTemplates } from "./use-agent-templates";
 export {
   useWebhooks,
   useCreateWebhook,

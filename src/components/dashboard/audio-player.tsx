@@ -2,9 +2,10 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Howl } from "howler";
-import { Play, Pause, Volume2, VolumeX } from "lucide-react";
+import { Pause, Play, Volume2, VolumeX } from "lucide-react";
+import { Button, Card, CardContent, CardHeader, CardTitle, Progress } from "@/components/ui";
 
-import { Button } from "@/components/ui";
+const SEEK_STEP_SEC = 5;
 
 interface AudioPlayerProps {
   src: string;
@@ -141,12 +142,31 @@ export const AudioPlayer = ({ src }: AudioPlayerProps) => {
     [duration]
   );
 
+  const handleSeekKey = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      const howl = howlRef.current;
+      if (!howl || duration <= 0) return;
+      const delta =
+        event.key === "ArrowRight" ? SEEK_STEP_SEC : event.key === "ArrowLeft" ? -SEEK_STEP_SEC : 0;
+      if (delta === 0) return;
+      event.preventDefault();
+      const seekTo = Math.max(0, Math.min(duration, readSeek(howl) + delta));
+      howl.seek(seekTo);
+      setCurrentTime(seekTo);
+    },
+    [duration]
+  );
+
   if (error) {
     return (
-      <div className="border-border bg-background rounded-2xl border p-5">
-        <h2 className="mb-3 text-sm font-semibold">Аудіозапис дзвінка</h2>
-        <p className="text-muted-foreground text-sm">Запис недоступний</p>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Аудіозапис дзвінка</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">Запис недоступний</p>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -154,52 +174,46 @@ export const AudioPlayer = ({ src }: AudioPlayerProps) => {
     duration > 0 ? Math.max(0, Math.min(100, (currentTime / duration) * 100)) : 0;
 
   return (
-    <div className="border-border bg-background rounded-2xl border p-5">
-      <h2 className="mb-3 text-sm font-semibold">Аудіозапис дзвінка</h2>
-      <div className="flex items-center gap-3">
+    <Card>
+      <CardHeader>
+        <CardTitle>Аудіозапис дзвінка</CardTitle>
+      </CardHeader>
+      <CardContent className="flex items-center gap-3">
         <Button
+          type="button"
           size="icon"
-          className="h-10 w-10 shrink-0 rounded-full"
           onClick={togglePlay}
           disabled={!isLoaded}
           aria-label={isPlaying ? "Пауза" : "Відтворити"}
         >
-          {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+          {isPlaying ? <Pause aria-hidden="true" /> : <Play aria-hidden="true" />}
         </Button>
-
-        <span className="text-muted-foreground w-12 shrink-0 font-mono text-xs">
-          {formatTime(currentTime)}
+        <span className="text-muted-foreground text-sm tabular-nums">
+          {formatTime(currentTime)} / {formatTime(duration)}
         </span>
-
         <div
-          className="bg-muted relative h-2 flex-1 cursor-pointer rounded-full"
+          className="flex-1 cursor-pointer py-2"
           onClick={handleSeek}
+          onKeyDown={handleSeekKey}
           role="slider"
+          tabIndex={0}
           aria-label="Прогрес відтворення"
           aria-valuenow={Math.round(currentTime)}
           aria-valuemin={0}
           aria-valuemax={Math.round(duration)}
         >
-          <div
-            className="bg-primary absolute inset-y-0 left-0 rounded-full"
-            style={{ width: `${progressPercent}%` }}
-          />
+          <Progress value={progressPercent} />
         </div>
-
-        <span className="text-muted-foreground w-12 shrink-0 text-right font-mono text-xs">
-          {formatTime(duration)}
-        </span>
-
         <Button
+          type="button"
           variant="ghost"
-          size="icon"
-          className="h-8 w-8 shrink-0"
+          size="icon-sm"
           onClick={toggleMute}
           aria-label={isMuted ? "Увімкнути звук" : "Вимкнути звук"}
         >
-          {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+          {isMuted ? <VolumeX aria-hidden="true" /> : <Volume2 aria-hidden="true" />}
         </Button>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };

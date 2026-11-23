@@ -1,10 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { CheckCircle, Mail } from "lucide-react";
 
-import { Button } from "@/components/ui";
+import { ArrowRight, Check } from "lucide-react";
+import { buttonVariants } from "@/components/ui";
 
 const REDIRECT_DELAY_MS = 3000;
 
@@ -15,40 +16,22 @@ export default function EmailConfirmedPage() {
     const timer = setTimeout(() => {
       router.replace("/dashboard");
     }, REDIRECT_DELAY_MS);
-
     return () => clearTimeout(timer);
   }, [router]);
 
   return (
-    <div className="w-full max-w-md text-center">
-      <div className="mb-6 flex justify-center">
-        <div className="relative">
-          <div className="bg-primary/10 flex h-20 w-20 items-center justify-center rounded-full">
-            <Mail className="text-primary h-10 w-10" />
-          </div>
-          <div className="bg-success text-success-foreground absolute -right-1 -bottom-1 flex h-7 w-7 items-center justify-center rounded-full">
-            <CheckCircle className="h-4 w-4" />
-          </div>
-        </div>
-      </div>
-
-      <h2 className="font-display text-2xl font-bold sm:text-3xl">Пошту підтверджено!</h2>
-      <p className="text-muted-foreground mx-auto mt-4 max-w-xs text-base">
-        Дякуємо, тепер можете увійти у свій акаунт і почати роботу.
+    <div className="flex w-full max-w-sm flex-col items-center gap-4 text-center">
+      <span className="bg-success/10 text-success grid size-16 place-items-center rounded-full">
+        <Check className="size-8" aria-hidden="true" />
+      </span>
+      <h1 className="font-heading text-3xl">Пошту підтверджено!</h1>
+      <p className="text-muted-foreground">
+        Ваш акаунт активовано. Тепер ви можете увійти й почати роботу.
       </p>
-
-      <Button
-        className="bg-primary hover:bg-primary/90 text-primary-foreground mt-8 h-11 w-full rounded-lg text-base font-semibold"
-        onClick={() => router.replace("/dashboard")}
-      >
-        Увійти в акаунт →
-      </Button>
-
-      <div className="bg-primary/5 mt-4 rounded-lg p-4 text-left">
-        <p className="text-muted-foreground text-sm">
-          Якщо перенаправлення не відбулося автоматично, натисніть на кнопку вище.
-        </p>
-      </div>
+      <Link className={buttonVariants({ size: "lg", className: "w-full" })} href="/dashboard">
+        Перейти в кабінет
+        <ArrowRight aria-hidden="true" />
+      </Link>
     </div>
   );
 }

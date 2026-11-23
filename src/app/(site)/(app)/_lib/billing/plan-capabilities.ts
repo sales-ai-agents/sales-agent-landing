@@ -1,7 +1,5 @@
 import type { AutoRenewState, BillingPlan } from "@dashboard/types";
 
-export const POPULAR_PLAN_KEY = "business" as const;
-
 export const DEFAULT_AUTO_RENEW: AutoRenewState = {
   auto_renew: false,
   auto_charge: false,
@@ -10,7 +8,7 @@ export const DEFAULT_AUTO_RENEW: AutoRenewState = {
   auto_renew_consent_at: null,
 };
 
-const PLAN_TIERS = ["trial", "start", "business", "pro"] as const;
+const PLAN_TIERS = ["trial", "start", "pro"] as const;
 
 type PlanTier = (typeof PLAN_TIERS)[number];
 
@@ -39,14 +37,6 @@ const PLAN_CAPABILITIES: Record<PlanTier, PlanCapabilities> = {
     callLog: true,
     csvCampaigns: false,
     webhooks: false,
-    integrations: "limited",
-    support: "basic",
-    businessProcess: false,
-  },
-  business: {
-    callLog: true,
-    csvCampaigns: true,
-    webhooks: true,
     integrations: "limited",
     support: "basic",
     businessProcess: false,

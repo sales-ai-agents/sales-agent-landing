@@ -2,9 +2,9 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, type LucideIcon } from "lucide-react";
 
-import { Button } from "@/components/ui";
+import { Button, Card } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
 interface PageLoadingProps {
@@ -75,7 +75,7 @@ export const PageError = ({ message, onRetry }: PageErrorProps) => {
 };
 
 interface PageEmptyProps {
-  icon: React.ComponentType<{ className?: string }>;
+  icon: LucideIcon;
   title: string;
   description?: React.ReactNode;
   action?: React.ReactNode;
@@ -83,13 +83,13 @@ interface PageEmptyProps {
 
 export const PageEmpty = ({ icon: Icon, title, description, action }: PageEmptyProps) => {
   return (
-    <div className="flex h-full min-h-[70vh] flex-col items-center justify-center gap-4">
-      <Icon className="text-primary h-10 w-10" />
-      <div className="text-center">
-        <h3 className="text-2xl font-medium">{title}</h3>
-        {description && description}
-      </div>
-      {action}
-    </div>
+    <Card className="flex flex-col items-center gap-3 px-6 py-14">
+      <span className="bg-primary/10 text-primary grid size-14 place-items-center rounded-full">
+        <Icon className="size-6" aria-hidden="true" />
+      </span>
+      <h2 className="font-heading text-2xl">{title}</h2>
+      {description && <div className="text-muted-foreground max-w-md text-sm">{description}</div>}
+      {action && <div className="mt-2 flex flex-wrap justify-center gap-2">{action}</div>}
+    </Card>
   );
 };

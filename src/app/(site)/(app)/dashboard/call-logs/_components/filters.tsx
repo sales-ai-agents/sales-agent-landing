@@ -3,7 +3,9 @@
 import type { DateRange } from "react-day-picker";
 
 import {
+  Card,
   Input,
+  Label,
   Select,
   SelectContent,
   SelectItem,
@@ -12,7 +14,6 @@ import {
 } from "@/components/ui";
 import type { Agent } from "@dashboard/types";
 import { DateRangePicker } from "./date-range-picker";
-import { FilterField } from "./filter-field";
 
 interface FiltersProps {
   dateRange: DateRange | undefined;
@@ -25,6 +26,9 @@ interface FiltersProps {
   onPhoneSubmit: () => void;
 }
 
+const ALL_AGENTS = "all";
+const ALL_AGENTS_LABEL = "Усі агенти";
+
 export const Filters = ({
   dateRange,
   onDateRangeChange,
@@ -34,27 +38,28 @@ export const Filters = ({
   phoneInput,
   onPhoneInputChange,
   onPhoneSubmit,
-}: FiltersProps) => {
-  return (
-    <div className="flex flex-wrap items-end gap-3">
-      <FilterField label="Діапазон дат">
+}: FiltersProps) => (
+  <Card className="p-6">
+    <div className="grid gap-4 md:grid-cols-3">
+      <div className="flex flex-col gap-2">
+        <Label>Діапазон дат</Label>
         <DateRangePicker value={dateRange} onChange={onDateRangeChange} />
-      </FilterField>
-
-      <FilterField label="Агент">
+      </div>
+      <div className="flex flex-col gap-2">
+        <Label>Агент</Label>
         <Select
-          value={agentId ? String(agentId) : "all"}
-          onValueChange={(val) => onAgentChange(val === "all" ? undefined : Number(val))}
+          value={agentId ? String(agentId) : ALL_AGENTS}
+          onValueChange={(value) => onAgentChange(value === ALL_AGENTS ? undefined : Number(value))}
         >
-          <SelectTrigger className="h-6! w-auto border-none p-0">
+          <SelectTrigger className="w-full" aria-label="Агент">
             <SelectValue>
               {agentId
-                ? (agents.find((a) => a.id === agentId)?.name ?? "Усі агенти")
-                : "Усі агенти"}
+                ? (agents.find((agent) => agent.id === agentId)?.name ?? ALL_AGENTS_LABEL)
+                : ALL_AGENTS_LABEL}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Усі агенти</SelectItem>
+            <SelectItem value={ALL_AGENTS}>{ALL_AGENTS_LABEL}</SelectItem>
             {agents.map((agent) => (
               <SelectItem key={agent.id} value={String(agent.id)}>
                 {agent.name}
@@ -62,21 +67,20 @@ export const Filters = ({
             ))}
           </SelectContent>
         </Select>
-      </FilterField>
-
-      <FilterField label="Номер телефону">
+      </div>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="calls-phone">Номер телефону</Label>
         <Input
+          id="calls-phone"
           type="tel"
           inputMode="tel"
-          aria-label="Пошук за номером телефону"
           placeholder="Введіть номер телефону"
           value={phoneInput}
-          onChange={(e) => onPhoneInputChange(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && onPhoneSubmit()}
+          onChange={(event) => onPhoneInputChange(event.target.value)}
+          onKeyDown={(event) => event.key === "Enter" && onPhoneSubmit()}
           onBlur={onPhoneSubmit}
-          className="h-6 border-none p-0"
         />
-      </FilterField>
+      </div>
     </div>
-  );
-};
+  </Card>
+);

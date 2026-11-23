@@ -29,16 +29,9 @@ export interface BillingPlan {
   agents: number;
   numbers?: number;
   pool_numbers?: number;
-}
-
-export type TopUpPackKey = "100" | "250" | "500" | "1000" | "2500";
-
-export interface MinutesPack {
-  key: TopUpPackKey;
-  minutes: number;
-  price_uah: number;
-  currency: "UAH";
-  per_minute_uah: number;
+  balance_usd?: number;
+  chatbot?: boolean;
+  coming_soon?: boolean;
 }
 
 export interface BillingPlansResponse extends Partial<AutoRenewState> {
@@ -49,7 +42,7 @@ export interface BillingPlansResponse extends Partial<AutoRenewState> {
   expired: boolean;
   minutes: number;
   bonus_minutes: number;
-  packs: MinutesPack[];
+  balance_usd?: number;
   plans: BillingPlan[];
 }
 
@@ -73,17 +66,50 @@ export interface CheckoutResponse {
   period: BillingPeriod;
 }
 
-export interface TopUpRequest {
-  pack: TopUpPackKey;
+export type LedgerKind = "plan_refill" | "topup" | "minutes" | "number" | "admin";
+
+export interface LedgerEntry {
+  id: number;
+  amount_usd: number;
+  kind: LedgerKind;
+  minutes: number | null;
+  note: string;
+  balance_after_usd: number;
+  created_at: string;
 }
 
-export interface TopUpResponse {
+export type AlertBelowUsd = 0 | 2 | 5 | 10;
+
+export interface BalanceResponse {
+  ok: boolean;
+  balance_usd: number;
+  minute_price_usd: number;
+  extra_number_price_usd: number;
+  plan_balance_usd: number;
+  topup_options_usd: number[];
+  topup_min_usd: number;
+  topup_max_usd: number;
+  alert_below_usd: number;
+  alert_options_usd: number[];
+  ledger: LedgerEntry[];
+}
+
+export interface BalanceAlertRequest {
+  alert_below_usd: AlertBelowUsd;
+}
+
+export interface BalanceTopUpRequest {
+  amount_usd: number;
+  return_url?: string;
+}
+
+export interface BalanceTopUpResponse {
   ok: boolean;
   invoice_id: string;
   payment_url: string;
+  amount_usd: number;
   amount_uah: number;
-  minutes: number;
-  pack: TopUpPackKey;
+  usd_rate: number;
 }
 
 export interface AutoRenewRequest {

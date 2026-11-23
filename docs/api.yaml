@@ -535,6 +535,21 @@ paths:
             Довжина періоду для `period`, `previous`, `delta_pct` і `by_day`.
             Перемикач 7 / 30 / 90 на екрані. Значення поза межами
             підтягуються до найближчої.
+        - in: query
+          name: agent_id
+          required: false
+          schema: { type: integer }
+          description: >
+            Фільтр «Усі агенти» над оглядом: дзвінки, цілі, заощаджений час і
+            графік — лише цього агента. Хвилини тарифу (`minutes_*`) спільні
+            для акаунта й від фільтра не залежать.
+        - in: query
+          name: number_id
+          required: false
+          schema: { type: integer }
+          description: >
+            Фільтр «Усі номери»: дзвінки на цей наш номер (вхідні) і з нього
+            (вихідні). `id` — з `GET /app/numbers`.
       responses:
         "200":
           content:
@@ -556,6 +571,19 @@ paths:
                       хвилини, а не нуль: нуль означав би «без обмеження».
                   minutes_left:
                     { type: number, description: "0 = ліміт вичерпано, дзвінки блокуються" }
+                  minutes_per_day:
+                    type: number
+                    description: >
+                      Скільки тарифних хвилин акаунт витрачає за день —
+                      середнє за останні 7 днів (тією ж міркою, що й
+                      `minutes_used`).
+                  minutes_runway_days:
+                    type: number
+                    nullable: true
+                    description: >
+                      «Вистачить ще на ~N днів» = `minutes_left` /
+                      `minutes_per_day`. **null — за тиждень дзвінків не
+                      було**, прогнозу немає: показуй «—».
                   plan: { type: string }
                   plan_expires_at: { type: string, nullable: true }
                   trial:
@@ -653,8 +681,19 @@ paths:
                         date: { type: string, format: date }
                         calls: { type: integer }
                         meetings: { type: integer, description: "з них із домовленою зустріччю" }
+                        talk_minutes:
+                          type: number
+                          description: >
+                            Хвилини розмов того дня — лінія «Заощаджений
+                            час» на графіку (год/день = talk_minutes / 60).
           description: OK
+        "400":
+          description: "`bad_filter` — agent_id чи number_id не число"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`agent_not_found` · `number_not_found` — фільтр за чужим чи неіснуючим"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
 
   /app/calls:
     get:
@@ -703,6 +742,17 @@ paths:
                   total: { type: integer, description: усього дзвінків — для пагінації }
                   limit: { type: integer }
                   offset: { type: integer }
+                  counts:
+                    type: object
+                    description: >
+                      Цифри над табами («Потребує уваги 12») — з тими самими
+                      фільтрами дат, агента й номера, але незалежно від
+                      відкритого табу (`status`).
+                    properties:
+                      all: { type: integer }
+                      success: { type: integer }
+                      failed: { type: integer }
+                      attention: { type: integer }
                   sla_minutes:
                     type: integer
                     description: "0 = SLA вимкнено, колонку строку не малювати"
@@ -1791,6 +1841,14 @@ paths:
                     additionalProperties: { type: integer }
                     description: "city — міський, mobile — мобільний, tollfree — 0 800"
                     examples: [{ mobile: 1 }]
+                  numbers_by_kind:
+                    type: object
+                    additionalProperties: { type: array, items: { type: string } }
+                    description: >
+                      До 5 конкретних вільних номерів кожного типу — список
+                      «обрати номер» у модалці. Обраний шли як `phone` у
+                      `POST /app/numbers/claim`.
+                    examples: [{ mobile: ["+380736405668", "+380736687085"] }]
           description: OK
         "401": { $ref: "#/components/responses/Unauthorized" }
 
@@ -1844,6 +1902,11 @@ paths:
                     enum: [city, mobile, tollfree],
                     description: "без поля — будь-який вільний",
                   }
+                phone:
+                  type: string
+                  description: >
+                    Конкретний номер із `numbers_by_kind`. Якщо його встигли
+                    забрати — `409 number_unavailable`, онови список.
                 agent_id: { type: integer }
                 direction: { type: string, enum: [inbound, outbound, both], default: both }
       responses:
@@ -4754,7 +4817,23 @@ paths:
                   plan_balance_usd:
                     { type: number, description: "до скількох доповнює тариф; 0 — тріал" }
                   topup_options_usd:
-                    { type: array, items: { type: integer }, examples: [[5, 10, 20, 50, 100]] }
+                    type: array
+                    items: { type: integer }
+                    examples: [[10, 25, 50, 100]]
+                    description: кнопки модалки поповнення
+                  topup_min_usd:
+                    { type: integer, examples: [5], description: "межі поля «Своя сума»" }
+                  topup_max_usd: { type: integer, examples: [1000] }
+                  alert_below_usd:
+                    type: number
+                    examples: [5]
+                    description: >
+                      «Сповістити, коли на рахунку менше» — поріг; 0 —
+                      вимкнено. Лист і Telegram ідуть каналом «Закінчення
+                      ліміту хвилин» з налаштувань сповіщень, один раз на
+                      кожен спуск нижче порогу.
+                  alert_options_usd:
+                    { type: array, items: { type: integer }, examples: [[2, 5, 10]] }
                   ledger:
                     type: array
                     items:
@@ -4764,10 +4843,32 @@ paths:
                         amount_usd: { type: number, description: "+ зарахування, − списання" }
                         kind: { type: string, enum: [plan_refill, topup, minutes, number, admin] }
                         minutes: { type: integer, nullable: true }
-                        note: { type: string, examples: ["7 хв понад тариф × $0.1"] }
+                        note:
+                          type: string
+                          examples: ["7 хв понад тариф × $0.1", "картка 41****4242"]
+                          description: "для `topup` — маска картки з WayForPay, якщо вона прийшла"
                         balance_after_usd: { type: number }
                         created_at: { type: string }
           description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    patch:
+      tags: [billing]
+      summary: Поріг «Сповістити, коли на рахунку менше»
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [alert_below_usd]
+              properties:
+                alert_below_usd: { type: integer, enum: [0, 2, 5, 10], description: "0 — вимкнути" }
+      responses:
+        "200":
+          description: Той самий об'єкт, що й GET, уже з новим порогом
+        "400":
+          description: "`bad_alert` (з полем `allowed`)"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
         "401": { $ref: "#/components/responses/Unauthorized" }
 
   /app/billing/balance/topup:
@@ -4788,7 +4889,15 @@ paths:
               type: object
               required: [amount_usd]
               properties:
-                amount_usd: { type: integer, enum: [5, 10, 20, 50, 100] }
+                amount_usd:
+                  type: number
+                  minimum: 5
+                  maximum: 1000
+                  multipleOf: 0.01
+                  description: >
+                    Будь-яка сума від `topup_min_usd` до `topup_max_usd` з
+                    точністю до цента: кнопки $10/25/50/100 або поле «Своя
+                    сума». Можна числом (25.5) чи рядком ("25,50").
                 return_url: { type: string }
       responses:
         "200":
@@ -4800,12 +4909,12 @@ paths:
                   ok: { type: boolean }
                   invoice_id: { type: string }
                   payment_url: { type: string }
-                  amount_usd: { type: integer }
+                  amount_usd: { type: number }
                   amount_uah: { type: number }
                   usd_rate: { type: number }
           description: Рахунок створено
         "400":
-          description: "`bad_amount` (з полем `allowed`) · `invalid_json`"
+          description: "`bad_amount` (з полями `min_usd`, `max_usd`) · `invalid_json`"
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "502":
@@ -6196,6 +6305,21 @@ components:
         - $ref: "#/components/schemas/CallListItem"
         - type: object
           properties:
+            contact:
+              type: object
+              nullable: true
+              description: >
+                Картка «Пов'язаний контакт» і «Тип клієнта» (перший тег) на
+                екрані дзвінка. null — цього номера немає в контактах.
+              properties:
+                id: { type: integer }
+                name: { type: string }
+                phone: { type: string }
+                email: { type: string }
+                note: { type: string }
+                tags: { type: array, items: { type: string } }
+                consent: { type: string }
+                do_not_call: { type: boolean }
             transcript:
               type: array
               description: розмова по репліках, у порядку

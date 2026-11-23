@@ -40,8 +40,7 @@ const METHOD_CARDS: MethodCard[] = [
   {
     method: "buy",
     title: "Отримати номер у Calls4U",
-    description:
-      "Входить у ваш тариф. Працює одразу на вхідні й вихідні, і клієнти бачать саме його.",
+    description: "Номер Calls4U працює одразу на вхідні й вихідні, і клієнти бачать саме його.",
     icon: LucideShoppingCart,
   },
 ];

@@ -176,7 +176,7 @@ export const ImportContactsDialog = ({ onClose }: ImportContactsDialogProps) => 
               className="border-border data-active:border-primary data-active:bg-primary/5 h-12 border"
             >
               <FileText className="h-4 w-4" />
-              CSV
+              CSV / XLSX
             </TabsTrigger>
             <TabsTrigger
               value="google_sheets"

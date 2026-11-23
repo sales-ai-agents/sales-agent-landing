@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui";
+import { Badge, Card } from "@/components/ui";
 import { CallResultIcon } from "@/components/dashboard/call-result-icon";
 import { cn } from "@/lib/utils";
 import { ACTION_REQUIRED_LABEL, CALL_RESULT_VISUALS } from "@dashboard/call-result";
@@ -15,17 +15,14 @@ export const CallResultCard = ({ result }: CallResultCardProps) => {
   const { label } = CALL_RESULT_VISUALS[result.type];
 
   return (
-    <section
-      aria-labelledby="call-result-title"
-      className="border-border bg-background rounded-2xl border p-5"
-    >
+    <Card role="region" aria-labelledby="call-result-title" className="p-6">
       <div className="flex flex-wrap items-center gap-3">
         <CallResultIcon type={result.type} className="h-10 w-10" />
         <span className="text-primary text-sm font-medium">{label}</span>
         {result.action_required && <Badge variant="warning">{ACTION_REQUIRED_LABEL}</Badge>}
       </div>
 
-      <h2 id="call-result-title" className="mt-4 text-xl leading-snug font-bold">
+      <h2 id="call-result-title" className="font-heading mt-4 text-2xl leading-snug">
         {result.title}
       </h2>
 
@@ -57,6 +54,6 @@ export const CallResultCard = ({ result }: CallResultCardProps) => {
           <p className="text-muted-foreground text-sm leading-relaxed">{result.summary}</p>
         </div>
       )}
-    </section>
+    </Card>
   );
 };

@@ -1,14 +1,15 @@
 import {
   Bot,
-  Users,
-  PhoneCall,
-  Settings,
   CreditCard,
-  ActivitySquareIcon,
-  Puzzle,
   Grid3x3,
+  LayoutDashboard,
+  PhoneCall,
+  Puzzle,
+  Settings,
+  Users,
+  Wallet,
+  type LucideIcon,
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 
 export interface NavItem {
   readonly href: string;
@@ -17,11 +18,12 @@ export interface NavItem {
 }
 
 export const DASHBOARD_NAV_ITEMS = [
-  { href: "/dashboard", icon: ActivitySquareIcon, label: "Огляд" },
+  { href: "/dashboard", icon: LayoutDashboard, label: "Огляд" },
   { href: "/dashboard/agents", icon: Bot, label: "Агенти" },
   { href: "/dashboard/contacts", icon: Users, label: "Контакти" },
   { href: "/dashboard/call-logs", icon: PhoneCall, label: "Дзвінки" },
   { href: "/dashboard/numbers", icon: Grid3x3, label: "Номери" },
+  { href: "/dashboard/balance", icon: Wallet, label: "Баланс" },
   { href: "/dashboard/billing", icon: CreditCard, label: "Тарифи і Оплата" },
   { href: "/dashboard/integrations", icon: Puzzle, label: "Інтеграції" },
 ] as const satisfies readonly NavItem[];
@@ -31,6 +33,8 @@ export const DASHBOARD_SETTINGS_ITEM: NavItem = {
   icon: Settings,
   label: "Налаштування",
 };
+
+export const CLAUDE_CONNECTOR_URL = "https://api.calls4u.ai/webhook/mcp";
 
 export const COMPANY_INFO = {
   legalName: "Фізична особа-підприємець Овсієнко Богдан Володимирович",

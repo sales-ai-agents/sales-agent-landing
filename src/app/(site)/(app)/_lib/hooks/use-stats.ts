@@ -1,12 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { apiGet } from "@/lib/api-client";
-import { API_ENDPOINTS } from "@/lib/api-config";
-import type { StatsResponse } from "@dashboard/types";
+import { apiUrl } from "@/lib/api-config";
+import type { StatsFilter, StatsResponse } from "@dashboard/types";
 
-export const useStats = (days: number = 7) => {
+export const useStats = (days: number = 7, filter: StatsFilter = {}) => {
   return useQuery<StatsResponse>({
-    queryKey: ["stats", days],
-    queryFn: () => apiGet<StatsResponse>(`${API_ENDPOINTS.APP_STATS}?days=${days}`),
+    queryKey: ["stats", days, filter.agent_id ?? 0, filter.number_id ?? 0],
+    queryFn: () => apiGet<StatsResponse>(apiUrl.stats({ days, ...filter })),
+    placeholderData: (previous) => previous,
   });
 };

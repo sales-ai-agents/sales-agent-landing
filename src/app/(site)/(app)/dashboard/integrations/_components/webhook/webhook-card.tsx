@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Plus, Webhook as WebhookIcon } from "lucide-react";
 
-import { Button, Skeleton } from "@/components/ui";
+import { Button, Card, Skeleton } from "@/components/ui";
 import { cn, pluralizeUk } from "@/lib/utils";
 import { useWebhooks } from "@dashboard/hooks";
 import type { Webhook } from "@dashboard/types";
@@ -30,10 +30,7 @@ export const WebhookCard = () => {
   const isConnected = webhooks.length > 0;
 
   return (
-    <section
-      aria-labelledby="webhook-card-title"
-      className="border-border bg-background rounded-xl border p-5"
-    >
+    <Card className="p-6" aria-labelledby="webhook-card-title" role="region">
       <div className="flex items-start gap-4">
         <div className="bg-primary/10 text-primary flex h-16 w-16 shrink-0 items-center justify-center rounded-full">
           <WebhookIcon className="h-7 w-7" aria-hidden="true" />
@@ -90,6 +87,6 @@ export const WebhookCard = () => {
         }}
       />
       <WebhookSecretDialog revealed={revealed} onClose={() => setRevealed(null)} />
-    </section>
+    </Card>
   );
 };

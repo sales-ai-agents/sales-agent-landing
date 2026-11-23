@@ -1,7 +1,7 @@
-import { Check } from "lucide-react";
-
-import { Button } from "@/components/ui";
-import { cn } from "@/lib/utils";
+import { Bot, ChartColumn, Check, Clock, Phone, type LucideIcon } from "lucide-react";
+import { VoiceWave } from "@/components/dashboard";
+import { Badge, Button, Card } from "@/components/ui";
+import { cn, formatNumber } from "@/lib/utils";
 import { getPlanFeatures } from "@dashboard/billing";
 import type { BillingPlan } from "@dashboard/types";
 
@@ -9,89 +9,110 @@ interface PlanCardProps {
   plan: BillingPlan;
   isCurrent: boolean;
   cycle?: "month" | "year";
+  maxMinutes: number;
   onSelect: () => void;
 }
 
-export const PlanCard = ({ plan, isCurrent, cycle = "month", onSelect }: PlanCardProps) => {
-  const features = getPlanFeatures(plan);
-  const isPro = plan.key === "pro";
-  const isAnnual = cycle === "year" && !!plan.year;
+const PLAN_ICONS: Record<string, LucideIcon> = {
+  trial: Clock,
+  start: Phone,
+  pro: ChartColumn,
+  pro_plus: Bot,
+};
 
+const WAVE_BARS = 30;
+const MONTHS_IN_YEAR = 12;
+
+const resolveWaveFraction = (minutes: number, maxMinutes: number): number => {
+  if (minutes <= 1 || maxMinutes <= 1) return 0;
+  return Math.log10(minutes) / Math.log10(maxMinutes);
+};
+
+interface PlanActionProps {
+  isPro: boolean;
+  isCurrent: boolean;
+  isComingSoon: boolean;
+  onSelect: () => void;
+}
+
+const PlanAction = ({ isPro, isCurrent, isComingSoon, onSelect }: PlanActionProps) => {
+  if (isComingSoon || isCurrent) {
+    return (
+      <Button variant="outline" disabled>
+        {isComingSoon ? "Незабаром" : "Поточний тариф"}
+      </Button>
+    );
+  }
+  return (
+    <Button variant={isPro ? "default" : "outline"} onClick={onSelect}>
+      {isPro ? "Перейти на PRO" : "Обрати"}
+    </Button>
+  );
+};
+
+export const PlanCard = ({
+  plan,
+  isCurrent,
+  cycle = "month",
+  maxMinutes,
+  onSelect,
+}: PlanCardProps) => {
+  const isComingSoon = plan.coming_soon === true;
+  const isAnnual = cycle === "year" && !!plan.year && !isComingSoon;
   const displayPriceUsd = isAnnual ? plan.year!.price_usd : plan.price_usd;
+  const features = getPlanFeatures(plan);
+  const Icon = PLAN_ICONS[plan.key] ?? ChartColumn;
 
   return (
-    <div
-      className={cn(
-        "border-border relative flex flex-col rounded-2xl border p-6",
-        isCurrent ? "shadow-primary/30 bg-transparent shadow-sm" : "bg-background"
+    <Card className={cn("flex flex-1 flex-col gap-4 p-6", isCurrent && "ring-primary ring-2")}>
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="bg-primary/10 text-primary grid size-10 place-items-center rounded-full">
+          <Icon className="size-5" aria-hidden="true" />
+        </span>
+        <b className="font-heading flex-1 text-xl">{plan.title}</b>
+        {isCurrent && <Badge variant="secondary">Поточний</Badge>}
+        {isComingSoon && <Badge variant="muted">Незабаром</Badge>}
+        {isAnnual && plan.year && plan.year.months_free > 0 && (
+          <Badge variant="success">Економія {plan.year.months_free} міс</Badge>
+        )}
+      </div>
+      <div className="flex items-baseline gap-1">
+        <b className="font-heading text-4xl tabular-nums">${formatNumber(displayPriceUsd)}</b>
+        <span className="text-muted-foreground">{isAnnual ? "/ рік" : "/ місяць"}</span>
+      </div>
+      {isAnnual && plan.year && (
+        <p className="text-muted-foreground text-xs">
+          ${(displayPriceUsd / MONTHS_IN_YEAR).toFixed(1)} / міс
+          {plan.year.saving_usd > 0 ? ` · економія $${plan.year.saving_usd}` : ""}
+        </p>
       )}
-    >
-      <div className="flex items-center justify-between">
-        <h3 className="text-3xl font-bold tracking-wide uppercase">{plan.title}</h3>
-        {isCurrent && (
-          <span className="bg-primary text-primary-foreground rounded-full px-2.5 py-0.5 text-xs font-medium">
-            Поточний
-          </span>
-        )}
-        {isAnnual && plan.year && (
-          <span className="bg-success/15 text-success rounded-full px-2.5 py-0.5 text-xs font-medium">
-            {plan.year.months_free > 0
-              ? `-${plan.year.months_free} міс`
-              : plan.year.saving_usd > 0
-                ? `-${plan.year.saving_usd}$`
-                : "Річний"}
-          </span>
-        )}
-      </div>
-
-      <div className="mt-8">
-        <div className="flex items-baseline gap-1">
-          <span className="text-3xl font-semibold">${displayPriceUsd}</span>
-          <span className="text-muted-foreground text-lg">{isAnnual ? " / рік" : " / місяць"}</span>
+      {cycle === "year" && !plan.year && !isComingSoon && (
+        <p className="text-muted-foreground text-xs">Річний період недоступний для цього тарифу</p>
+      )}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between gap-2 text-sm">
+          <span className="text-muted-foreground">Хвилини розмов</span>
+          <b className="tabular-nums">{formatNumber(plan.minutes)} хв</b>
         </div>
-        {cycle === "year" && !plan.year && (
-          <p className="text-warning mt-0.5 text-xs">
-            Річний період недоступний для цього тарифу (оплата помісячно)
-          </p>
-        )}
-        {isAnnual && (
-          <p className="text-muted-foreground mt-0.5 text-xs">
-            ${(displayPriceUsd / 12).toFixed(1)} / міс
-            {plan.year!.saving_usd > 0 ? ` · економія $${plan.year!.saving_usd}` : ""}
-          </p>
-        )}
+        <VoiceWave fraction={resolveWaveFraction(plan.minutes, maxMinutes)} bars={WAVE_BARS} />
       </div>
-
-      <ul className="mt-5 flex-1 space-y-1.5 text-sm">
-        {features.map((feature) => (
-          <li key={feature} className="flex items-center gap-2">
-            <Check className="h-4 w-4 shrink-0" />
-            <span>{feature}</span>
+      <PlanAction
+        isPro={plan.key === "pro"}
+        isCurrent={isCurrent}
+        isComingSoon={isComingSoon}
+        onSelect={onSelect}
+      />
+      <ul className="flex flex-col gap-2 text-sm">
+        {features.map((feature, index) => (
+          <li key={feature} className={cn("flex items-start gap-2", index === 0 && "font-medium")}>
+            <Check
+              className="text-primary bg-primary/20 mt-0.5 size-4 shrink-0 rounded-full p-1"
+              aria-hidden="true"
+            />
+            {feature}
           </li>
         ))}
       </ul>
-
-      <div className="mt-6">
-        {isCurrent ? (
-          <Button
-            size="lg"
-            variant="ghost"
-            className="pointer-events-none w-full rounded-full"
-            onClick={onSelect}
-          >
-            <Check className="text-success h-3.5 w-3.5" />
-            Поточний тариф
-          </Button>
-        ) : isPro ? (
-          <Button size="lg" className="w-full rounded-full" onClick={onSelect}>
-            Перейти на PRO
-          </Button>
-        ) : (
-          <Button size="lg" variant="outline" className="w-full rounded-full" onClick={onSelect}>
-            Обрати
-          </Button>
-        )}
-      </div>
-    </div>
+    </Card>
   );
 };

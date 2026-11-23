@@ -3,9 +3,10 @@
 import { Controller, UseFormReturn } from "react-hook-form";
 import { Phone } from "lucide-react";
 
-import { Button, Label, Textarea } from "@/components/ui";
-import { INSTRUCTIONS_MAX_LENGTH, type CreateAgentFormData } from "@/lib/schemas";
+import { Button } from "@/components/ui";
+import type { CreateAgentFormData } from "@/lib/schemas";
 import { PhoneField } from "@/app/(site)/(app)/dashboard/agents/_components/connect-number/phone-field";
+import { InstructionFields } from "../../_components/instruction-fields";
 import { CallConfigSection } from "../../_components/call-config/call-config-section";
 import { useCallConfigForm } from "../../_components/call-config/use-call-config-form";
 
@@ -15,21 +16,16 @@ interface StepInstructionsProps {
   onTestCall: () => void;
 }
 
-const INSTRUCTION_HINTS = [
-  "Опишіть мету дзвінка",
-  "Додайте можливі заперечення та відповіді",
-  "Вкажіть, як завершувати розмову",
-];
-
 export const StepInstructions = ({ form, isTesting, onTestCall }: StepInstructionsProps) => {
   const {
-    register,
+    setValue,
     watch,
     formState: { errors },
     control,
   } = form;
 
   const instructions = watch("instructions");
+  const reportFields = watch("reportFields");
   const testPhone = watch("testPhone");
 
   const callConfig = useCallConfigForm(form);
@@ -43,39 +39,17 @@ export const StepInstructions = ({ form, isTesting, onTestCall }: StepInstructio
         </p>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="instructions">Інструкції</Label>
-        <Textarea
-          id="instructions"
-          rows={6}
-          maxLength={INSTRUCTIONS_MAX_LENGTH}
-          placeholder="Ти - помічник, який нагадує клієнтам про заплановані зустрічі. Пояснюй коротко, дружньо та ввічливо. Якщо клієнт підтверджує - подякуй. Якщо хоче перенести - запропонуй новий час. Будь максимально лаконічним."
-          {...register("instructions")}
-        />
-        <div className="flex items-center justify-between">
-          {errors.instructions ? (
-            <p className="text-destructive text-sm">{errors.instructions.message}</p>
-          ) : (
-            <span />
-          )}
-          <span className="text-muted-foreground text-xs">
-            {instructions.length}/{INSTRUCTIONS_MAX_LENGTH}
-          </span>
-        </div>
-      </div>
+      <InstructionFields
+        showTemplates
+        values={{ instructions, reportFields }}
+        instructionsError={errors.instructions?.message}
+        onChange={(next) => {
+          setValue("instructions", next.instructions, { shouldValidate: true, shouldDirty: true });
+          setValue("reportFields", next.reportFields, { shouldValidate: true, shouldDirty: true });
+        }}
+      />
 
       <CallConfigSection {...callConfig} />
-
-      <div className="bg-primary/5 rounded-lg p-4">
-        <p className="text-sm font-medium">Корисні підказки</p>
-        <ul className="text-muted-foreground mt-1 list-inside list-disc space-y-0.5 text-xs">
-          {INSTRUCTION_HINTS.map((hint) => (
-            <li className="pl-4" key={hint}>
-              {hint}
-            </li>
-          ))}
-        </ul>
-      </div>
 
       <div className="border-border space-y-3 rounded-lg border p-4">
         <div className="flex items-start gap-3">

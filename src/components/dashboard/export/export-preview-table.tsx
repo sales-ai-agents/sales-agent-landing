@@ -1,7 +1,8 @@
+import { TagBadge } from "@/components/dashboard/tag-badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import type { Contact } from "@dashboard/types";
-import { formatConsentLabel, getTagColor } from "@/app/(site)/(app)/dashboard/contacts/_lib/utils";
+import { formatConsentLabel } from "@/app/(site)/(app)/dashboard/contacts/_lib/utils";
 
 interface ExportPreviewTableProps {
   contacts: Contact[];
@@ -9,7 +10,7 @@ interface ExportPreviewTableProps {
 
 export const ExportPreviewTable = ({ contacts }: ExportPreviewTableProps) => {
   return (
-    <div className="border-border overflow-hidden rounded-lg border">
+    <div className="border-border overflow-hidden rounded-2xl border">
       <Table>
         <TableHeader className="bg-muted/50">
           <TableRow>
@@ -32,21 +33,9 @@ export const ExportPreviewTable = ({ contacts }: ExportPreviewTableProps) => {
                     <span className="text-muted-foreground">—</span>
                   ) : (
                     <div className="flex flex-wrap gap-1">
-                      {tags.map((tag) => {
-                        const color = getTagColor(tag);
-                        return (
-                          <span
-                            key={tag}
-                            className={cn(
-                              "inline-block rounded px-2 py-0.5 text-xs font-normal",
-                              color.bg,
-                              color.text
-                            )}
-                          >
-                            {tag}
-                          </span>
-                        );
-                      })}
+                      {tags.map((tag) => (
+                        <TagBadge key={tag} tag={tag} />
+                      ))}
                     </div>
                   )}
                 </TableCell>

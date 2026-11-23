@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui";
+import { Button, Card } from "@/components/ui";
 import type { AvailableIntegration } from "@dashboard/types";
 import { IntegrationLogo } from "./integration-logo";
 
@@ -12,7 +12,7 @@ export const GenericIntegrationCard = ({ integration }: GenericIntegrationCardPr
   const isError = integration.status === "error" || Boolean(integration.error);
 
   return (
-    <div className="border-border bg-background rounded-xl border p-5">
+    <Card className="p-6">
       <div className="flex items-start gap-4">
         <IntegrationLogo id={integration.id} />
         <div className="min-w-0 flex-1">
@@ -41,16 +41,8 @@ export const GenericIntegrationCard = ({ integration }: GenericIntegrationCardPr
             </>
           ) : (
             <div className="mt-1 flex items-center gap-1.5">
-              <span
-                className={
-                  integration.ready
-                    ? "bg-primary h-1.5 w-1.5 rounded-full"
-                    : "bg-muted-foreground h-1.5 w-1.5 rounded-full"
-                }
-              />
-              <span className="text-muted-foreground text-xs">
-                {integration.ready ? "Доступно для підключення" : "Не підключено"}
-              </span>
+              <span className="bg-muted-foreground h-1.5 w-1.5 rounded-full" />
+              <span className="text-muted-foreground text-xs">Незабаром</span>
             </div>
           )}
         </div>
@@ -67,6 +59,6 @@ export const GenericIntegrationCard = ({ integration }: GenericIntegrationCardPr
           </Button>
         )}
       </div>
-    </div>
+    </Card>
   );
 };

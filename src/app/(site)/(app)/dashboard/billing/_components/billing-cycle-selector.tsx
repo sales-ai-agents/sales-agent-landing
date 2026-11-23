@@ -1,5 +1,13 @@
 import type { ReactNode } from "react";
-
+import {
+  Badge,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  RadioGroup,
+  RadioGroupItem,
+} from "@/components/ui";
 import { cn, pluralizeMonths } from "@/lib/utils";
 import type { BillingPeriod, BillingPlan } from "@dashboard/types";
 
@@ -10,6 +18,30 @@ interface BillingCycleSelectorProps {
   onChange: (cycle: BillingPeriod) => void;
 }
 
+const MONTHS_IN_YEAR = 12;
+
+interface CycleOptionProps {
+  value: BillingPeriod;
+  selected: boolean;
+  title: ReactNode;
+  children: ReactNode;
+}
+
+const CycleOption = ({ value, selected, title, children }: CycleOptionProps) => (
+  <label
+    className={cn(
+      "border-border hover:bg-muted/40 flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition-colors",
+      selected && "border-primary bg-primary/5"
+    )}
+  >
+    <RadioGroupItem value={value} className="mt-1" />
+    <span className="flex flex-col gap-1">
+      <b className="flex flex-wrap items-center gap-2 font-medium">{title}</b>
+      {children}
+    </span>
+  </label>
+);
+
 export const BillingCycleSelector = ({
   cycle,
   currentPlan,
@@ -19,94 +51,62 @@ export const BillingCycleSelector = ({
   const annualPlan = currentPlan?.year;
 
   return (
-    <section className="border-border bg-background rounded-2xl border p-6">
-      <h2 className="text-muted-foreground text-sm font-medium">Оплата тарифу</h2>
-      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <button
-          type="button"
-          aria-pressed={cycle === "month"}
-          onClick={() => onChange("month")}
-          className={cn(
-            "cursor-pointer rounded-md border p-4 text-left transition-colors",
-            cycle === "month"
-              ? "border-primary bg-primary/5 ring-primary ring-1"
-              : "border-border hover:border-primary/40"
-          )}
+    <Card>
+      <CardHeader>
+        <CardTitle>Оплата тарифу</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <RadioGroup
+          value={cycle}
+          onValueChange={(value) => onChange(value as BillingPeriod)}
+          aria-label="Період оплати"
+          className="md:grid-cols-2"
         >
-          <CycleLabel selected={cycle === "month"}>Щомісячна оплата</CycleLabel>
-          {currentPlan && (
-            <>
-              <p className="mt-2 ml-6 text-xl leading-none">
-                ${currentPlan.price_usd} <span className="text-lg font-normal">/ місяць</span>
-              </p>
-              <p className="text-muted-foreground mt-1 ml-6 text-xs">
-                ${currentPlan.price_usd} щомісяця, без зобов’язань
-              </p>
-            </>
-          )}
-        </button>
-
-        <button
-          type="button"
-          aria-pressed={cycle === "year"}
-          onClick={() => onChange("year")}
-          className={cn(
-            "cursor-pointer rounded-md border p-4 text-left transition-colors",
-            cycle === "year"
-              ? "border-primary bg-primary/5 ring-primary ring-1"
-              : "border-border hover:border-primary/40"
-          )}
-        >
-          <CycleLabel selected={cycle === "year"}>
-            Річна оплата
-            {annualPlan && annualPlan.months_free > 0 && (
-              <span className="bg-success/15 text-success ml-2 rounded-md px-2 py-0.5 text-xs font-medium">
-                Економія {annualPlan.months_free} {pluralizeMonths(annualPlan.months_free)}
-              </span>
+          <CycleOption value="month" selected={cycle === "month"} title="Щомісячна оплата">
+            {currentPlan && (
+              <>
+                <span className="font-heading text-lg tabular-nums">
+                  ${currentPlan.price_usd} / місяць
+                </span>
+                <small className="text-muted-foreground">
+                  ${currentPlan.price_usd} щомісяця, без зобов&apos;язань
+                </small>
+              </>
             )}
-            {annualPlan && annualPlan.months_free === 0 && annualPlan.saving_usd > 0 && (
-              <span className="bg-success/15 text-success ml-2 rounded-md px-2 py-0.5 text-xs font-medium">
-                Економія ${annualPlan.saving_usd}
-              </span>
+          </CycleOption>
+          <CycleOption
+            value="year"
+            selected={cycle === "year"}
+            title={
+              <>
+                Річна оплата
+                {annualPlan && annualPlan.months_free > 0 && (
+                  <Badge variant="success">
+                    Економія {annualPlan.months_free} {pluralizeMonths(annualPlan.months_free)}
+                  </Badge>
+                )}
+              </>
+            }
+          >
+            {annualPlan ? (
+              <>
+                <span className="font-heading text-lg tabular-nums">
+                  ${annualPlan.price_usd} / рік
+                </span>
+                <small className="text-muted-foreground">
+                  ${(annualPlan.price_usd / MONTHS_IN_YEAR).toFixed(1)} / місяць при річній оплаті
+                </small>
+              </>
+            ) : (
+              <small className="text-muted-foreground">
+                {isTrial
+                  ? "Оберіть річний варіант у каталозі тарифів нижче"
+                  : "Річна оплата наразі недоступна для цього тарифу"}
+              </small>
             )}
-          </CycleLabel>
-
-          {annualPlan ? (
-            <>
-              <p className="mt-2 ml-6 text-xl leading-none">
-                ${annualPlan.price_usd} <span className="text-lg font-normal">/ рік</span>
-              </p>
-              {annualPlan.price_uah != null && (
-                <p className="text-muted-foreground mt-1 ml-6 text-xs">
-                  ${(annualPlan.price_usd / 12).toFixed(1)} / місяць при річній оплаті ($
-                  {annualPlan.price_usd} раз на рік)
-                </p>
-              )}
-            </>
-          ) : (
-            <p className="text-muted-foreground mt-2 text-xs">
-              {isTrial
-                ? "Оберіть річний варіант у каталозі тарифів нижче"
-                : "Річна оплата наразі недоступна для цього тарифу"}
-            </p>
-          )}
-        </button>
-      </div>
-    </section>
+          </CycleOption>
+        </RadioGroup>
+      </CardContent>
+    </Card>
   );
 };
-
-const CycleLabel = ({ selected, children }: { selected: boolean; children: ReactNode }) => (
-  <div className="flex flex-wrap items-center gap-2">
-    <span
-      aria-hidden="true"
-      className={cn(
-        "flex h-4 w-4 items-center justify-center rounded-full border-2",
-        selected ? "border-primary" : "border-muted-foreground"
-      )}
-    >
-      {selected && <span className="bg-primary h-2 w-2 rounded-full" />}
-    </span>
-    <span className="text-sm font-medium">{children}</span>
-  </div>
-);

@@ -22,6 +22,7 @@ interface ContactsData {
 interface UseContactsParams {
   search?: string;
   tag?: string;
+  baseId?: number;
 }
 
 const EMPTY_STATS: ContactsStats = {
@@ -34,11 +35,14 @@ const EMPTY_STATS: ContactsStats = {
 export const useContacts = (params?: UseContactsParams) => {
   const search = params?.search ?? "";
   const tag = params?.tag ?? "";
+  const baseId = params?.baseId;
 
   return useQuery<ContactsData>({
-    queryKey: ["contacts", search, tag],
+    queryKey: ["contacts", search, tag, baseId ?? null],
     queryFn: async () => {
-      const data = await apiGet<ContactsResponse>(apiUrl.contacts({ search, tag }));
+      const data = await apiGet<ContactsResponse>(
+        apiUrl.contacts({ search, tag, base_id: baseId })
+      );
       return {
         contacts: data.contacts,
         tags: data.tags ?? [],
@@ -67,6 +71,7 @@ export const useCreateContact = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
+      queryClient.invalidateQueries({ queryKey: ["contact-bases"] });
     },
   });
 };
@@ -93,6 +98,7 @@ export const useDeleteContact = () => {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
+      queryClient.invalidateQueries({ queryKey: ["contact-bases"] });
     },
   });
 };

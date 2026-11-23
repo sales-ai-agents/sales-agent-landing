@@ -7,6 +7,7 @@ import { Button, Input, Label } from "@/components/ui";
 import { useUpdateProfile } from "@/lib/hooks";
 import { AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/mutation-error";
+import { SettingsSection } from "./settings-section";
 
 interface ProfileSectionProps {
   initialName: string;
@@ -34,36 +35,27 @@ export const Profile = ({ initialName, initialEmail }: ProfileSectionProps) => {
   };
 
   return (
-    <section className="border-border bg-background rounded-2xl border p-5">
-      <h2 className="text-base font-semibold">Інформація профілю</h2>
-      <p className="text-muted-foreground mt-1 text-xs">Оновіть дані вашого акаунту</p>
-      <div className="mt-4 space-y-4">
-        <div className="space-y-1">
-          <Label htmlFor="profile-name" className="text-xs">
-            Повне ім&apos;я
-          </Label>
-          <Input id="profile-name" value={name} onChange={(e) => setName(e.target.value)} />
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="profile-email" className="text-xs">
-            Електронна пошта
-          </Label>
-          <Input
-            id="profile-email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
+    <SettingsSection title="Інформація профілю" description="Оновіть дані вашого акаунту">
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="profile-name">Повне ім&apos;я</Label>
+        <Input id="profile-name" value={name} onChange={(e) => setName(e.target.value)} />
+      </div>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="profile-email">Електронна пошта</Label>
+        <Input
+          id="profile-email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
       </div>
       <Button
-        size="sm"
-        className="mt-4"
+        className="self-start"
         onClick={handleSave}
         disabled={!hasChanges || updateProfile.isPending}
       >
         {updateProfile.isPending ? "Збереження..." : "Зберегти зміни"}
       </Button>
-    </section>
+    </SettingsSection>
   );
 };

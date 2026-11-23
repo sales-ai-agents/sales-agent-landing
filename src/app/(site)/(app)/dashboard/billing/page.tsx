@@ -1,12 +1,17 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { AlertTriangle } from "lucide-react";
-
-import { Button } from "@/components/ui";
-import { ChangePlanDialog, PageError, PageLoading } from "@/components/dashboard";
+import { TriangleAlert } from "lucide-react";
+import { ChangePlanDialog, PageError, PageHead, PageLoading } from "@/components/dashboard";
+import { Alert, AlertDescription, Button } from "@/components/ui";
 import { DEFAULT_AUTO_RENEW } from "@dashboard/billing";
-import { useBillingHistory, useBillingPlans, usePaymentMethod, useStats } from "@dashboard/hooks";
+import {
+  useBalance,
+  useBillingHistory,
+  useBillingPlans,
+  usePaymentMethod,
+  useStats,
+} from "@dashboard/hooks";
 import type { AutoRenewState, BillingPeriod } from "@dashboard/types";
 
 import { BillingCycleSelector } from "./_components/billing-cycle-selector";
@@ -15,7 +20,6 @@ import { PaymentMethodSection } from "./_components/payment-method-section";
 import { PlanOverviewSection } from "./_components/plan-overview-section";
 import { SubscriptionSection } from "./_components/subscription-section";
 import { PlanCard } from "./_components/plan-card";
-import { TopUpDialog } from "./_components/top-up-dialog";
 import { getDefaultUpgradePlan } from "./_lib/utils";
 
 const scrollToPlans = () => {
@@ -27,9 +31,9 @@ const BillingPage = () => {
   const billingQuery = useBillingPlans();
   const historyQuery = useBillingHistory();
   const paymentMethodQuery = usePaymentMethod();
+  const { data: balance } = useBalance();
 
   const [selectedPlanKey, setSelectedPlanKey] = useState<string | null>(null);
-  const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const [cycle, setCycle] = useState<BillingPeriod>("month");
 
   const billing = billingQuery.data;
@@ -55,6 +59,7 @@ const BillingPage = () => {
   const currentPlan = billing.plans.find((plan) => plan.key === billing.current);
   const upgradePlanKey = getDefaultUpgradePlan(billing.plans, billing.current);
   const isTrial = billing.current === "trial";
+  const maxPlanMinutes = Math.max(...billing.plans.map((plan) => plan.minutes));
 
   const autoRenew: AutoRenewState = {
     auto_renew: billing.auto_renew ?? DEFAULT_AUTO_RENEW.auto_renew,
@@ -66,27 +71,20 @@ const BillingPage = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       {isTrial && (
-        <div className="border-destructive bg-destructive/5 flex flex-col gap-3 rounded-xl border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="text-destructive h-5 w-5 shrink-0" />
-            <p className="text-destructive text-sm">
-              Оберіть тариф, щоб не втратити доступ після завершення безкоштовного периоду Trial
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            className="border-primary text-primary px-8"
-            onClick={scrollToPlans}
-          >
+        <Alert variant="warning" className="flex items-center gap-3">
+          <TriangleAlert aria-hidden="true" />
+          <AlertDescription className="text-foreground">
+            Додайте спосіб оплати, щоб не втратити доступ після завершення Trial
+          </AlertDescription>
+          <Button size="sm" onClick={scrollToPlans}>
             Обрати тариф
           </Button>
-        </div>
+        </Alert>
       )}
 
-      <h1 className="text-2xl font-bold">Тариф / оплата</h1>
+      <PageHead word="оплата" title="Тариф / оплата" tone="b" />
 
       <PlanOverviewSection
         currentPlan={currentPlan}
@@ -105,7 +103,7 @@ const BillingPage = () => {
         isStatsError={statsQuery.isError}
         onRetryStats={() => statsQuery.refetch()}
         onChangePlan={() => openPlanDialog(upgradePlanKey ?? undefined)}
-        onTopUp={() => setIsTopUpOpen(true)}
+        minutePriceUsd={balance?.minute_price_usd}
       />
 
       <BillingCycleSelector
@@ -133,21 +131,21 @@ const BillingPage = () => {
         onRetry={() => historyQuery.refetch()}
       />
 
-      <section id="plans" className="scroll-mt-4">
-        <h2 className="mb-4 text-lg font-semibold">Тарифні плани</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {billing.plans.map((plan) => (
-            <PlanCard
-              key={plan.key}
-              plan={plan}
-              cycle={cycle}
-              isCurrent={plan.key === billing.current}
-              onSelect={() => setSelectedPlanKey(plan.key)}
-            />
-          ))}
-        </div>
-      </section>
-
+      <h2 id="plans" className="font-heading px-1 pt-2 text-3xl">
+        Тарифні плани
+      </h2>
+      <div className="flex flex-wrap gap-4">
+        {billing.plans.map((plan) => (
+          <PlanCard
+            key={plan.key}
+            plan={plan}
+            cycle={cycle}
+            maxMinutes={maxPlanMinutes}
+            isCurrent={plan.key === billing.current}
+            onSelect={() => setSelectedPlanKey(plan.key)}
+          />
+        ))}
+      </div>
       {selectedPlanKey && (
         <ChangePlanDialog
           plans={billing.plans}
@@ -156,10 +154,6 @@ const BillingPage = () => {
           initialCycle={cycle}
           onClose={() => setSelectedPlanKey(null)}
         />
-      )}
-
-      {isTopUpOpen && (
-        <TopUpDialog packs={billing.packs ?? []} onClose={() => setIsTopUpOpen(false)} />
       )}
     </div>
   );

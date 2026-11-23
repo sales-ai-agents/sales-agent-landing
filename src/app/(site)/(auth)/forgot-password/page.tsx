@@ -6,10 +6,12 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Check, Loader2, Mail } from "lucide-react";
+import { Loader2, Mail } from "lucide-react";
 
 import { Button, Input, InputOTP, InputOTPGroup, InputOTPSlot, Label } from "@/components/ui";
+import { PasswordHints } from "@/components/auth/password-hints";
 import { PasswordInput } from "@/components/auth/password-input";
+import { REQUIRED_PASSWORD_RULE } from "@/lib/password-rules";
 import {
   forgotPasswordSchema,
   resetPasswordSchema,
@@ -21,15 +23,6 @@ import { ApiError } from "@/lib/api-client";
 import { resolveErrorMessage, AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
 
 const RESEND_COOLDOWN_SEC = 60;
-
-const PASSWORD_REQUIREMENTS = [
-  { label: "Мінімум 8 символів", test: (v: string) => v.length >= 8 },
-  {
-    label: "Містить цифру або спецсимвол",
-    test: (v: string) => /[0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(v),
-  },
-  { label: "Містить велику літеру", test: (v: string) => /[A-ZА-ЯІЇЄҐ]/.test(v) },
-] as const;
 
 type Step = "email" | "reset";
 
@@ -154,7 +147,7 @@ export default function ForgotPasswordPage() {
           </p>
         </div>
 
-        <div className="bg-primary/5 mb-5 flex items-start gap-3 rounded-lg p-4">
+        <div className="bg-primary/5 mb-5 flex items-start gap-3 rounded-2xl p-4">
           <div className="bg-primary/10 flex h-9 w-9 shrink-0 items-center justify-center rounded-md">
             <Mail className="text-primary h-5 w-5" />
           </div>
@@ -175,7 +168,7 @@ export default function ForgotPasswordPage() {
                   <InputOTPSlot
                     key={i}
                     index={i}
-                    className="h-12 w-12 rounded-lg border text-base"
+                    className="h-12 w-12 rounded-xl border text-base"
                   />
                 ))}
               </InputOTPGroup>
@@ -196,24 +189,8 @@ export default function ForgotPasswordPage() {
             )}
           </div>
 
-          <div className="bg-primary/5 rounded-lg p-4">
-            <p className="text-muted-foreground mb-2 text-sm">Пароль має містити:</p>
-            <ul className="space-y-1" aria-label="Вимоги до пароля">
-              {PASSWORD_REQUIREMENTS.map(({ label, test }) => {
-                const passed = test(passwordValue);
-                return (
-                  <li key={label} className="flex items-center gap-3 text-sm">
-                    <Check
-                      className={`h-4 w-4 ${passed ? "text-success" : "text-muted-foreground/40"}`}
-                      aria-hidden="true"
-                    />
-                    <span className={passed ? "text-muted-foreground" : "text-muted-foreground/60"}>
-                      {label}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
+          <div className="bg-primary/5 rounded-2xl p-4">
+            <PasswordHints value={passwordValue} />
           </div>
 
           <div className="flex flex-col gap-2">
@@ -232,11 +209,12 @@ export default function ForgotPasswordPage() {
 
           <Button
             type="submit"
-            className="bg-primary hover:bg-primary/90 h-11 w-full rounded-lg text-base font-semibold text-white"
+            className="w-full"
+            size="lg"
             disabled={
               confirmReset.isPending ||
               otp.length < 6 ||
-              !PASSWORD_REQUIREMENTS.every(({ test }) => test(passwordValue)) ||
+              !REQUIRED_PASSWORD_RULE.test(passwordValue) ||
               !resetForm.watch("confirmPassword")
             }
           >
@@ -253,7 +231,8 @@ export default function ForgotPasswordPage() {
           <Button
             type="button"
             variant="outline"
-            className="h-11 w-full rounded-lg text-base"
+            className="w-full"
+            size="lg"
             onClick={handleResend}
             disabled={passwordReset.isPending || cooldown > 0}
           >
@@ -298,7 +277,7 @@ export default function ForgotPasswordPage() {
             id="email"
             type="email"
             placeholder="Kulchytskyi@gmail.com"
-            className="h-11 rounded-lg"
+
             {...emailForm.register("email")}
           />
           {emailForm.formState.errors.email && (
@@ -308,11 +287,7 @@ export default function ForgotPasswordPage() {
           )}
         </div>
 
-        <Button
-          type="submit"
-          className="bg-primary hover:bg-primary/90 h-11 w-full rounded-lg text-base font-semibold text-white"
-          disabled={passwordReset.isPending}
-        >
+        <Button type="submit" className="w-full" size="lg" disabled={passwordReset.isPending}>
           {passwordReset.isPending ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -323,7 +298,7 @@ export default function ForgotPasswordPage() {
           )}
         </Button>
 
-        <div className="bg-primary/5 flex items-start gap-3 rounded-lg p-4">
+        <div className="bg-primary/5 flex items-start gap-3 rounded-2xl p-4">
           <div className="bg-primary/10 flex h-9 w-9 shrink-0 items-center justify-center rounded-md">
             <Mail className="text-primary h-5 w-5" />
           </div>

@@ -1,17 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import type { KeyboardEvent, MouseEvent } from "react";
+import { ExternalLink } from "lucide-react";
+import { VoiceWave } from "@/components/dashboard";
+import { CallResultCell } from "@/components/dashboard/call-result-cell";
 import {
-  useReactTable,
-  getCoreRowModel,
-  flexRender,
-  createColumnHelper,
-} from "@tanstack/react-table";
-import { ChevronRight } from "lucide-react";
-
-import {
+  Checkbox,
   Table as UiTable,
   TableBody,
   TableCell,
@@ -19,246 +14,164 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui";
-import { CallResultCell } from "@/components/dashboard/call-result-cell";
-import { formatDuration, formatSlaMinutes, formatDateShort, formatTime, cn } from "@/lib/utils";
-import type { CallLog, Agent, SlaState } from "@dashboard/types";
 import { useAccountTimeZone } from "@/lib/hooks";
-import { resolveAgentName } from "../_lib/utils";
+import { formatDateShort, formatDuration, formatTime } from "@/lib/utils";
+import type { Agent, CallLog } from "@dashboard/types";
+import { formatBilledMinutes, resolveAgentName } from "../_lib/utils";
+import { CrmSyncBadge } from "./crm-sync-badge";
+import { SlaIndicator } from "./sla-indicator";
 
-const columnHelper = createColumnHelper<CallLog>();
+const WAVE_BARS = 14;
+const LONG_CALL_SEC = 330;
 
 interface TableProps {
   data: CallLog[];
   agents: Agent[];
-  pageCount: number;
-  slaMinutes?: number;
+  showSla: boolean;
+  showCrm: boolean;
+  selectedIds: ReadonlySet<string>;
+  onToggleOne: (id: string) => void;
+  onToggleAll: (ids: string[]) => void;
 }
 
-const SlaIndicator = ({
-  state,
-  minutesLeft,
-}: {
-  state: SlaState | null;
-  minutesLeft: number | null;
-}) => {
-  if (!state) return null;
+const stopRowNavigation = (event: MouseEvent | KeyboardEvent): void => event.stopPropagation();
 
-  switch (state) {
-    case "breached": {
-      const overdue = minutesLeft !== null ? formatSlaMinutes(minutesLeft) : "0 хв";
-      return <span className="text-destructive text-xs font-medium">⊘ Прострочено {overdue}</span>;
-    }
-    case "ok": {
-      const left = minutesLeft !== null ? formatSlaMinutes(minutesLeft) : "0 хв";
-      return <span className="text-warning text-xs font-medium">⊘ Залишилось {left}</span>;
-    }
-    case "handled":
-      return null;
-    default:
-      return null;
-  }
-};
-
-interface CallCardProps {
+interface CallRowProps {
   call: CallLog;
   agents: Agent[];
   showSla: boolean;
+  showCrm: boolean;
+  isSelected: boolean;
+  timeZone: string | undefined;
+  onToggle: (id: string) => void;
 }
 
-const CallCard = ({ call, agents, showSla }: CallCardProps) => {
-  const timeZone = useAccountTimeZone();
-  const agentName = resolveAgentName(call.agent_id, agents);
-  const minutes = call.billed_sec ? `${(call.billed_sec / 60).toFixed(1)} хв` : "—";
-
+const CallRow = ({
+  call,
+  agents,
+  showSla,
+  showCrm,
+  isSelected,
+  timeZone,
+  onToggle,
+}: CallRowProps) => {
+  const router = useRouter();
+  const navigate = (): void => router.push(`/dashboard/call-logs/${call.id}`);
+  const durationSec = call.duration_sec ?? 0;
   return (
-    <Link
-      href={`/dashboard/call-logs/${call.id}`}
-      className="border-border hover:bg-muted/30 block border-b p-4 transition-colors last:border-0"
+    <TableRow
+      className="cursor-pointer"
+      data-state={isSelected ? "selected" : undefined}
+      tabIndex={0}
+      role="link"
+      aria-label={`Деталі дзвінка ${call.phone}`}
+      onClick={navigate}
+      onKeyDown={(event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        navigate();
+      }}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="truncate text-sm font-medium">{call.phone}</p>
-          <p className="text-muted-foreground truncate text-xs">{agentName}</p>
-        </div>
-        <div className="flex shrink-0 flex-col items-end gap-1">
-          {showSla && <SlaIndicator state={call.sla_state} minutesLeft={call.sla_minutes_left} />}
-        </div>
-      </div>
-      <div className="mt-3">
+      <TableCell onClick={stopRowNavigation} onKeyDown={stopRowNavigation}>
+        <Checkbox
+          aria-label="Обрати дзвінок"
+          checked={isSelected}
+          onCheckedChange={() => onToggle(call.id)}
+        />
+      </TableCell>
+      <TableCell className="tabular-nums">
+        <div className="font-medium">{formatDateShort(call.created_at, timeZone)}</div>
+        <div className="text-muted-foreground text-xs">{formatTime(call.created_at, timeZone)}</div>
+      </TableCell>
+      <TableCell className="tabular-nums">{call.phone}</TableCell>
+      <TableCell className="max-w-44 truncate">{resolveAgentName(call.agent_id, agents)}</TableCell>
+      <TableCell>
         <CallResultCell call={call} />
-      </div>
-      <div className="text-muted-foreground mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
-        <span>
-          {formatDateShort(call.created_at, timeZone)} {formatTime(call.created_at, timeZone)}
+      </TableCell>
+      {showSla && (
+        <TableCell>
+          <SlaIndicator state={call.sla_state} minutesLeft={call.sla_minutes_left} />
+        </TableCell>
+      )}
+      <TableCell className="tabular-nums">
+        <span className="flex items-center gap-2">
+          <VoiceWave
+            fraction={Math.min(1, durationSec / LONG_CALL_SEC)}
+            bars={WAVE_BARS}
+            className="h-5 w-16 flex-none"
+          />
+          {durationSec ? formatDuration(durationSec) : "—"}
         </span>
-        <span>Тривалість: {call.duration_sec ? formatDuration(call.duration_sec) : "—"}</span>
-        <span>Витрачено: {minutes}</span>
-      </div>
-    </Link>
+      </TableCell>
+      <TableCell className="tabular-nums">{formatBilledMinutes(call.billed_sec)}</TableCell>
+      {showCrm && (
+        <TableCell>
+          <CrmSyncBadge state={call.crm_sync_state} />
+        </TableCell>
+      )}
+      <TableCell>
+        <ExternalLink className="text-muted-foreground size-4" aria-hidden="true" />
+      </TableCell>
+    </TableRow>
   );
 };
 
-export const Table = ({ data, agents, pageCount, slaMinutes }: TableProps) => {
+export const Table = ({
+  data,
+  agents,
+  showSla,
+  showCrm,
+  selectedIds,
+  onToggleOne,
+  onToggleAll,
+}: TableProps) => {
   const timeZone = useAccountTimeZone();
-  const router = useRouter();
-  const showSla = slaMinutes !== undefined ? slaMinutes > 0 : true;
-
-  const columns = useMemo(() => {
-    const cols = [
-      columnHelper.accessor("created_at", {
-        header: "Дата і час",
-        cell: (info) => {
-          const value = info.getValue();
-          return (
-            <div className="text-sm">
-              <div>{formatDateShort(value, timeZone)}</div>
-              <div className="text-muted-foreground text-xs">{formatTime(value, timeZone)}</div>
-            </div>
-          );
-        },
-      }),
-      columnHelper.accessor("phone", {
-        header: "Номер телефону",
-        cell: (info) => <span className="text-sm">{info.getValue()}</span>,
-      }),
-      columnHelper.display({
-        id: "agent",
-        header: "Агент",
-        cell: ({ row }) => {
-          const name = resolveAgentName(row.original.agent_id, agents);
-          return <span className="text-muted-foreground text-sm">{name}</span>;
-        },
-      }),
-      columnHelper.display({
-        id: "result",
-        header: showSla ? "Результат / SLA" : "Результат",
-        cell: ({ row }) => (
-          <div className="flex min-w-0 flex-col gap-1">
-            <CallResultCell call={row.original} />
-            {showSla && (
-              <SlaIndicator
-                state={row.original.sla_state}
-                minutesLeft={row.original.sla_minutes_left}
-              />
-            )}
-          </div>
-        ),
-      }),
-      columnHelper.accessor("duration_sec", {
-        header: "Тривалість",
-        cell: (info) => {
-          const sec = info.getValue();
-          return <span className="text-sm">{sec ? formatDuration(sec) : "—"}</span>;
-        },
-      }),
-      columnHelper.display({
-        id: "minutes",
-        header: "Витрачено хв",
-        cell: ({ row }) => {
-          const sec = row.original.billed_sec;
-          if (!sec) return <span className="text-muted-foreground text-sm">—</span>;
-          return <span className="text-sm">{(sec / 60).toFixed(1)} хв</span>;
-        },
-        meta: { className: "hidden lg:table-cell" },
-      }),
-    ];
-
-    cols.push(
-      columnHelper.display({
-        id: "actions",
-        header: "",
-        cell: () => <ChevronRight className="text-muted-foreground size-4" />,
-      })
-    );
-
-    return cols;
-  }, [agents, showSla, timeZone]);
-
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    manualPagination: true,
-    pageCount,
-  });
-
+  const pageIds = data.map((call) => call.id);
+  const isAllSelected = pageIds.length > 0 && pageIds.every((id) => selectedIds.has(id));
+  const columnCount = 8 + Number(showSla) + Number(showCrm);
   return (
-    <div className="border-border bg-card overflow-hidden rounded-xl border">
-      <div className="sm:hidden">
-        {data.length === 0 ? (
-          <p className="text-muted-foreground px-4 py-12 text-center text-sm">
-            Нічого не знайдено за обраними фільтрами
-          </p>
-        ) : (
-          data.map((call) => (
-            <CallCard key={call.id} call={call} agents={agents} showSla={showSla} />
-          ))
+    <UiTable className="min-w-245">
+      <TableHeader>
+        <TableRow>
+          <TableHead>
+            <Checkbox
+              aria-label="Обрати всі дзвінки на сторінці"
+              checked={isAllSelected}
+              onCheckedChange={() => onToggleAll(pageIds)}
+            />
+          </TableHead>
+          <TableHead>Дата і час</TableHead>
+          <TableHead>Номер телефону</TableHead>
+          <TableHead>Агент</TableHead>
+          <TableHead>Результат</TableHead>
+          {showSla && <TableHead>SLA</TableHead>}
+          <TableHead>Тривалість</TableHead>
+          <TableHead>Витрачено хв</TableHead>
+          {showCrm && <TableHead>CRM</TableHead>}
+          <TableHead>Дії</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {data.length === 0 && (
+          <TableRow>
+            <TableCell colSpan={columnCount} className="text-muted-foreground py-12 text-center">
+              Нічого не знайдено за обраними фільтрами
+            </TableCell>
+          </TableRow>
         )}
-      </div>
-      <div className="hidden sm:block">
-        <UiTable>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="bg-muted/50">
-                {headerGroup.headers.map((header) => {
-                  const meta = header.column.columnDef.meta as { className?: string } | undefined;
-                  return (
-                    <TableHead key={header.id} className={cn("px-4", meta?.className)}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {data.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="text-muted-foreground px-4 py-12 text-center"
-                >
-                  Нічого не знайдено за обраними фільтрами
-                </TableCell>
-              </TableRow>
-            ) : (
-              table.getRowModel().rows.map((row) => {
-                const navigate = (): void => {
-                  router.push(`/dashboard/call-logs/${row.original.id}`);
-                };
-
-                return (
-                  <TableRow
-                    key={row.id}
-                    className="cursor-pointer"
-                    onClick={navigate}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" || event.key === " ") {
-                        event.preventDefault();
-                        navigate();
-                      }
-                    }}
-                    tabIndex={0}
-                    role="link"
-                    aria-label={`Деталі дзвінка ${row.original.phone}`}
-                  >
-                    {row.getVisibleCells().map((cell) => {
-                      const meta = cell.column.columnDef.meta as { className?: string } | undefined;
-                      return (
-                        <TableCell key={cell.id} className={cn("px-4 py-3", meta?.className)}>
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </UiTable>
-      </div>
-    </div>
+        {data.map((call) => (
+          <CallRow
+            key={call.id}
+            call={call}
+            agents={agents}
+            showSla={showSla}
+            showCrm={showCrm}
+            isSelected={selectedIds.has(call.id)}
+            timeZone={timeZone}
+            onToggle={onToggleOne}
+          />
+        ))}
+      </TableBody>
+    </UiTable>
   );
 };

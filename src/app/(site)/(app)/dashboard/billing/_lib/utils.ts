@@ -1,6 +1,10 @@
 import type { BillingPlan } from "@dashboard/types";
 
-export const getDefaultUpgradePlan = (plans: BillingPlan[], currentKey: string): string | null => {
+export const getDefaultUpgradePlan = (
+  allPlans: BillingPlan[],
+  currentKey: string
+): string | null => {
+  const plans = allPlans.filter((plan) => !plan.coming_soon);
   if (plans.length === 0) return null;
 
   const byCapacityThenPrice = (a: BillingPlan, b: BillingPlan) =>

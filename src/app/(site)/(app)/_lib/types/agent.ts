@@ -20,6 +20,7 @@ export interface Agent {
   name: string;
   voice: string;
   instructions: string;
+  report_fields?: string;
   instructions_expanded?: string;
   call_type?: CallTypeId | null;
   call_fields?: CallField[];
@@ -55,6 +56,7 @@ export interface AgentsResponse {
 }
 
 export interface AgentConfigParams {
+  report_fields?: string;
   call_type?: CallTypeId | null;
   call_fields?: CallField[];
   call_direction?: "inbound" | "outbound";
@@ -93,6 +95,7 @@ export interface UpdateAgentResponse {
 
 export interface TestCallParams {
   phone: string;
+  report_fields?: string;
   agent_id?: number;
   name?: string;
   voice?: string;
@@ -109,6 +112,29 @@ export interface Voice {
   label: string;
   sample_url?: string;
   sample_text?: string;
+}
+
+export type AgentTemplateIcon = "calendar" | "package" | "trending-up";
+
+export interface AgentTemplate {
+  id: string;
+  title: string;
+  subtitle: string;
+  icon: AgentTemplateIcon;
+  call_direction: Exclude<CallDirection, "">;
+  instructions: string;
+  report_fields: string;
+  tips: string[];
+}
+
+export interface AgentTemplatesResponse {
+  ok: boolean;
+  templates: AgentTemplate[];
+  placeholder_pattern: string;
+  instructions_max: number;
+  report_fields_max: number;
+  report_fields_label: string;
+  report_fields_hint: string;
 }
 
 export interface VoicesResponse {

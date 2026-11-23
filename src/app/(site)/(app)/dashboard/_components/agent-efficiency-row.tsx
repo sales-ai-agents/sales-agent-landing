@@ -1,17 +1,10 @@
+import { Progress } from "@/components/ui";
+import { cn, formatNumber, pluralizeGoals } from "@/lib/utils";
 import type { Agent } from "@dashboard/types";
-import { formatNumber, pluralizeGoals } from "@/lib/utils";
-
-const COLORS = [
-  { bg: "bg-primary/10", bar: "bg-primary", text: "text-primary" },
-  { bg: "bg-success/15", bar: "bg-success", text: "text-success" },
-  { bg: "bg-warning/15", bar: "bg-warning", text: "text-warning" },
-] as const;
-
 export interface AgentEfficiencyRowProps {
   agent: Agent;
   index: number;
 }
-
 export const AgentEfficiencyRow = ({ agent, index }: AgentEfficiencyRowProps) => {
   const efficiency = agent.stats?.efficiency_pct ?? null;
   const goals = agent.stats?.meetings ?? 0;
@@ -19,31 +12,24 @@ export const AgentEfficiencyRow = ({ agent, index }: AgentEfficiencyRowProps) =>
     efficiency !== null
       ? `${formatNumber(goals)} ${pluralizeGoals(goals)} досягнуто`
       : "Ще не дзвонив";
-
-  const color = COLORS[index % COLORS.length];
-
   return (
-    <div className="flex items-start gap-3">
-      <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${color.bg}`}>
-        <span className={`text-xs font-bold ${color.text}`}>
-          {agent.name.charAt(0).toUpperCase()}
-        </span>
+    <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
+      <span
+        className={cn(
+          "font-heading grid size-10 place-items-center rounded-full",
+          index === 0 ? "bg-foreground text-background" : "bg-primary/10 text-primary"
+        )}
+      >
+        {agent.name.charAt(0).toUpperCase()}
+      </span>
+      <div className="flex min-w-0 flex-col gap-1">
+        <b className="truncate font-medium">{agent.name}</b>
+        <span className="text-muted-foreground text-xs">{subtitle}</span>
+        <Progress value={efficiency ?? 0} aria-label={`Ефективність ${agent.name}`} />
       </div>
-      <div className="flex-1">
-        <p className="text-sm font-medium">{agent.name}</p>
-        <div className="flex items-center justify-between">
-          <p className="text-muted-foreground text-xs">{subtitle}</p>
-          <p className={`text-xs font-normal ${color.text}`}>
-            {efficiency !== null ? `${Math.round(efficiency)}%` : "—"}
-          </p>
-        </div>
-        <div className="bg-muted mt-1.5 h-1.5 w-full overflow-hidden rounded-full">
-          <div
-            className={`h-full rounded-full ${color.bar}`}
-            style={{ width: `${efficiency ?? 0}%` }}
-          />
-        </div>
-      </div>
+      <span className="font-heading text-lg tabular-nums">
+        {efficiency !== null ? `${Math.round(efficiency)}%` : "—"}
+      </span>
     </div>
   );
 };

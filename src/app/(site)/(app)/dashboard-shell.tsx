@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { usePathname } from "next/navigation";
 
 import {
@@ -9,20 +9,17 @@ import {
   PageLoading,
   PageError,
   SupportBotButton,
-  PageTransition,
 } from "@/components/dashboard";
 import { OnboardingWrapper } from "@/components/dashboard/onboarding";
 import { useRequireAuth } from "@/lib/hooks";
-
 import { PendingPaymentBanner } from "./dashboard/_components/pending-payment-banner";
 
 const DashboardShell = ({ children }: { children: React.ReactNode }) => {
   const { isLoading, isAuthenticated, isUnauthenticated, error, refetch } = useRequireAuth();
-  const mainRef = useRef<HTMLElement>(null);
   const pathname = usePathname();
 
   useEffect(() => {
-    mainRef.current?.scrollTo({ top: 0, behavior: "instant" });
+    window.scrollTo({ top: 0, behavior: "instant" });
   }, [pathname]);
 
   if (isLoading || isUnauthenticated) return <PageLoading fullScreen />;
@@ -30,16 +27,13 @@ const DashboardShell = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <OnboardingWrapper>
-      <div className="flex h-screen flex-col px-4 py-4 md:flex-row md:px-5 md:py-8">
+      <div className="bg-ground text-foreground flex min-h-screen">
         <Sidebar />
-        <div className="flex min-w-0 flex-1 flex-col md:ml-5">
+        <div className="flex min-w-0 flex-1 flex-col">
           <DashboardHeader />
-          <main
-            ref={mainRef}
-            className="bg-primary/5 flex-1 overflow-y-auto scroll-smooth rounded-xl px-4 py-6 md:px-6 md:py-8"
-          >
+          <main className="flex flex-1 flex-col gap-6 px-4 pb-10">
             <PendingPaymentBanner />
-            <PageTransition>{children}</PageTransition>
+            {children}
           </main>
         </div>
         <SupportBotButton />

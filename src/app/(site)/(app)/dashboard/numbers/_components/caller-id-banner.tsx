@@ -1,8 +1,7 @@
 "use client";
 
-import { PhoneOutgoing } from "lucide-react";
-
-import { Button } from "@/components/ui";
+import { PhoneForwarded } from "lucide-react";
+import { Alert, AlertDescription, Button } from "@/components/ui";
 import { formatUaPhone } from "@/lib/utils";
 
 import { ConnectNumberDialog } from "../../agents/_components/connect-number";
@@ -48,22 +47,22 @@ export const CallerIdBanner = ({ phone, isOwn, used, onConnected }: CallerIdBann
   const { text, cta } = resolveContent(phone, isOwn, used);
 
   return (
-    <div className="bg-primary/10 flex flex-col gap-3 rounded-lg p-4 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex items-start gap-3">
-        <PhoneOutgoing className="text-primary mt-0.5 h-5 w-5 shrink-0" />
-        <p className="text-sm">{text}</p>
-      </div>
+    <Alert variant="info" className="flex items-center gap-3">
+      <PhoneForwarded aria-hidden="true" />
+      <AlertDescription className="flex-1">
+        <p>{text}</p>
+      </AlertDescription>
       {cta && (
         <ConnectNumberDialog
           initialMethod="buy"
           onConnected={onConnected}
           trigger={
-            <Button variant="outline" size="sm" className="shrink-0">
+            <Button variant="secondary" size="sm">
               {cta}
             </Button>
           }
         />
       )}
-    </div>
+    </Alert>
   );
 };

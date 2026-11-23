@@ -8,6 +8,10 @@ import {
   Alert,
   AlertDescription,
   Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
   Input,
   Label,
   Dialog,
@@ -79,39 +83,32 @@ export const ApiKeysSection = () => {
 
   if (!showKeys) {
     return (
-      <div className="border-border bg-background rounded-xl border p-5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="bg-primary/10 flex h-17 w-17 shrink-0 items-center justify-center rounded-full">
-              <KeyRound className="text-primary h-7 w-7" />
-            </div>
-            <div>
-              <p className="text-sm font-medium">API-ключі</p>
-              <p className="text-muted-foreground mt-0.5 max-w-xs text-xs">
-                Розділ для генерації та управління API-ключами для власних інтеграцій та розробки
-              </p>
-            </div>
+      <Card className="flex flex-row flex-wrap items-center justify-between gap-4 p-6">
+        <div className="flex items-center gap-4">
+          <div className="bg-primary/10 flex size-14 shrink-0 items-center justify-center rounded-full">
+            <KeyRound className="text-primary h-7 w-7" aria-hidden="true" />
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-primary border-primary/40"
-            onClick={() => setShowKeys(true)}
-          >
-            Відкрити
-          </Button>
+          <div>
+            <p className="font-heading text-lg">API-ключі</p>
+            <p className="text-muted-foreground mt-0.5 max-w-md text-sm">
+              Розділ для генерації та управління API-ключами для власних інтеграцій та розробки
+            </p>
+          </div>
         </div>
-      </div>
+        <Button variant="outline" size="sm" onClick={() => setShowKeys(true)}>
+          Відкрити
+        </Button>
+      </Card>
     );
   }
 
   return (
     <>
-      <div className="border-border bg-background rounded-xl border p-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-sm font-semibold">API-ключі</h3>
-            <p className="text-muted-foreground mt-0.5 text-xs">
+      <Card className="gap-0 overflow-hidden p-0">
+        <CardHeader className="flex-row flex-wrap items-center justify-between gap-3 border-b">
+          <div className="flex flex-col gap-1">
+            <CardTitle>API-ключі</CardTitle>
+            <p className="text-muted-foreground text-sm">
               Генерація та управління ключами для власних інтеграцій
             </p>
           </div>
@@ -123,11 +120,10 @@ export const ApiKeysSection = () => {
               Новий ключ
             </Button>
           </div>
-        </div>
-
-        <div className="mt-4">
+        </CardHeader>
+        <CardContent className="p-0">
           {keys.length === 0 ? (
-            <p className="text-muted-foreground py-4 text-center text-sm">
+            <p className="text-muted-foreground p-6 text-center text-sm">
               Ключів ще немає. Створіть перший API-ключ.
             </p>
           ) : (
@@ -159,12 +155,12 @@ export const ApiKeysSection = () => {
                     <TableCell className="px-2 py-2.5">
                       <Button
                         variant="ghost"
-                        size="icon"
-                        className="text-muted-foreground hover:text-destructive h-7 w-7"
+                        size="icon-sm"
+                        className="text-muted-foreground hover:text-destructive"
                         onClick={() => handleDelete(k.id)}
                         aria-label="Видалити ключ"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4" aria-hidden="true" />
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -172,8 +168,8 @@ export const ApiKeysSection = () => {
               </TableBody>
             </Table>
           )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       <Dialog open={showDialog} onOpenChange={handleClose}>
         <DialogContent>
@@ -184,7 +180,7 @@ export const ApiKeysSection = () => {
           {createdKey ? (
             <div className="space-y-3 py-2">
               <Alert variant="warning">
-                <TriangleAlert />
+                <TriangleAlert aria-hidden="true" />
                 <AlertDescription>
                   Збережіть ключ зараз — він більше не буде показаний.
                 </AlertDescription>
@@ -192,11 +188,16 @@ export const ApiKeysSection = () => {
               <Label>Ваш API-ключ</Label>
               <div className="flex gap-2">
                 <Input value={createdKey} readOnly className="font-mono text-xs" />
-                <Button variant="outline" size="sm" onClick={handleCopy}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCopy}
+                  aria-label="Копіювати ключ"
+                >
                   {copied ? (
-                    <Check className="text-success h-4 w-4" />
+                    <Check className="text-success h-4 w-4" aria-hidden="true" />
                   ) : (
-                    <Copy className="h-4 w-4" />
+                    <Copy className="h-4 w-4" aria-hidden="true" />
                   )}
                 </Button>
               </div>

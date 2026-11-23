@@ -40,6 +40,10 @@ export function formatNumber(n: number): string {
   return n.toLocaleString("uk-UA");
 }
 
+export function formatUsd(amount: number): string {
+  return `$${amount.toLocaleString("uk-UA", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 export function formatTimeSaved(minutes: number): string {
   const hours = Math.floor(minutes / 60);
   const mins = Math.round(minutes % 60);

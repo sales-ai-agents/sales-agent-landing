@@ -17,9 +17,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  Tabs,
-  TabsList,
-  TabsTrigger,
 } from "@/components/ui";
 import { useContactsExportPreview } from "@dashboard/hooks";
 import { apiUrl } from "@/lib/api-config";
@@ -101,28 +98,7 @@ export const ExportContactsDialog = ({ search, onClose }: ExportContactsDialogPr
               </p>
             </div>
 
-            <Tabs defaultValue="ready">
-              <TabsList className="gap-4 bg-transparent p-0" variant="line">
-                <TabsTrigger
-                  value="ready"
-                  className="data-active:text-primary after:bg-primary hover:text-primary"
-                >
-                  Готові до експорту ({formatNumber(data.exportable)})
-                </TabsTrigger>
-                <TabsTrigger
-                  value="duplicates"
-                  className="data-active:text-primary after:bg-primary hover:text-primary"
-                >
-                  Дублікати ({formatNumber(data.duplicates)})
-                </TabsTrigger>
-                <TabsTrigger
-                  value="invalid"
-                  className="data-active:text-primary after:bg-primary hover:text-primary"
-                >
-                  Неправильні номери ({formatNumber(data.invalid)})
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+            <p className="text-sm font-medium">Приклад контактів, готових до експорту</p>
 
             {data.sample.length > 0 ? (
               <ExportPreviewTable contacts={data.sample} />

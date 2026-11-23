@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Switch } from "@/components/ui";
 import { useUpdateMarketingConsent } from "@/lib/hooks";
 import { handleMutationError } from "@/lib/mutation-error";
+import { SettingsSection } from "./settings-section";
 
 interface MarketingConsentSectionProps {
   initialGranted: boolean;
@@ -29,14 +30,13 @@ export const MarketingConsent = ({ initialGranted }: MarketingConsentSectionProp
   };
 
   return (
-    <section className="border-border bg-background rounded-2xl border p-5">
-      <h2 className="text-base font-semibold">Маркетингові розсилки</h2>
-      <p className="text-muted-foreground mt-1 text-xs">
-        Керуйте згодою на інформаційні та рекламні повідомлення
-      </p>
-      <div className="mt-3 flex items-center justify-between gap-4">
-        <div>
-          <p className="text-xs font-medium">Отримувати розсилки від calls4u.ai</p>
+    <SettingsSection
+      title="Маркетингові розсилки"
+      description="Керуйте згодою на інформаційні та рекламні повідомлення"
+    >
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <p className="text-sm font-medium">Отримувати розсилки від calls4u.ai</p>
           <p className="text-muted-foreground text-xs">
             Новини, поради та спеціальні пропозиції. Згоду можна відкликати будь-коли.
           </p>
@@ -48,6 +48,6 @@ export const MarketingConsent = ({ initialGranted }: MarketingConsentSectionProp
           aria-label="Згода на маркетингові розсилки"
         />
       </div>
-    </section>
+    </SettingsSection>
   );
 };

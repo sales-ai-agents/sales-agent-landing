@@ -15,8 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui";
-import { cn } from "@/lib/utils";
-import { getTagColor } from "@/app/(site)/(app)/_lib/tag-colors";
+import { TagBadge } from "@/components/dashboard";
 import { useContacts } from "@dashboard/hooks";
 
 const ALL_TAGS_FILTER = "__all__";
@@ -129,21 +128,9 @@ export const ContactPicker = ({ selectedIds, onChange }: ContactPickerProps) => 
                   <TableCell className="text-muted-foreground px-2 py-3">{contact.phone}</TableCell>
                   <TableCell className="px-2 py-3">
                     <div className="flex flex-wrap gap-1">
-                      {(contact.tags ?? []).map((tagName) => {
-                        const color = getTagColor(tagName);
-                        return (
-                          <span
-                            key={tagName}
-                            className={cn(
-                              "inline-block rounded px-2 py-0.5 text-xs",
-                              color.bg,
-                              color.text
-                            )}
-                          >
-                            {tagName}
-                          </span>
-                        );
-                      })}
+                      {(contact.tags ?? []).map((tagName) => (
+                        <TagBadge key={tagName} tag={tagName} />
+                      ))}
                     </div>
                   </TableCell>
                 </TableRow>

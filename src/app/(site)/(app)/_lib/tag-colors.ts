@@ -1,16 +1,18 @@
+import type { BadgeProps } from "@/components/ui/badge";
+
 export interface TagColor {
-  bg: string;
-  text: string;
+  variant: NonNullable<BadgeProps["variant"]>;
 }
 
 const TAG_COLORS: Record<string, TagColor> = {
-  VIP: { bg: "bg-warning/15", text: "text-warning" },
-  Новий: { bg: "bg-success/15", text: "text-success" },
-  "Прострочена оплата": { bg: "bg-destructive/15", text: "text-destructive" },
-  "Постійний клієнт": { bg: "bg-primary/10", text: "text-primary" },
+  VIP: { variant: "warning" },
+  Новий: { variant: "success" },
+  "Прострочена оплата": { variant: "destructive" },
+  "Постійний клієнт": { variant: "secondary" },
+  Повторний: { variant: "muted" },
 };
 
-const DEFAULT_TAG_COLOR: TagColor = { bg: "bg-muted", text: "text-muted-foreground" };
+const DEFAULT_TAG_COLOR: TagColor = { variant: "secondary" };
 
 export const getTagColor = (tag: string): TagColor => {
   return TAG_COLORS[tag] ?? DEFAULT_TAG_COLOR;

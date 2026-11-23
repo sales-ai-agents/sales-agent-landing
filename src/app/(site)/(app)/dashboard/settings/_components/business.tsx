@@ -16,6 +16,7 @@ import {
 import { useUpdateProfile } from "@/lib/hooks";
 import { AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/mutation-error";
+import { SettingsSection } from "./settings-section";
 import type { AgentLanguage } from "@/lib/types";
 
 interface BusinessProps {
@@ -55,16 +56,13 @@ export const Business = ({
   };
 
   return (
-    <section className="border-border bg-background rounded-2xl border p-5">
-      <h2 className="text-base font-semibold">Дані бізнесу</h2>
-      <p className="text-muted-foreground mt-1 text-xs">
-        Інформація про ваш бізнес, яку агент використовує під час дзвінків
-      </p>
-      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="space-y-1">
-          <Label htmlFor="company-name" className="text-xs">
-            Назва компанії (вимовляється агентом)
-          </Label>
+    <SettingsSection
+      title="Дані бізнесу"
+      description="Інформація про ваш бізнес, яку агент використовує під час дзвінків"
+    >
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="company-name">Назва компанії (вимовляється агентом)</Label>
           <Input
             id="company-name"
             value={company}
@@ -72,10 +70,8 @@ export const Business = ({
             placeholder="Calls4U"
           />
         </div>
-        <div className="space-y-1">
-          <Label htmlFor="short-name" className="text-xs">
-            Коротка назва для відображення
-          </Label>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="short-name">Коротка назва для відображення</Label>
           <Input
             id="short-name"
             value={shortName}
@@ -83,12 +79,8 @@ export const Business = ({
             placeholder="Calls4U"
           />
         </div>
-      </div>
-      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="space-y-1">
-          <Label htmlFor="website" className="text-xs">
-            Сайт компанії (необов&apos;язково)
-          </Label>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="website">Сайт компанії (необов&apos;язково)</Label>
           <Input
             id="website"
             value={website}
@@ -96,10 +88,10 @@ export const Business = ({
             placeholder="https://..."
           />
         </div>
-        <div className="space-y-1">
-          <Label className="text-xs">Мова спілкування агентів за замовчуванням</Label>
+        <div className="flex flex-col gap-2">
+          <Label>Мова спілкування агентів за замовчуванням</Label>
           <Select value={language} onValueChange={(val) => setLanguage(val as AgentLanguage)}>
-            <SelectTrigger className="h-10! w-full rounded-md">
+            <SelectTrigger className="w-full">
               <SelectValue>{selectedLabel}</SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -112,9 +104,9 @@ export const Business = ({
           </Select>
         </div>
       </div>
-      <Button size="sm" className="mt-4" onClick={handleSave} disabled={updateProfile.isPending}>
+      <Button className="self-start" onClick={handleSave} disabled={updateProfile.isPending}>
         {updateProfile.isPending ? "Збереження..." : "Зберегти зміни"}
       </Button>
-    </section>
+    </SettingsSection>
   );
 };

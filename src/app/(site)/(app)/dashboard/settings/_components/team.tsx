@@ -34,6 +34,7 @@ import {
   useUpdateTeamMemberRole,
   useRemoveTeamMember,
 } from "@dashboard/hooks";
+import { SettingsSection } from "./settings-section";
 import { TEAM_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/mutation-error";
 import type { TeamRole } from "@dashboard/types";
@@ -102,33 +103,31 @@ export const Team = () => {
   );
 
   return (
-    <section className="border-border bg-background rounded-2xl border p-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-base font-semibold">Команда / ролі</h2>
-          <p className="text-muted-foreground mt-1 text-xs">
-            Додавайте користувачів і керуйте їхніми ролями в акаунті
-          </p>
-        </div>
-        <Button size="sm" variant="outline" onClick={() => setShowInviteDialog(true)}>
-          <Plus className="mr-1.5 h-3.5 w-3.5" />
+    <SettingsSection
+      title="Команда / ролі"
+      description="Додавайте користувачів і керуйте їхніми ролями в акаунті"
+      action={
+        <Button variant="outline" size="sm" onClick={() => setShowInviteDialog(true)}>
+          <Plus aria-hidden="true" />
           Додати користувача
         </Button>
-      </div>
-
-      <Table className="mt-4">
+      }
+    >
+      <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="px-2">Користувач</TableHead>
-            <TableHead className="px-2">Email</TableHead>
-            <TableHead className="px-2">Роль</TableHead>
-            <TableHead className="w-10" />
+            <TableHead>Користувач</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Роль</TableHead>
+            <TableHead className="w-10">
+              <span className="sr-only">Дії</span>
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {members.map((member) => (
             <TableRow key={member.id}>
-              <TableCell className="px-2 py-3">
+              <TableCell>
                 <div className="flex items-center gap-2">
                   <Avatar className="size-8">
                     <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
@@ -136,15 +135,11 @@ export const Team = () => {
                     </AvatarFallback>
                   </Avatar>
                   <span className="font-medium">{member.name || member.email}</span>
-                  {member.role === "owner" && (
-                    <Badge variant="secondary" className="text-xs">
-                      Ви
-                    </Badge>
-                  )}
+                  {member.role === "owner" && <Badge variant="secondary">Ви</Badge>}
                 </div>
               </TableCell>
-              <TableCell className="text-muted-foreground px-2 py-3">{member.email}</TableCell>
-              <TableCell className="px-2 py-3">
+              <TableCell className="text-muted-foreground">{member.email}</TableCell>
+              <TableCell>
                 {member.role === "owner" ? (
                   <span className="text-sm">{ROLE_LABELS.owner}</span>
                 ) : (
@@ -165,16 +160,16 @@ export const Team = () => {
                   </Select>
                 )}
               </TableCell>
-              <TableCell className="px-2 py-3">
+              <TableCell>
                 {member.role !== "owner" && (
                   <Button
                     variant="ghost"
-                    size="icon"
-                    className="text-destructive h-7 w-7"
+                    size="icon-sm"
+                    className="text-destructive"
                     onClick={() => handleRemove(member.id)}
                     aria-label="Видалити"
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <Trash2 aria-hidden="true" />
                   </Button>
                 )}
               </TableCell>
@@ -182,19 +177,17 @@ export const Team = () => {
           ))}
         </TableBody>
       </Table>
-
-      <p className="text-muted-foreground mt-3 text-xs">
+      <p className="text-muted-foreground text-xs">
         Роль &quot;Адмін&quot; має повний доступ до налаштувань та управління командою
       </p>
-
       <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Запросити користувача</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-1">
-              <Label className="text-xs">Email</Label>
+          <div className="flex flex-col gap-4 py-2">
+            <div className="flex flex-col gap-2">
+              <Label>Email</Label>
               <Input
                 type="email"
                 value={inviteEmail}
@@ -202,21 +195,21 @@ export const Team = () => {
                 placeholder="user@example.com"
               />
             </div>
-            <div className="space-y-1">
-              <Label className="text-xs">Ім&apos;я (необов&apos;язково)</Label>
+            <div className="flex flex-col gap-2">
+              <Label>Ім&apos;я (необов&apos;язково)</Label>
               <Input
                 value={inviteName}
                 onChange={(e) => setInviteName(e.target.value)}
                 placeholder="Ім'я"
               />
             </div>
-            <div className="space-y-1">
-              <Label className="text-xs">Роль</Label>
+            <div className="flex flex-col gap-2">
+              <Label>Роль</Label>
               <Select
                 value={inviteRole}
                 onValueChange={(val) => setInviteRole(val as "admin" | "viewer")}
               >
-                <SelectTrigger className="h-10! w-full rounded-md">
+                <SelectTrigger className="w-full">
                   <SelectValue>{selectedLabel}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
@@ -239,6 +232,6 @@ export const Team = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </section>
+    </SettingsSection>
   );
 };

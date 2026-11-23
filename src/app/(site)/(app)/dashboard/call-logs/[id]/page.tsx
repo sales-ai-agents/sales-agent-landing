@@ -3,11 +3,11 @@
 import { useState, useCallback, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Download, Bot } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button, buttonVariants, Textarea, Badge } from "@/components/ui";
-import { PageLoading, PageError, AudioPlayer } from "@/components/dashboard";
+import { ArrowLeft, Download } from "lucide-react";
+import { PageLoading, PageError, PageHead, AudioPlayer } from "@/components/dashboard";
+import { Button, buttonVariants, Card, CardTitle, Textarea } from "@/components/ui";
 import {
   useCallDetail,
   useSaveNote,
@@ -17,45 +17,22 @@ import {
 } from "@dashboard/hooks";
 import { useAccountTimeZone } from "@/lib/hooks";
 import { handleMutationError } from "@/lib/mutation-error";
-import { getOutcomeConfig } from "@/app/(site)/(app)/_lib/call-outcome";
-import {
-  formatDuration,
-  formatSlaMinutes,
-  formatDateShort,
-  formatTime,
-  formatDateTime,
-  cn,
-} from "@/lib/utils";
-import { InfoField } from "@/app/(site)/(app)/dashboard/call-logs/_components/info-field";
-import { CallResultCard } from "@/app/(site)/(app)/dashboard/call-logs/_components/call-result-card";
-import { CrmStatusPanel } from "@/app/(site)/(app)/dashboard/call-logs/_components/crm-status-panel";
-import { CollectedDataPanel } from "@/app/(site)/(app)/dashboard/call-logs/_components/collected-data-panel";
-import type { SlaState } from "@dashboard/types";
+import { apiUrl } from "@/lib/api-config";
+import { CallResultCell } from "@/components/dashboard/call-result-cell";
+import { formatDuration, formatDateShort, formatTime, formatDateTime, cn } from "@/lib/utils";
+import { CallResultCard } from "../_components/call-result-card";
+import { CollectedDataPanel } from "../_components/collected-data-panel";
+import { ContactCard } from "../_components/contact-card";
+import { CrmStatusPanel } from "../_components/crm-status-panel";
+import { SlaIndicator } from "../_components/sla-indicator";
+import { formatBilledMinutes } from "../_lib/utils";
 
-const SlaDisplay = ({
-  state,
-  minutesLeft,
-}: {
-  state: SlaState | null;
-  minutesLeft: number | null;
-}) => {
-  if (!state) return <p className="mt-1 text-sm font-medium">—</p>;
-
-  switch (state) {
-    case "breached": {
-      const overdue = minutesLeft !== null ? formatSlaMinutes(minutesLeft) : "0 хв";
-      return <p className="text-destructive mt-1 text-sm font-medium">⊘ Прострочено {overdue}</p>;
-    }
-    case "ok": {
-      const left = minutesLeft !== null ? formatSlaMinutes(minutesLeft) : "0 хв";
-      return <p className="text-warning mt-1 text-sm font-medium">Залишилось {left}</p>;
-    }
-    case "handled":
-      return <p className="text-success mt-1 text-sm font-medium">Оброблено</p>;
-    default:
-      return <p className="mt-1 text-sm font-medium">—</p>;
-  }
-};
+const Fact = ({ label, children }: { label: string; children: React.ReactNode }) => (
+  <div className="flex flex-col items-start gap-1.5">
+    <span className="caption text-muted-foreground">{label}</span>
+    {children}
+  </div>
+);
 
 const CallDetailPage = () => {
   const params = useParams();
@@ -88,74 +65,70 @@ const CallDetailPage = () => {
   if (error) return <PageError message={error.message} onRetry={refetch} />;
   if (!call) return <PageError message="Дзвінок не знайдено" />;
 
-  const outcomeConfig = getOutcomeConfig(call.outcome);
-  const duration = formatDuration(call.duration_sec);
   const agentName = agents.find((a) => a.id === call.agent_id)?.name ?? "—";
-  const minutesUsed = call.billed_sec ? (call.billed_sec / 60).toFixed(1) : "0";
+  const customerType = call.contact?.tags[0] ?? "—";
+  const audioUrl = apiUrl.callAudio(callId);
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <Link
+        className={cn(buttonVariants({ variant: "link" }), "w-fit px-0")}
         href="/dashboard/call-logs"
-        className="text-primary inline-flex items-center gap-1 text-sm font-medium"
       >
-        <ArrowLeft className="h-4 w-4" />
+        <ArrowLeft aria-hidden="true" />
         Назад до дзвінків
       </Link>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Деталі дзвінка</h1>
-          <p className="text-muted-foreground text-sm">
-            {formatDateShort(call.created_at, timeZone)} - {formatTime(call.created_at, timeZone)}
-          </p>
+      <PageHead
+        word="дзвінок"
+        title="Деталі дзвінка"
+        description={`${formatDateShort(call.created_at, timeZone)} · ${formatTime(call.created_at, timeZone)}`}
+        tone="b"
+        actions={
+          <a
+            className={buttonVariants({ variant: "outline" })}
+            href={audioUrl}
+            download
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Download aria-hidden="true" />
+            Завантажити аудіо
+          </a>
+        }
+      />
+
+      <Card className="p-6">
+        <div className="grid gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
+          <Fact label="Клієнт">
+            <b className="tabular-nums">{call.contact?.name || call.company_name || call.phone}</b>
+          </Fact>
+          <Fact label="Агент">
+            <b>{agentName}</b>
+          </Fact>
+          <Fact label="Результат дзвінка">
+            <CallResultCell call={call} />
+          </Fact>
+          <Fact label="Тривалість дзвінка">
+            <b className="tabular-nums">{formatDuration(call.duration_sec)}</b>
+          </Fact>
+          <Fact label="Статус / SLA">
+            <SlaIndicator state={call.sla_state} minutesLeft={call.sla_minutes_left} />
+          </Fact>
+          <Fact label="Тип клієнта">
+            <b>{customerType}</b>
+          </Fact>
+          <Fact label="Витрачено хвилин">
+            <b className="tabular-nums">{formatBilledMinutes(call.billed_sec)}</b>
+          </Fact>
         </div>
-        <a
-          href={`/api/app/calls/${callId}/audio`}
-          download
-          target="_blank"
-          rel="noopener noreferrer"
-          className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-2")}
-        >
-          <Download className="h-4 w-4" />
-          Завантажити аудіо
-        </a>
-      </div>
+      </Card>
 
-      <div className="border-border bg-background grid grid-cols-2 gap-4 rounded-2xl border p-5 sm:grid-cols-3 lg:grid-cols-6">
-        <InfoField label="Клієнт" value={call.company_name || call.phone} />
-
-        <InfoField
-          label="Агент"
-          value={agentName}
-          icon={<Bot className="text-primary h-4 w-4" />}
-        />
-
-        <div>
-          <p className="text-muted-foreground text-xs">Результат дзвінка</p>
-          <Badge variant={outcomeConfig.variant} className="mt-1 px-4">
-            {outcomeConfig.label}
-          </Badge>
-        </div>
-
-        <InfoField label="Тривалість дзвінка" value={duration} />
-
-        <div>
-          <p className="text-muted-foreground text-xs">Статус / SLA</p>
-          <SlaDisplay state={call.sla_state} minutesLeft={call.sla_minutes_left} />
-        </div>
-
-        <div>
-          <p className="text-muted-foreground text-xs">Витрачено хвилин</p>
-          <p className="mt-1 text-sm font-medium">{minutesUsed} хв</p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="space-y-4 lg:col-span-2">
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <div className="flex min-w-0 flex-col gap-6">
           {call.result && <CallResultCard result={call.result} />}
 
-          <AudioPlayer src={`/api/app/calls/${callId}/audio`} />
+          <AudioPlayer src={audioUrl} />
 
           {call.collected_data && call.collected_data.length > 0 && (
             <CollectedDataPanel
@@ -164,66 +137,60 @@ const CallDetailPage = () => {
             />
           )}
 
-          <div className="border-border bg-background rounded-2xl border p-5">
-            <h2 className="mb-4 text-sm font-semibold">Транскрипція</h2>
+          <Card className="flex flex-col gap-4 p-6">
+            <CardTitle>Транскрипція</CardTitle>
             {call.transcript?.length ? (
-              <div className="space-y-4">
-                {call.transcript.map((msg, i) => (
-                  <div key={`${msg.role}-${i}`} className="flex gap-3">
+              <div className="divide-y">
+                {call.transcript.map((msg, index) => (
+                  <div
+                    key={`${msg.role}-${index}`}
+                    className="grid grid-cols-[5.5rem_minmax(0,1fr)] gap-3 py-3 text-sm"
+                  >
                     <span
                       className={cn(
-                        "text-xs font-semibold",
-                        msg.role === "assistant" ? "text-primary" : "text-success"
+                        "caption",
+                        msg.role === "assistant" ? "text-primary" : "text-muted-foreground"
                       )}
                     >
                       {msg.role === "assistant" ? "ШІ-агент" : "Клієнт"}
                     </span>
-                    <p className="text-sm">{msg.content}</p>
+                    <span>{msg.content}</span>
                   </div>
                 ))}
               </div>
             ) : (
               <p className="text-muted-foreground text-sm">Транскрипт відсутній</p>
             )}
-          </div>
+          </Card>
         </div>
-
-        <div className="space-y-4">
+        <div className="flex flex-col gap-6">
           {crm?.configured && <CrmStatusPanel callId={callId} crm={crm} />}
-
-          <div className="border-border bg-background rounded-2xl border p-5">
-            <h3 className="mb-3 text-sm font-semibold">Пов&apos;язаний контакт</h3>
-            <div className="space-y-2 text-sm">
-              <p className="font-medium">{call.phone}</p>
-              <div>
-                <span className="text-muted-foreground">Email</span>
-                <p>—</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-border bg-background rounded-2xl border p-5">
-            <h3 className="mb-3 text-sm font-semibold">Примітки менеджера</h3>
+          <ContactCard contact={call.contact} phone={call.phone} />
+          <Card className="flex flex-col gap-3 p-6">
+            <CardTitle className="text-lg">Примітки менеджера</CardTitle>
             <Textarea
+              id="manager-note"
               placeholder="Додати примітку..."
-              rows={4}
+              aria-label="Примітка менеджера"
+              className="min-h-28"
               value={displayNote}
-              onChange={(e) => setNote(e.target.value)}
+              onChange={(event) => setNote(event.target.value)}
             />
             {call.manager_note_at && (
-              <p className="text-muted-foreground mt-1 text-xs">
+              <p className="text-muted-foreground text-xs">
                 Останнє оновлення: {formatDateTime(call.manager_note_at, timeZone)}
               </p>
             )}
             <Button
+              type="button"
               size="sm"
-              className="mt-3"
+              className="w-full"
               onClick={handleSaveNote}
               disabled={saveNote.isPending}
             >
               {saveNote.isPending ? "Збереження..." : "Зберегти примітку"}
             </Button>
-          </div>
+          </Card>
         </div>
       </div>
     </div>

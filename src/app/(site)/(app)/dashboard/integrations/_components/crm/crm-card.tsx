@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Button } from "@/components/ui";
+import { Button, Card } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { useCrmIntegration } from "@dashboard/hooks";
 import type { AvailableIntegration, CrmIntegration, CrmProvider } from "@dashboard/types";
@@ -82,12 +82,10 @@ export const CrmCard = ({ integration, provider }: CrmCardProps) => {
   const modeHint = connectedCrm ? describeCrmMode(connectedCrm) : null;
 
   return (
-    <section
+    <Card
+      role="region"
       aria-label={config.name}
-      className={cn(
-        "bg-background rounded-xl border p-5",
-        state === "error" ? "border-destructive/40" : "border-border"
-      )}
+      className={cn("p-6", state === "error" && "ring-destructive/40 ring-2")}
     >
       <div className="flex items-start gap-4">
         <IntegrationLogo id={provider} />
@@ -153,6 +151,6 @@ export const CrmCard = ({ integration, provider }: CrmCardProps) => {
         replacedCrmName={resolveReplacedName(crm, provider)}
         onOpenChange={setIsConnectOpen}
       />
-    </section>
+    </Card>
   );
 };

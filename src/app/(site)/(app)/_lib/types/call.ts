@@ -19,6 +19,17 @@ export type CallOutcome =
 
 export type SlaState = "ok" | "breached" | "handled";
 
+export interface CallContact {
+  id: number;
+  name: string;
+  phone: string;
+  email: string;
+  note: string;
+  tags: string[];
+  consent: string;
+  do_not_call: boolean;
+}
+
 export interface CallLog {
   id: string;
   phone: string;
@@ -38,6 +49,7 @@ export interface CallLog {
   result_seen?: boolean;
   sla_state: SlaState | null;
   sla_minutes_left: number | null;
+  crm_sync_state?: CrmSyncState | null;
 }
 
 export interface TranscriptMessage {
@@ -54,6 +66,7 @@ export interface CollectedDataItem {
 }
 
 export interface CallDetail extends CallLog {
+  contact?: CallContact | null;
   transcript: TranscriptMessage[];
   manager_note: string | null;
   manager_note_at: string | null;
@@ -73,12 +86,22 @@ export interface CallsFilter {
   phone?: string;
 }
 
+export type CallsExportFilter = Omit<CallsFilter, "limit" | "offset"> & { number_id?: number };
+
+export interface CallCounts {
+  all: number;
+  success: number;
+  failed: number;
+  attention: number;
+}
+
 export interface CallsResponse {
   ok: boolean;
   calls: CallLog[];
   total: number;
   limit: number;
   offset: number;
+  counts?: CallCounts;
   sla_minutes?: number;
   crm_configured?: boolean;
 }
@@ -92,6 +115,7 @@ export interface DayStats {
   date: string;
   calls: number;
   meetings: number;
+  talk_minutes?: number;
 }
 
 export interface PeriodStats {
@@ -122,11 +146,18 @@ export type TestCallErrorCode =
   | "minutes_exhausted"
   | "plan_expired";
 
+export interface StatsFilter {
+  agent_id?: number;
+  number_id?: number;
+}
+
 export interface StatsResponse {
   ok: boolean;
   minutes_used: number;
   minutes_limit: number;
   minutes_left: number;
+  minutes_per_day: number;
+  minutes_runway_days: number | null;
   plan: string;
   plan_expires_at: string | null;
   trial: boolean;

@@ -15,6 +15,7 @@ import {
 import { useUpdateProfile } from "@/lib/hooks";
 import { AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/mutation-error";
+import { SettingsSection } from "./settings-section";
 import { buildTimezoneOptions, canonicalizeTimezone, type TimezoneOption } from "@/lib/timezones";
 
 const DEFAULT_TIMEZONE = "Europe/Kyiv";
@@ -45,15 +46,12 @@ export const Timezone = ({ initialTimezone }: TimezoneProps) => {
   };
 
   return (
-    <section className="border-border bg-background rounded-2xl border p-5">
-      <h2 className="text-base font-semibold">Таймзона</h2>
-      <p className="text-muted-foreground mt-1 text-xs">
-        Оберіть часовий пояс для коректного відображення часу в системі та звітах
-      </p>
-      <div className="mt-3 space-y-1">
-        <Label htmlFor="timezone" className="text-xs">
-          Часовий пояс
-        </Label>
+    <SettingsSection
+      title="Таймзона"
+      description="Оберіть часовий пояс для коректного відображення часу в системі та звітах"
+    >
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="timezone">Часовий пояс</Label>
         <Combobox
           items={options}
           value={selected}
@@ -78,6 +76,6 @@ export const Timezone = ({ initialTimezone }: TimezoneProps) => {
           Час у системі буде відображатися відповідно до обраного часового поясу
         </p>
       </div>
-    </section>
+    </SettingsSection>
   );
 };

@@ -11,8 +11,12 @@ const formatMinutesFeature = (plan: BillingPlan): string =>
 const formatAgentsFeature = (plan: BillingPlan, singular: string): string =>
   plan.agents === 0 ? "Необмежено ШІ-агентів" : singular;
 
+const formatPlanBalance = ({ balance_usd }: BillingPlan): Feature =>
+  balance_usd ? `Рахунок поповнюється до $${balance_usd} при кожній оплаті` : null;
+
 const buildFeatures = (plan: BillingPlan): Feature[] => {
   const numbers = formatPlanNumbers(plan);
+  const balance = formatPlanBalance(plan);
 
   switch (plan.key) {
     case "start":
@@ -20,29 +24,19 @@ const buildFeatures = (plan: BillingPlan): Feature[] => {
         formatMinutesFeature(plan),
         formatAgentsFeature(plan, `${plan.agents} ШІ-агент`),
         numbers,
+        balance,
         "Журнал дзвінків",
         "Перегляд результатів розмов",
         "Базове налаштування сценарію",
       ];
-    case "business":
-      return [
-        "Все з тарифу Start",
-        formatMinutesFeature(plan),
-        formatAgentsFeature(plan, `До ${plan.agents} ШІ-агентів`),
-        numbers,
-        "CSV-кампанії",
-        "Webhooks",
-        "Кілька сценаріїв дзвінків",
-      ];
     case "pro":
       return [
-        "Все з тарифу Business",
         formatMinutesFeature(plan),
         formatAgentsFeature(plan, `До ${plan.agents} ШІ-агентів`),
         numbers,
+        balance,
         "Усі доступні інтеграції",
         "Пріоритетна підтримка",
-        "Підключення до бізнес-процесів",
       ];
     default:
       return [

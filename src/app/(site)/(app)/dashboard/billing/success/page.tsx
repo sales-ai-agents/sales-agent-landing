@@ -14,7 +14,7 @@ const MissingInvoice = () => (
     <Card className="border-border w-full max-w-md rounded-2xl">
       <CardContent className="flex flex-col items-center gap-4 pt-8 text-center">
         <XCircle className="text-destructive h-12 w-12" aria-hidden="true" />
-        <h1 className="font-display text-2xl font-bold">Помилка</h1>
+        <h1 className="font-heading text-2xl">Помилка</h1>
         <p className="text-muted-foreground">Відсутній ідентифікатор рахунку.</p>
         <Link href="/dashboard/billing">
           <Button variant="outline" className="mt-2 gap-2">

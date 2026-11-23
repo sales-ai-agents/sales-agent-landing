@@ -1,140 +1,116 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Phone, TrendingUp, Clock, ShieldCheck } from "lucide-react";
 
-const BENEFITS = [
+import { ChartColumn, Clock, Phone, ShieldCheck, type LucideIcon } from "lucide-react";
+
+interface Benefit {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+}
+
+const BENEFITS: readonly Benefit[] = [
   {
     icon: Phone,
     title: "ШІ-агенти для дзвінків",
-    description: "Приймають, обробляють та записують дзвінки 24/7",
+    description: "Приймають, обробляють та телефонують клієнтам 24/7",
   },
   {
-    icon: TrendingUp,
+    icon: ChartColumn,
     title: "Більше продажів",
     description: "ШІ-агенти кваліфікують ліди та підвищують конверсію",
   },
   {
     icon: Clock,
     title: "Економія часу",
-    description: "Автоматизація рутини та звільнення часу для важливих завдань",
+    description: "Автоматизуйте рутинні дзвінки та звільніть час для важливих задач",
   },
   {
     icon: ShieldCheck,
     title: "Безпека даних",
     description: "Ваші дані захищені за найвищими стандартами",
   },
-] as const;
+];
+
+type AuthPanelVariant = "sign-in" | "sign-up" | "forgot-password" | "email-confirm" | "verified";
+
+interface PanelCopy {
+  heading: React.ReactNode;
+  text: string;
+}
+
+const PANEL_COPY: Record<AuthPanelVariant, PanelCopy> = {
+  "sign-in": {
+    heading: (
+      <>
+        Розумні <em>ШІ-агенти</em>
+        <br />
+        для ваших дзвінків
+      </>
+    ),
+    text: "Почніть працювати з ШІ-агентами для дзвінків та автоматизуйте рутинні процеси вже сьогодні",
+  },
+  "sign-up": {
+    heading: (
+      <>
+        Створіть акаунт
+        <br />
+        <em>за 30 секунд</em>
+      </>
+    ),
+    text: "Почніть працювати з ШІ-агентами для дзвінків та автоматизуйте рутинні процеси вже сьогодні",
+  },
+  "forgot-password": {
+    heading: "Відновлення пароля",
+    text: "Ми допоможемо вам повернути доступ. Введіть електронну пошту, і ми надішлемо код для відновлення пароля",
+  },
+  verified: {
+    heading: (
+      <>
+        Пошту
+        <br />
+        <em>підтверджено</em>
+      </>
+    ),
+    text: "Ваш акаунт готовий. Створіть першого ШІ-агента за кілька хвилин",
+  },
+  "email-confirm": {
+    heading: "Підтвердіть свою пошту",
+    text: "Ваш акаунт майже готовий. Створіть першого ШІ-агента за кілька хвилин",
+  },
+};
 
 interface AuthMarketingPanelProps {
-  variant?: "sign-in" | "sign-up" | "forgot-password" | "email-confirm";
+  variant?: AuthPanelVariant;
 }
 
 export function AuthMarketingPanel({ variant = "sign-in" }: AuthMarketingPanelProps) {
+  const { heading, text } = PANEL_COPY[variant];
   return (
-    <div className="bg-primary/5 relative flex w-full flex-col items-center justify-center overflow-hidden p-8 xl:p-12">
+    <aside className="from-card via-primary/5 to-primary/20 hidden flex-col gap-6 bg-linear-to-br p-10 lg:flex">
       <Link href="/" prefetch={false} className="flex items-center gap-3" aria-label="Calls4U">
-        <Image
-          src="/image/Logo.svg"
-          alt="Calls4u.ai logo"
-          width={48}
-          height={48}
-          className="h-12 w-12"
-        />
-        <Image
-          src="/image/calls4u.svg"
-          alt="Calls4u"
-          width={120}
-          height={32}
-          className="h-8 w-auto"
-        />
+        <Image src="/image/Logo.svg" alt="" width={34} height={34} />
+        <Image src="/image/calls4u.svg" alt="calls4u" width={90} height={21} />
       </Link>
-
-      <div className="mt-10">
-        {variant === "sign-in" && (
-          <>
-            <h1 className="font-display text-2xl xl:text-3xl">
-              Розумні <span className="text-primary">ШІ-агенти</span>
-              <br />
-              для ваших дзвінків
-            </h1>
-            <p className="text-muted-foreground mt-3 max-w-sm text-sm">
-              Почніть працювати з ШІ-агентами для дзвінків та автоматизуйте рутинні процеси вже
-              сьогодні
-            </p>
-          </>
-        )}
-
-        {variant === "sign-up" && (
-          <>
-            <h1 className="font-display text-2xl xl:text-3xl">
-              Створіть акаунт
-              <br />
-              <span className="text-primary">за 30 секунд</span>
-            </h1>
-            <p className="text-muted-foreground mt-3 max-w-sm text-sm">
-              Почніть працювати з ШІ-агентами для дзвінків та автоматизуйте рутинні процеси вже
-              сьогодні
-            </p>
-          </>
-        )}
-
-        {variant === "forgot-password" && (
-          <>
-            <h1 className="font-display text-2xl xl:text-3xl">
-              Відновлення пароля
-              <br />
-              <span className="text-primary text-xl">Ми допоможемо вам повернути доступ</span>
-            </h1>
-            <p className="text-muted-foreground mt-3 max-w-sm text-sm">
-              Введіть електронну пошту та новий пароль для вашого акаунту Calls4U
-            </p>
-          </>
-        )}
-
-        {variant === "email-confirm" && (
-          <>
-            <h1 className="font-display text-2xl xl:text-3xl">
-              Створюємо відносини
-              <br />
-              <span className="text-primary">на 30 секунд</span>
-            </h1>
-            <p className="text-muted-foreground mt-3 max-w-sm text-sm">
-              Голосові ШІ-агенти, які дзвонять, спілкуються та закривають рутину за вас.
-            </p>
-          </>
-        )}
-
-        <div className="border-border/50 bg-card mt-8 max-w-xs rounded-lg border px-5 py-9">
-          <div className="space-y-3">
-            {BENEFITS.map(({ icon: Icon, title, description }) => (
-              <div key={title} className="flex items-center gap-4">
-                <div className="bg-primary/10 flex h-12 w-12 shrink-0 items-center justify-center rounded-md">
-                  <Icon className="text-primary h-6 w-6" />
-                </div>
-                <div className="pt-1">
-                  <p className="text-sm font-normal">{title}</p>
-                  <p className="text-muted-foreground mt-0.5 text-xs">{description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-20 flex items-center gap-2">
-        <ShieldCheck className="text-primary h-4 w-4" />
-        <span className="text-muted-foreground text-sm">Безпечно та конфіденційно</span>
-      </div>
-
-      <div className="pointer-events-none absolute -bottom-40 -left-25 h-96 w-96">
-        <Image
-          src="/image/rocket.png"
-          alt="rocket"
-          fill
-          className="rotate-300 object-contain opacity-90"
-          aria-hidden="true"
-        />
-      </div>
-    </div>
+      <h2 className="font-heading [&_em]:text-primary text-4xl [&_em]:not-italic">{heading}</h2>
+      <p className="text-muted-foreground">{text}</p>
+      <ul className="flex flex-col gap-4">
+        {BENEFITS.map(({ icon: Icon, title, description }) => (
+          <li key={title} className="flex items-start gap-3">
+            <span className="bg-card text-primary grid size-10 shrink-0 place-items-center rounded-full shadow-xs">
+              <Icon className="size-5" aria-hidden="true" />
+            </span>
+            <span className="flex flex-col">
+              <b className="text-sm">{title}</b>
+              <small className="text-muted-foreground">{description}</small>
+            </span>
+          </li>
+        ))}
+      </ul>
+      <span className="text-muted-foreground mt-auto inline-flex items-center gap-2 text-sm">
+        <ShieldCheck className="size-4" aria-hidden="true" />
+        Безпечно та конфіденційно
+      </span>
+    </aside>
   );
 }

@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Check, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 import { Button, Checkbox, Input, Label } from "@/components/ui";
+import { PasswordHints } from "@/components/auth/password-hints";
 import { PasswordInput } from "@/components/auth/password-input";
 import { SocialLoginButtons } from "@/components/auth/social-login-buttons";
 import { signUpSchema, type SignUpFormData } from "@/lib/schemas";
@@ -15,15 +16,6 @@ import { LEGAL_PAGES } from "@/lib/constants";
 import { useRegister, useEmailCode } from "@/lib/hooks";
 import { ApiError } from "@/lib/api-client";
 import { resolveErrorMessage, AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
-
-const PASSWORD_REQUIREMENTS = [
-  { label: "Мінімум 8 символів", test: (value: string) => value.length >= 8 },
-  {
-    label: "Містить цифру або спецсимвол",
-    test: (value: string) => /[0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(value),
-  },
-  { label: "Містить велику літеру", test: (value: string) => /[A-ZА-ЯІЇЄҐ]/.test(value) },
-] as const;
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -93,7 +85,7 @@ export default function SignUpPage() {
           <Input
             id="name"
             placeholder="Ivan Kulchytskyi"
-            className="h-11 rounded-lg"
+
             {...register("name")}
           />
           {errors.name && (
@@ -109,7 +101,7 @@ export default function SignUpPage() {
             id="email"
             type="email"
             placeholder="Kulchytskyi@gmail.com"
-            className="h-11 rounded-lg"
+
             {...register("email")}
           />
           {errors.email && (
@@ -129,23 +121,7 @@ export default function SignUpPage() {
           )}
         </div>
 
-        <ul className="space-y-2" aria-label="Вимоги до пароля">
-          {PASSWORD_REQUIREMENTS.map(({ label, test }) => {
-            const passed = test(passwordValue);
-
-            return (
-              <li key={label} className="flex items-center gap-6 text-sm">
-                <Check
-                  className={`h-4 w-4 ${passed ? "text-success" : "text-muted-foreground/40"}`}
-                  aria-hidden="true"
-                />
-                <span className={passed ? "text-muted-foreground" : "text-muted-foreground/60"}>
-                  {label}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
+        <PasswordHints value={passwordValue} />
 
         <div className="space-y-3">
           <div className="flex flex-col gap-1.5">
@@ -221,7 +197,8 @@ export default function SignUpPage() {
 
         <Button
           type="submit"
-          className="bg-primary hover:bg-primary/90 h-11 w-full rounded-lg text-base font-semibold text-white"
+          className="w-full"
+          size="lg"
           disabled={registerMutation.isPending || emailCode.isPending}
         >
           {registerMutation.isPending || emailCode.isPending ? (

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -14,13 +15,16 @@ import {
   DialogFooter,
 } from "@/components/ui";
 import { contactSchema, type ContactFormData } from "@/lib/schemas";
+import { TagPicker } from "./tag-picker";
 
 interface AddContactDialogProps {
-  onSubmit: (data: ContactFormData) => void;
+  tagOptions: string[];
+  onSubmit: (data: ContactFormData, tags: string[]) => void;
   onClose: () => void;
 }
 
-export const AddContactDialog = ({ onSubmit, onClose }: AddContactDialogProps) => {
+export const AddContactDialog = ({ tagOptions, onSubmit, onClose }: AddContactDialogProps) => {
+  const [tags, setTags] = useState<string[]>([]);
   const {
     register,
     handleSubmit,
@@ -31,7 +35,7 @@ export const AddContactDialog = ({ onSubmit, onClose }: AddContactDialogProps) =
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
     event.stopPropagation();
-    void handleSubmit(onSubmit)(event);
+    void handleSubmit((data) => onSubmit(data, tags))(event);
   };
 
   return (
@@ -60,6 +64,10 @@ export const AddContactDialog = ({ onSubmit, onClose }: AddContactDialogProps) =
             <Label htmlFor="contact-email">Пошта</Label>
             <Input id="contact-email" placeholder="email@example.com" {...register("email")} />
             {errors.email && <p className="text-destructive text-sm">{errors.email.message}</p>}
+          </div>
+          <div className="space-y-2">
+            <Label>Теги</Label>
+            <TagPicker options={tagOptions} value={tags} onChange={setTags} />
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>

@@ -1,7 +1,5 @@
 import type { ConsentStatus } from "@dashboard/types";
 
-export { getTagColor, type TagColor } from "@/app/(site)/(app)/_lib/tag-colors";
-
 interface ConsentDisplay {
   label: string;
   color: string;

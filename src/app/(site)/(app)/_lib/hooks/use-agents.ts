@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, type Query } from "@tanstack/react-query";
 
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api-client";
 import { API_ENDPOINTS, apiUrl } from "@/lib/api-config";
@@ -18,6 +18,14 @@ interface UseAgentsOptions {
   stats?: boolean;
   days?: number;
 }
+
+const AGENT_LISTS_FILTER = {
+  queryKey: ["agents"],
+  predicate: (query: Query) =>
+    typeof query.queryKey[1] === "object" &&
+    query.queryKey[1] !== null &&
+    "stats" in query.queryKey[1],
+} as const;
 
 export const useAgents = (options?: UseAgentsOptions) => {
   const withStats = options?.stats ?? false;
@@ -66,19 +74,17 @@ export const useToggleAgentStatus = () => {
       return apiPatch<UpdateAgentResponse>(apiUrl.agent(id), { is_active });
     },
     onMutate: async ({ id, is_active }) => {
-      await queryClient.cancelQueries({ queryKey: ["agents"] });
-      const previousAgents = queryClient.getQueryData<Agent[]>(["agents"]);
+      await queryClient.cancelQueries(AGENT_LISTS_FILTER);
+      const previousLists = queryClient.getQueriesData<Agent[]>(AGENT_LISTS_FILTER);
 
-      queryClient.setQueryData<Agent[]>(["agents"], (old) =>
+      queryClient.setQueriesData<Agent[]>(AGENT_LISTS_FILTER, (old) =>
         old?.map((agent) => (agent.id === id ? { ...agent, is_active } : agent))
       );
 
-      return { previousAgents };
+      return { previousLists };
     },
     onError: (_err, _vars, context) => {
-      if (context?.previousAgents) {
-        queryClient.setQueryData(["agents"], context.previousAgents);
-      }
+      context?.previousLists.forEach(([key, data]) => queryClient.setQueryData(key, data));
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["agents"] });
@@ -94,19 +100,17 @@ export const useDeleteAgent = () => {
       return apiDelete(apiUrl.agent(id));
     },
     onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: ["agents"] });
-      const previousAgents = queryClient.getQueryData<Agent[]>(["agents"]);
+      await queryClient.cancelQueries(AGENT_LISTS_FILTER);
+      const previousLists = queryClient.getQueriesData<Agent[]>(AGENT_LISTS_FILTER);
 
-      queryClient.setQueryData<Agent[]>(["agents"], (old) =>
+      queryClient.setQueriesData<Agent[]>(AGENT_LISTS_FILTER, (old) =>
         old?.filter((agent) => String(agent.id) !== String(id))
       );
 
-      return { previousAgents };
+      return { previousLists };
     },
     onError: (_err, _vars, context) => {
-      if (context?.previousAgents) {
-        queryClient.setQueryData(["agents"], context.previousAgents);
-      }
+      context?.previousLists.forEach(([key, data]) => queryClient.setQueryData(key, data));
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["agents"] });

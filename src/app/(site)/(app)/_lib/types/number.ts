@@ -36,11 +36,14 @@ export interface NumbersResponse {
   pool_limit: number;
   pool_used: number;
   can_claim: boolean;
+  next_is_extra?: boolean;
+  extra_price_usd?: number;
 }
 
 export interface NumberPool {
   available: number;
   available_by_kind: Record<string, number>;
+  numbers_by_kind: Record<string, string[]>;
 }
 
 export interface NumberPoolResponse extends NumberPool {
@@ -49,6 +52,7 @@ export interface NumberPoolResponse extends NumberPool {
 
 export interface ClaimNumberParams {
   kind?: NumberKind;
+  phone?: string;
   agent_id?: number;
   direction?: NumberDirection;
 }

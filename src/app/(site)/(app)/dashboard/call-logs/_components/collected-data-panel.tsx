@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui";
+import { Badge, Card, CardTitle } from "@/components/ui";
 import { useAccountTimeZone } from "@/lib/hooks";
 import { cn, formatDateTime } from "@/lib/utils";
 import type { CollectedDataItem } from "@dashboard/types";
@@ -20,9 +20,9 @@ export const CollectedDataPanel = ({ items, isComplete }: CollectedDataPanelProp
   const timeZone = useAccountTimeZone();
 
   return (
-    <div className="border-border bg-background rounded-2xl border p-5">
+    <Card className="p-6">
       <div className="mb-4 flex items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold">Зібрані дані</h2>
+        <CardTitle className="text-lg">Зібрані дані</CardTitle>
         {!isComplete && <Badge variant="warning">Не всі обов&apos;язкові поля</Badge>}
       </div>
 
@@ -49,6 +49,6 @@ export const CollectedDataPanel = ({ items, isComplete }: CollectedDataPanelProp
           </div>
         ))}
       </dl>
-    </div>
+    </Card>
   );
 };

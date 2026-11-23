@@ -704,6 +704,10 @@ export interface paths {
                 query?: {
                     /** @description Довжина періоду для `period`, `previous`, `delta_pct` і `by_day`. Перемикач 7 / 30 / 90 на екрані. Значення поза межами підтягуються до найближчої. */
                     days?: number;
+                    /** @description Фільтр «Усі агенти» над оглядом: дзвінки, цілі, заощаджений час і графік — лише цього агента. Хвилини тарифу (`minutes_*`) спільні для акаунта й від фільтра не залежать. */
+                    agent_id?: number;
+                    /** @description Фільтр «Усі номери»: дзвінки на цей наш номер (вхідні) і з нього (вихідні). `id` — з `GET /app/numbers`. */
+                    number_id?: number;
                 };
                 header?: never;
                 path?: never;
@@ -725,6 +729,10 @@ export interface paths {
                             minutes_limit?: number;
                             /** @description 0 = ліміт вичерпано, дзвінки блокуються */
                             minutes_left?: number;
+                            /** @description Скільки тарифних хвилин акаунт витрачає за день — середнє за останні 7 днів (тією ж міркою, що й `minutes_used`). */
+                            minutes_per_day?: number;
+                            /** @description «Вистачить ще на ~N днів» = `minutes_left` / `minutes_per_day`. **null — за тиждень дзвінків не було**, прогнозу немає: показуй «—». */
+                            minutes_runway_days?: number | null;
                             plan?: string;
                             plan_expires_at?: string | null;
                             /** @description Тариф жодного разу не оплачувався. Хвилини є, строку немає — показуй «пробний період», а не «тариф trial». */
@@ -784,11 +792,31 @@ export interface paths {
                                 calls?: number;
                                 /** @description з них із домовленою зустріччю */
                                 meetings?: number;
+                                /** @description Хвилини розмов того дня — лінія «Заощаджений час» на графіку (год/день = talk_minutes / 60). */
+                                talk_minutes?: number;
                             }[];
                         };
                     };
                 };
+                /** @description `bad_filter` — agent_id чи number_id не число */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
                 401: components["responses"]["Unauthorized"];
+                /** @description `agent_not_found` · `number_not_found` — фільтр за чужим чи неіснуючим */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
             };
         };
         put?: never;
@@ -847,6 +875,13 @@ export interface paths {
                             total?: number;
                             limit?: number;
                             offset?: number;
+                            /** @description Цифри над табами («Потребує уваги 12») — з тими самими фільтрами дат, агента й номера, але незалежно від відкритого табу (`status`). */
+                            counts?: {
+                                all?: number;
+                                success?: number;
+                                failed?: number;
+                                attention?: number;
+                            };
                             /** @description 0 = SLA вимкнено, колонку строку не малювати */
                             sla_minutes?: number;
                             /** @description Чи підключена CRM. **false → колонку синхронізації не малювати взагалі.** Питається один раз на сторінку, а не по рядку: журнал показує сотню рядків, і сотня запитів на їх статуси була б безглуздям. */
@@ -2457,6 +2492,18 @@ export interface paths {
                             available_by_kind?: {
                                 [key: string]: number;
                             };
+                            /**
+                             * @description До 5 конкретних вільних номерів кожного типу — список «обрати номер» у модалці. Обраний шли як `phone` у `POST /app/numbers/claim`.
+                             * @example {
+                             *       "mobile": [
+                             *         "+380736405668",
+                             *         "+380736687085"
+                             *       ]
+                             *     }
+                             */
+                            numbers_by_kind?: {
+                                [key: string]: string[];
+                            };
                         };
                     };
                 };
@@ -2530,6 +2577,8 @@ export interface paths {
                          * @enum {string}
                          */
                         kind?: "city" | "mobile" | "tollfree";
+                        /** @description Конкретний номер із `numbers_by_kind`. Якщо його встигли забрати — `409 number_unavailable`, онови список. */
+                        phone?: string;
                         agent_id?: number;
                         /**
                          * @default both
@@ -7041,15 +7090,35 @@ export interface paths {
                             /** @description до скількох доповнює тариф; 0 — тріал */
                             plan_balance_usd?: number;
                             /**
+                             * @description кнопки модалки поповнення
                              * @example [
-                             *       5,
                              *       10,
-                             *       20,
+                             *       25,
                              *       50,
                              *       100
                              *     ]
                              */
                             topup_options_usd?: number[];
+                            /**
+                             * @description межі поля «Своя сума»
+                             * @example 5
+                             */
+                            topup_min_usd?: number;
+                            /** @example 1000 */
+                            topup_max_usd?: number;
+                            /**
+                             * @description «Сповістити, коли на рахунку менше» — поріг; 0 — вимкнено. Лист і Telegram ідуть каналом «Закінчення ліміту хвилин» з налаштувань сповіщень, один раз на кожен спуск нижче порогу.
+                             * @example 5
+                             */
+                            alert_below_usd?: number;
+                            /**
+                             * @example [
+                             *       2,
+                             *       5,
+                             *       10
+                             *     ]
+                             */
+                            alert_options_usd?: number[];
                             ledger?: {
                                 id?: number;
                                 /** @description + зарахування, − списання */
@@ -7057,7 +7126,11 @@ export interface paths {
                                 /** @enum {string} */
                                 kind?: "plan_refill" | "topup" | "minutes" | "number" | "admin";
                                 minutes?: number | null;
-                                /** @example 7 хв понад тариф × $0.1 */
+                                /**
+                                 * @description для `topup` — маска картки з WayForPay, якщо вона прийшла
+                                 * @example 7 хв понад тариф × $0.1
+                                 * @example картка 41****4242
+                                 */
                                 note?: string;
                                 balance_after_usd?: number;
                                 created_at?: string;
@@ -7073,7 +7146,45 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /** Поріг «Сповістити, коли на рахунку менше» */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /**
+                         * @description 0 — вимкнути
+                         * @enum {integer}
+                         */
+                        alert_below_usd: 0 | 2 | 5 | 10;
+                    };
+                };
+            };
+            responses: {
+                /** @description Той самий об'єкт, що й GET, уже з новим порогом */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description `bad_alert` (з полем `allowed`) */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+            };
+        };
         trace?: never;
     };
     "/app/billing/balance/topup": {
@@ -7099,8 +7210,8 @@ export interface paths {
             requestBody: {
                 content: {
                     "application/json": {
-                        /** @enum {integer} */
-                        amount_usd: 5 | 10 | 20 | 50 | 100;
+                        /** @description Будь-яка сума від `topup_min_usd` до `topup_max_usd` з точністю до цента: кнопки $10/25/50/100 або поле «Своя сума». Можна числом (25.5) чи рядком ("25,50"). */
+                        amount_usd: number;
                         return_url?: string;
                     };
                 };
@@ -7122,7 +7233,7 @@ export interface paths {
                         };
                     };
                 };
-                /** @description `bad_amount` (з полем `allowed`) · `invalid_json` */
+                /** @description `bad_amount` (з полями `min_usd`, `max_usd`) · `invalid_json` */
                 400: {
                     headers: {
                         [name: string]: unknown;
@@ -8911,6 +9022,17 @@ export interface components {
             ended_at?: string | null;
         };
         CallDetail: components["schemas"]["CallListItem"] & {
+            /** @description Картка «Пов'язаний контакт» і «Тип клієнта» (перший тег) на екрані дзвінка. null — цього номера немає в контактах. */
+            contact?: {
+                id?: number;
+                name?: string;
+                phone?: string;
+                email?: string;
+                note?: string;
+                tags?: string[];
+                consent?: string;
+                do_not_call?: boolean;
+            } | null;
             /** @description розмова по репліках, у порядку */
             transcript?: {
                 /** @enum {string} */
