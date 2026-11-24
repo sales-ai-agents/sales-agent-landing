@@ -13,11 +13,12 @@ import type { CallTypeId } from "@/lib/call-config/schema";
 
 interface CallTypeSelectProps {
   value: CallTypeId | null;
-  onChange: (id: CallTypeId) => void;
+  onChange: (id: CallTypeId | null) => void;
 }
 
 const SELECT_ID = "call-type-select";
 const PLACEHOLDER = "Оберіть тип дзвінка";
+const NULL_VALUE = "__none__";
 
 const renderCallTypeLabel = (value: CallTypeId | null) =>
   value ? getCallTypeDefinition(value).title : PLACEHOLDER;
@@ -25,7 +26,10 @@ const renderCallTypeLabel = (value: CallTypeId | null) =>
 export const CallTypeSelect = ({ value, onChange }: CallTypeSelectProps) => (
   <div className="space-y-1.5">
     <Label htmlFor={SELECT_ID}>Тип дзвінка</Label>
-    <Select value={value} onValueChange={(next) => next && onChange(next as CallTypeId)}>
+    <Select
+      value={value ?? NULL_VALUE}
+      onValueChange={(next) => onChange(next === NULL_VALUE ? null : (next as CallTypeId))}
+    >
       <SelectTrigger id={SELECT_ID} className="w-full sm:w-64">
         <SelectValue placeholder={PLACEHOLDER}>{renderCallTypeLabel}</SelectValue>
       </SelectTrigger>
@@ -35,6 +39,7 @@ export const CallTypeSelect = ({ value, onChange }: CallTypeSelectProps) => (
             {callType.title}
           </SelectItem>
         ))}
+        <SelectItem value={NULL_VALUE}>Інше</SelectItem>
       </SelectContent>
     </Select>
     {value && (

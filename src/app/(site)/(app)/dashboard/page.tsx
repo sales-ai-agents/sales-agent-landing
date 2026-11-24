@@ -144,7 +144,7 @@ const DashboardPage = () => {
           contentClassName="flex flex-col gap-4"
         >
           {agents.slice(0, EFFICIENCY_AGENTS_LIMIT).map((agent, index) => (
-            <AgentEfficiencyRow key={agent.id} agent={agent} index={index} />
+            <AgentEfficiencyRow key={agent.id} agent={agent} index={index} periodDays={days} />
           ))}
           {agents.length === 0 && (
             <p className="text-muted-foreground text-sm">Немає створених агентів</p>

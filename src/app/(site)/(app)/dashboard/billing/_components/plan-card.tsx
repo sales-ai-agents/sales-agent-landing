@@ -1,7 +1,7 @@
 import { Bot, ChartColumn, Check, Clock, Phone, type LucideIcon } from "lucide-react";
 import { VoiceWave } from "@/components/dashboard";
 import { Badge, Button, Card } from "@/components/ui";
-import { cn, formatNumber } from "@/lib/utils";
+import { cn, formatNumber, formatUsd } from "@/lib/utils";
 import { getPlanFeatures } from "@dashboard/billing";
 import type { BillingPlan } from "@dashboard/types";
 
@@ -82,8 +82,8 @@ export const PlanCard = ({
       </div>
       {isAnnual && plan.year && (
         <p className="text-muted-foreground text-xs">
-          ${(displayPriceUsd / MONTHS_IN_YEAR).toFixed(1)} / міс
-          {plan.year.saving_usd > 0 ? ` · економія $${plan.year.saving_usd}` : ""}
+          {formatUsd(displayPriceUsd / MONTHS_IN_YEAR)} / міс
+          {plan.year.saving_usd > 0 ? ` · економія ${formatUsd(plan.year.saving_usd)}` : ""}
         </p>
       )}
       {cycle === "year" && !plan.year && !isComingSoon && (

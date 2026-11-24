@@ -21,6 +21,7 @@ import {
   useCreateContact,
   useDeleteContact,
   useUpdateContact,
+  useDeleteContactTag,
 } from "@dashboard/hooks";
 import { CONTACT_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/mutation-error";
@@ -47,6 +48,7 @@ const ContactsPage = () => {
   const createContact = useCreateContact();
   const deleteContact = useDeleteContact();
   const updateContact = useUpdateContact();
+  const deleteTag = useDeleteContactTag();
 
   const contacts = useMemo(() => data?.contacts ?? [], [data?.contacts]);
   const serverTags = useMemo(() => data?.tags ?? [], [data?.tags]);
@@ -135,20 +137,30 @@ const ContactsPage = () => {
   );
 
   const handleCreateTag = useCallback((tag: string) => {
-    setDraftTags((current) => [...current, tag]);
-    setShowTagDialog(false);
+    setDraftTags((current) => (current.includes(tag) ? current : [...current, tag]));
   }, []);
+
+  const handleDeleteTag = useCallback(
+    (tag: string) => {
+      deleteTag.mutate(tag, {
+        onSuccess: () => {
+          toast.success(`Тег «${tag}» видалено`);
+          if (activeTag === tag) setActiveTag(null);
+        },
+        onError: (err) => handleMutationError(err),
+      });
+    },
+    [deleteTag, activeTag]
+  );
 
   if (isLoading) return <PageLoading message="Завантажуємо контакти..." />;
   if (error) return <PageError message={error.message} onRetry={refetch} />;
 
   const totalContacts = contactStats?.total_contacts ?? 0;
-  const actions = (
+  const isEmptyAccount = totalContacts === 0 && !activeTag && baseId === NO_BASE;
+
+  const emptyActions = (
     <>
-      <Button type="button" variant="outline" onClick={() => setShowExportDialog(true)}>
-        <Download aria-hidden="true" />
-        Експорт CSV
-      </Button>
       <Button type="button" variant="outline" onClick={() => setShowUploadDialog(true)}>
         <Upload aria-hidden="true" />
         Імпорт контактів
@@ -159,7 +171,16 @@ const ContactsPage = () => {
       </Button>
     </>
   );
-  const isEmptyAccount = totalContacts === 0 && !activeTag && baseId === NO_BASE;
+
+  const actions = (
+    <>
+      <Button type="button" variant="outline" onClick={() => setShowExportDialog(true)}>
+        <Download aria-hidden="true" />
+        Експорт CSV
+      </Button>
+      {emptyActions}
+    </>
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -175,7 +196,7 @@ const ContactsPage = () => {
           icon={Users}
           title="Контактів ще немає"
           description={<p>Додайте перший контакт, щоб почати</p>}
-          action={actions}
+          action={emptyActions}
         />
       ) : (
         <>
@@ -220,6 +241,7 @@ const ContactsPage = () => {
             activeTag={activeTag}
             onSelect={setActiveTag}
             onCreate={() => setShowTagDialog(true)}
+            onDelete={handleDeleteTag}
           />
 
           <Card className="overflow-hidden p-0">
@@ -248,7 +270,7 @@ const ContactsPage = () => {
       {showTagDialog && (
         <CreateTagDialog
           existingTags={tagOptions}
-          onCreate={handleCreateTag}
+          onCreated={handleCreateTag}
           onClose={() => setShowTagDialog(false)}
         />
       )}

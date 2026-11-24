@@ -104,6 +104,7 @@ const BillingPage = () => {
         onRetryStats={() => statsQuery.refetch()}
         onChangePlan={() => openPlanDialog(upgradePlanKey ?? undefined)}
         minutePriceUsd={balance?.minute_price_usd}
+        autoCharge={autoRenew.auto_charge}
       />
 
       <BillingCycleSelector

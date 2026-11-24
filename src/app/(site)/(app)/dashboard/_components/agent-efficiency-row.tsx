@@ -1,17 +1,21 @@
 import { Progress } from "@/components/ui";
 import { cn, formatNumber, pluralizeGoals } from "@/lib/utils";
 import type { Agent } from "@dashboard/types";
+
 export interface AgentEfficiencyRowProps {
   agent: Agent;
   index: number;
+  periodDays: number;
 }
-export const AgentEfficiencyRow = ({ agent, index }: AgentEfficiencyRowProps) => {
+
+export const AgentEfficiencyRow = ({ agent, index, periodDays }: AgentEfficiencyRowProps) => {
   const efficiency = agent.stats?.efficiency_pct ?? null;
   const goals = agent.stats?.meetings ?? 0;
   const subtitle =
     efficiency !== null
       ? `${formatNumber(goals)} ${pluralizeGoals(goals)} досягнуто`
-      : "Ще не дзвонив";
+      : `Немає дзвінків за ${periodDays} днів`;
+
   return (
     <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
       <span

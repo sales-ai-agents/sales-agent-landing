@@ -8,7 +8,7 @@ import {
   RadioGroup,
   RadioGroupItem,
 } from "@/components/ui";
-import { cn, pluralizeMonths } from "@/lib/utils";
+import { cn, formatUsd, pluralizeMonths } from "@/lib/utils";
 import type { BillingPeriod, BillingPlan } from "@dashboard/types";
 
 interface BillingCycleSelectorProps {
@@ -66,10 +66,10 @@ export const BillingCycleSelector = ({
             {currentPlan && (
               <>
                 <span className="font-heading text-lg tabular-nums">
-                  ${currentPlan.price_usd} / місяць
+                  {formatUsd(currentPlan.price_usd)} / місяць
                 </span>
                 <small className="text-muted-foreground">
-                  ${currentPlan.price_usd} щомісяця, без зобов&apos;язань
+                  {formatUsd(currentPlan.price_usd)} щомісяця, без зобов&apos;язань
                 </small>
               </>
             )}
@@ -91,10 +91,10 @@ export const BillingCycleSelector = ({
             {annualPlan ? (
               <>
                 <span className="font-heading text-lg tabular-nums">
-                  ${annualPlan.price_usd} / рік
+                  {formatUsd(annualPlan.price_usd)} / рік
                 </span>
                 <small className="text-muted-foreground">
-                  ${(annualPlan.price_usd / MONTHS_IN_YEAR).toFixed(1)} / місяць при річній оплаті
+                  {formatUsd(annualPlan.price_usd / MONTHS_IN_YEAR)} / місяць при річній оплаті
                 </small>
               </>
             ) : (

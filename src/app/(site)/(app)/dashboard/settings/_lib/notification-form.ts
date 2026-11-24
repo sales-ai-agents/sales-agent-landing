@@ -6,7 +6,7 @@ import type {
   UpdateNotificationItem,
 } from "@dashboard/types";
 
-export const VISIBLE_NOTIFICATION_KINDS = ["call_result", "limit_exhausted"] as const;
+export const VISIBLE_NOTIFICATION_KINDS = ["call_result", "limit_exhausted", "escalation"] as const;
 
 export type VisibleNotificationKind = (typeof VISIBLE_NOTIFICATION_KINDS)[number];
 
@@ -24,6 +24,7 @@ export const notificationFormSchema = z
   .object({
     call_result: channelsSchema,
     limit_exhausted: channelsSchema,
+    escalation: channelsSchema,
     email: z.union([
       z.literal(""),
       z.email("Введіть коректну електронну адресу").max(NOTIFICATION_EMAIL_MAX_LENGTH),
@@ -37,8 +38,13 @@ export const notificationFormSchema = z
       }),
   })
   .refine(
-    ({ telegram, call_result, limit_exhausted }) =>
-      telegram !== "" || !(call_result.telegram_enabled || limit_exhausted.telegram_enabled),
+    ({ telegram, call_result, limit_exhausted, escalation }) =>
+      telegram !== "" ||
+      !(
+        call_result.telegram_enabled ||
+        limit_exhausted.telegram_enabled ||
+        escalation.telegram_enabled
+      ),
     { path: ["telegram"], message: "Вкажіть chat ID, щоб отримувати сповіщення в Telegram" }
   );
 
@@ -65,6 +71,7 @@ export const buildNotificationFormValues = (
   return {
     call_result: channelsOf("call_result"),
     limit_exhausted: channelsOf("limit_exhausted"),
+    escalation: channelsOf("escalation"),
     email: firstFilled(settings, "email"),
     telegram: firstFilled(settings, "telegram"),
   };

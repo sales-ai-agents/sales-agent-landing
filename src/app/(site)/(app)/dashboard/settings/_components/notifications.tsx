@@ -36,6 +36,10 @@ const KIND_COPY: Record<VisibleNotificationKind, NotificationKindCopy> = {
     title: "Хвилини закінчуються",
     description: "Лист, коли витрачено 80 % хвилин, і ще один, коли вони скінчились.",
   },
+  escalation: {
+    title: "Клієнт просить менеджера",
+    description: "Агент не зміг розв'язати питання і клієнт хоче поговорити з людиною.",
+  },
 };
 
 const EMAIL_FIELD_ID = "notification-email";

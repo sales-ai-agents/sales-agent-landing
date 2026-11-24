@@ -7,6 +7,7 @@ const APEX_HOST = new URL(SITE_URL).hostname.replace(/^www\./, "");
 const DEFAULT_LOCALE_ROOT = `/${DEFAULT_LOCALE}`;
 
 const nextConfig: NextConfig = {
+  reactStrictMode: false,
   experimental: {
     globalNotFound: true,
   },

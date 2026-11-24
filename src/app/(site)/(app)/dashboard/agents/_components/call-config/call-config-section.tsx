@@ -1,16 +1,24 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
-import { DEFAULT_CALL_TYPE_ID, getCallTypeDefinition } from "@/lib/call-config/defaults";
+import { getCallTypeDefinition } from "@/lib/call-config/defaults";
 import type { CallTypeId } from "@/lib/call-config/schema";
 import {
   buildCallConfigValue,
   hasUnsavedCallConfigChanges,
-  isCallConfigBlank,
   type CallConfigValue,
 } from "@/lib/call-config/value";
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui";
 import { CallFieldsEditor } from "./call-fields-editor";
 import { CallTypeSelect } from "./call-type-select";
 import { ResetCallTypeDialog } from "./reset-call-type-dialog";
@@ -21,35 +29,48 @@ interface CallConfigSectionProps {
 }
 
 export const CallConfigSection = ({ value, onChange }: CallConfigSectionProps) => {
-  const hasInitialized = useRef(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingType, setPendingType] = useState<CallTypeId | null>(null);
   const { callType, callFields } = value;
 
-  useEffect(() => {
-    if (hasInitialized.current) return;
-    hasInitialized.current = true;
+  const applyType = (nextType: CallTypeId | null): void => {
+    if (nextType === null) {
+      onChange({ ...value, callType: null });
+    } else {
+      onChange(buildCallConfigValue(nextType));
+    }
+  };
 
-    if (isCallConfigBlank(value)) onChange(buildCallConfigValue(DEFAULT_CALL_TYPE_ID));
-  }, [value, onChange]);
-
-  const handleSelect = (nextType: CallTypeId): void => {
+  const handleSelect = (nextType: CallTypeId | null): void => {
     if (nextType === callType) return;
 
-    const previous = value;
-    onChange(buildCallConfigValue(nextType));
+    if (nextType !== null && hasUnsavedCallConfigChanges(value)) {
+      setPendingType(nextType);
+      setConfirmOpen(true);
+      return;
+    }
 
-    if (!hasUnsavedCallConfigChanges(previous)) return;
+    applyType(nextType);
+  };
 
-    toast("Тип дзвінка змінено: інструкції та поля замінено", {
-      action: { label: "Скасувати", onClick: () => onChange(previous) },
-    });
+  const handleConfirm = (): void => {
+    applyType(pendingType);
+    setPendingType(null);
+    setConfirmOpen(false);
+  };
+
+  const handleCancel = (): void => {
+    setPendingType(null);
+    setConfirmOpen(false);
   };
 
   const handleReset = (): void => {
     if (!callType) return;
-
     onChange(buildCallConfigValue(callType));
     toast.success("Повернуто стандартні інструкції та поля");
   };
+
+  const pendingTitle = pendingType ? getCallTypeDefinition(pendingType).title : "";
 
   return (
     <section className="space-y-4" aria-labelledby="call-config-title">
@@ -58,8 +79,8 @@ export const CallConfigSection = ({ value, onChange }: CallConfigSectionProps) =
           Дані, які агент збирає після дзвінка
         </h3>
         <p className="text-muted-foreground mt-1 text-sm">
-          Оберіть тип дзвінка, щоб завантажити інструкції та поля. Поля зберігаються разом з
-          агентом.
+          Оберіть тип дзвінка, щоб завантажити поля збору. «Інше» — зберігає ваші інструкції та поля
+          без шаблону.
         </p>
       </div>
 
@@ -78,6 +99,26 @@ export const CallConfigSection = ({ value, onChange }: CallConfigSectionProps) =
           />
         </div>
       )}
+
+      <Dialog open={confirmOpen} onOpenChange={(open) => !open && handleCancel()}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Замінити інструкцію шаблоном?</DialogTitle>
+            <DialogDescription>
+              Поточна інструкція та поля будуть замінені стандартними для типу «{pendingTitle}».
+              Ваші зміни буде втрачено.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCancel}>
+              Скасувати
+            </Button>
+            <Button variant="destructive" onClick={handleConfirm}>
+              Замінити
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };

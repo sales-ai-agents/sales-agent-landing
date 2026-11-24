@@ -47,6 +47,9 @@ export const StepInstructions = ({ form, isTesting, onTestCall }: StepInstructio
           setValue("instructions", next.instructions, { shouldValidate: true, shouldDirty: true });
           setValue("reportFields", next.reportFields, { shouldValidate: true, shouldDirty: true });
         }}
+        onCallTypeChange={(callType) => {
+          setValue("callType", callType, { shouldDirty: true });
+        }}
       />
 
       <CallConfigSection {...callConfig} />

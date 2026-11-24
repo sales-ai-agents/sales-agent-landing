@@ -32,6 +32,7 @@ interface PlanOverviewSectionProps {
   isStatsError: boolean;
   onRetryStats: () => void;
   minutePriceUsd?: number;
+  autoCharge: boolean;
   onChangePlan: () => void;
 }
 
@@ -43,6 +44,7 @@ interface PlanNowProps {
   daysLeft: number | null;
   expiresAt: string | null;
   planMinutes: number;
+  autoCharge: boolean;
   onChangePlan: () => void;
 }
 
@@ -52,6 +54,7 @@ const PlanNow = ({
   daysLeft,
   expiresAt,
   planMinutes,
+  autoCharge,
   onChangePlan,
 }: PlanNowProps) => (
   <div className="flex flex-col items-start gap-3">
@@ -73,7 +76,8 @@ const PlanNow = ({
       <Badge variant="success">Активний</Badge>
       {expiresAt && (
         <span className="text-muted-foreground text-sm">
-          {isTrial ? "Діє до" : "Наступне списання"} {formatDateShort(expiresAt)}
+          {isTrial || !autoCharge ? "Активний до" : "Наступне списання"}{" "}
+          {formatDateShort(expiresAt)}
         </span>
       )}
     </div>
@@ -100,6 +104,7 @@ export const PlanOverviewSection = ({
   isStatsError,
   onRetryStats,
   minutePriceUsd,
+  autoCharge,
   onChangePlan,
 }: PlanOverviewSectionProps) => {
   const usagePercent =
@@ -114,6 +119,7 @@ export const PlanOverviewSection = ({
         daysLeft={hasDaysLeft ? daysLeft : null}
         expiresAt={expiresAt}
         planMinutes={planMinutes}
+        autoCharge={autoCharge}
         onChangePlan={onChangePlan}
       />
       <div className="flex flex-col gap-3">

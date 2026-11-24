@@ -6,6 +6,8 @@ import { Label, Textarea } from "@/components/ui";
 import { INSTRUCTIONS_MAX_LENGTH, REPORT_FIELDS_MAX_LENGTH } from "@/lib/schemas";
 import { useAgentTemplates } from "@dashboard/hooks";
 import type { AgentTemplate } from "@dashboard/types";
+import type { CallTypeId } from "@/lib/call-config/schema";
+import { CALL_TYPE_IDS } from "@/lib/call-config/schema";
 import { TemplatePicker } from "./template-picker";
 
 export interface InstructionValues {
@@ -18,6 +20,7 @@ interface InstructionFieldsProps {
   instructionsError?: string;
   showTemplates: boolean;
   onChange: (values: InstructionValues) => void;
+  onCallTypeChange?: (callType: CallTypeId | null) => void;
 }
 
 const countPlaceholders = (text: string, pattern: string | undefined): number => {
@@ -34,6 +37,7 @@ export const InstructionFields = ({
   instructionsError,
   showTemplates,
   onChange,
+  onCallTypeChange,
 }: InstructionFieldsProps) => {
   const { data: templateData } = useAgentTemplates();
   const [templateId, setTemplateId] = useState<string | null>(null);
@@ -47,6 +51,10 @@ export const InstructionFields = ({
   const applyTemplate = (template: AgentTemplate): void => {
     setTemplateId(template.id);
     onChange({ instructions: template.instructions, reportFields: template.report_fields });
+    if (onCallTypeChange) {
+      const isKnownType = (CALL_TYPE_IDS as readonly string[]).includes(template.id);
+      onCallTypeChange(isKnownType ? (template.id as CallTypeId) : null);
+    }
   };
 
   return (

@@ -5,14 +5,12 @@ import { Plus } from "lucide-react";
 import { buttonVariants } from "@/components/ui";
 import { AlertsBell } from "./alerts-bell";
 import { BalancePill } from "./balance-pill";
-import { CallResultsBell } from "./call-results-bell";
 import { UserMenu } from "./user-menu";
 
 export const DashboardHeader = () => (
   <header className="flex flex-wrap items-center justify-end gap-3 px-4 py-4 md:px-8">
     <BalancePill />
     <AlertsBell />
-    <CallResultsBell />
     <Link
       id="onboarding-create-agent-btn"
       className={buttonVariants({ size: "default" })}

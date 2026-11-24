@@ -147,8 +147,8 @@ const EditAgentForm = ({ agent }: { agent: AgentDetail }) => {
                 <DialogHeader>
                   <DialogTitle>Видалити агента?</DialogTitle>
                   <DialogDescription>
-                    Цю дію неможливо скасувати. Агент та вся його історія дзвінків будуть видалені
-                    назавжди.
+                    Агента буде видалено назавжди. Дзвінки, зроблені цим агентом, залишаться в
+                    журналі.
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
