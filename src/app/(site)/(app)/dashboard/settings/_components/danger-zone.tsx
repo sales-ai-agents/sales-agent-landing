@@ -281,8 +281,8 @@ export const DangerZone = () => {
         <div className="flex items-center gap-3">
           <TriangleAlert className="text-destructive size-5 shrink-0" aria-hidden="true" />
           <p className="text-muted-foreground text-sm">
-            Ми назавжди видалимо ваш акаунт, агентів, контакти, номери, журнал дзвінків, записи
-            розмов, транскрипти та платежі. Відновити ці дані буде неможливо.
+            Ми назавжди видалимо агентів, контакти, номери, журнал дзвінків, записи розмов і
+            розшифровки. Платіжні документи зберігаються 3 роки за вимогою закону.
           </p>
         </div>
         <Button variant="destructive" className="shrink-0" onClick={() => setIsOpen(true)}>
@@ -298,8 +298,8 @@ export const DangerZone = () => {
               Видалити акаунт назавжди?
             </DialogTitle>
             <DialogDescription>
-              Записи розмов, журнал дзвінків та всі персональні дані зникнуть без можливості
-              відновлення.
+              Агенти, контакти, номери, журнал дзвінків, записи розмов і розшифровки зникнуть без
+              можливості відновлення. Платіжні документи зберігаються 3 роки за вимогою закону.
             </DialogDescription>
           </DialogHeader>
 

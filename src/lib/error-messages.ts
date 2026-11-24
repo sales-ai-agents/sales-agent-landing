@@ -42,6 +42,7 @@ export const AUTH_ERROR_MESSAGES: ErrorMessageMap = {
   invalid_language: "Ця мова недоступна.",
   invalid_timezone: "Невідомий часовий пояс.",
   invalid_sla_minutes: "Некоректний строк реакції на дзвінок.",
+  invalid_recording_retention_days: "Допустимий діапазон: 0–365 днів.",
 };
 
 export const AGENT_ERROR_MESSAGES: ErrorMessageMap = {

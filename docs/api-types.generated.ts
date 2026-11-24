@@ -379,6 +379,8 @@ export interface paths {
                         require_consent?: boolean;
                         ai_disclosure_upfront?: boolean;
                         record_notice?: boolean;
+                        /** @description скільки днів зберігати записи розмов; 0 — не зберігати */
+                        recording_retention_days?: number;
                     };
                 };
             };
@@ -395,7 +397,7 @@ export interface paths {
                         };
                     };
                 };
-                /** @description `invalid_email` · `nothing_to_update` · `invalid_json` · `invalid_sla_minutes` · `invalid_timezone` — пояс не з бази IANA · `invalid_language` — мова не з переліку */
+                /** @description `invalid_email` · `nothing_to_update` · `invalid_json` · `invalid_sla_minutes` · `invalid_timezone` — пояс не з бази IANA · `invalid_language` — мова не з переліку · `invalid_recording_retention_days` (0–365) */
                 400: {
                     headers: {
                         [name: string]: unknown;
@@ -674,6 +676,130 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/app/connections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Підключені асистенти (Claude, ChatGPT…)
+         * @description Хто має доступ до акаунта через коннектор. Для блоку «Підключені асистенти» в налаштуваннях з кнопкою «Відключити». Рядок — на клієнта OAuth: Claude реєструє нового клієнта на кожне підключення, тож два підключення Claude — два рядки. Запит із токена самого коннектора — 403.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            ok?: boolean;
+                            connections?: {
+                                /** @description для DELETE /app/connections/{id} */
+                                id?: string;
+                                /** @description Claude, ChatGPT… або «ШІ-асистент» */
+                                name?: string;
+                                /** @description коли востаннє оновлював доступ (UTC) */
+                                last_active_at?: string;
+                                /** @description до коли діє без повторного входу (UTC) */
+                                expires_at?: string;
+                            }[];
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                /** @description `connector_not_allowed` — запит із токена коннектора; керує лише людина в кабінеті */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/app/connections/{client_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Відключити асистента
+         * @description Доступ перестає діяти одразу: токени й сесія коннектора видаляються. Знову підключитись — у самому асистенті, через «Дозволити».
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    client_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Відключено */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            ok?: boolean;
+                            removed?: number;
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                /** @description `connector_not_allowed` — запит із токена коннектора */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description `not_found` — такого підключення в цього акаунта немає */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/app/account/marketing-consent": {
         parameters: {
             query?: never;
@@ -840,9 +966,9 @@ export interface paths {
                             /** @description не взяли слухавку */
                             missed_calls?: number;
                             /**
-                             * @description «Середня вартість дзвінка» з макета. Рахується як ціна хвилини за тарифом × середня тривалість дзвінка.
+                             * @description «Середня вартість дзвінка» з макета. Рахується як ціна хвилини за тарифом × середня тривалість дзвінка **за вибраний період** (`days`), як і решта плиток.
                              *
-                             *     **null означає, що рахувати нема з чого** — тариф не оплачений або дзвінків ще не було. Показуй «—», а не нуль: нуль читається як «дзвінки безкоштовні».
+                             *     **null означає, що рахувати нема з чого** — тариф не оплачений або за період дзвінків не було. Показуй «—», а не нуль: нуль читається як «дзвінки безкоштовні».
                              */
                             avg_call_usd?: number | null;
                             /**
@@ -1015,7 +1141,12 @@ export interface paths {
          *     знати кожен сценарій наперед фронту не треба: новий тип покажеться
          *     тими самими рядками.
          *
-         *     **Значок на дзвіночку** — з `unseen_important`, не з `unseen`.
+         *     **Це НЕ дзвіночок у шапці.** Дзвіночок один — `GET /app/alerts`
+         *     (стан акаунта; звіти, де треба діяти, там уже є одним пунктом
+         *     `kind: call_results` з `link: calls`). Ця стрічка — окремий список
+         *     на огляді чи сторінці дзвінків, а не друга іконка дзвіночка.
+         *
+         *     **Лічильник біля стрічки** — з `unseen_important`, не з `unseen`.
          *     Кампанія на 500 номерів дає сотні «не відповіли», і «312» на
          *     значку нічого не каже. `unseen_important` — непереглянуті, де
          *     власнику треба діяти (`action_required: true`).
@@ -9329,16 +9460,11 @@ export interface components {
             ai_disclosure_upfront?: boolean;
             /** @description Казати «Розмова записується» одразу після першого речення привітання — на вхідних і вихідних цього акаунта. Записи розмов — персональні дані, і повідомити про запис — обов'язок клієнта як їх власника; цей перемикач робить це за нього. Звучить завжди: вписано в текст привітання, а не доручено моделі. Умовчання — ні. Поруч на екрані «Налаштування», біля `ai_disclosure_upfront`. */
             record_notice?: boolean;
+            /** @description Скільки днів зберігати записи розмов (аудіо), 0–365, за замовчуванням 90 — як у Політиці конфіденційності. Старші записи стираються щодоби; 0 — не зберігати (стираються наступного дня). Розшифровки й картки лишаються, поки живий акаунт. */
+            recording_retention_days?: number;
             /** @description Дзвінки зупинені нами (скарга оператора, розбір інциденту). Кабінет працює, дані доступні, але дзвінки віддають 402 `calls_blocked`. Показуй смугу з причиною, а не мовчазну неробочу кнопку. */
             calls_blocked?: boolean;
             calls_blocked_reason?: string | null;
-            /** @description Пошту п��дтверджено. Google/Apple/GitHub — одразу true; реєстрація паролем — false до підтвердження через `POST /auth/email-code` → `POST /auth/email-confirm`. */
-            email_verified?: boolean;
-            /**
-             * @description Яким способом увійшов цей акаунт. Визначає, як підтверджувати видалення: `password` — пароль, решта — код на пошту.
-             * @enum {string}
-             */
-            sign_in?: "password" | "google" | "apple" | "github";
         };
         AuthSuccess: {
             ok?: boolean;
@@ -9389,7 +9515,7 @@ export interface components {
             sla_state?: "ok" | "breached" | "handled" | null;
             /** @description Хвилин до кінця строку. Відʼємне — прострочено на стільки: `-5` це «Прострочено 5 хв», `25` це «Залишилось 25 хв». */
             sla_minutes_left?: number | null;
-            /** @description null, поки дзвінок не завершився */
+            /** @description null, поки дзвінок не завершився; 0 — набір не вдався (лише гудки, розмови не було) */
             duration_sec?: number | null;
             /** @description Скільки секунд пішло в хвилини тарифу. Колонку «Витрачено хв» малюй з НЬОГО, а не з duration_sec: дзвінок «не з'єдналось» (оператор узяв трубку, щоб сказати «номер не обслуговується») має тривалість, але клієнту не коштує нічого — billed_sec = 0. */
             billed_sec?: number | null;

@@ -19,6 +19,7 @@ export interface Account {
   require_consent?: boolean;
   ai_disclosure_upfront?: boolean;
   record_notice?: boolean;
+  recording_retention_days?: number;
   calls_blocked?: boolean;
   calls_blocked_reason?: string | null;
 }
@@ -98,6 +99,7 @@ export interface UpdateProfileParams {
   require_consent?: boolean;
   ai_disclosure_upfront?: boolean;
   record_notice?: boolean;
+  recording_retention_days?: number;
 }
 
 export interface UpdateProfileResponse {
@@ -149,4 +151,21 @@ export interface EmailConfirmResponse {
   ok: boolean;
   verified: boolean;
   already_verified: boolean;
+}
+
+export interface Connection {
+  id: string;
+  name: string;
+  last_active_at: string;
+  expires_at: string;
+}
+
+export interface ConnectionsResponse {
+  ok: boolean;
+  connections: Connection[];
+}
+
+export interface DisconnectConnectionResponse {
+  ok: boolean;
+  removed: number;
 }

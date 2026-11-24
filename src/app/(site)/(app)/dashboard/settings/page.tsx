@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { PageError, PageHead, PageLoading } from "@/components/dashboard";
 import { Business } from "./_components/business";
 import { CallBehavior } from "./_components/call-behavior";
+import { ConnectedAssistants } from "./_components/connected-assistants";
 import { Profile } from "./_components/profile";
 import { Password } from "./_components/password";
 import { Notifications } from "./_components/notifications";
@@ -14,6 +15,7 @@ import { Team } from "./_components/team";
 import { Timezone } from "./_components/timezone";
 import { VerificationSection } from "./_components/verification";
 
+const DEFAULT_RETENTION_DAYS = 90;
 const ANCHOR_CLASS = "scroll-mt-6";
 const SECTIONS = [
   { id: "s-time", label: "Таймзона" },
@@ -21,6 +23,7 @@ const SECTIONS = [
   { id: "s-team", label: "Команда / ролі" },
   { id: "s-biz", label: "Дані бізнесу" },
   { id: "s-behave", label: "Поведінка агента" },
+  { id: "s-assistants", label: "Підключені асистенти" },
   { id: "s-me", label: "Інформація профілю" },
   { id: "s-pass", label: "Змінити пароль" },
   { id: "s-del", label: "Видалення акаунту" },
@@ -78,7 +81,13 @@ const SettingsPage = () => {
             <CallBehavior
               initialAiDisclosure={account?.ai_disclosure_upfront ?? false}
               initialRecordNotice={account?.record_notice ?? false}
+              initialRecordingRetentionDays={
+                account?.recording_retention_days ?? DEFAULT_RETENTION_DAYS
+              }
             />
+          </div>
+          <div id="s-assistants" className={ANCHOR_CLASS}>
+            <ConnectedAssistants />
           </div>
           <div id="s-me" className={ANCHOR_CLASS}>
             <Profile initialName={account?.name ?? ""} initialEmail={account?.email ?? ""} />

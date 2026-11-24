@@ -63,6 +63,7 @@ export const API_ENDPOINTS = {
   APP_TEAM: `${API_BASE}/app/team`,
   APP_NOTIFICATIONS: `${API_BASE}/app/notifications`,
   APP_AUDIT: `${API_BASE}/app/audit`,
+  APP_CONNECTIONS: `${API_BASE}/app/connections`,
 
   // Billing
   APP_BILLING_PLANS: `${API_BASE}/app/billing/plans`,
@@ -217,6 +218,7 @@ export const apiUrl = {
   apiKey: (id: number) => `${API_ENDPOINTS.APP_API_KEYS}/${id}`,
   contactTag: (tag: string) => `${API_ENDPOINTS.APP_CONTACT_TAGS}/${encodeURIComponent(tag)}`,
   teamMember: (id: number) => `${API_ENDPOINTS.APP_TEAM}/${id}`,
+  connection: (id: string) => `${API_ENDPOINTS.APP_CONNECTIONS}/${encodeURIComponent(id)}`,
   audit: (params?: { limit?: number; offset?: number }) => {
     const url = API_ENDPOINTS.APP_AUDIT;
     if (!params) return url;

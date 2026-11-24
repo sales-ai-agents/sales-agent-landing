@@ -14,6 +14,8 @@ export {
   usePasswordResetConfirm,
   useEmailCode,
   useEmailConfirm,
+  useConnections,
+  useDisconnectConnection,
 } from "./use-auth";
 
 export { useAccountTimeZone } from "./use-account-time-zone";

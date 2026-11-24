@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { apiPost, apiGet, apiPatch, apiDelete, ApiError } from "@/lib/api-client";
-import { API_ENDPOINTS } from "@/lib/api-config";
+import { API_ENDPOINTS, apiUrl } from "@/lib/api-config";
 import { trackEvent } from "@/lib/analytics";
 import { setAuthToken, clearAuthToken } from "@/lib/auth-token";
 import type {
@@ -28,6 +28,8 @@ import type {
   EmailCodeResponse,
   EmailConfirmParams,
   EmailConfirmResponse,
+  ConnectionsResponse,
+  DisconnectConnectionResponse,
 } from "@/lib/types";
 
 const AUTH_QUERY_KEY = ["auth", "me"] as const;
@@ -189,6 +191,27 @@ export const useEmailConfirm = () => {
     mutationFn: (params) => apiPost<EmailConfirmResponse>(API_ENDPOINTS.AUTH_EMAIL_CONFIRM, params),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
+    },
+  });
+};
+
+const CONNECTIONS_QUERY_KEY = ["auth", "connections"] as const;
+
+export const useConnections = () => {
+  return useQuery<ConnectionsResponse, ApiError>({
+    queryKey: CONNECTIONS_QUERY_KEY,
+    queryFn: () => apiGet<ConnectionsResponse>(API_ENDPOINTS.APP_CONNECTIONS),
+    staleTime: 30 * 1000,
+  });
+};
+
+export const useDisconnectConnection = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<DisconnectConnectionResponse, ApiError, string>({
+    mutationFn: (id) => apiDelete<DisconnectConnectionResponse>(apiUrl.connection(id)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: CONNECTIONS_QUERY_KEY });
     },
   });
 };

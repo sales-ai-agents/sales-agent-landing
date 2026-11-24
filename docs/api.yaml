@@ -354,6 +354,11 @@ paths:
                 require_consent: { type: boolean }
                 ai_disclosure_upfront: { type: boolean }
                 record_notice: { type: boolean }
+                recording_retention_days:
+                  type: integer
+                  minimum: 0
+                  maximum: 365
+                  description: "скільки днів зберігати записи розмов; 0 — не зберігати"
       responses:
         "200":
           content:
@@ -368,7 +373,8 @@ paths:
           description: >
             `invalid_email` · `nothing_to_update` · `invalid_json` ·
             `invalid_sla_minutes` · `invalid_timezone` — пояс не з бази
-            IANA · `invalid_language` — мова не з переліку
+            IANA · `invalid_language` — мова не з переліку ·
+            `invalid_recording_retention_days` (0–365)
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "409":
@@ -510,6 +516,67 @@ paths:
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
         "502":
           description: "`mail_failed` — лист не пішов"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/connections:
+    get:
+      tags: [auth]
+      summary: Підключені асистенти (Claude, ChatGPT…)
+      description: >
+        Хто має доступ до акаунта через коннектор. Для блоку «Підключені
+        асистенти» в налаштуваннях з кнопкою «Відключити». Рядок — на клієнта
+        OAuth: Claude реєструє нового клієнта на кожне підключення, тож два
+        підключення Claude — два рядки. Запит із токена самого коннектора — 403.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  connections:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string, description: "для DELETE /app/connections/{id}" }
+                        name: { type: string, description: "Claude, ChatGPT… або «ШІ-асистент»" }
+                        last_active_at:
+                          { type: string, description: "коли востаннє оновлював доступ (UTC)" }
+                        expires_at:
+                          { type: string, description: "до коли діє без повторного входу (UTC)" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: "`connector_not_allowed` — запит із токена коннектора; керує лише людина в кабінеті"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/connections/{client_id}:
+    delete:
+      tags: [auth]
+      summary: Відключити асистента
+      description: >
+        Доступ перестає діяти одразу: токени й сесія коннектора видаляються.
+        Знову підключитись — у самому асистенті, через «Дозволити».
+      parameters:
+        - { name: client_id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Відключено
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  removed: { type: integer }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: "`connector_not_allowed` — запит із токена коннектора"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "404":
+          description: "`not_found` — такого підключення в цього акаунта немає"
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
 
   /app/account/marketing-consent:
@@ -663,12 +730,13 @@ paths:
                     nullable: true
                     description: >
                       «Середня вартість дзвінка» з макета. Рахується як
-                      ціна хвилини за тарифом × середня тривалість дзвінка.
+                      ціна хвилини за тарифом × середня тривалість дзвінка
+                      **за вибраний період** (`days`), як і решта плиток.
 
 
                       **null означає, що рахувати нема з чого** — тариф не
-                      оплачений або дзвінків ще не було. Показуй «—», а не
-                      нуль: нуль читається як «дзвінки безкоштовні».
+                      оплачений або за період дзвінків не було. Показуй «—»,
+                      а не нуль: нуль читається як «дзвінки безкоштовні».
                   talk_minutes_saved:
                     type: number
                     description: >
@@ -835,7 +903,12 @@ paths:
         знати кожен сценарій наперед фронту не треба: новий тип покажеться
         тими самими рядками.
 
-        **Значок на дзвіночку** — з `unseen_important`, не з `unseen`.
+        **Це НЕ дзвіночок у шапці.** Дзвіночок один — `GET /app/alerts`
+        (стан акаунта; звіти, де треба діяти, там уже є одним пунктом
+        `kind: call_results` з `link: calls`). Ця стрічка — окремий список
+        на огляді чи сторінці дзвінків, а не друга іконка дзвіночка.
+
+        **Лічильник біля стрічки** — з `unseen_important`, не з `unseen`.
         Кампанія на 500 номерів дає сотні «не відповіли», і «312» на
         значку нічого не каже. `unseen_important` — непереглянуті, де
         власнику треба діяти (`action_required: true`).
@@ -6420,6 +6493,13 @@ components:
             Звучить завжди: вписано в текст привітання, а не доручено
             моделі. Умовчання — ні. Поруч на екрані «Налаштування», біля
             `ai_disclosure_upfront`.
+        recording_retention_days:
+          type: integer
+          description: >
+            Скільки днів зберігати записи розмов (аудіо), 0–365, за
+            замовчуванням 90 — як у Політиці конфіденційності. Старші
+            записи стираються щодоби; 0 — не зберігати (стираються наступного
+            дня). Розшифровки й картки лишаються, поки живий акаунт.
         calls_blocked:
           type: boolean
           description: >
@@ -6428,18 +6508,6 @@ components:
             `calls_blocked`. Показуй смугу з причиною, а не мовчазну
             неробочу кнопку.
         calls_blocked_reason: { type: string, nullable: true }
-        email_verified:
-          type: boolean
-          description: >
-            Пошту п��дтверджено. Google/Apple/GitHub — одразу true;
-            реєстрація паролем — false до підтвердження через
-            `POST /auth/email-code` → `POST /auth/email-confirm`.
-        sign_in:
-          type: string
-          enum: [password, google, apple, github]
-          description: >
-            Яким способом увійшов цей акаунт. Визначає, як підтверджувати
-            видалення: `password` — пароль, решта — код на пошту.
 
     AuthSuccess:
       type: object
@@ -6538,7 +6606,7 @@ components:
         duration_sec:
           type: integer
           nullable: true
-          description: null, поки дзвінок не завершився
+          description: "null, поки дзвінок не завершився; 0 — набір не вдався (лише гудки, розмови не було)"
         billed_sec:
           type: integer
           nullable: true

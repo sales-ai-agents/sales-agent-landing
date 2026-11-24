@@ -7,13 +7,19 @@ import { useUpdateProfile } from "@/lib/hooks";
 import { AUTH_ERROR_MESSAGES } from "@/lib/error-messages";
 import { handleMutationError } from "@/lib/mutation-error";
 import { SettingsSection } from "./settings-section";
+import { RecordingRetention } from "./recording-retention";
 
 interface CallBehaviorProps {
   initialAiDisclosure: boolean;
   initialRecordNotice: boolean;
+  initialRecordingRetentionDays: number;
 }
 
-export const CallBehavior = ({ initialAiDisclosure, initialRecordNotice }: CallBehaviorProps) => {
+export const CallBehavior = ({
+  initialAiDisclosure,
+  initialRecordNotice,
+  initialRecordingRetentionDays,
+}: CallBehaviorProps) => {
   const updateProfile = useUpdateProfile();
 
   const aiDisclosure = updateProfile.data?.account?.ai_disclosure_upfront ?? initialAiDisclosure;
@@ -75,6 +81,8 @@ export const CallBehavior = ({ initialAiDisclosure, initialRecordNotice }: CallB
           aria-label="Попереджати про запис розмови"
         />
       </div>
+      <Separator />
+      <RecordingRetention initialDays={initialRecordingRetentionDays} />
     </SettingsSection>
   );
 };
