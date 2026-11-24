@@ -244,7 +244,7 @@ const CodeFlow = ({ onSuccess, onClose }: { onSuccess: () => void; onClose: () =
           {fieldError && <p className="text-destructive text-sm">{fieldError}</p>}
         </div>
       </div>
-      <DialogFooter>
+      <DialogFooter className="sm:flex-col sm:items-stretch">
         <Button variant="ghost" onClick={goToRequest} disabled={deleteAccount.isPending}>
           Запросити новий код
         </Button>

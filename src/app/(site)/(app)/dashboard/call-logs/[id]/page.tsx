@@ -105,6 +105,9 @@ const CallDetailPage = () => {
           </Fact>
           <Fact label="Агент">
             <b>{agentName}</b>
+            {call.agent_revision != null && (
+              <span className="text-muted-foreground text-xs">v{call.agent_revision}</span>
+            )}
           </Fact>
           <Fact label="Результат дзвінка">
             <CallResultCell call={call} />

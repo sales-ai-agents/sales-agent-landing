@@ -1,4 +1,11 @@
-import type { LegalContacts, LegalInline, LegalList, LegalParagraph, LegalSection } from "./types";
+import type {
+  LegalContacts,
+  LegalInline,
+  LegalList,
+  LegalParagraph,
+  LegalSection,
+  LegalTable,
+} from "./types";
 
 export const paragraph = (...content: LegalInline[]): LegalParagraph => ({
   type: "paragraph",
@@ -21,6 +28,14 @@ export const section = (
   ...blocks: LegalSection["blocks"]
 ): LegalSection => ({ heading, blocks });
 
+export const table = (
+  head: readonly string[],
+  rows: readonly (readonly string[])[]
+): LegalTable => ({
+  type: "table",
+  head,
+  rows,
+});
 export const UPDATED_NOTE = "Дата останнього оновлення: у процесі публікації";
 
 export const updatedOn = (date: string): string => `Дата останнього оновлення: ${date}`;

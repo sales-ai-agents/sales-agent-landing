@@ -116,7 +116,7 @@ const AgentsPage = () => {
       { agent_id: testDialog.agentId, phone: normalizeUaPhone(testPhone) },
       {
         onSuccess: () => {
-          toast.success("Дзвінок ініційовано — очікуйте виклик");
+          toast.success("Зараз вам подзвонить +380 91 481 05 42 — візьміть, будь ласка.");
           setTestDialog(null);
           setTestPhone("");
         },

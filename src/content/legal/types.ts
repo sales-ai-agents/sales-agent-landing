@@ -21,7 +21,13 @@ export interface LegalContacts {
   readonly rows: readonly { readonly label: string; readonly value: string }[];
 }
 
-export type LegalBlock = LegalParagraph | LegalList | LegalContacts;
+export interface LegalTable {
+  readonly type: "table";
+  readonly head: readonly string[];
+  readonly rows: readonly (readonly string[])[];
+}
+
+export type LegalBlock = LegalParagraph | LegalList | LegalContacts | LegalTable;
 
 export interface LegalSection {
   readonly heading?: string;

@@ -123,7 +123,8 @@ const CreateAgentPage = () => {
         call_fields: toApiCallFields(data.callFields),
       },
       {
-        onSuccess: () => toast.success("Дзвінок ініційовано — очікуйте виклик"),
+        onSuccess: () =>
+          toast.success("Зараз вам подзвонить +380 91 481 05 42 — візьміть, будь ласка."),
         onError: (error) => handleMutationError(error, AGENT_ERROR_MESSAGES),
       }
     );

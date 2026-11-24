@@ -5,7 +5,12 @@ import { Alert, AlertDescription, buttonVariants } from "@/components/ui";
 import { CAMPAIGN_ERROR_MESSAGES, resolveErrorMessage } from "@/lib/error-messages";
 
 export type CampaignBlockCode =
-  "verification_required" | "minutes_exhausted" | "plan_expired" | "calls_blocked" | "daily_limit";
+  | "verification_required"
+  | "minutes_exhausted"
+  | "plan_expired"
+  | "calls_blocked"
+  | "email_not_verified"
+  | "daily_limit";
 
 interface BlockAction {
   href: string;
@@ -17,10 +22,16 @@ const VERIFICATION_ACTION: BlockAction = {
   label: "Підтвердити юрособу",
 };
 
+const EMAIL_ACTION: BlockAction = {
+  href: "/dashboard/settings",
+  label: "Підтвердити пошту",
+};
+
 const BILLING_ACTION: BlockAction = { href: "/dashboard/billing", label: "Тарифи і оплата" };
 
 const BLOCK_ACTIONS: Record<CampaignBlockCode, BlockAction | null> = {
   verification_required: VERIFICATION_ACTION,
+  email_not_verified: EMAIL_ACTION,
   minutes_exhausted: BILLING_ACTION,
   plan_expired: BILLING_ACTION,
   calls_blocked: null,

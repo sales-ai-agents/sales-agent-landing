@@ -6,10 +6,11 @@ interface AgentIdentityProps {
   name: string;
   id: number | string;
   isActive: boolean;
+  revision?: number;
   className?: string;
 }
 
-export const AgentIdentity = ({ name, id, isActive, className }: AgentIdentityProps) => (
+export const AgentIdentity = ({ name, id, isActive, revision, className }: AgentIdentityProps) => (
   <div className={cn("flex items-center gap-3", className)}>
     <span
       className={cn(
@@ -21,7 +22,15 @@ export const AgentIdentity = ({ name, id, isActive, className }: AgentIdentityPr
     </span>
     <div className="flex min-w-0 flex-1 flex-col">
       <h3 className="font-heading truncate text-xl">{name}</h3>
-      <span className="caption text-muted-foreground">{`agent_${id}`}</span>
+      <span className="caption text-muted-foreground">
+        {`agent_${id}`}
+        {revision !== undefined && revision > 0 && (
+          <>
+            {" "}
+            · <span title="Версія інструкції">v{revision}</span>
+          </>
+        )}
+      </span>
     </div>
     {isActive ? (
       <Badge variant="success" dot>

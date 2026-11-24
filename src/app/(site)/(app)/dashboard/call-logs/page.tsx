@@ -73,6 +73,15 @@ const CallLogsPage = () => {
     window.open(apiUrl.callsExport(exportFilters), "_blank", "noopener,noreferrer");
   }, [exportFilters]);
 
+  const handleExportSelected = useCallback(() => {
+    if (selectedIds.size === 0) return;
+    window.open(
+      apiUrl.callsExport({ ids: [...selectedIds].join(",") }),
+      "_blank",
+      "noopener,noreferrer"
+    );
+  }, [selectedIds]);
+
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
     setSelectedIds(new Set());
@@ -201,6 +210,7 @@ const CallLogsPage = () => {
             isPending={markSeen.isPending}
             onClear={() => setSelectedIds(new Set())}
             onMarkProcessed={handleMarkProcessed}
+            onExport={handleExportSelected}
           />
         )}
 

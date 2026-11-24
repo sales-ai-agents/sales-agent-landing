@@ -119,7 +119,12 @@ const EditAgentForm = ({ agent }: { agent: AgentDetail }) => {
         tone="b"
       />
       <Card className="mx-auto flex w-full max-w-4xl flex-col gap-6 p-6">
-        <AgentHeader name={agent.name} id={agent.id} isActive={agent.is_active} />
+        <AgentHeader
+          name={agent.name}
+          id={agent.id}
+          isActive={agent.is_active}
+          revision={agent.revision}
+        />
 
         <form onSubmit={form.handleSubmit(handleSave)} noValidate className="space-y-8">
           <SectionBasics form={form} voices={voices} />

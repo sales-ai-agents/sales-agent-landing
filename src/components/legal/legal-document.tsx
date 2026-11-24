@@ -59,6 +59,36 @@ const renderBlock = (block: LegalBlock, index: number) => {
           ))}
         </dl>
       );
+    case "table":
+      return (
+        <div key={index} className="overflow-x-auto">
+          <table className="text-muted-foreground w-full text-sm">
+            <thead>
+              <tr className="border-border border-b">
+                {block.head.map((cell) => (
+                  <th
+                    key={cell}
+                    className="text-foreground py-2 pr-4 text-left font-semibold last:pr-0"
+                  >
+                    {cell}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {block.rows.map((row, rowIndex) => (
+                <tr key={rowIndex} className="border-border border-b last:border-0">
+                  {row.map((cell, cellIndex) => (
+                    <td key={cellIndex} className="py-2 pr-4 align-top last:pr-0">
+                      {cell}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
     default:
       return null;
   }
