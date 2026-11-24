@@ -27,6 +27,8 @@ export {
   useCreateContact,
   useUpdateContact,
   useDeleteContact,
+  useCreateContactTag,
+  useDeleteContactTag,
 } from "./use-contacts";
 export { useContactBases } from "./use-contact-bases";
 export {
@@ -89,4 +91,5 @@ export {
   useRemoveTeamMember,
 } from "./use-team";
 export { useNotifications, useUpdateNotifications } from "./use-notifications";
+export { useAlerts, useMarkAlertsSeen } from "./use-alerts";
 export { useAuditLog } from "./use-audit";

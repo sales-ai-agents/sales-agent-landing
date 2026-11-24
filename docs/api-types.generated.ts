@@ -472,8 +472,9 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description `bad_current_password` */
-                401: {
+                401: components["responses"]["Unauthorized"];
+                /** @description `bad_current_password`. **403, а не 401:** сесія жива, неправильний лише пароль — не розлогінюй людину. */
+                403: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -515,10 +516,18 @@ export interface paths {
          *     кампанії, журнал дзвінків, платежі, вебхуки, сесії — і аудіозаписи
          *     розмов з диска.
          *
-         *     Пароль вимагається ПОВТОРНО, хоч сесія й авторизована: вкрадена
-         *     сесія чи відкритий ноутбук не мають дати стерти чужий бізнес одним
-         *     запитом. Плюс явне `confirm: "DELETE"` — щоб кнопку не можна було
-         *     натиснути випадково.
+         *     Підтвердження ПОВТОРНЕ, хоч сесія й авторизована: вкрадена сесія чи
+         *     відкритий ноутбук не мають дати стерти чужий бізнес одним запитом.
+         *     Чим саме — залежить від `sign_in` у `GET /auth/me`:
+         *     * `password` — поле `password`;
+         *     * `google` / `apple` / `github` (пароля немає) — поле `code`: спершу
+         *       `POST /app/account/delete-code`, код прийде на пошту.
+         *
+         *     Плюс явне `confirm: "DELETE"` — щоб кнопку не можна було натиснути
+         *     випадково.
+         *
+         *     **Неправильний пароль чи код — 403, а не 401.** На 401 фронт
+         *     розлогінює, а сесія жива й акаунт не видалено.
          *
          *     Після успіху сесія завершена: кукі стерта, токен недійсний. Веди
          *     людину на головну, не в кабінет.
@@ -537,7 +546,10 @@ export interface paths {
             requestBody: {
                 content: {
                     "application/json": {
-                        password: string;
+                        /** @description якщо sign_in = password */
+                        password?: string;
+                        /** @description якщо sign_in ≠ password — з листа після POST /app/account/delete-code */
+                        code?: string;
                         /** @enum {string} */
                         confirm: "DELETE";
                     };
@@ -556,7 +568,7 @@ export interface paths {
                         };
                     };
                 };
-                /** @description `confirm_required` · `invalid_json` */
+                /** @description `confirm_required` · `invalid_json` · `code_required` (код ще не запитували) · `code_expired` */
                 400: {
                     headers: {
                         [name: string]: unknown;
@@ -565,8 +577,18 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description `bad_credentials` — невірний пароль, або `unauthorized` */
-                401: {
+                401: components["responses"]["Unauthorized"];
+                /** @description `wrong_password` · `bad_code` (з `attempts_left`) — сесія жива, не розлогінюй */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description `too_many_attempts` — код згорів, запитай новий */
+                429: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -576,6 +598,77 @@ export interface paths {
                 };
             };
         };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/app/account/delete-code": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Код на пошту для видалення акаунта без пароля
+         * @description Для `sign_in` = google / apple: пароля немає, тож видалення підтверджується кодом із пошти (6 цифр, діє 15 хвилин, 5 спроб). Далі — `DELETE /app/account {code, confirm: "DELETE"}`.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Код надіслано */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            ok?: boolean;
+                            /** @description на яку пошту пішов лист */
+                            sent_to?: string;
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                /** @description `has_password` — в акаунта є пароль, видаляй із ним */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description `too_soon` — не частіше разу на хвилину (`retry_after`) */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description `mail_failed` — лист не пішов */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -739,7 +832,7 @@ export interface paths {
                             trial?: boolean;
                             /** @description Чи поставиться дзвінок просто зараз. Та сама перевірка, що відбиває `POST /app/agents/test-call` і `POST /app/campaigns` кодом 402 — тож кнопку «подзвонити» можна гасити заздалегідь, а не після відмови. */
                             can_call?: boolean;
-                            /** @description `minutes_exhausted` · `plan_expired` · null, якщо дзвонити можна */
+                            /** @description `minutes_exhausted` · `plan_expired` · `email_not_verified` (пробний акаунт, пошту не підтверджено) · null, якщо дзвонити можна */
                             blocked_reason?: string | null;
                             total_calls?: number;
                             /** @description дзвінки, де домовились про зустріч */
@@ -1248,6 +1341,8 @@ export interface paths {
                     agent_id?: number;
                     phone?: string;
                     status?: "success" | "failed" | "attention";
+                    /** @description «Експортувати вибрані»: id дзвінків через кому (до 1000). Разом із ним фільтри теж діють — шли або ids, або фільтри. */
+                    ids?: string;
                 };
                 header?: never;
                 path?: never;
@@ -2426,6 +2521,15 @@ export interface paths {
                     };
                 };
                 401: components["responses"]["Unauthorized"];
+                /** @description лише для `assigned`: `email_not_verified` — пробний акаунт без підтвердженої пошти. Не про гроші: веди на підтвердження (`POST /auth/email-code` → `/auth/email-confirm`), а не на тарифи. */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
                 /** @description `agent_not_found` */
                 404: {
                     headers: {
@@ -2619,6 +2723,15 @@ export interface paths {
                     };
                 };
                 401: components["responses"]["Unauthorized"];
+                /** @description `email_not_verified` — пробний акаунт без підтвердженої пошти. Не про гроші: веди на підтвердження (`POST /auth/email-code` → `/auth/email-confirm`), а не на тарифи. */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
                 /** @description `agent_not_found` */
                 404: {
                     headers: {
@@ -3154,6 +3267,254 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/app/contact-tags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Створити тег без контактів
+         * @description «Створити тег» з макета. Тег одразу є в `tags` у `GET /app/contacts` (з `count: 0`) і в будь-якій випадайці тегів. Повтор того самого — не помилка (`created: false`). Поставити тег контакту — як і раніше, полем `tags` контакту.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @description без коми — вона роздільник тегів у контакті */
+                        name: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            ok?: boolean;
+                            tag?: string;
+                            /** @description false — такий тег уже був */
+                            created?: boolean;
+                        };
+                    };
+                };
+                /** @description `bad_tag` (порожній, довший за 40 чи з комою) · `invalid_json` */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/app/contact-tags/{tag}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Прибрати тег, створений без контактів
+         * @description Контактів не чіпає: тег, що вже стоїть на контактах, і далі видно в `tags` — його знімають із самих контактів. Ім'я тегу — в URL (encodeURIComponent).
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    tag: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                401: components["responses"]["Unauthorized"];
+                /** @description `not_found` — такого тегу без контактів немає */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/app/alerts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Дзвіночок у шапці — що потребує уваги
+         * @description Не журнал подій, а зріз поточного стану: сповіщення зникає саме, щойно
+         *     зникла причина. Порядок: спершу `bad`, потім `warn`, `info`; усередині —
+         *     новіші вище.
+         *
+         *     `kind`:
+         *     * `calls_blocked` — дзвінки акаунта зупинив адміністратор;
+         *     * `email_not_verified` — пробний акаунт без підтвердженої пошти: агенти
+         *       не дзвонять, номер узяти не можна (`link: profile`);
+         *     * `sla` — дзвінки чекають на реакцію довше за SLA (`sla_minutes` акаунта);
+         *     * `call_results` — звіти після дзвінків, де власнику треба щось зробити;
+         *     * `crm_failed` — дзвінки, що не дійшли в CRM за тиждень;
+         *     * `trial_ending` — пробний період закінчується (≤ 3 дні) або закінчився;
+         *     * `minutes` — використано 80% хвилин або хвилини скінчились;
+         *     * `balance_low` — рахунок опустився нижче порогу `alert_below_usd`;
+         *     * `numbers_suspended` — номер понад тариф зупинено: не вистачило балансу.
+         *
+         *     `link` — куди вести по кліку: `calls`, `calls?status=attention`,
+         *     `integrations`, `billing`, `balance`, `profile`.
+         *
+         *     Бейдж на дзвіночку — `unread`. Нова подія того самого типу (ще один
+         *     прострочений дзвінок, нова помилка CRM) знову приходить непрочитаною.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            ok?: boolean;
+                            unread?: number;
+                            items?: {
+                                /** @description стабільний ключ — для POST /app/alerts/seen */
+                                key?: string;
+                                /** @enum {string} */
+                                kind?: "calls_blocked" | "email_not_verified" | "sla" | "call_results" | "crm_failed" | "trial_ending" | "minutes" | "balance_low" | "numbers_suspended";
+                                /**
+                                 * @description колір крапки
+                                 * @enum {string}
+                                 */
+                                level?: "bad" | "warn" | "info";
+                                title?: string;
+                                text?: string;
+                                /** @description коли сталось (UTC), якщо відомо — для «2 хв тому» */
+                                at?: string | null;
+                                link?: string;
+                                unread?: boolean;
+                            }[];
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/app/alerts/seen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Позначити сповіщення прочитаними
+         * @description Без тіла — усі, що зараз у списку («Позначити всі як прочитані»); `{keys}` — лише ці.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        keys?: string[];
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            ok?: boolean;
+                            marked?: number;
+                        };
+                    };
+                };
+                /** @description `invalid_json` */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/app/contact-bases": {
         parameters: {
             query?: never;
@@ -3603,6 +3964,9 @@ export interface paths {
          *     ендпоїнт стає безкоштовним спамером із нашого домену.
          *
          *     Стан підтвердження видно в `GET /auth/me` полем `email_verified`.
+         *     Вхід через Google/Apple — пошта вже підтверджена провайдером
+         *     (`email_verified: true` одразу). Як людина входить — поле `sign_in`
+         *     (`password` | `google` | `apple` | `github`).
          */
         post: {
             parameters: {
@@ -5410,7 +5774,7 @@ export interface paths {
                         };
                     };
                 };
-                /** @description `name_required` · `invalid_json` · `invalid_call_direction` · `contact_base_required` (лише якщо передано id неіснуючої бази) · `invalid_contact_ids` · `invalid_schedule` · `invalid_working_days` · `invalid_calls_per_day` · `number_not_connected` · `invalid_call_type` · `invalid_call_fields` (поганий елемент, тип, порожня чи задовга назва, повтор id, не масив) · `too_many_call_fields` (більше 15) · `instructions_unfilled` — в інструкції лишились поля в [дужках]; `fields` — які саме, у порядку появи (з повторами), щоб підсвітити їх у тексті. */
+                /** @description `name_required` · `invalid_json` · `invalid_call_direction` · `unknown_voice` (у відповіді `voices` — дозволені ключі) · `contact_base_required` (лише якщо передано id неіснуючої бази) · `invalid_contact_ids` · `invalid_schedule` · `invalid_working_days` · `invalid_calls_per_day` · `number_not_connected` · `invalid_call_type` · `invalid_call_fields` (поганий елемент, тип, порожня чи задовга назва, повтор id, не масив) · `too_many_call_fields` (більше 15) · `instructions_unfilled` — в інструкції лишились поля в [дужках]; `fields` — які саме, у порядку появи (з повторами), щоб підсвітити їх у тексті. */
                 400: {
                     headers: {
                         [name: string]: unknown;
@@ -5619,7 +5983,7 @@ export interface paths {
                         };
                     };
                 };
-                /** @description `invalid_json` · `invalid_starts_at` · `invalid_minutes` */
+                /** @description `invalid_json` · `invalid_starts_at` · `invalid_minutes` · `starts_at_in_past` (день раніше за сьогодні за Києвом) */
                 400: {
                     headers: {
                         [name: string]: unknown;
@@ -5878,6 +6242,8 @@ export interface paths {
                  * @description `do_not_call` — цей номер просив більше не дзвонити.
                  *
                  *     Не пропонуй «спробувати ще раз»: зняти це можна лише свідомо, через картку контакту.
+                 *
+                 *     `email_not_verified` — пробний акаунт без підтвердженої пошти. Не про гроші: веди на підтвердження (`POST /auth/email-code` → `/auth/email-confirm`), а не на тарифи.
                  */
                 403: {
                     headers: {
@@ -7655,7 +8021,7 @@ export interface paths {
                         };
                     };
                 };
-                /** @description `name_required` · `nothing_to_update` · `invalid_json` · `invalid_call_direction` · `contact_base_required` (id неіснуючої бази) · `invalid_contact_ids` · `invalid_schedule` · `invalid_working_days` · `invalid_calls_per_day` · `number_not_connected` · `invalid_call_type` · `invalid_call_fields` · `too_many_call_fields` · `instructions_unfilled` (з `fields`) */
+                /** @description `name_required` · `nothing_to_update` · `invalid_json` · `unknown_voice` (лише якщо голос змінено) · `invalid_call_direction` · `contact_base_required` (id неіснуючої бази) · `invalid_contact_ids` · `invalid_schedule` · `invalid_working_days` · `invalid_calls_per_day` · `number_not_connected` · `invalid_call_type` · `invalid_call_fields` · `too_many_call_fields` · `instructions_unfilled` (з `fields`) */
                 400: {
                     headers: {
                         [name: string]: unknown;
@@ -7985,7 +8351,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description `verification_required` — юрособу не підтверджено, обдзвін закритий (поле `level` каже, на якому кроці акаунт). Не показуй це як поломку: вхідні дзвінки й тестові працюють, веди на форму верифікації. */
+                /** @description `verification_required` — юрособу не підтверджено, обдзвін закритий (поле `level` каже, на якому кроці акаунт). Не показуй це як поломку: вхідні дзвінки й тестові працюють, веди на форму верифікації · `email_not_verified` — пробний акаунт без підтвердженої пошти. Не про гроші: веди на підтвердження (`POST /auth/email-code` → `/auth/email-confirm`), а не на тарифи. */
                 403: {
                     headers: {
                         [name: string]: unknown;
@@ -8070,7 +8436,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description `verification_required` — рівень зняли, поки обдзвін стояв на паузі. Ввімкнути назад можна лише після нового підтвердження. */
+                /** @description `verification_required` — рівень зняли, поки обдзвін стояв на паузі. Ввімкнути назад можна лише після нового підтвердження · `email_not_verified` — пробний акаунт без підтвердженої пошти. Не про гроші: веди на підтвердження (`POST /auth/email-code` → `/auth/email-confirm`), а не на тарифи. */
                 403: {
                     headers: {
                         [name: string]: unknown;
@@ -8966,6 +9332,13 @@ export interface components {
             /** @description Дзвінки зупинені нами (скарга оператора, розбір інциденту). Кабінет працює, дані доступні, але дзвінки віддають 402 `calls_blocked`. Показуй смугу з причиною, а не мовчазну неробочу кнопку. */
             calls_blocked?: boolean;
             calls_blocked_reason?: string | null;
+            /** @description Пошту п��дтверджено. Google/Apple/GitHub — одразу true; реєстрація паролем — false до підтвердження через `POST /auth/email-code` → `POST /auth/email-confirm`. */
+            email_verified?: boolean;
+            /**
+             * @description Яким способом увійшов цей акаунт. Визначає, як підтверджувати видалення: `password` — пароль, решта — код на пошту.
+             * @enum {string}
+             */
+            sign_in?: "password" | "google" | "apple" | "github";
         };
         AuthSuccess: {
             ok?: boolean;
@@ -8978,6 +9351,8 @@ export interface components {
         };
         CallListItem: {
             id?: string;
+            /** @description «Версія скрипту» на екрані дзвінка: з якою редакцією інструкції агента йшов дзвінок (показуй як v{n}). null — дзвінок до 19.11.2026 або без агента. */
+            agent_revision?: number | null;
             phone?: string;
             company_name?: string;
             niche?: string;
@@ -9079,6 +9454,8 @@ export interface components {
         };
         Agent: {
             id?: number;
+            /** @description поточна редакція інструкції: +1 щоразу, коли інструкцію справді змінили */
+            revision?: number;
             account_id?: number;
             name?: string;
             voice?: string;
@@ -9103,7 +9480,7 @@ export interface components {
              * @description Чому не можна — для підказки на сірій кнопці. `no_instructions` — «Додайте інструкції агенту»; `minutes_exhausted` / `plan_expired` — ті самі стани, що `blocked_reason` у `/app/stats`. `null`, коли `can_test: true`.
              * @enum {string|null}
              */
-            can_test_reason?: "no_instructions" | "minutes_exhausted" | "plan_expired" | "calls_blocked" | null;
+            can_test_reason?: "no_instructions" | "minutes_exhausted" | "plan_expired" | "calls_blocked" | "email_not_verified" | null;
             /** @description "HH:MM"; порожньо = загальні години */
             schedule_start?: string;
             schedule_end?: string;

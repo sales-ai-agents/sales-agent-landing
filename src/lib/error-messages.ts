@@ -5,6 +5,9 @@ export type ApiErrorCode =
   | "email_taken"
   | "too_many_requests"
   | "too_soon"
+  | "wrong_password"
+  | "bad_current_password"
+  | "code_required"
   | "network_error"
   | "session_expired"
   | "unknown";
@@ -17,12 +20,13 @@ export const AUTH_ERROR_MESSAGES: ErrorMessageMap = {
   weak_password: "Пароль має містити мінімум 8 символів.",
   email_taken: "Цей email вже зареєстрований.",
   too_many_requests: "Забагато спроб. Спробуйте через пару хв",
+  wrong_password: "Невірний пароль.",
   bad_current_password: "Невірний поточний пароль.",
   no_password_login: "Цей акаунт використовує вхід через Google/Apple. Пароля немає.",
   nothing_to_update: "Нічого не змінено.",
   unknown_kind: "Невідомий тип сповіщення.",
   invalid_token: "Токен авторизації недійсний. Спробуйте ще раз.",
-  email_not_verified: "Email не підтверджений у провайдера.",
+  email_not_verified: "Підтвердіть пошту, щоб продовжити.",
   unknown_provider: "Невідомий спосіб входу.",
   provider_not_configured: "Цей спосіб входу тимчасово недоступний.",
   confirm_required: "Введіть DELETE для підтвердження.",
@@ -30,6 +34,7 @@ export const AUTH_ERROR_MESSAGES: ErrorMessageMap = {
   invalid_code: "Невірний або застарілий код.",
   bad_code: "Невірний код.",
   code_expired: "Код застарів. Запросіть новий.",
+  code_required: "Спершу запросіть код підтвердження.",
   no_code: "Код не знайдено. Запросіть новий лист.",
   too_many_attempts: "Занадто багато спроб — код заблоковано. Запросіть новий.",
   too_soon: "Зачекайте хвилину перед повторним надсиланням.",
@@ -52,11 +57,13 @@ export const AGENT_ERROR_MESSAGES: ErrorMessageMap = {
   invalid_call_fields: "Перевірте поля для збору даних: назва кожного поля обов'язкова.",
   too_many_call_fields: "Забагато полів. Можна додати щонайбільше 15.",
   instructions_unfilled: "В інструкціях лишились незаповнені місця в [дужках]. Заповніть їх.",
+  unknown_voice: "Оберіть голос зі списку доступних.",
   agent_not_found: "Агента не знайдено.",
   agent_has_no_instructions: "Додайте інструкції, щоб агент міг дзвонити.",
   invalid_phone: "Введіть коректний номер телефону.",
   do_not_call: "Цей номер є у списку «Не дзвонити» — зніміть позначку на картці контакту.",
   calls_blocked: "Дзвінки зупинені. Зверніться до підтримки.",
+  email_not_verified: "Підтвердіть пошту, щоб зробити тестовий дзвінок.",
   number_not_yours: "Вказаний номер не належить вашому акаунту.",
   call_failed: "Не вдалося з'єднати дзвінок. Спробуйте ще раз.",
   minutes_exhausted: "Хвилини вичерпано — поповніть тариф.",
@@ -74,6 +81,7 @@ export const CAMPAIGN_ERROR_MESSAGES: ErrorMessageMap = {
   minutes_exhausted: "Хвилини вичерпано. Поповніть тариф, щоб запустити обдзвін.",
   plan_expired: "Строк тарифу вийшов. Продовжіть підписку, щоб запустити обдзвін.",
   calls_blocked: "Дзвінки зупинені. Зверніться до підтримки.",
+  email_not_verified: "Підтвердіть пошту, щоб запустити обдзвін.",
   daily_limit: "Добовий ліміт вихідних дзвінків вичерпано. Спробуйте завтра.",
   verification_required:
     "Обдзвін відкривається після підтвердження юрособи. Вхідні та тестові дзвінки працюють.",
@@ -191,10 +199,6 @@ export const CONTACTS_IMPORT_ERROR_MESSAGES: ErrorMessageMap = {
   no_valid_phones: "У файлі не знайдено жодного коректного номера телефону.",
   consent_source_required: "Вкажіть, звідки згода на дзвінки.",
   invalid_json: "Некоректні дані запиту.",
-};
-
-export const CONTACTS_EXPORT_ERROR_MESSAGES: ErrorMessageMap = {
-  export_failed: "Не вдалося сформувати експорт. Спробуйте ще раз.",
 };
 
 export const resolveErrorMessage = (code: string, domainMap?: ErrorMessageMap): string => {

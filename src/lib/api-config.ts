@@ -16,10 +16,13 @@ export const API_ENDPOINTS = {
 
   // Account
   APP_ACCOUNT: `${API_BASE}/app/account`,
+  APP_ACCOUNT_DELETE_CODE: `${API_BASE}/app/account/delete-code`,
   APP_ACCOUNT_MARKETING_CONSENT: `${API_BASE}/app/account/marketing-consent`,
 
   // App (authenticated)
   APP_STATS: `${API_BASE}/app/stats`,
+  APP_ALERTS: `${API_BASE}/app/alerts`,
+  APP_ALERTS_SEEN: `${API_BASE}/app/alerts/seen`,
   APP_CALLS: `${API_BASE}/app/calls`,
   APP_CALL_RESULTS: `${API_BASE}/app/call-results`,
   APP_CALL_RESULTS_SEEN: `${API_BASE}/app/call-results/seen`,
@@ -40,6 +43,7 @@ export const API_ENDPOINTS = {
   APP_CONTACTS_UPLOAD: `${API_BASE}/app/contacts/upload`,
   APP_CONTACTS_UPLOAD_PREVIEW: `${API_BASE}/app/contacts/upload/preview`,
   APP_CONTACTS_EXPORT: `${API_BASE}/app/contacts/export`,
+  APP_CONTACT_TAGS: `${API_BASE}/app/contact-tags`,
   APP_TEST_CALL: `${API_BASE}/app/agents/test-call`,
 
   // Integrations
@@ -169,6 +173,7 @@ export const apiUrl = {
     agent_id?: number;
     number_id?: number;
     phone?: string;
+    ids?: string;
   }) => {
     const url = API_ENDPOINTS.APP_CALLS_EXPORT;
     if (!params) return url;
@@ -179,6 +184,7 @@ export const apiUrl = {
     if (params.agent_id !== undefined) sp.set("agent_id", String(params.agent_id));
     if (params.number_id !== undefined) sp.set("number_id", String(params.number_id));
     if (params.phone) sp.set("phone", params.phone);
+    if (params.ids) sp.set("ids", params.ids);
     const qs = sp.toString();
     return qs ? `${url}?${qs}` : url;
   },
@@ -209,6 +215,7 @@ export const apiUrl = {
     return qs ? `${url}?${qs}` : url;
   },
   apiKey: (id: number) => `${API_ENDPOINTS.APP_API_KEYS}/${id}`,
+  contactTag: (tag: string) => `${API_ENDPOINTS.APP_CONTACT_TAGS}/${encodeURIComponent(tag)}`,
   teamMember: (id: number) => `${API_ENDPOINTS.APP_TEAM}/${id}`,
   audit: (params?: { limit?: number; offset?: number }) => {
     const url = API_ENDPOINTS.APP_AUDIT;

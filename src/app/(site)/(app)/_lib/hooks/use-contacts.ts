@@ -10,6 +10,8 @@ import type {
   ContactTagCount,
   CreateContactParams,
   CreateContactResponse,
+  CreateContactTagParams,
+  CreateContactTagResponse,
   UpdateContactParams,
 } from "@dashboard/types";
 
@@ -99,6 +101,32 @@ export const useDeleteContact = () => {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
       queryClient.invalidateQueries({ queryKey: ["contact-bases"] });
+    },
+  });
+};
+
+export const useCreateContactTag = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: CreateContactTagParams): Promise<CreateContactTagResponse> => {
+      return apiPost<CreateContactTagResponse>(API_ENDPOINTS.APP_CONTACT_TAGS, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["contacts"] });
+    },
+  });
+};
+
+export const useDeleteContactTag = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (tag: string) => {
+      return apiDelete(apiUrl.contactTag(tag));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["contacts"] });
     },
   });
 };

@@ -32,6 +32,7 @@ export interface CallContact {
 
 export interface CallLog {
   id: string;
+  agent_revision: number | null;
   phone: string;
   company_name: string;
   niche: string;
@@ -86,7 +87,10 @@ export interface CallsFilter {
   phone?: string;
 }
 
-export type CallsExportFilter = Omit<CallsFilter, "limit" | "offset"> & { number_id?: number };
+export type CallsExportFilter = Omit<CallsFilter, "limit" | "offset"> & {
+  number_id?: number;
+  ids?: string;
+};
 
 export interface CallCounts {
   all: number;
@@ -132,7 +136,7 @@ export interface DeltaPct {
   talk_minutes_saved: number | null;
 }
 
-export type CallBlockedReason = "minutes_exhausted" | "plan_expired";
+export type CallBlockedReason = "minutes_exhausted" | "plan_expired" | "email_not_verified";
 
 export type TestCallErrorCode =
   | "do_not_call"
@@ -144,7 +148,8 @@ export type TestCallErrorCode =
   | "agent_has_no_instructions"
   | "agent_not_found"
   | "minutes_exhausted"
-  | "plan_expired";
+  | "plan_expired"
+  | "email_not_verified";
 
 export interface StatsFilter {
   agent_id?: number;

@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://api.calls4u.ai";
+const PROXY_SECRET = process.env.CALLS4U_PROXY_SECRET;
 const SKIP_REQUEST_HEADERS = new Set([
   "host",
   "connection",
@@ -11,6 +12,14 @@ const SKIP_REQUEST_HEADERS = new Set([
 ]);
 const SKIP_RESPONSE_HEADERS = new Set(["connection", "keep-alive", "transfer-encoding"]);
 const METHODS_WITHOUT_BODY = new Set(["GET", "HEAD"]);
+
+function getClientIp(req: NextRequest): string {
+  return (
+    req.headers.get("x-real-ip") ??
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    "unknown"
+  );
+}
 
 async function handler(req: NextRequest) {
   const url = new URL(
@@ -25,6 +34,11 @@ async function handler(req: NextRequest) {
 
   const session = (await cookies()).get("cs_session");
   if (session) headers.set("cookie", `cs_session=${session.value}`);
+
+  if (PROXY_SECRET) {
+    headers.set("X-Calls4U-Proxy", PROXY_SECRET);
+    headers.set("X-Calls4U-Client-IP", getClientIp(req));
+  }
 
   const body = METHODS_WITHOUT_BODY.has(req.method) ? undefined : await req.arrayBuffer();
   const hasBody = body !== undefined && body.byteLength > 0;

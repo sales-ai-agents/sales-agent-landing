@@ -19,7 +19,7 @@ import {
 } from "@/lib/schemas";
 import { useCreateAgent, useTestCall, useVoices, useNumbers } from "@dashboard/hooks";
 import { toApiCallFields } from "@/lib/call-config/schema";
-import { handleMutationError } from "@/lib/mutation-error";
+import { handleMutationError, handleMutationErrorWithForm } from "@/lib/mutation-error";
 import { AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
 import { StepIndicator } from "./_components/step-indicator";
 import { StepBasics } from "./_components/step-basics";
@@ -82,9 +82,9 @@ const CreateAgentPage = () => {
         toast.success("Агента створено");
         router.push("/dashboard/agents");
       },
-      onError: (error) => handleMutationError(error, AGENT_ERROR_MESSAGES),
+      onError: (error) => handleMutationErrorWithForm(error, form.setError, AGENT_ERROR_MESSAGES),
     });
-  }, [getValues, createAgent, router]);
+  }, [getValues, createAgent, form.setError, router]);
 
   const handleSubmit = useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {

@@ -30,7 +30,7 @@ import {
   DEFAULT_NUMBER_ID,
 } from "@/lib/schemas";
 import { useAgent, useUpdateAgent, useDeleteAgent, useVoices, useNumbers } from "@dashboard/hooks";
-import { handleMutationError } from "@/lib/mutation-error";
+import { handleMutationError, handleMutationErrorWithForm } from "@/lib/mutation-error";
 import { AGENT_ERROR_MESSAGES } from "@/lib/error-messages";
 import type { AgentDetail } from "@dashboard/types";
 import AgentNotFound from "@/app/(site)/(app)/dashboard/agents/[id]/not-found";
@@ -92,11 +92,12 @@ const EditAgentForm = ({ agent }: { agent: AgentDetail }) => {
             toast.success("Зміни збережено");
             router.push("/dashboard/agents");
           },
-          onError: (error) => handleMutationError(error, AGENT_ERROR_MESSAGES),
+          onError: (error) =>
+            handleMutationErrorWithForm(error, form.setError, AGENT_ERROR_MESSAGES),
         }
       );
     },
-    [updateAgent, agent.id, router]
+    [updateAgent, agent.id, form.setError, router]
   );
 
   const handleDelete = useCallback(() => {

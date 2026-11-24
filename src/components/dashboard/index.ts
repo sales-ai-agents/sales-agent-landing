@@ -1,4 +1,5 @@
 export { AddContactDialog } from "./add-contact-dialog";
+export { AlertsBell } from "./alerts-bell";
 export { AudioPlayer } from "./audio-player";
 export { CallsChart, CHART_SERIES } from "./calls-chart";
 export type { ChartSeries, ChartSeriesVisibility } from "./calls-chart";

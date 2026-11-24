@@ -22,6 +22,7 @@ export const EN_CLIENT: ClientCopy = {
       instruction_expand_failed: "Could not generate the script. Please try again.",
       dispatch_failed: "The calling service is temporarily unavailable. Please try again later.",
       livekit_not_configured: "The voice service is temporarily unavailable.",
+      ua_numbers_only: "Demo calls are only available to +380 numbers (Ukraine).",
     },
   },
   validation: {
@@ -82,7 +83,7 @@ export const EN_CLIENT: ClientCopy = {
       },
     ],
   },
-  testCallSuccess: "✓ Done! The agent will call you within 20 seconds.",
+  testCallSuccess: "You'll receive a call from +380 91 481 05 42 shortly — please answer.",
   testCallInvalid: "Enter the 9 digits of your number after +380.",
   finalForm: {
     submit: "Start the call",

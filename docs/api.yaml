@@ -408,8 +408,11 @@ paths:
         "400":
           description: "`weak_password` (з полем `detail`) · `invalid_json`"
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
-        "401":
-          description: "`bad_current_password`"
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: >
+            `bad_current_password`. **403, а не 401:** сесія жива, неправильний
+            лише пароль — не розлогінюй людину.
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
         "409":
           description: "`no_password_login` — акаунт через Google/Apple, пароля немає"
@@ -425,10 +428,18 @@ paths:
         кампанії, журнал дзвінків, платежі, вебхуки, сесії — і аудіозаписи
         розмов з диска.
 
-        Пароль вимагається ПОВТОРНО, хоч сесія й авторизована: вкрадена
-        сесія чи відкритий ноутбук не мають дати стерти чужий бізнес одним
-        запитом. Плюс явне `confirm: "DELETE"` — щоб кнопку не можна було
-        натиснути випадково.
+        Підтвердження ПОВТОРНЕ, хоч сесія й авторизована: вкрадена сесія чи
+        відкритий ноутбук не мають дати стерти чужий бізнес одним запитом.
+        Чим саме — залежить від `sign_in` у `GET /auth/me`:
+        * `password` — поле `password`;
+        * `google` / `apple` / `github` (пароля немає) — поле `code`: спершу
+          `POST /app/account/delete-code`, код прийде на пошту.
+
+        Плюс явне `confirm: "DELETE"` — щоб кнопку не можна було натиснути
+        випадково.
+
+        **Неправильний пароль чи код — 403, а не 401.** На 401 фронт
+        розлогінює, а сесія жива й акаунт не видалено.
 
         Після успіху сесія завершена: кукі стерта, токен недійсний. Веди
         людину на головну, не в кабінет.
@@ -442,9 +453,10 @@ paths:
           application/json:
             schema:
               type: object
-              required: [password, confirm]
+              required: [confirm]
               properties:
-                password: { type: string }
+                password: { type: string, description: "якщо sign_in = password" }
+                code: { type: string, description: "якщо sign_in ≠ password — з листа після POST /app/account/delete-code" }
                 confirm: { type: string, enum: [DELETE] }
       responses:
         "200":
@@ -457,10 +469,43 @@ paths:
                   deleted: { type: boolean }
           description: Видалено. Сесія завершена.
         "400":
-          description: "`confirm_required` · `invalid_json`"
+          description: "`confirm_required` · `invalid_json` · `code_required` (код ще не запитували) · `code_expired`"
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
-        "401":
-          description: "`bad_credentials` — невірний пароль, або `unauthorized`"
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: "`wrong_password` · `bad_code` (з `attempts_left`) — сесія жива, не розлогінюй"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "429":
+          description: "`too_many_attempts` — код згорів, запитай новий"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/account/delete-code:
+    post:
+      tags: [auth]
+      summary: Код на пошту для видалення акаунта без пароля
+      description: >
+        Для `sign_in` = google / apple: пароля немає, тож видалення
+        підтверджується кодом із пошти (6 цифр, діє 15 хвилин, 5 спроб).
+        Далі — `DELETE /app/account {code, confirm: "DELETE"}`.
+      responses:
+        "200":
+          description: Код надіслано
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  sent_to: { type: string, description: "на яку пошту пішов лист" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "409":
+          description: "`has_password` — в акаунта є пароль, видаляй із ним"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "429":
+          description: "`too_soon` — не частіше разу на хвилину (`retry_after`)"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "502":
+          description: "`mail_failed` — лист не пішов"
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
 
   /app/account/marketing-consent:
@@ -498,6 +543,7 @@ paths:
           description: "`granted_required` · `invalid_json`"
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
         "401": { $ref: "#/components/responses/Unauthorized" }
+
 
   /auth/logout:
     post:
@@ -569,8 +615,7 @@ paths:
                     description: >
                       Скільки дає тариф. У неоплаченого акаунта це пробні
                       хвилини, а не нуль: нуль означав би «без обмеження».
-                  minutes_left:
-                    { type: number, description: "0 = ліміт вичерпано, дзвінки блокуються" }
+                  minutes_left: { type: number, description: "0 = ліміт вичерпано, дзвінки блокуються" }
                   minutes_per_day:
                     type: number
                     description: >
@@ -601,7 +646,7 @@ paths:
                   blocked_reason:
                     type: string
                     nullable: true
-                    description: "`minutes_exhausted` · `plan_expired` · null, якщо дзвонити можна"
+                    description: "`minutes_exhausted` · `plan_expired` · `email_not_verified` (пробний акаунт, пошту не підтверджено) · null, якщо дзвонити можна"
                   total_calls: { type: integer }
                   successful_calls:
                     type: integer
@@ -830,8 +875,7 @@ paths:
                     items:
                       type: object
                       properties:
-                        call_id:
-                          { type: string, description: "для /app/calls/{call_id} і запису розмови" }
+                        call_id: { type: string, description: "для /app/calls/{call_id} і запису розмови" }
                         created_at: { type: string }
                         ended_at: { type: string }
                         phone: { type: string }
@@ -867,11 +911,7 @@ paths:
                 type: object
                 properties:
                   ok: { type: boolean }
-                  marked:
-                    {
-                      type: integer,
-                      description: скільки позначено зараз (чужі й уже переглянуті не рахуються),
-                    }
+                  marked: { type: integer, description: скільки позначено зараз (чужі й уже переглянуті не рахуються) }
                   unseen: { type: integer }
                   unseen_important: { type: integer }
           description: OK — лічильники вже після позначки, значок можна оновити з відповіді
@@ -903,8 +943,7 @@ paths:
           content:
             audio/ogg: { schema: { type: string, format: binary } }
         "401": { description: не авторизований }
-        "404":
-          { description: "not_found — чужий або неіснуючий дзвінок; no_recording — запису немає" }
+        "404": { description: "not_found — чужий або неіснуючий дзвінок; no_recording — запису немає" }
 
   /app/calls/{call_id}:
     get:
@@ -961,15 +1000,8 @@ paths:
                         actor: { type: string, description: пошта того, хто зробив }
                         action:
                           type: string
-                          examples:
-                            [
-                              settings.updated,
-                              team.invited,
-                              apikey.created,
-                              webhook.created,
-                              calls.exported,
-                              contacts.exported,
-                            ]
+                          examples: [settings.updated, team.invited, apikey.created,
+                                     webhook.created, calls.exported, contacts.exported]
                         details: { type: string }
                         created_at: { type: string }
           description: Найновіші першими
@@ -1002,6 +1034,12 @@ paths:
         - { name: agent_id, in: query, schema: { type: integer } }
         - { name: phone, in: query, schema: { type: string } }
         - { name: status, in: query, schema: { type: string, enum: [success, failed, attention] } }
+        - name: ids
+          in: query
+          schema: { type: string }
+          description: >
+            «Експортувати вибрані»: id дзвінків через кому (до 1000). Разом із
+            ним фільтри теж діють — шли або ids, або фільтри.
       responses:
         "200":
           description: файл CSV
@@ -1043,6 +1081,7 @@ paths:
                     items: { $ref: "#/components/schemas/Contact" }
           description: OK
         "401": { $ref: "#/components/responses/Unauthorized" }
+
 
   /app/contacts/upload/preview:
     post:
@@ -1092,6 +1131,7 @@ paths:
           description: "`unreadable_file` · `empty_file`"
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
         "401": { $ref: "#/components/responses/Unauthorized" }
+
 
   /app/contacts/export:
     get:
@@ -1322,16 +1362,8 @@ paths:
                 type: object
                 properties:
                   ok: { type: boolean }
-                  external_id:
-                    {
-                      type: string,
-                      description: "`card:123` (KeyCRM), `lead:45` / `deal:45` (Bitrix24)",
-                    }
-                  url:
-                    {
-                      type: string,
-                      description: "посилання на картку (Bitrix24); для KeyCRM порожнє",
-                    }
+                  external_id: { type: string, description: "`card:123` (KeyCRM), `lead:45` / `deal:45` (Bitrix24)" }
+                  url: { type: string, description: "посилання на картку (Bitrix24); для KeyCRM порожнє" }
           description: Картку створено
         "400":
           description: "`auth_failed` · `no_access` · `leads_disabled` · `bad_request` (з `detail`)"
@@ -1370,13 +1402,7 @@ paths:
         випадайки колонок, але лиши можливість змінити.
       parameters:
         - { name: spreadsheet_id, in: query, required: true, schema: { type: string } }
-        - {
-            name: sheet,
-            in: query,
-            required: false,
-            schema: { type: string },
-            description: назва вкладки; порожньо = перша,
-          }
+        - { name: sheet, in: query, required: false, schema: { type: string }, description: назва вкладки; порожньо = перша }
       responses:
         "200":
           content:
@@ -1452,8 +1478,7 @@ paths:
                 has_header: { type: boolean, default: true }
                 base_title: { type: string, maxLength: 120 }
                 consent: { type: string, enum: [granted], description: "як в імпорті файлом" }
-                consent_source:
-                  { type: string, maxLength: 200, description: "обов'язково з consent" }
+                consent_source: { type: string, maxLength: 200, description: "обов'язково з consent" }
       responses:
         "200":
           content:
@@ -1482,6 +1507,7 @@ paths:
         "502":
           description: "`read_failed`"
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
 
   /app/integrations/google-sheets/auth-url:
     get:
@@ -1675,11 +1701,7 @@ paths:
                         agent_name: { type: string, nullable: true }
                         source: { type: string, enum: [sip, forward, assigned] }
                         direction: { type: string, enum: [inbound, outbound, both] }
-                        provider:
-                          {
-                            type: string,
-                            description: "оператор, як його бачить клієнт («Datagroup»)",
-                          }
+                        provider: { type: string, description: "оператор, як його бачить клієнт («Datagroup»)" }
                         caller_id:
                           type: boolean
                           description: >
@@ -1765,17 +1787,8 @@ paths:
             schema:
               type: object
               properties:
-                phone:
-                  {
-                    type: string,
-                    description: "обовʼязково для sip і forward; для assigned ігнорується",
-                  }
-                kind:
-                  {
-                    type: string,
-                    enum: [city, mobile, tollfree],
-                    description: "лише для assigned: який тип номера з пулу",
-                  }
+                phone: { type: string, description: "обовʼязково для sip і forward; для assigned ігнорується" }
+                kind: { type: string, enum: [city, mobile, tollfree], description: "лише для assigned: який тип номера з пулу" }
                 agent_id: { type: integer, description: "хто відповідає на вхідні" }
                 source: { type: string, enum: [sip, forward, assigned], default: assigned }
                 direction: { type: string, enum: [inbound, outbound, both], default: both }
@@ -1808,6 +1821,9 @@ paths:
             `pool_empty` — лише для `assigned`: вільних номерів зараз
             немає (адмінам уже пішло сповіщення). Запропонуй
             переадресацію свого номера.
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "403":
+          description: "лише для `assigned`: `email_not_verified` — пробний акаунт без підтвердженої пошти. Не про гроші: веди на підтвердження (`POST /auth/email-code` → `/auth/email-confirm`), а не на тарифи."
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
 
   /app/numbers/pool:
@@ -1896,12 +1912,7 @@ paths:
             schema:
               type: object
               properties:
-                kind:
-                  {
-                    type: string,
-                    enum: [city, mobile, tollfree],
-                    description: "без поля — будь-який вільний",
-                  }
+                kind: { type: string, enum: [city, mobile, tollfree], description: "без поля — будь-який вільний" }
                 phone:
                   type: string
                   description: >
@@ -1944,6 +1955,9 @@ paths:
             зовсім. Типи в модалці будуй з `available_by_kind` у
             `GET /app/numbers/pool`, тоді цієї помилки не буде.
             · `number_limit` · `number_unavailable`
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "403":
+          description: "`email_not_verified` — пробний акаунт без підтвердженої пошти. Не про гроші: веди на підтвердження (`POST /auth/email-code` → `/auth/email-confirm`), а не на тарифи."
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
 
   /admin/number-pool:
@@ -1988,10 +2002,7 @@ paths:
                   type: string
                   description: "id або пошта акаунта, під який резервуємо номер"
       responses:
-        "200":
-          {
-            description: "`added` (список), `skipped`, `reserved_account_id`, `stats` (free/taken/cooling/reserved)",
-          }
+        "200": { description: "`added` (список), `skipped`, `reserved_account_id`, `stats` (free/taken/cooling/reserved)" }
         "400": { description: "`phones_required` · `invalid_json`" }
         "403": { description: forbidden }
         "404": { description: "`reserved_account_not_found`" }
@@ -2010,10 +2021,7 @@ paths:
         "200": { description: "`assigned` — номери, що тепер на транку" }
         "403": { description: forbidden }
         "502": { description: "LiveKit не прийняв оновлення — повторити пізніше" }
-        "503":
-          {
-            description: "`pool_trunk_not_configured` — LIVEKIT_POOL_TRUNK_ID не задано · `admin_api_disabled`",
-          }
+        "503": { description: "`pool_trunk_not_configured` — LIVEKIT_POOL_TRUNK_ID не задано · `admin_api_disabled`" }
 
   /admin/carrier-usage:
     get:
@@ -2033,10 +2041,7 @@ paths:
           schema: { type: string, examples: ["2026-10"] }
           description: "YYYY-MM; без нього — минулий місяць"
       responses:
-        "200":
-          {
-            description: "`carriers` — по операторах: out_calls, out_min, in_calls, in_min, numbers, numbers_new, cost_*; `text` — готовий звіт",
-          }
+        "200": { description: "`carriers` — по операторах: out_calls, out_min, in_calls, in_min, numbers, numbers_new, cost_*; `text` — готовий звіт" }
         "400": { description: "`bad_month`" }
         "403": { description: forbidden }
         "503": { description: "`admin_api_disabled` — ADMIN_API_TOKEN не задано" }
@@ -2090,8 +2095,7 @@ paths:
                       properties:
                         number_id: { type: integer }
                         phone: { type: string }
-                        sip_uri:
-                          { type: string, description: "готовий рядок для кнопки «Скопіювати»" }
+                        sip_uri: { type: string, description: "готовий рядок для кнопки «Скопіювати»" }
                         verified:
                           type: boolean
                           description: >
@@ -2220,6 +2224,137 @@ paths:
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
         "401": { $ref: "#/components/responses/Unauthorized" }
 
+  /app/contact-tags:
+    post:
+      tags: [contacts]
+      summary: Створити тег без контактів
+      description: >
+        «Створити тег» з макета. Тег одразу є в `tags` у `GET /app/contacts`
+        (з `count: 0`) і в будь-якій випадайці тегів. Повтор того самого — не
+        помилка (`created: false`). Поставити тег контакту — як і раніше,
+        полем `tags` контакту.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string, maxLength: 40, description: "без коми — вона роздільник тегів у контакті" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  tag: { type: string }
+                  created: { type: boolean, description: "false — такий тег уже був" }
+        "400":
+          description: "`bad_tag` (порожній, довший за 40 чи з комою) · `invalid_json`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /app/contact-tags/{tag}:
+    delete:
+      tags: [contacts]
+      summary: Прибрати тег, створений без контактів
+      description: >
+        Контактів не чіпає: тег, що вже стоїть на контактах, і далі видно в
+        `tags` — його знімають із самих контактів. Ім'я тегу — в URL
+        (encodeURIComponent).
+      parameters:
+        - { name: tag, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: OK
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: "`not_found` — такого тегу без контактів немає"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /app/alerts:
+    get:
+      tags: [dashboard]
+      summary: Дзвіночок у шапці — що потребує уваги
+      description: |
+        Не журнал подій, а зріз поточного стану: сповіщення зникає саме, щойно
+        зникла причина. Порядок: спершу `bad`, потім `warn`, `info`; усередині —
+        новіші вище.
+
+        `kind`:
+        * `calls_blocked` — дзвінки акаунта зупинив адміністратор;
+        * `email_not_verified` — пробний акаунт без підтвердженої пошти: агенти
+          не дзвонять, номер узяти не можна (`link: profile`);
+        * `sla` — дзвінки чекають на реакцію довше за SLA (`sla_minutes` акаунта);
+        * `call_results` — звіти після дзвінків, де власнику треба щось зробити;
+        * `crm_failed` — дзвінки, що не дійшли в CRM за тиждень;
+        * `trial_ending` — пробний період закінчується (≤ 3 дні) або закінчився;
+        * `minutes` — використано 80% хвилин або хвилини скінчились;
+        * `balance_low` — рахунок опустився нижче порогу `alert_below_usd`;
+        * `numbers_suspended` — номер понад тариф зупинено: не вистачило балансу.
+
+        `link` — куди вести по кліку: `calls`, `calls?status=attention`,
+        `integrations`, `billing`, `balance`, `profile`.
+
+        Бейдж на дзвіночку — `unread`. Нова подія того самого типу (ще один
+        прострочений дзвінок, нова помилка CRM) знову приходить непрочитаною.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  unread: { type: integer }
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        key: { type: string, description: "стабільний ключ — для POST /app/alerts/seen" }
+                        kind: { type: string, enum: [calls_blocked, email_not_verified, sla, call_results, crm_failed, trial_ending, minutes, balance_low, numbers_suspended] }
+                        level: { type: string, enum: [bad, warn, info], description: "колір крапки" }
+                        title: { type: string }
+                        text: { type: string }
+                        at: { type: string, nullable: true, description: "коли сталось (UTC), якщо відомо — для «2 хв тому»" }
+                        link: { type: string }
+                        unread: { type: boolean }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /app/alerts/seen:
+    post:
+      tags: [dashboard]
+      summary: Позначити сповіщення прочитаними
+      description: Без тіла — усі, що зараз у списку («Позначити всі як прочитані»); `{keys}` — лише ці.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                keys: { type: array, items: { type: string } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  marked: { type: integer }
+        "400":
+          description: "`invalid_json`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
   /app/contact-bases:
     get:
       tags: [contacts]
@@ -2314,8 +2449,7 @@ paths:
               properties:
                 agent_id: { type: integer }
                 direction: { type: string, enum: [inbound, outbound, both] }
-                is_active:
-                  { type: boolean, description: "false = номер не приймає й не робить дзвінків" }
+                is_active: { type: boolean, description: "false = номер не приймає й не робить дзвінків" }
                 note: { type: string, maxLength: 200 }
                 hour_from:
                   type: integer
@@ -2441,8 +2575,7 @@ paths:
               properties:
                 email: { type: string, format: email }
                 code: { type: string, examples: ["481027"] }
-                password:
-                  { type: string, description: "новий пароль (можна слати як `new_password`)" }
+                password: { type: string, description: "новий пароль (можна слати як `new_password`)" }
       responses:
         "200":
           content:
@@ -2477,6 +2610,9 @@ paths:
         ендпоїнт стає безкоштовним спамером із нашого домену.
 
         Стан підтвердження видно в `GET /auth/me` полем `email_verified`.
+        Вхід через Google/Apple — пошта вже підтверджена провайдером
+        (`email_verified: true` одразу). Як людина входить — поле `sign_in`
+        (`password` | `google` | `apple` | `github`).
       responses:
         "200":
           content:
@@ -2485,8 +2621,7 @@ paths:
                 type: object
                 properties:
                   ok: { type: boolean }
-                  already_verified:
-                    { type: boolean, description: "пошта вже підтверджена, лист не надсилали" }
+                  already_verified: { type: boolean, description: "пошта вже підтверджена, лист не надсилали" }
           description: Надіслано
         "401": { $ref: "#/components/responses/Unauthorized" }
         "429":
@@ -2566,8 +2701,7 @@ paths:
                       level: { type: string, enum: [unverified, pending, verified, trusted] }
                       legal_name: { type: string }
                       legal_code: { type: string }
-                      note:
-                        { type: string, description: "коментар при відмові — показуй його людині" }
+                      note: { type: string, description: "коментар при відмові — показуй його людині" }
                       can_run_campaigns: { type: boolean }
                       daily_outbound_limit: { type: integer, description: "0 = без стелі" }
           description: OK
@@ -3244,8 +3378,7 @@ paths:
                 type: object
                 properties:
                   ok: { type: boolean, description: "приймач відповів кодом < 400" }
-                  response_code:
-                    { type: integer, nullable: true, description: "null — не достукались зовсім" }
+                  response_code: { type: integer, nullable: true, description: "null — не достукались зовсім" }
                   error: { type: string }
           description: Спробували
         "401": { $ref: "#/components/responses/Unauthorized" }
@@ -3287,12 +3420,7 @@ paths:
         Саме тіло запиту сюди НЕ входить — у ньому телефон і транскрипт, а
         журнал відкривається як звичайна таблиця.
       parameters:
-        - {
-            name: webhook_id,
-            in: query,
-            schema: { type: integer },
-            description: лише цього приймача,
-          }
+        - { name: webhook_id, in: query, schema: { type: integer }, description: лише цього приймача }
         - { name: limit, in: query, schema: { type: integer, default: 50, maximum: 200 } }
       responses:
         "200":
@@ -3372,17 +3500,8 @@ paths:
                         nullable: true
                         description: "`auth_failed` · `no_access` · `leads_disabled` · `rate_limited` · `crm_unavailable` · `timeout` · `bad_request` · `crm_not_connected`"
                       attempts: { type: integer }
-                      will_retry:
-                        {
-                          type: boolean,
-                          description: "true — повторимо самі, кнопку можна не тиснути",
-                        }
-                      external_id:
-                        {
-                          type: string,
-                          nullable: true,
-                          description: "`card:123` / `lead:45` / `deal:45`",
-                        }
+                      will_retry: { type: boolean, description: "true — повторимо самі, кнопку можна не тиснути" }
+                      external_id: { type: string, nullable: true, description: "`card:123` / `lead:45` / `deal:45`" }
                       external_url:
                         type: string
                         nullable: true
@@ -3602,6 +3721,7 @@ paths:
         "400":
           description: >
             `name_required` · `invalid_json` · `invalid_call_direction` ·
+            `unknown_voice` (у відповіді `voices` — дозволені ключі) ·
             `contact_base_required` (лише якщо передано id неіснуючої бази) ·
             `invalid_contact_ids` · `invalid_schedule` · `invalid_working_days` ·
             `invalid_calls_per_day` · `number_not_connected` ·
@@ -3658,17 +3778,12 @@ paths:
                           enum: [inbound, outbound]
                           description: підказка для кроку «Що робить агент», якщо його ще не обрали
                         instructions: { type: string, description: "текст із полями в [дужках]" }
-                        report_fields:
-                          {
-                            type: string,
-                            description: "готовий перелік для поля «Що має бути у звіті»",
-                          }
+                        report_fields: { type: string, description: "готовий перелік для поля «Що має бути у звіті»" }
                         tips: { type: array, items: { type: string } }
                   placeholder_pattern: { type: string, examples: ["\\[[^\\[\\]\\n]{1,80}\\]"] }
                   instructions_max: { type: integer, examples: [4000] }
                   report_fields_max: { type: integer, examples: [500] }
-                  report_fields_label:
-                    { type: string, examples: ["Що має бути у звіті після дзвінка"] }
+                  report_fields_label: { type: string, examples: ["Що має бути у звіті після дзвінка"] }
                   report_fields_hint: { type: string, description: підказка під полем }
           description: OK
         "401": { $ref: "#/components/responses/Unauthorized" }
@@ -3689,12 +3804,7 @@ paths:
         - { name: date_from, in: query, schema: { type: string, examples: ["2026-11-05"] } }
         - { name: date_to, in: query, schema: { type: string, examples: ["2026-11-12"] } }
         - { name: agent_id, in: query, schema: { type: integer } }
-        - {
-            name: cancelled,
-            in: query,
-            schema: { type: string, enum: ["1"] },
-            description: "1 — разом зі скасованими",
-          }
+        - { name: cancelled, in: query, schema: { type: string, enum: ["1"] }, description: "1 — разом зі скасованими" }
         - { name: limit, in: query, schema: { type: integer, default: 200, maximum: 500 } }
       responses:
         "200":
@@ -3722,14 +3832,8 @@ paths:
               required: [agent_id, starts_at]
               properties:
                 agent_id: { type: integer }
-                master:
-                  { type: string, description: "порожньо — зайнятий час усіх майстрів агента" }
-                starts_at:
-                  {
-                    type: string,
-                    examples: ["2026-11-05 18:00"],
-                    description: "YYYY-MM-DD HH:MM за Києвом",
-                  }
+                master: { type: string, description: "порожньо — зайнятий час усіх майстрів агента" }
+                starts_at: { type: string, examples: ["2026-11-05 18:00"], description: "YYYY-MM-DD HH:MM за Києвом" }
                 minutes: { type: integer, default: 60, minimum: 5, maximum: 480 }
                 service: { type: string }
                 client_name: { type: string }
@@ -3746,7 +3850,7 @@ paths:
                   id: { type: integer }
           description: Записано
         "400":
-          description: "`invalid_json` · `invalid_starts_at` · `invalid_minutes`"
+          description: "`invalid_json` · `invalid_starts_at` · `invalid_minutes` · `starts_at_in_past` (день раніше за сьогодні за Києвом)"
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404":
@@ -3784,18 +3888,8 @@ paths:
         у форматі `пн–пт 10:00–19:00`, тоді агент працює без журналу. Покажи це
         на кроці «Інструкція», щоб людина дописала години.
       parameters:
-        - {
-            name: date,
-            in: query,
-            schema: { type: string, examples: ["2026-11-05"] },
-            description: "порожньо — сьогодні",
-          }
-        - {
-            name: service,
-            in: query,
-            schema: { type: string },
-            description: "послуга: від неї залежить тривалість",
-          }
+        - { name: date, in: query, schema: { type: string, examples: ["2026-11-05"] }, description: "порожньо — сьогодні" }
+        - { name: service, in: query, schema: { type: string }, description: "послуга: від неї залежить тривалість" }
       responses:
         "200":
           content:
@@ -3859,7 +3953,7 @@ paths:
                     Тип дзвінка агента, який ще не збережено: booking вмикає збір запису з підсумком.
                     Якщо не передано, береться з картки агента.
                   allOf:
-                    - $ref: "#/components/schemas/CallType"
+                    - $ref: '#/components/schemas/CallType'
                 call_fields:
                   type: array
                   maxItems: 15
@@ -3885,6 +3979,9 @@ paths:
 
             Не пропонуй «спробувати ще раз»: зняти це можна лише свідомо,
             через картку контакту.
+
+
+            `email_not_verified` — пробний акаунт без підтвердженої пошти. Не про гроші: веди на підтвердження (`POST /auth/email-code` → `/auth/email-confirm`), а не на тарифи.
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
         "402":
           description: >
@@ -3977,11 +4074,7 @@ paths:
                   contacts:
                     type: array
                     items: { $ref: "#/components/schemas/Contact" }
-                  total:
-                    {
-                      type: integer,
-                      description: "скільки повернуто в цій видачі (стеля 1000 — для сторінки; обдзвін і експорт стелі не мають)",
-                    }
+                  total: { type: integer, description: "скільки повернуто в цій видачі (стеля 1000 — для сторінки; обдзвін і експорт стелі не мають)" }
                   tags:
                     type: array
                     description: >
@@ -4038,18 +4131,8 @@ paths:
                     Мітки одразу при створенні — «Додати контакт» у майстрі
                     має поле міток. Масив або рядок через кому; дублікати
                     прибираються.
-                consent:
-                  {
-                    type: string,
-                    enum: [granted],
-                    description: "згода є — контакт лягає з датою згоди",
-                  }
-                consent_source:
-                  {
-                    type: string,
-                    maxLength: 200,
-                    description: "звідки згода; без нього — «вручну в кабінеті»",
-                  }
+                consent: { type: string, enum: [granted], description: "згода є — контакт лягає з датою згоди" }
+                consent_source: { type: string, maxLength: 200, description: "звідки згода; без нього — «вручну в кабінеті»" }
       responses:
         "200":
           content:
@@ -4285,12 +4368,9 @@ paths:
                   minutes: { type: integer, description: "ліміт хвилин за оплаченим тарифом" }
                   auto_renew: { $ref: "#/components/schemas/AutoRenew/properties/auto_renew" }
                   auto_charge: { $ref: "#/components/schemas/AutoRenew/properties/auto_charge" }
-                  next_charge_at:
-                    { $ref: "#/components/schemas/AutoRenew/properties/next_charge_at" }
-                  auto_renew_period:
-                    { $ref: "#/components/schemas/AutoRenew/properties/auto_renew_period" }
-                  auto_renew_consent_at:
-                    { $ref: "#/components/schemas/AutoRenew/properties/auto_renew_consent_at" }
+                  next_charge_at: { $ref: "#/components/schemas/AutoRenew/properties/next_charge_at" }
+                  auto_renew_period: { $ref: "#/components/schemas/AutoRenew/properties/auto_renew_period" }
+                  auto_renew_consent_at: { $ref: "#/components/schemas/AutoRenew/properties/auto_renew_consent_at" }
                   plans:
                     type: array
                     items:
@@ -4298,8 +4378,7 @@ paths:
                       properties:
                         key: { type: string, description: "передавати в /app/billing/checkout" }
                         title: { type: string }
-                        price_usd:
-                          { type: number, description: "ціна тарифу; її й показуй головною" }
+                        price_usd: { type: number, description: "ціна тарифу; її й показуй головною" }
                         currency: { type: string, enum: [USD] }
                         price_uah:
                           type: number
@@ -4332,16 +4411,8 @@ paths:
                               description: "скільки економить проти 12 місячних платежів"
                         minutes: { type: integer }
                         agents: { type: integer, description: "0 = без обмеження" }
-                        numbers:
-                          {
-                            type: integer,
-                            description: "скільки номерів включено; 0 = без обмеження",
-                          }
-                        pool_numbers:
-                          {
-                            type: integer,
-                            description: "з них від Calls4U (з пулу): Start 1, Pro/Pro+ 3. Понад це — $5/міс з балансу",
-                          }
+                        numbers: { type: integer, description: "скільки номерів включено; 0 = без обмеження" }
+                        pool_numbers: { type: integer, description: "з них від Calls4U (з пулу): Start 1, Pro/Pro+ 3. Понад це — $5/міс з балансу" }
                         balance_usd:
                           type: number
                           description: >
@@ -4424,12 +4495,9 @@ paths:
                       saved_at: { type: string, nullable: true }
                   auto_renew: { $ref: "#/components/schemas/AutoRenew/properties/auto_renew" }
                   auto_charge: { $ref: "#/components/schemas/AutoRenew/properties/auto_charge" }
-                  next_charge_at:
-                    { $ref: "#/components/schemas/AutoRenew/properties/next_charge_at" }
-                  auto_renew_period:
-                    { $ref: "#/components/schemas/AutoRenew/properties/auto_renew_period" }
-                  auto_renew_consent_at:
-                    { $ref: "#/components/schemas/AutoRenew/properties/auto_renew_consent_at" }
+                  next_charge_at: { $ref: "#/components/schemas/AutoRenew/properties/next_charge_at" }
+                  auto_renew_period: { $ref: "#/components/schemas/AutoRenew/properties/auto_renew_period" }
+                  auto_renew_consent_at: { $ref: "#/components/schemas/AutoRenew/properties/auto_renew_consent_at" }
           description: OK
         "401": { $ref: "#/components/responses/Unauthorized" }
 
@@ -4594,6 +4662,7 @@ paths:
           description: "`payments_unavailable`"
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
 
+
   /app/billing/checkout:
     post:
       tags: [billing]
@@ -4669,8 +4738,7 @@ paths:
                   price_usd: { type: number, description: "ціна тарифу в доларах" }
                   usd_rate: { type: number, description: "курс НБУ, яким рахували" }
                   plan: { type: string }
-                  period:
-                    { type: string, enum: [month, year], description: "за що виставлено рахунок" }
+                  period: { type: string, enum: [month, year], description: "за що виставлено рахунок" }
                   return_url:
                     type: string
                     description: >
@@ -4769,12 +4837,9 @@ paths:
                   minutes: { type: integer, description: "ліміт хвилин за новим тарифом" }
                   auto_renew: { $ref: "#/components/schemas/AutoRenew/properties/auto_renew" }
                   auto_charge: { $ref: "#/components/schemas/AutoRenew/properties/auto_charge" }
-                  next_charge_at:
-                    { $ref: "#/components/schemas/AutoRenew/properties/next_charge_at" }
-                  auto_renew_period:
-                    { $ref: "#/components/schemas/AutoRenew/properties/auto_renew_period" }
-                  auto_renew_consent_at:
-                    { $ref: "#/components/schemas/AutoRenew/properties/auto_renew_consent_at" }
+                  next_charge_at: { $ref: "#/components/schemas/AutoRenew/properties/next_charge_at" }
+                  auto_renew_period: { $ref: "#/components/schemas/AutoRenew/properties/auto_renew_period" }
+                  auto_renew_consent_at: { $ref: "#/components/schemas/AutoRenew/properties/auto_renew_consent_at" }
         "400": { description: "invoice_id_required" }
         "401": { description: не авторизований }
         "404": { description: рахунок не знайдено або чужий }
@@ -4814,15 +4879,13 @@ paths:
                   balance_usd: { type: number, examples: [12.4] }
                   minute_price_usd: { type: number, examples: [0.1] }
                   extra_number_price_usd: { type: number, examples: [5] }
-                  plan_balance_usd:
-                    { type: number, description: "до скількох доповнює тариф; 0 — тріал" }
+                  plan_balance_usd: { type: number, description: "до скількох доповнює тариф; 0 — тріал" }
                   topup_options_usd:
                     type: array
                     items: { type: integer }
                     examples: [[10, 25, 50, 100]]
                     description: кнопки модалки поповнення
-                  topup_min_usd:
-                    { type: integer, examples: [5], description: "межі поля «Своя сума»" }
+                  topup_min_usd: { type: integer, examples: [5], description: "межі поля «Своя сума»" }
                   topup_max_usd: { type: integer, examples: [1000] }
                   alert_below_usd:
                     type: number
@@ -4832,8 +4895,7 @@ paths:
                       вимкнено. Лист і Telegram ідуть каналом «Закінчення
                       ліміту хвилин» з налаштувань сповіщень, один раз на
                       кожен спуск нижче порогу.
-                  alert_options_usd:
-                    { type: array, items: { type: integer }, examples: [[2, 5, 10]] }
+                  alert_options_usd: { type: array, items: { type: integer }, examples: [[2, 5, 10]] }
                   ledger:
                     type: array
                     items:
@@ -5014,11 +5076,7 @@ paths:
                 merchantSignature: { type: string, description: "HMAC-MD5 по 8 полях через ;" }
                 amount: { type: number, description: "гривні з копійками" }
                 currency: { type: string }
-                transactionStatus:
-                  {
-                    type: string,
-                    enum: [Approved, Declined, Refunded, Expired, InProcessing, Pending],
-                  }
+                transactionStatus: { type: string, enum: [Approved, Declined, Refunded, Expired, InProcessing, Pending] }
                 reasonCode: { type: integer }
                 authCode: { type: string }
                 cardPan: { type: string, description: "маска картки" }
@@ -5138,18 +5196,8 @@ paths:
               properties:
                 name: { type: string, maxLength: 120 }
                 voice: { type: string, maxLength: 64 }
-                instructions:
-                  {
-                    type: string,
-                    maxLength: 4000,
-                    description: "[дужки] не пропускаємо — `instructions_unfilled`",
-                  }
-                report_fields:
-                  {
-                    type: string,
-                    maxLength: 500,
-                    description: "що має бути у звіті; порожньо — звіт як зазвичай",
-                  }
+                instructions: { type: string, maxLength: 4000, description: "[дужки] не пропускаємо — `instructions_unfilled`" }
+                report_fields: { type: string, maxLength: 500, description: "що має бути у звіті; порожньо — звіт як зазвичай" }
                 call_type: { $ref: "#/components/schemas/CallType" }
                 call_fields:
                   type: array
@@ -5163,7 +5211,7 @@ paths:
                   items: { type: integer }
                   description: замінює список агента цілком
                 contact_base_id: { type: integer, description: "0 = зняти прив'язку" }
-                schedule_start: { type: string, description: '"HH:MM"' }
+                schedule_start: { type: string, description: "\"HH:MM\"" }
                 schedule_end: { type: string }
                 working_days:
                   oneOf:
@@ -5183,7 +5231,7 @@ paths:
                   agent: { $ref: "#/components/schemas/Agent" }
           description: OK
         "400":
-          description: "`name_required` · `nothing_to_update` · `invalid_json` · `invalid_call_direction` · `contact_base_required` (id неіснуючої бази) · `invalid_contact_ids` · `invalid_schedule` · `invalid_working_days` · `invalid_calls_per_day` · `number_not_connected` · `invalid_call_type` · `invalid_call_fields` · `too_many_call_fields` · `instructions_unfilled` (з `fields`)"
+          description: "`name_required` · `nothing_to_update` · `invalid_json` · `unknown_voice` (лише якщо голос змінено) · `invalid_call_direction` · `contact_base_required` (id неіснуючої бази) · `invalid_contact_ids` · `invalid_schedule` · `invalid_working_days` · `invalid_calls_per_day` · `number_not_connected` · `invalid_call_type` · `invalid_call_fields` · `too_many_call_fields` · `instructions_unfilled` (з `fields`)"
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404":
@@ -5398,8 +5446,7 @@ paths:
               required: [agent_id]
               properties:
                 agent_id: { type: integer }
-                name:
-                  { type: string, maxLength: 120, description: без назви візьметься ім'я агента }
+                name: { type: string, maxLength: 120, description: без назви візьметься ім'я агента }
                 contact_ids:
                   type: array
                   items: { type: integer }
@@ -5439,7 +5486,8 @@ paths:
             `verification_required` — юрособу не підтверджено, обдзвін
             закритий (поле `level` каже, на якому кроці акаунт).
             Не показуй це як поломку: вхідні дзвінки й тестові працюють,
-            веди на форму верифікації.
+            веди на форму верифікації ·
+            `email_not_verified` — пробний акаунт без підтвердженої пошти. Не про гроші: веди на підтвердження (`POST /auth/email-code` → `/auth/email-confirm`), а не на тарифи.
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
         "404":
           description: "`agent_not_found`"
@@ -5480,7 +5528,8 @@ paths:
         "403":
           description: >
             `verification_required` — рівень зняли, поки обдзвін стояв на
-            паузі. Ввімкнути назад можна лише після нового підтвердження.
+            паузі. Ввімкнути назад можна лише після нового підтвердження ·
+            `email_not_verified` — пробний акаунт без підтвердженої пошти. Не про гроші: веди на підтвердження (`POST /auth/email-code` → `/auth/email-confirm`), а не на тарифи.
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
         "404":
           description: "`not_found` — немає такого обдзвону в цього акаунта"
@@ -5500,16 +5549,8 @@ paths:
         фронт показує їх разом із цими, а їхні слаги бекенд ніколи не займе.
       security: []
       parameters:
-        - {
-            name: category,
-            in: query,
-            schema: { type: string, enum: [guides, economics, comparison, instructions, myths] },
-          }
-        - {
-            name: limit,
-            in: query,
-            schema: { type: integer, minimum: 1, maximum: 100, default: 20 },
-          }
+        - { name: category, in: query, schema: { type: string, enum: [guides, economics, comparison, instructions, myths] } }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
         - { name: offset, in: query, schema: { type: integer, minimum: 0, default: 0 } }
       responses:
         "200":
@@ -5593,17 +5634,8 @@ paths:
       description: Під `X-Admin-Token`. Основна модерація — кнопки в Telegram; це для адмінки.
       security: []
       parameters:
-        - {
-            name: status,
-            in: query,
-            schema:
-              { type: string, enum: [all, draft, published, rejected, archived], default: all },
-          }
-        - {
-            name: limit,
-            in: query,
-            schema: { type: integer, minimum: 1, maximum: 100, default: 50 },
-          }
+        - { name: status, in: query, schema: { type: string, enum: [all, draft, published, rejected, archived], default: all } }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 50 } }
         - { name: offset, in: query, schema: { type: integer, minimum: 0, default: 0 } }
       responses:
         "200":
@@ -5660,12 +5692,7 @@ paths:
       security: []
       parameters:
         - { name: post_id, in: path, required: true, schema: { type: integer } }
-        - {
-            name: action,
-            in: path,
-            required: true,
-            schema: { type: string, enum: [publish, unpublish, reject] },
-          }
+        - { name: action, in: path, required: true, schema: { type: string, enum: [publish, unpublish, reject] } }
       responses:
         "200":
           description: OK
@@ -5703,8 +5730,7 @@ paths:
               type: object
               properties:
                 topic: { type: string, maxLength: 300 }
-                category:
-                  { type: string, enum: [guides, economics, comparison, instructions, myths] }
+                category: { type: string, enum: [guides, economics, comparison, instructions, myths] }
       responses:
         "200":
           description: OK — генерацію запущено
@@ -5724,11 +5750,7 @@ paths:
       description: Під `X-Admin-Token`. Теми від людей ідуть раніше за запропоновані роботом.
       security: []
       parameters:
-        - {
-            name: status,
-            in: query,
-            schema: { type: string, enum: [queued, generating, used, dropped], default: queued },
-          }
+        - { name: status, in: query, schema: { type: string, enum: [queued, generating, used, dropped], default: queued } }
       responses:
         "200":
           description: OK
@@ -5752,8 +5774,7 @@ paths:
               required: [topic]
               properties:
                 topic: { type: string, minLength: 5, maxLength: 300 }
-                category:
-                  { type: string, enum: [guides, economics, comparison, instructions, myths] }
+                category: { type: string, enum: [guides, economics, comparison, instructions, myths] }
       responses:
         "200":
           description: "OK — `id` нової теми"
@@ -5816,8 +5837,7 @@ components:
         client_name: { type: string }
         phone: { type: string }
         note: { type: string }
-        call_id:
-          { type: string, description: "дзвінок, у якому записали; порожньо для ручного запису" }
+        call_id: { type: string, description: "дзвінок, у якому записали; порожньо для ручного запису" }
         source: { type: string, enum: [call, manual] }
         status: { type: string, enum: [booked, cancelled] }
         created_at: { type: string }
@@ -5832,25 +5852,10 @@ components:
           type: string
           enum: [connected, error]
           description: "`error` — ключ чи вебхук перестав діяти; показуй «Перепідключити»"
-        error:
-          {
-            type: string,
-            nullable: true,
-            description: "`auth_failed` · `no_access` · `leads_disabled`",
-          }
-        account:
-          {
-            type: string,
-            description: "«KeyCRM» або домен порталу Bitrix24 — для «Підключено до …»",
-          }
+        error: { type: string, nullable: true, description: "`auth_failed` · `no_access` · `leads_disabled`" }
+        account: { type: string, description: "«KeyCRM» або домен порталу Bitrix24 — для «Підключено до …»" }
         push: { type: string, enum: [important, conversations, all] }
-        mode:
-          {
-            type: string,
-            nullable: true,
-            enum: [classic, simple, null],
-            description: "Bitrix24: класична (ліди) чи проста (угоди)",
-          }
+        mode: { type: string, nullable: true, enum: [classic, simple, null], description: "Bitrix24: класична (ліди) чи проста (угоди)" }
         pipeline_id: { type: integer, nullable: true }
         source_id: { type: integer, nullable: true }
         pipelines:
@@ -5875,17 +5880,7 @@ components:
         version: { type: integer, description: "1" }
         type:
           type: string
-          enum:
-            [
-              booking,
-              payment,
-              callback,
-              request,
-              refusal,
-              do_not_call,
-              needs_attention,
-              not_reached,
-            ]
+          enum: [booking, payment, callback, request, refusal, do_not_call, needs_attention, not_reached]
           description: >
             `booking` — записали / домовились про зустріч (рушій справді
             записав, не «модель думає»). `payment` — погодився на оплату.
@@ -5918,20 +5913,14 @@ components:
           nullable: true
           description: "Лише для booking і callback. null — часу не назвали."
           properties:
-            date:
-              {
-                type: string,
-                nullable: true,
-                description: "YYYY-MM-DD за Києвом; null — дня не назвали",
-              }
+            date: { type: string, nullable: true, description: "YYYY-MM-DD за Києвом; null — дня не назвали" }
             time: { type: string, nullable: true, description: "HH:MM; null — години не назвали" }
             time_mode:
               type: string
               nullable: true
               enum: [at, after, before, null]
               description: "at — «о 18:00», after — «після 18:00», before — «до 18:00»"
-            text:
-              { type: string, description: "Як сказати людині: «у суботу, 7 листопада, о 18:00»" }
+            text: { type: string, description: "Як сказати людині: «у суботу, 7 листопада, о 18:00»" }
         contact:
           type: object
           description: усе — лише зі слів співрозмовника в цій розмові; порожньо — не називав
@@ -6046,8 +6035,7 @@ components:
         title: { type: string }
         description: { type: string, description: meta description і підзаголовок картки }
         category: { type: string, enum: [guides, economics, comparison, instructions, myths] }
-        category_label:
-          { type: string, description: "Гайди · Економіка · Порівняння · Інструкції · Міфи" }
+        category_label: { type: string, description: "Гайди · Економіка · Порівняння · Інструкції · Міфи" }
         cover: { $ref: "#/components/schemas/BlogCover" }
         reading_minutes: { type: integer }
         author: { type: string }
@@ -6068,8 +6056,7 @@ components:
                 properties:
                   id: { type: string }
                   label: { type: string }
-            keywords:
-              { type: array, items: { type: string }, description: для meta keywords і JSON-LD }
+            keywords: { type: array, items: { type: string }, description: для meta keywords і JSON-LD }
             words: { type: integer }
 
     BlogAdminItem:
@@ -6081,11 +6068,7 @@ components:
             status: { type: string, enum: [draft, published, rejected, archived] }
             topic: { type: string }
             words: { type: integer }
-            source:
-              {
-                type: string,
-                description: "auto — розклад; requested — попросили (Telegram чи адмінка)",
-              }
+            source: { type: string, description: "auto — розклад; requested — попросили (Telegram чи адмінка)" }
             model: { type: string }
             reviewed_by: { type: string }
             review_note: { type: string }
@@ -6197,6 +6180,18 @@ components:
             `calls_blocked`. Показуй смугу з причиною, а не мовчазну
             неробочу кнопку.
         calls_blocked_reason: { type: string, nullable: true }
+        email_verified:
+          type: boolean
+          description: >
+            Пошту п��дтверджено. Google/Apple/GitHub — одразу true;
+            реєстрація паролем — false до підтвердження через
+            `POST /auth/email-code` → `POST /auth/email-confirm`.
+        sign_in:
+          type: string
+          enum: [password, google, apple, github]
+          description: >
+            Яким способом увійшов цей акаунт. Визначає, як підтверджувати
+            видалення: `password` — пароль, решта — код на пошту.
 
     AuthSuccess:
       type: object
@@ -6213,6 +6208,13 @@ components:
       type: object
       properties:
         id: { type: string }
+        agent_revision:
+          type: integer
+          nullable: true
+          description: >
+            «Версія скрипту» на екрані дзвінка: з якою редакцією інструкції
+            агента йшов дзвінок (показуй як v{n}). null — дзвінок до 19.11.2026
+            або без агента.
         phone: { type: string }
         company_name: { type: string }
         niche: { type: string }
@@ -6410,12 +6412,14 @@ components:
       type: object
       properties:
         id: { type: integer }
+        revision:
+          type: integer
+          description: "поточна редакція інструкції: +1 щоразу, коли інструкцію справді змінили"
         account_id: { type: integer }
         name: { type: string }
         voice: { type: string }
         instructions: { type: string }
-        report_fields:
-          { type: string, description: "«Що має бути у звіті після дзвінка»; порожньо — не задано" }
+        report_fields: { type: string, description: "«Що має бути у звіті після дзвінка»; порожньо — не задано" }
         call_type: { $ref: "#/components/schemas/CallType" }
         call_fields:
           type: array
@@ -6441,15 +6445,15 @@ components:
         can_test_reason:
           type: string
           nullable: true
-          enum: [no_instructions, minutes_exhausted, plan_expired, calls_blocked, null]
+          enum: [no_instructions, minutes_exhausted, plan_expired, calls_blocked, email_not_verified, null]
           description: >
             Чому не можна — для підказки на сірій кнопці. `no_instructions` —
             «Додайте інструкції агенту»; `minutes_exhausted` / `plan_expired`
             — ті самі стани, що `blocked_reason` у `/app/stats`. `null`, коли
             `can_test: true`.
-        schedule_start: { type: string, description: '"HH:MM"; порожньо = загальні години' }
+        schedule_start: { type: string, description: "\"HH:MM\"; порожньо = загальні години" }
         schedule_end: { type: string }
-        working_days: { type: string, description: '"mon,tue,wed" у тижневому порядку' }
+        working_days: { type: string, description: "\"mon,tue,wed\" у тижневому порядку" }
         calls_per_day: { type: integer, description: "0 = без стелі" }
         number_id: { type: integer, description: "0 = перший вихідний номер акаунта" }
         number_phone:
@@ -6511,10 +6515,8 @@ components:
           type: string
           enum: ["", granted, pending]
           description: "згода на дзвінки; порожньо — ще не питали"
-        consent_at:
-          { type: string, description: "коли згода з'явилась (UTC); порожньо — згоди немає" }
-        consent_source:
-          { type: string, description: "звідки згода — це показуй на картці поруч із датою" }
+        consent_at: { type: string, description: "коли згода з'явилась (UTC); порожньо — згоди немає" }
+        consent_source: { type: string, description: "звідки згода — це показуй на картці поруч із датою" }
         consent_by: { type: string, description: "хто з кабінету поставив згоду (пошта)" }
         do_not_call:
           type: boolean

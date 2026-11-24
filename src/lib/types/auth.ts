@@ -1,5 +1,7 @@
 export type AgentLanguage = "uk" | "ru" | "en";
 
+export type SignInMethod = "password" | "google" | "apple" | "github";
+
 export interface Account {
   id: number;
   email: string;
@@ -13,6 +15,7 @@ export interface Account {
   agent_language?: AgentLanguage;
   marketing_consent?: boolean;
   email_verified?: boolean;
+  sign_in?: SignInMethod;
   require_consent?: boolean;
   ai_disclosure_upfront?: boolean;
   record_notice?: boolean;
@@ -39,14 +42,17 @@ export interface RegisterParams {
   marketing_consent?: boolean;
 }
 
-export interface DeleteAccountParams {
-  password: string;
-  confirm: "DELETE";
-}
+export type DeleteAccountParams =
+  { password: string; confirm: "DELETE" } | { code: string; confirm: "DELETE" };
 
 export interface DeleteAccountResponse {
   ok: boolean;
   deleted: boolean;
+}
+
+export interface DeleteCodeResponse {
+  ok: boolean;
+  sent_to: string;
 }
 
 export interface MarketingConsentParams {

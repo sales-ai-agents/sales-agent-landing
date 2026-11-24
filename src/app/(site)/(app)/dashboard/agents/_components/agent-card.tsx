@@ -29,6 +29,7 @@ const CAN_TEST_REASON_LABELS: Record<string, string> = {
   minutes_exhausted: "Хвилини вичерпано — поповніть рахунок",
   plan_expired: "Строк тарифу вийшов — продовжіть підписку",
   calls_blocked: "Дзвінки зупинені — зверніться до підтримки",
+  email_not_verified: "Підтвердіть пошту в налаштуваннях профілю",
 };
 
 const WAVE_BARS = 40;

@@ -9,6 +9,7 @@ export {
   useChangePassword,
   useUpdateMarketingConsent,
   useDeleteAccount,
+  useDeleteCode,
   usePasswordReset,
   usePasswordResetConfirm,
   useEmailCode,

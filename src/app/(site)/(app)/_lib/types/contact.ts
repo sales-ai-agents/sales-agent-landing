@@ -101,3 +101,13 @@ export interface ContactsExportPreviewResponse {
   truncated: boolean;
   sample: Contact[];
 }
+
+export interface CreateContactTagParams {
+  name: string;
+}
+
+export interface CreateContactTagResponse {
+  ok: boolean;
+  tag: string;
+  created: boolean;
+}

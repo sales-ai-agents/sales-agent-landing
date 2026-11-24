@@ -18,6 +18,7 @@ import type {
   ChangePasswordResponse,
   DeleteAccountParams,
   DeleteAccountResponse,
+  DeleteCodeResponse,
   MarketingConsentParams,
   MarketingConsentResponse,
   PasswordResetParams,
@@ -152,6 +153,12 @@ export const useDeleteAccount = () => {
       clearAuthToken();
       queryClient.clear();
     },
+  });
+};
+
+export const useDeleteCode = () => {
+  return useMutation<DeleteCodeResponse, ApiError, void>({
+    mutationFn: () => apiPost<DeleteCodeResponse>(API_ENDPOINTS.APP_ACCOUNT_DELETE_CODE),
   });
 };
 

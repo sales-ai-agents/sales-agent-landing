@@ -21,6 +21,7 @@ export const RU_CLIENT: ClientCopy = {
       instruction_expand_failed: "Не удалось сгенерировать сценарий. Попробуйте ещё раз.",
       dispatch_failed: "Сервис звонков временно недоступен. Попробуйте позже.",
       livekit_not_configured: "Сервис голосовой связи временно недоступен.",
+      ua_numbers_only: "Демо-звонок доступен только на номера +380 (Украина).",
     },
   },
   validation: {
@@ -75,7 +76,7 @@ export const RU_CLIENT: ClientCopy = {
       { speaker: "agent", text: "Изменила адрес. Курьер будет в четверг с 10:00 до 14:00." },
     ],
   },
-  testCallSuccess: "✓ Готово! Агент позвонит вам в течение 20 секунд.",
+  testCallSuccess: "Сейчас вам позвонит +380 91 481 05 42 — ответьте, пожалуйста.",
   testCallInvalid: "Введите 9 цифр номера после +380.",
   finalForm: {
     submit: "Запустить звонок",

@@ -6,12 +6,14 @@ export type AuthFlowCode =
   | "weak_password"
   | "email_taken"
   | "too_many_requests"
+  | "wrong_password"
   | "bad_current_password"
   | "no_password_login"
   | "invalid_code"
   | "bad_code"
   | "code_expired"
-  | "no_code";
+  | "no_code"
+  | "code_required";
 
 export const AUTH_FLOW_CODES: ReadonlySet<string> = new Set<AuthFlowCode>([
   "bad_credentials",
@@ -19,12 +21,14 @@ export const AUTH_FLOW_CODES: ReadonlySet<string> = new Set<AuthFlowCode>([
   "weak_password",
   "email_taken",
   "too_many_requests",
+  "wrong_password",
   "bad_current_password",
   "no_password_login",
   "invalid_code",
   "bad_code",
   "code_expired",
   "no_code",
+  "code_required",
 ]);
 
 export class ApiError extends Error {
@@ -34,6 +38,7 @@ export class ApiError extends Error {
   readonly attemptsLeft?: number;
   readonly hint?: string;
   readonly fields?: string[];
+  readonly field?: string;
 
   constructor(
     status: number,
@@ -42,7 +47,8 @@ export class ApiError extends Error {
     retryAfter?: number,
     attemptsLeft?: number,
     hint?: string,
-    fields?: string[]
+    fields?: string[],
+    field?: string
   ) {
     super(message);
     this.name = "ApiError";
@@ -52,6 +58,7 @@ export class ApiError extends Error {
     this.attemptsLeft = attemptsLeft;
     this.hint = hint;
     this.fields = fields;
+    this.field = field;
   }
 }
 
@@ -62,6 +69,7 @@ interface ApiErrorBody {
   attempts_left?: number;
   hint?: string;
   fields?: string[];
+  field?: string;
 }
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -126,7 +134,8 @@ async function request<T>(url: string, method: HttpMethod, options?: RequestOpti
       undefined,
       body?.attempts_left,
       body?.hint,
-      body?.fields
+      body?.fields,
+      body?.field
     );
   }
 
