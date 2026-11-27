@@ -4,6 +4,11 @@ import { buildLegalMetadata } from "@/content/legal/metadata";
 
 export const metadata = buildLegalMetadata(refundPolicy);
 
-export default function RefundPolicyPage() {
-  return <LegalDocumentView document={refundPolicy} />;
+interface Props {
+  searchParams: Promise<{ lang?: string }>;
+}
+
+export default async function RefundPolicyPage({ searchParams }: Props) {
+  const { lang } = await searchParams;
+  return <LegalDocumentView document={refundPolicy} locale={lang} />;
 }

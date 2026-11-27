@@ -1,6 +1,6 @@
 import { COMPANY_INFO, LEGAL_PAGES } from "@/lib/constants";
 
-import { contacts, list, paragraph, section, UPDATED_NOTE } from "../builders";
+import { contacts, list, paragraph, section, UPDATED_NOTE, UPDATED_NOTE_EN } from "../builders";
 import type { LegalDocument } from "../types";
 
 export const refundPolicy: LegalDocument = {
@@ -70,4 +70,76 @@ export const refundPolicy: LegalDocument = {
       ])
     ),
   ],
+  translations: {
+    en: {
+      title: "Refund Policy",
+      metaTitle: "Refund Policy",
+      metaDescription:
+        "Refund rules for calls4u.ai subscriptions: general rule, exceptions, erroneous payments and how to contact us.",
+      updatedNote: UPDATED_NOTE_EN,
+      sections: [
+        section(
+          "1. General rule: no refunds",
+          paragraph(
+            "calls4u.ai is a subscription (SaaS) for access to an AI voice agent. Payment is made for access to the Service for the chosen billing period (monthly or annual)."
+          ),
+          paragraph(
+            "Fees paid for a subscription are non-refundable, including where the paid period was only partially used, where the Service was not used during the paid period for reasons outside the Service Provider's control, or where the Client decides to stop using the Service early."
+          ),
+          paragraph(
+            "This policy exists because every new user receives a free 3-day trial period before purchasing a paid subscription, during which they can evaluate the Service before paying. By purchasing a paid subscription, the user confirms their informed decision to continue using the Service on a paid basis."
+          )
+        ),
+        section(
+          "2. Exceptions where a refund is available",
+          paragraph(
+            "A full refund to the original payment method will be made within up to 14 (fourteen) business days of confirming the relevant case, if:"
+          ),
+          list([
+            [
+              "The Service Provider failed through its own fault to provide access to the Service within a reasonable time after payment (for example, a technical error on the Service Provider's side that prevented the connection);",
+            ],
+            [
+              `A material defect is found in the Service that prevents use of the AI agent in accordance with its stated features, and the Service Provider does not fix that defect within 5 (five) business days of the Client contacting ${COMPANY_INFO.email}.`,
+            ],
+          ])
+        ),
+        section(
+          "3. Erroneous and duplicate payments",
+          paragraph(
+            "If funds are charged erroneously or in duplicate (a technical failure of the payment system), a full refund will be made within up to 14 (fourteen) business days of the request and confirmation of the erroneous payment."
+          )
+        ),
+        section(
+          "4. Transaction reversal and fraud",
+          paragraph(
+            "If signs of fraudulent use of a payment instrument are detected, the Service Provider has the right to initiate a transaction reversal in accordance with the WayForPay payment system rules."
+          )
+        ),
+        section(
+          "5. For users in the European Union",
+          paragraph(
+            "When purchasing a paid subscription, an EU consumer expressly consents to the immediate provision of the digital service before the 14-day withdrawal period expires and confirms that they therefore lose the right of withdrawal under applicable law (by analogy with Article 16(m) of Directive 2011/83/EU). This provision does not limit mandatory consumer rights that cannot be excluded by contract."
+          )
+        ),
+        section(
+          "6. How to contact us",
+          paragraph(
+            `Requests regarding payments (Sections 2–4 of this Policy) should be sent to ${COMPANY_INFO.email} with the payment date, amount and circumstances. Requests are reviewed within 5 (five) business days.`
+          )
+        ),
+        section(
+          "7. Contacts",
+          contacts([
+            {
+              label: "Service Provider",
+              value: "Individual entrepreneur (FOP) Bohdan Volodymyrovych Ovsiienko",
+            },
+            { label: "Email", value: COMPANY_INFO.email },
+            { label: "Phone", value: COMPANY_INFO.phone },
+          ])
+        ),
+      ],
+    },
+  },
 };

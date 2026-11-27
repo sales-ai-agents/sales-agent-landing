@@ -4,6 +4,11 @@ import { buildLegalMetadata } from "@/content/legal/metadata";
 
 export const metadata = buildLegalMetadata(serviceTerms);
 
-export default function ServiceTermsPage() {
-  return <LegalDocumentView document={serviceTerms} />;
+interface Props {
+  searchParams: Promise<{ lang?: string }>;
+}
+
+export default async function ServiceTermsPage({ searchParams }: Props) {
+  const { lang } = await searchParams;
+  return <LegalDocumentView document={serviceTerms} locale={lang} />;
 }

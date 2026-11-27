@@ -376,6 +376,40 @@ body:has(.c4u) {
   font-size: 15px;
   padding: 10px 14px;
 }
+.c4u .nav-lang {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--paper);
+  border-radius: 999px;
+  padding: 3px;
+}
+.c4u .nav-lang button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: var(--ink3);
+  font-family: var(--f-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.c4u .nav-lang button:hover {
+  color: var(--ink);
+}
+.c4u .nav-lang button[aria-current="true"] {
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
 .c4u section {
   position: relative;
 }

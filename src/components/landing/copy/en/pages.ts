@@ -38,7 +38,6 @@ export const EN_FOOTER: FooterCopy = {
     "Calls4U is an AI agent for routine calls: it confirms appointments and passes the result to your CRM or a manager.",
   navTitle: "Navigation",
   documentsTitle: "Documents",
-  documentsNote: "Legal documents are available in Ukrainian.",
   contactsTitle: "Contacts",
   leaveRequest: "Leave a request",
   claudeLink: "Calls4U for Claude",

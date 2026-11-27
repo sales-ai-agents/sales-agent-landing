@@ -1,6 +1,6 @@
 import { COMPANY_INFO, LEGAL_PAGES } from "@/lib/constants";
 
-import { paragraph, section, UPDATED_NOTE } from "../builders";
+import { paragraph, section, UPDATED_NOTE, UPDATED_NOTE_EN } from "../builders";
 import type { LegalDocument } from "../types";
 
 export const cookiePolicy: LegalDocument = {
@@ -73,4 +73,76 @@ export const cookiePolicy: LegalDocument = {
       )
     ),
   ],
+  translations: {
+    en: {
+      title: "Cookie Policy",
+      metaTitle: "Cookie Policy",
+      metaDescription:
+        "How the calls4u.ai website uses cookies and similar technologies, which cookie categories we use and how to manage your consent.",
+      updatedNote: UPDATED_NOTE_EN,
+      intro: [
+        'This Policy explains how the calls4u.ai website (the "Website", "we"), owned by ',
+        { label: "FOP Ovsiienko Bohdan Volodymyrovych", href: LEGAL_PAGES.contacts.href },
+        ` (Tax ID ${COMPANY_INFO.taxId}), uses cookies and similar technologies when you use the Website.`,
+      ],
+      sections: [
+        section(
+          "1. What are cookies",
+          paragraph(
+            "Cookies are small text files stored on your device (computer, smartphone or tablet) when you visit a website. They allow the Website to remember your actions and settings for a period of time, and to collect statistical information about how the Website is used."
+          )
+        ),
+        section(
+          "2. The cookies we use",
+          paragraph(
+            "Strictly necessary cookies are required for the Website to function: signing in to your account, maintaining your session, securing forms and processing subscription payments. Without them the Website may not work correctly. These cookies do not require separate consent because they are necessary to deliver the service you requested."
+          ),
+          paragraph(
+            "Analytics (statistical) cookies are used to analyse website traffic, user behaviour and page performance (for example, Google Analytics). Data are collected anonymously or in pseudonymised form."
+          ),
+          paragraph(
+            "Functional cookies remember your preferences (language, region, pre-filled form fields) for a more convenient return visit."
+          ),
+          paragraph(
+            "Marketing / advertising cookies are used to show relevant ads and measure the effectiveness of advertising campaigns (for example, Meta Pixel, Google Ads). They are set only with your consent."
+          )
+        ),
+        section(
+          "3. Legal basis and consent",
+          paragraph(
+            "Strictly necessary cookies are set automatically. All other categories (analytics, functional, marketing) are set only after you give your consent through the cookie banner on your first visit. You can change or withdraw your consent at any time through the cookie settings on the Website or through your browser settings."
+          )
+        ),
+        section(
+          "4. Third-party cookies",
+          paragraph(
+            "Some cookies on the Website are set not by us directly but by services we use for analytics, advertising or Website functionality (for example, Google, Meta). We do not control these cookies directly; their terms of use are determined by the respective service providers."
+          )
+        ),
+        section(
+          "5. How to disable cookies",
+          paragraph(
+            "You can delete or block cookies through your browser settings. Please note that disabling strictly necessary cookies may affect certain Website functions, including your account."
+          )
+        ),
+        section(
+          "6. Retention period",
+          paragraph(
+            "Session cookies are deleted automatically when you close your browser. Persistent cookies are stored on your device for the period specified for each cookie type (typically from 30 days to 2 years), or until you delete them yourself."
+          )
+        ),
+        section(
+          "7. Contacts",
+          paragraph(
+            `For questions about this Policy, contact us: ${COMPANY_INFO.email}, ${COMPANY_INFO.phone}.`
+          ),
+          paragraph(
+            "This Policy is part of the ",
+            { label: "Privacy Policy", href: LEGAL_PAGES.privacyPolicy.href },
+            " and applies together with it."
+          )
+        ),
+      ],
+    },
+  },
 };

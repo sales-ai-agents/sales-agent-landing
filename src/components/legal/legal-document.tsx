@@ -94,29 +94,42 @@ const renderBlock = (block: LegalBlock, index: number) => {
   }
 };
 
+const BACK_LABEL: Record<string, string> = {
+  en: "Back",
+};
+
+const resolveLocale = (doc: LegalDocument, locale: string | undefined): LegalDocument => {
+  if (!locale || !doc.translations?.[locale]) return doc;
+  return { slug: doc.slug, ...doc.translations[locale], translations: doc.translations };
+};
+
 interface LegalDocumentViewProps {
   document: LegalDocument;
+  locale?: string;
 }
 
-export function LegalDocumentView({ document }: LegalDocumentViewProps) {
+export function LegalDocumentView({ document, locale }: LegalDocumentViewProps) {
+  const resolved = resolveLocale(document, locale);
+  const backLabel = (locale && BACK_LABEL[locale]) ?? "Назад";
+
   return (
     <>
-      <LegalHeader />
+      <LegalHeader backLabel={backLabel} />
       <article className="mx-auto w-full max-w-3xl px-6 py-16 sm:py-20">
         <header className="mb-10">
-          <h1 className="font-display text-3xl font-bold sm:text-4xl">{document.title}</h1>
-          {document.updatedNote && (
-            <p className="text-muted-foreground mt-3 text-sm">{document.updatedNote}</p>
+          <h1 className="font-display text-3xl font-bold sm:text-4xl">{resolved.title}</h1>
+          {resolved.updatedNote && (
+            <p className="text-muted-foreground mt-3 text-sm">{resolved.updatedNote}</p>
           )}
-          {document.intro && (
+          {resolved.intro && (
             <p className="text-muted-foreground mt-6 leading-relaxed">
-              {renderInline(document.intro)}
+              {renderInline(resolved.intro)}
             </p>
           )}
         </header>
 
         <div className="flex flex-col gap-10">
-          {document.sections.map((sectionItem, sectionIndex) => (
+          {resolved.sections.map((sectionItem, sectionIndex) => (
             <section key={sectionIndex} className="flex flex-col gap-4">
               {sectionItem.heading && (
                 <h2 className="text-foreground text-xl font-semibold">{sectionItem.heading}</h2>

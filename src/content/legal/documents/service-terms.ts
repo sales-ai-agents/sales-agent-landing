@@ -1,6 +1,6 @@
 import { COMPANY_INFO, LEGAL_PAGES } from "@/lib/constants";
 
-import { contacts, paragraph, section, UPDATED_NOTE } from "../builders";
+import { contacts, paragraph, section, UPDATED_NOTE, UPDATED_NOTE_EN } from "../builders";
 import type { LegalDocument } from "../types";
 
 export const serviceTerms: LegalDocument = {
@@ -86,4 +86,92 @@ export const serviceTerms: LegalDocument = {
       )
     ),
   ],
+  translations: {
+    en: {
+      title: "Terms of Service",
+      metaTitle: "Terms of Service",
+      metaDescription:
+        "Description of the calls4u.ai service, subscription process, payment methods, auto-renewal and cancellation, service availability.",
+      updatedNote: UPDATED_NOTE_EN,
+      sections: [
+        section(
+          "1. Description of the Service",
+          paragraph(
+            "calls4u.ai is a SaaS platform that gives clients access to an AI voice agent for automating outbound and inbound phone calls. The Service is provided remotely, as access to an account and connection of the voice agent to the client's phone number (physical or virtual)."
+          ),
+          paragraph(
+            "The Service is digital (intangible) and does not involve the physical delivery of goods."
+          )
+        ),
+        section(
+          "2. Ordering a subscription",
+          paragraph(
+            "To start using the Service, the user registers an account on the calls4u.ai website."
+          ),
+          paragraph(
+            "Every new user receives a free 3-day trial period from the moment of registration, during which the basic features of the Service are available."
+          ),
+          paragraph(
+            "To continue using the Service after the trial, the user purchases a paid subscription by choosing a plan and a billing period (monthly or annual). The subscription is set up and paid for online through the account."
+          )
+        ),
+        section(
+          "3. Payment methods",
+          paragraph(
+            "Payment for the Service is made exclusively by bank card (Visa/Mastercard) through the WayForPay payment system. Cash payments, bank transfers outside WayForPay and cash on delivery are not available."
+          )
+        ),
+        section(
+          "4. Billing cycle and auto-renewal",
+          paragraph("Subscriptions are monthly or annual, at the client's choice when purchasing."),
+          paragraph(
+            "The subscription renews automatically for the next billing period with an automatic charge to the previously used payment method, unless the client has disabled auto-renewal in the account before the charge date."
+          ),
+          paragraph(
+            "Renewal notice: the Service Provider will send an email (to the address provided at registration) reminding the client of the upcoming automatic charge no later than 3 (three) days before the charge date."
+          ),
+          paragraph(
+            "The client can disable auto-renewal at any time in the account settings (Pricing and Billing section); access to the Service continues until the end of the already-paid period."
+          )
+        ),
+        section(
+          "5. Service delivery timeline",
+          paragraph(
+            "Access to the Service is activated automatically and immediately after WayForPay confirms the payment, except where additional technical setup is needed (for example, connecting a phone number), which is completed within a reasonable time, typically within 1 (one) business day."
+          )
+        ),
+        section(
+          "6. Service availability",
+          paragraph(
+            "As of the date this document was published, the Service is available to clients registered in Ukraine. The Service is planned to expand to European Union countries soon; the current availability is shown on the Website at the time of the client's registration. As the service is digital and provided remotely over the internet, physical delivery of goods or the use of courier or postal services is not applicable."
+          )
+        ),
+        section(
+          "7. Refunds",
+          paragraph(
+            "The procedure and conditions for refunds are set out in a separate document — the ",
+            { label: "Refund Policy", href: LEGAL_PAGES.refundPolicy.href },
+            "."
+          )
+        ),
+        section(
+          "8. Contacts",
+          contacts([
+            {
+              label: "Service Provider",
+              value: "Individual entrepreneur (FOP) Bohdan Volodymyrovych Ovsiienko",
+            },
+            { label: "Email", value: COMPANY_INFO.email },
+            { label: "Phone", value: COMPANY_INFO.phone },
+            { label: "Address", value: "24 Yaroslava Hasheka Blvd, Kyiv, 02000, Ukraine" },
+          ]),
+          paragraph(
+            "The full list of the parties' rights and obligations is set out in the ",
+            { label: "Public Offer", href: LEGAL_PAGES.offer.href },
+            "."
+          )
+        ),
+      ],
+    },
+  },
 };

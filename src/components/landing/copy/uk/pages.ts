@@ -38,7 +38,6 @@ export const UK_FOOTER: FooterCopy = {
     "Calls4U — ШІ-агент для рутинних дзвінків: підтверджує записи і передає результат у CRM або менеджеру.",
   navTitle: "Навігація",
   documentsTitle: "Документи",
-  documentsNote: "",
   contactsTitle: "Контакти",
   leaveRequest: "Залишити заявку",
   claudeLink: "Calls4U у Claude",

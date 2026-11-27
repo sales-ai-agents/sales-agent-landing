@@ -42,4 +42,5 @@ export interface LegalDocument {
   readonly intro?: readonly LegalInline[];
   readonly updatedNote?: string;
   readonly sections: readonly LegalSection[];
+  readonly translations?: Partial<Record<string, Omit<LegalDocument, "slug" | "translations">>>;
 }

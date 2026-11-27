@@ -2,22 +2,30 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+
 import { AnchorLink } from "@/components/landing/anchor-link";
 import { trackProps } from "@/components/landing/click-tracking";
 import { useLandingCopy } from "@/components/landing/copy/provider";
-import { cn } from "@/lib/utils";
 import { NAV_ITEMS, resolveNavHref, SIGN_IN_URL } from "@/components/landing/data";
+import { LanguageSwitcher } from "@/components/landing/language-switcher";
+import { cn } from "@/lib/utils";
 
 const SCROLLED_OFFSET = 20;
 const HIDE_AFTER = 360;
 const DIRECTION_THRESHOLD = 3;
 
-function useNavVisibility() {
+interface NavVisibility {
+  scrolled: boolean;
+  hidden: boolean;
+}
+
+const useNavVisibility = (): NavVisibility => {
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
     let lastY = window.scrollY;
+
     const onScroll = (): void => {
       const y = window.scrollY;
       setScrolled(y > SCROLLED_OFFSET);
@@ -25,13 +33,14 @@ function useNavVisibility() {
       else if (y < lastY - DIRECTION_THRESHOLD || y <= HIDE_AFTER) setHidden(false);
       lastY = y;
     };
+
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   return { scrolled, hidden };
-}
+};
 
 interface LandingNavProps {
   basePath?: string;
@@ -40,7 +49,7 @@ interface LandingNavProps {
 export function LandingNav({ basePath = "" }: LandingNavProps) {
   const { locale, copy } = useLandingCopy();
   const { scrolled, hidden } = useNavVisibility();
-  const topHref = basePath ? basePath : "#top";
+  const topHref = basePath || "#top";
 
   return (
     <header className={cn("nav", scrolled && "scrolled", hidden && "hide")}>
@@ -71,6 +80,7 @@ export function LandingNav({ basePath = "" }: LandingNavProps) {
           ))}
         </nav>
         <div className="nav-cta">
+          <LanguageSwitcher locale={locale} />
           <a className="nav-login" href={SIGN_IN_URL}>
             {copy.nav.login}
           </a>

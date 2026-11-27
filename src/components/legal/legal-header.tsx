@@ -3,14 +3,18 @@ import Link from "next/link";
 
 import { LegalBackButton } from "@/components/legal/legal-back-button";
 
-export function LegalHeader() {
+interface LegalHeaderProps {
+  backLabel: string;
+}
+
+export function LegalHeader({ backLabel }: LegalHeaderProps) {
   return (
     <header className="border-border border-b">
       <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-3">
-        <Link href="/" aria-label="Calls4u.ai — на головну" className="flex items-center gap-4">
+        <Link href="/" aria-label="Calls4U" className="flex items-center gap-4">
           <Image
             src="/image/Logo.svg"
-            alt="Calls4u.ai"
+            alt="Calls4U"
             width={36}
             height={36}
             className="h-auto w-auto"
@@ -24,8 +28,7 @@ export function LegalHeader() {
             aria-hidden="true"
           />
         </Link>
-
-        <LegalBackButton />
+        <LegalBackButton label={backLabel} />
       </div>
     </header>
   );

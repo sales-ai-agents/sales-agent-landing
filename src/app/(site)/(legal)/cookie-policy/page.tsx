@@ -4,6 +4,11 @@ import { buildLegalMetadata } from "@/content/legal/metadata";
 
 export const metadata = buildLegalMetadata(cookiePolicy);
 
-export default function CookiePolicyPage() {
-  return <LegalDocumentView document={cookiePolicy} />;
+interface Props {
+  searchParams: Promise<{ lang?: string }>;
+}
+
+export default async function CookiePolicyPage({ searchParams }: Props) {
+  const { lang } = await searchParams;
+  return <LegalDocumentView document={cookiePolicy} locale={lang} />;
 }

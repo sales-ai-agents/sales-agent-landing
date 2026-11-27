@@ -1,6 +1,6 @@
 import { COMPANY_INFO, LEGAL_PAGES } from "@/lib/constants";
 
-import { contacts, paragraph, section, UPDATED_NOTE } from "../builders";
+import { contacts, paragraph, section, UPDATED_NOTE, UPDATED_NOTE_EN } from "../builders";
 import type { LegalDocument } from "../types";
 
 export const offer: LegalDocument = {
@@ -146,4 +146,155 @@ export const offer: LegalDocument = {
       ])
     ),
   ],
+  translations: {
+    en: {
+      title: "Public Offer Agreement",
+      metaTitle: "Public Offer",
+      metaDescription:
+        "Public offer for access to the calls4u.ai service: subject matter, acceptance procedure, rights and obligations of the parties, payment and termination.",
+      updatedNote: UPDATED_NOTE_EN,
+      intro: [
+        `This document is a public offer by ${COMPANY_INFO.legalName} (Tax ID ${COMPANY_INFO.taxId}), address: 24 Yaroslava Hasheka Blvd, Kyiv, 02000, Ukraine (the "Service Provider"), to enter into a service agreement for access to calls4u.ai (the "Service") with any individual, legal entity or sole proprietor (the "Client") who accepts this offer. The agreement is governed by Articles 633, 641 and 642 of the Civil Code of Ukraine.`,
+      ],
+      sections: [
+        section(
+          "1. Definitions",
+          paragraph(
+            "Offer — this document, published on the calls4u.ai website, containing all material terms of the agreement."
+          ),
+          paragraph(
+            "Acceptance — the Client's full and unconditional acceptance of this Offer by registering an account on the Website and/or paying for a Subscription."
+          ),
+          paragraph(
+            "Service — the calls4u.ai SaaS software that provides access to an AI voice agent for automating phone calls. Account — the Client's personal area on the Website for managing the Service. Subscription — paid access to the Service for a defined billing period."
+          )
+        ),
+        section(
+          "2. Subject matter",
+          paragraph(
+            "The Service Provider agrees to give the Client access to the Service under the terms of this Offer, the ",
+            { label: "Terms of Service", href: LEGAL_PAGES.serviceTerms.href },
+            " and the ",
+            { label: "Privacy Policy", href: LEGAL_PAGES.privacyPolicy.href },
+            ", which are integral parts of the agreement, and the Client agrees to accept and pay for these services under the chosen plan."
+          ),
+          paragraph(
+            "The detailed description of the features, plans and their prices are published on the Website and may be changed unilaterally by the Service Provider; a price change does not apply to an already-paid billing period."
+          )
+        ),
+        section(
+          "3. Conclusion of the agreement (acceptance of the offer)",
+          paragraph(
+            "The agreement is considered concluded when the Client does either of the following: (a) registers an account on the Website and starts using the trial period; or (b) pays for a Subscription."
+          ),
+          paragraph(
+            "By accepting the Offer, the Client confirms that they have read and agree in full to the terms of the agreement, the ",
+            { label: "Terms of Service", href: LEGAL_PAGES.serviceTerms.href },
+            ", the ",
+            { label: "Refund Policy", href: LEGAL_PAGES.refundPolicy.href },
+            " and the ",
+            { label: "Privacy Policy", href: LEGAL_PAGES.privacyPolicy.href },
+            "."
+          )
+        ),
+        section(
+          "4. Rights and obligations of the Service Provider",
+          paragraph(
+            "The Service Provider agrees to provide access to the Service in accordance with the chosen plan, deliver technical support within a reasonable time and take measures to protect the Client's personal data."
+          ),
+          paragraph(
+            "The Service Provider has the right to change features, prices and technical specifications with prior notice; temporarily suspend access for maintenance; refuse or suspend access if the Client breaches the terms of the agreement, applicable law or uses the Service for unlawful purposes."
+          )
+        ),
+        section(
+          "5. Rights and obligations of the Client",
+          paragraph(
+            "The Client agrees to provide accurate information, pay for the Subscription on time, use the Service in accordance with its purpose and applicable law, independently ensure that call recipients have consented to calls and recordings where required, and not use the Service for unlawful or deceptive calls."
+          ),
+          paragraph(
+            "The Client has the right to use the Service in accordance with the chosen plan, receive technical support and raise questions regarding the Service and the processing of personal data."
+          )
+        ),
+        section(
+          "6. Pricing and payment",
+          paragraph(
+            "The Subscription price is determined by the plans published on the Website at the time of placing the order."
+          ),
+          paragraph(
+            "Payment is made by bank card (Visa/Mastercard) through WayForPay in accordance with the ",
+            { label: "Terms of Service", href: LEGAL_PAGES.serviceTerms.href },
+            "."
+          ),
+          paragraph(
+            "The Subscription may renew automatically for the next billing period in accordance with the options chosen by the Client in the account. The Service Provider sends an advance email notice about the auto-renewal 3 (three) days before the scheduled charge date."
+          )
+        ),
+        section(
+          "7. Liability",
+          paragraph(
+            "The parties are liable for failure to fulfil their obligations in accordance with the applicable law of Ukraine. The Service Provider is not liable for temporary unavailability of the Service caused by third parties or force majeure, for the content of the Client's calls or for the Client's compliance with personal data protection law in relation to call recipients."
+          ),
+          paragraph(
+            "The Client bears full responsibility for the lawfulness of using the Service, including the content of call scripts and respect for the rights of call recipients."
+          )
+        ),
+        section(
+          "8. Force majeure",
+          paragraph(
+            "The parties are released from liability for failure to fulfil their obligations if that failure was caused by force majeure (military action, state of emergency or martial law, government actions, large-scale failures of communications networks or the internet, natural disasters). The occurrence of force majeure is confirmed in the manner established by the law of Ukraine."
+          )
+        ),
+        section(
+          "9. Term and termination",
+          paragraph(
+            "The agreement is effective from the moment the Offer is accepted and continues for the entire duration of the Client's use of the Service."
+          ),
+          paragraph(
+            "The Client may stop using the Service at any time by disabling auto-renewal in the account; the agreement is then considered terminated at the end of the already-paid billing period."
+          ),
+          paragraph(
+            "The Service Provider may unilaterally terminate the agreement in the event of a material breach by the Client, by notifying the Client at their email address."
+          )
+        ),
+        section(
+          "10. Personal data",
+          paragraph(
+            "The processing of the Client's personal data is governed by the ",
+            { label: "Privacy Policy", href: LEGAL_PAGES.privacyPolicy.href },
+            ", which is an integral part of the agreement."
+          )
+        ),
+        section(
+          "11. Dispute resolution",
+          paragraph(
+            "All disputes are resolved through negotiation. If no agreement is reached, the dispute is submitted to a court of competent jurisdiction under the law of Ukraine at the Service Provider's location."
+          )
+        ),
+        section(
+          "12. Final provisions",
+          paragraph(
+            "This agreement is governed by the law of Ukraine. The Service Provider reserves the right to amend the Offer unilaterally by publishing a new version on the Website. Continuing to use the Service after an amendment constitutes the Client's agreement to the new version. If any provision of the agreement is found invalid, that does not affect the validity of the remaining provisions."
+          )
+        ),
+        section(
+          "13. Service Provider details",
+          contacts([
+            {
+              label: "Name",
+              value: "Individual entrepreneur (FOP) Bohdan Volodymyrovych Ovsiienko",
+            },
+            { label: "Tax ID (RNOKPP)", value: COMPANY_INFO.taxId },
+            {
+              label: "Tax system",
+              value: "Simplified taxation system, Group 3, 5% (not a VAT payer)",
+            },
+            { label: "Address", value: "24 Yaroslava Hasheka Blvd, Kyiv, 02000, Ukraine" },
+            { label: "Phone", value: COMPANY_INFO.phone },
+            { label: "Email", value: COMPANY_INFO.email },
+            { label: "Website", value: COMPANY_INFO.site },
+          ])
+        ),
+      ],
+    },
+  },
 };

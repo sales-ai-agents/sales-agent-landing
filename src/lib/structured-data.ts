@@ -16,7 +16,7 @@ export interface BreadcrumbItem {
 }
 
 const LOGO_ID = `${SITE_URL}/#logo`;
-const SUPPORT_LANGUAGES = ["uk", "ru"] as const;
+const SUPPORT_LANGUAGES = ["uk", "en"] as const;
 
 export const buildGraph = (nodes: readonly object[]): object => ({
   "@context": "https://schema.org",

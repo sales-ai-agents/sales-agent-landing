@@ -1,4 +1,5 @@
 import Image from "next/image";
+
 import { AnchorLink } from "@/components/landing/anchor-link";
 import { trackProps } from "@/components/landing/click-tracking";
 import { getLandingCopy } from "@/components/landing/copy";
@@ -11,7 +12,7 @@ import {
   resolveNavHref,
 } from "@/components/landing/data";
 import { FormDialogTrigger } from "@/components/landing/form-dialog-trigger";
-import type { Locale } from "@/lib/i18n/config";
+import { DEFAULT_LOCALE, isUiLocale, type Locale } from "@/lib/i18n/config";
 import { claudePath } from "@/lib/i18n/paths";
 import { SITE_SOCIAL } from "@/lib/site";
 
@@ -19,6 +20,11 @@ interface LandingFooterProps {
   locale: Locale;
   basePath?: string;
 }
+
+const legalHref = (href: string, locale: Locale): string => {
+  if (locale === DEFAULT_LOCALE || !isUiLocale(locale)) return href;
+  return `${href}?lang=${locale}`;
+};
 
 export function LandingFooter({ locale, basePath = "" }: LandingFooterProps) {
   const { footer, client } = getLandingCopy(locale);
@@ -28,7 +34,7 @@ export function LandingFooter({ locale, basePath = "" }: LandingFooterProps) {
       <div className="wrap">
         <div className="foot-top">
           <div>
-            <AnchorLink href={basePath ? basePath : "#top"} className="foot-logo">
+            <AnchorLink href={basePath || "#top"} className="foot-logo">
               <Image
                 className="ic"
                 src="/image/Logo.svg"
@@ -58,9 +64,9 @@ export function LandingFooter({ locale, basePath = "" }: LandingFooterProps) {
           </div>
           <div>
             <span className="mono">{footer.documentsTitle}</span>
-            {FOOTER_DOCUMENTS.map((document) => (
-              <a key={document.id} href={document.href}>
-                {footer.documents[document.id]}
+            {FOOTER_DOCUMENTS.map((doc) => (
+              <a key={doc.id} href={legalHref(doc.href, locale)}>
+                {footer.documents[doc.id]}
               </a>
             ))}
             {footer.documentsNote ? <small>{footer.documentsNote}</small> : null}

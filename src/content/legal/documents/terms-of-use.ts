@@ -1,6 +1,6 @@
 import { COMPANY_INFO, LEGAL_PAGES } from "@/lib/constants";
 
-import { contacts, paragraph, section, UPDATED_NOTE } from "../builders";
+import { contacts, paragraph, section, UPDATED_NOTE, UPDATED_NOTE_EN } from "../builders";
 import type { LegalDocument } from "../types";
 
 export const termsOfUse: LegalDocument = {
@@ -99,4 +99,103 @@ export const termsOfUse: LegalDocument = {
       ])
     ),
   ],
+  translations: {
+    en: {
+      title: "Website Terms of Use",
+      metaTitle: "Website Terms of Use",
+      metaDescription:
+        "Rules for accessing and using calls4u.ai: intellectual property, registration, limitations of liability and governing law.",
+      updatedNote: UPDATED_NOTE_EN,
+      sections: [
+        section(
+          "1. General provisions",
+          paragraph(
+            'These Terms of Use govern access to and use of the calls4u.ai website (the "Website").'
+          ),
+          paragraph(
+            `The Website is owned by ${COMPANY_INFO.legalName}, Tax ID ${COMPANY_INFO.taxId}, address: 24 Yaroslava Hasheka Blvd, Kyiv, 02000, Ukraine (the "Service Provider", "we").`
+          ),
+          paragraph(
+            "These Terms apply to use of the Website as an information resource. The conditions for using the Service itself are set out in separate documents: the ",
+            { label: "Terms of Service", href: LEGAL_PAGES.serviceTerms.href },
+            " and the ",
+            { label: "Public Offer", href: LEGAL_PAGES.offer.href },
+            "."
+          ),
+          paragraph(
+            "By starting to use the Website, you confirm that you have full legal capacity and agree to these Terms."
+          )
+        ),
+        section(
+          "2. Use of the Website",
+          paragraph(
+            "The Website and all its elements (text, graphics, logos, source code, design) are protected by the Service Provider's intellectual property rights or are used by the Service Provider on a lawful basis."
+          ),
+          paragraph(
+            "The following are prohibited: copying, reproducing or distributing Website materials without the Service Provider's written consent; using the Website for unlawful purposes, spreading malware or attempting unauthorized access; automated data collection (scraping) without permission."
+          ),
+          paragraph(
+            "We reserve the right to restrict or terminate a user's access to the Website if these Terms are violated."
+          )
+        ),
+        section(
+          "3. Registration and account",
+          paragraph("An account is required to access certain Website and Service features."),
+          paragraph(
+            "Users must provide accurate information when registering and are responsible for keeping their credentials (login, password) confidential."
+          ),
+          paragraph(
+            `Any suspected unauthorized use of an account must be reported immediately to ${COMPANY_INFO.email}.`
+          )
+        ),
+        section(
+          "4. Limitations of liability",
+          paragraph(
+            'The Website and the information on it are provided "as is". We make reasonable efforts to ensure the accuracy and currency of information, but we do not guarantee the complete absence of errors or uninterrupted operation of the Website.'
+          ),
+          paragraph(
+            "The Service Provider is not liable for temporary unavailability of the Website caused by maintenance, failures of communication or hosting providers, or force majeure."
+          ),
+          paragraph(
+            "Links to third-party websites are provided for convenience only; we are not responsible for the content or privacy policies of third-party resources."
+          )
+        ),
+        section(
+          "5. Personal data and cookies",
+          paragraph(
+            "The processing of personal data of Website users is governed by the ",
+            { label: "Privacy Policy", href: LEGAL_PAGES.privacyPolicy.href },
+            " and the ",
+            { label: "Cookie Policy", href: LEGAL_PAGES.cookiePolicy.href },
+            "."
+          )
+        ),
+        section(
+          "6. Governing law and dispute resolution",
+          paragraph("These Terms are governed by the law of Ukraine."),
+          paragraph(
+            "All disputes arising from use of the Website are resolved through negotiation and, if no agreement is reached, through the courts in accordance with the law of Ukraine."
+          )
+        ),
+        section(
+          "7. Changes to the Terms",
+          paragraph(
+            "We may amend these Terms unilaterally. The current version is always available on this page. Continuing to use the Website after an amendment constitutes your agreement to the updated Terms."
+          )
+        ),
+        section(
+          "8. Contacts",
+          contacts([
+            {
+              label: "Service Provider",
+              value: "Individual entrepreneur (FOP) Bohdan Volodymyrovych Ovsiienko",
+            },
+            { label: "Email", value: COMPANY_INFO.email },
+            { label: "Phone", value: COMPANY_INFO.phone },
+            { label: "Address", value: "24 Yaroslava Hasheka Blvd, Kyiv, 02000, Ukraine" },
+          ])
+        ),
+      ],
+    },
+  },
 };

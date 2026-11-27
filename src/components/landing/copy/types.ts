@@ -246,7 +246,7 @@ export interface FooterCopy {
   readonly about: string;
   readonly navTitle: string;
   readonly documentsTitle: string;
-  readonly documentsNote: string;
+  readonly documentsNote?: string;
   readonly contactsTitle: string;
   readonly leaveRequest: string;
   readonly claudeLink: string;
